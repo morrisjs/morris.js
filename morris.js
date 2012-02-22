@@ -3,8 +3,12 @@
 
 function parse_year(year) {
   var m = year.toString().match(/(\d+) Q(\d)/);
+  var n = year.toString().match(/(\d+)\-(\d+)/);
   if (m) {
-    return parseInt(m[1], 10) + (parseInt(m[2], 19) * 3 - 1) / 12;
+    return parseInt(m[1], 10) + (parseInt(m[2], 10) * 3 - 1) / 12;
+  }
+  else if (n) {
+    return parseInt(n[1], 10) + (parseInt(n[2], 10) - 1) / 12;
   }
   else {
     return parseInt(year, 10);
