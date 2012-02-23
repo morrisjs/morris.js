@@ -266,15 +266,28 @@ class window.Morris.Line
     tt.remove()
     return ret
 
-  parseYear: (year) ->
-    m = year.toString().match /(\d+) Q(\d)/
-    n = year.toString().match /(\d+)\-(\d+)/
+  parseYear: (date) ->
+    s = date.toString()
+    m = s.match /^(\d+) Q(\d)$/
+    n = s.match /^(\d+)-(\d+)$/
+    o = s.match /^(\d+)-(\d+)-(\d+)$/
     if m
       parseInt(m[1], 10) + (parseInt(m[2], 10) * 3 - 1) / 12
     else if n
       parseInt(n[1], 10) + (parseInt(n[2], 10) - 1) / 12
+    else if o
+      # parse to a timestamp
+      year = parseInt(o[1], 10);
+      month = parseInt(o[2], 10);
+      day = parseInt(o[3], 10);
+      timestamp = new Date(year, month - 1, day).getTime();
+      # get timestamps for the beginning and end of the year
+      y1 = new Date(year, 0, 1).getTime();
+      y2 = new Date(year+1, 0, 1).getTime();
+      # calculate a decimal-year value
+      year + (timestamp - y1) / (y2 - y1);
     else
-      parseInt(year, 10)
+      parseInt(d, 10)
 
   # make long numbers prettier by inserting commas
   # eg: commas(1234567) -> '1,234,567'

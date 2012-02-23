@@ -25,16 +25,25 @@
       gridLineColor: '#aaa',
       gridTextColor: '#888',
       gridTextSize: 12,
-      gridStrokeWidth: 0.5
+      gridStrokeWidth: 0.5,
+      hoverPaddingX: 10,
+      hoverPaddingY: 5,
+      hoverMargin: 10,
+      hoverFillColor: '#fff',
+      hoverBorderColor: '#ccc',
+      hoverBorderWidth: 2,
+      hoverOpacity: 0.95,
+      hoverLabelColor: '#444',
+      hoverFontSize: 12
     };
 
     Line.prototype.precalc = function() {
       var all_y_vals, ykey, _i, _len, _ref,
         _this = this;
-      this.xlabels = $.map(this.options.data, function(d) {
+      this.columnLabels = $.map(this.options.data, function(d) {
         return d[_this.options.xkey];
       });
-      this.ylabels = this.options.labels;
+      this.seriesLabels = this.options.labels;
       this.series = [];
       _ref = this.options.ykeys;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -43,7 +52,7 @@
           return d[ykey];
         }));
       }
-      this.xvals = $.map(this.xlabels, function(x) {
+      this.xvals = $.map(this.columnLabels, function(x) {
         return _this.parseYear(x);
       });
       this.xmin = Math.min.apply(null, this.xvals);
@@ -59,7 +68,7 @@
     };
 
     Line.prototype.redraw = function() {
-      var c, circle, columns, coords, dx, dy, height, hoverMargins, i, label, labelBox, left, lineInterval, path, prevLabelMargin, s, seriesCoords, seriesPoints, transX, transY, v, width, x, xLabelMargin, y, _i, _j, _len, _len2, _ref, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7,
+      var c, circle, columns, coords, dx, dy, height, hideHover, hilight, hover, hoverHeight, hoverMargins, hoverSet, i, label, labelBox, left, lineInterval, path, pointGrow, pointShrink, prevHilight, prevLabelMargin, s, seriesCoords, seriesPoints, touchHandler, transX, transY, updateHilight, updateHover, v, width, x, xLabel, xLabelMargin, y, yLabel, yLabels, _i, _j, _len, _len2, _ref, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8,
         _this = this;
       this.el.empty();
       this.r = new Raphael(this.el[0]);
@@ -140,9 +149,95 @@
           seriesPoints[i].push(circle);
         }
       }
-      return hoverMargins = $.map(columns.slice(1), function(x, i) {
+      hoverHeight = this.options.hoverFontSize * 1.5 * (this.series.length + 1);
+      hover = this.r.rect(-10, -hoverHeight / 2 - this.options.hoverPaddingY, 20, hoverHeight + this.options.hoverPaddingY * 2, 10).attr('fill', this.options.hoverFillColor).attr('stroke', this.options.hoverBorderColor).attr('stroke-width', this.options.hoverBorderWidth).attr('opacity', this.options.hoverOpacity);
+      xLabel = this.r.text(0, (this.options.hoverFontSize * 0.75) - hoverHeight / 2, '').attr('fill', this.options.hoverLabelColor).attr('font-weight', 'bold').attr('font-size', this.options.hoverFontSize);
+      hoverSet = this.r.set();
+      hoverSet.push(hover);
+      hoverSet.push(xLabel);
+      yLabels = [];
+      for (i = 0, _ref8 = this.series.length - 1; 0 <= _ref8 ? i <= _ref8 : i >= _ref8; 0 <= _ref8 ? i++ : i--) {
+        yLabel = this.r.text(0, this.options.hoverFontSize * 1.5 * (i + 1.5) - hoverHeight / 2, '').attr('fill', this.options.lineColors[i]).attr('font-size', this.options.hoverFontSize);
+        yLabels.push(yLabel);
+        hoverSet.push(yLabel);
+      }
+      updateHover = function(index) {
+        var i, maxLabelWidth, xloc, yloc, _ref9;
+        hoverSet.show();
+        xLabel.attr('text', _this.columnLabels[index]);
+        for (i = 0, _ref9 = _this.series.length - 1; 0 <= _ref9 ? i <= _ref9 : i >= _ref9; 0 <= _ref9 ? i++ : i--) {
+          yLabels[i].attr('text', "" + _this.seriesLabels[i] + ": " + (_this.commas(_this.series[i][index])));
+        }
+        maxLabelWidth = Math.max.apply(null, $.map(yLabels, function(l) {
+          return l.getBBox().width;
+        }));
+        maxLabelWidth = Math.max(maxLabelWidth, xLabel.getBBox().width);
+        hover.attr('width', maxLabelWidth + _this.options.hoverPaddingX * 2);
+        hover.attr('x', -_this.options.hoverPaddingX - maxLabelWidth / 2);
+        yloc = Math.min.apply(null, $.map(_this.series, function(s) {
+          return transY(s[index]);
+        }));
+        if (yloc > hoverHeight + _this.options.hoverPaddingY * 2 + _this.options.hoverMargin + _this.options.marginTop) {
+          yloc = yloc - hoverHeight / 2 - _this.options.hoverPaddingY - _this.options.hoverMargin;
+        } else {
+          yloc = yloc + hoverHeight / 2 + _this.options.hoverPaddingY + _this.options.hoverMargin;
+        }
+        yloc = Math.max(_this.options.marginTop + hoverHeight / 2 + _this.options.hoverPaddingY, yloc);
+        yloc = Math.min(_this.options.marginTop + height - hoverHeight / 2 - _this.options.hoverPaddingY, yloc);
+        xloc = Math.min(left + width - maxLabelWidth / 2 - _this.options.hoverPaddingX, columns[index]);
+        xloc = Math.max(left + maxLabelWidth / 2 + _this.options.hoverPaddingX, xloc);
+        return hoverSet.attr('transform', "t" + xloc + "," + yloc);
+      };
+      hideHover = function() {
+        return hoverSet.hide();
+      };
+      hoverMargins = $.map(columns.slice(1), function(x, i) {
         return (x + columns[i]) / 2;
       });
+      prevHilight = null;
+      pointGrow = Raphael.animation({
+        r: this.options.pointSize + 3
+      }, 25, 'linear');
+      pointShrink = Raphael.animation({
+        r: this.options.pointSize
+      }, 25, 'linear');
+      hilight = function(index) {
+        var i, _ref10, _ref9;
+        if (prevHilight !== null && prevHilight !== index) {
+          for (i = 0, _ref9 = seriesPoints.length - 1; 0 <= _ref9 ? i <= _ref9 : i >= _ref9; 0 <= _ref9 ? i++ : i--) {
+            seriesPoints[i][prevHilight].animate(pointShrink);
+          }
+        }
+        if (index !== null && prevHilight !== index) {
+          for (i = 0, _ref10 = seriesPoints.length - 1; 0 <= _ref10 ? i <= _ref10 : i >= _ref10; 0 <= _ref10 ? i++ : i--) {
+            seriesPoints[i][index].animate(pointGrow);
+          }
+          updateHover(index);
+        }
+        prevHilight = index;
+        if (index === null) return hideHover();
+      };
+      updateHilight = function(x) {
+        var i, _ref9;
+        x -= _this.el.offset().left;
+        for (i = _ref9 = hoverMargins.length; _ref9 <= 1 ? i <= 1 : i >= 1; _ref9 <= 1 ? i++ : i--) {
+          if (hoverMargins[i - 1] > x) break;
+        }
+        return hilight(i);
+      };
+      this.el.mousemove(function(evt) {
+        return updateHilight(evt.pageX);
+      });
+      touchHandler = function(evt) {
+        var touch;
+        touch = evt.originalEvent.touches[0] || evt.originalEvent.changedTouches[0];
+        updateHilight(touch.pageX);
+        return touch;
+      };
+      this.el.bind('touchstart', touchHandler);
+      this.el.bind('touchmove', touchHandler);
+      this.el.bind('touchend', touchHandler);
+      return hilight(0);
     };
 
     Line.prototype.createPath = function(coords, top, left, bottom, right) {
@@ -189,17 +284,31 @@
       return ret;
     };
 
-    Line.prototype.parseYear = function(year) {
-      var m, n;
-      m = year.toString().match(/(\d+) Q(\d)/);
-      n = year.toString().match(/(\d+)\-(\d+)/);
+    Line.prototype.parseYear = function(date) {
+      var day, m, month, n, o, s, timestamp, y1, y2, year;
+      s = date.toString();
+      m = s.match(/^(\d+) Q(\d)$/);
+      n = s.match(/^(\d+)-(\d+)$/);
+      o = s.match(/^(\d+)-(\d+)-(\d+)$/);
       if (m) {
         return parseInt(m[1], 10) + (parseInt(m[2], 10) * 3 - 1) / 12;
       } else if (n) {
         return parseInt(n[1], 10) + (parseInt(n[2], 10) - 1) / 12;
+      } else if (o) {
+        year = parseInt(o[1], 10);
+        month = parseInt(o[2], 10);
+        day = parseInt(o[3], 10);
+        timestamp = new Date(year, month - 1, day).getTime();
+        y1 = new Date(year, 0, 1).getTime();
+        y2 = new Date(year + 1, 0, 1).getTime();
+        return year + (timestamp - y1) / (y2 - y1);
       } else {
-        return parseInt(year, 10);
+        return parseInt(d, 10);
       }
+    };
+
+    Line.prototype.commas = function(num) {
+      return Math.max(0, num).toFixed(0).replace(/(?=(?:\d{3})+$)(?!^)/g, ',');
     };
 
     return Line;
