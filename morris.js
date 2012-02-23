@@ -1,17 +1,30 @@
 
 /*global jQuery: false, Raphael: false */
 
-function parse_year(year) {
-  var m = year.toString().match(/(\d+) Q(\d)/);
-  var n = year.toString().match(/(\d+)\-(\d+)/);
+function parse_year(date) {
+  var m = date.toString().match(/^(\d+) Q(\d)$/);
+  var n = date.toString().match(/^(\d+)-(\d+)$/);
+  var o = date.toString().match(/^(\d+)-(\d+)-(\d+)$/)
   if (m) {
     return parseInt(m[1], 10) + (parseInt(m[2], 10) * 3 - 1) / 12;
   }
   else if (n) {
     return parseInt(n[1], 10) + (parseInt(n[2], 10) - 1) / 12;
   }
+  else if (o) {
+    // parse to a timestamp
+    var year = parseInt(o[1], 10);
+    var month = parseInt(o[2], 10);
+    var day = parseInt(o[3], 10);
+    var timestamp = new Date(year, month - 1, day).getTime();
+    // get timestamps for the beginning and end of the year
+    var y1 = new Date(year, 0, 1).getTime();
+    var y2 = new Date(year+1, 0, 1).getTime();
+    // calculate a decimal-year value
+    return year + (timestamp - y1) / (y2 - y1);
+  }
   else {
-    return parseInt(year, 10);
+    return parseInt(date, 10);
   }
 }
 
