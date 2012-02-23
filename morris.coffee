@@ -40,13 +40,22 @@ class window.Morris.Line
     gridTextColor: '#888'
     gridTextSize: 12
     gridStrokeWidth: 0.5
+    hoverPaddingX: 10
+    hoverPaddingY: 5
+    hoverMargin: 10
+    hoverFillColor: '#fff'
+    hoverBorderColor: '#ccc'
+    hoverBorderWidth: 2
+    hoverOpacity: 0.95
+    hoverLabelColor: '#444'
+    hoverFontSize: 12
 
   # Do any necessary pre-processing for a new dataset
   #
   precalc: ->
     # extract labels
-    @xlabels = $.map @options.data, (d) => d[@options.xkey]
-    @ylabels = @options.labels
+    @columnLabels = $.map @options.data, (d) => d[@options.xkey]
+    @seriesLabels = @options.labels
 
     # extract series data
     @series = []
@@ -55,7 +64,7 @@ class window.Morris.Line
 
     # translate x labels into nominal dates
     # note: currently using decimal years to specify dates
-    @xvals = $.map @xlabels, (x) => @parseYear x
+    @xvals = $.map @columnLabels, (x) => @parseYear x
     @xmin = Math.min.apply null, @xvals
     @xmax = Math.max.apply null, @xvals
     if @xmin is @xmax
@@ -140,7 +149,84 @@ class window.Morris.Line
         seriesPoints[i].push(circle)
 
     # hover labels
+    hoverHeight = @options.hoverFontSize * 1.5 * (@series.length + 1)
+    hover = @r.rect(-10, -hoverHeight / 2 - @options.hoverPaddingY, 20, hoverHeight + @options.hoverPaddingY * 2, 10)
+      .attr('fill', @options.hoverFillColor)
+      .attr('stroke', @options.hoverBorderColor)
+      .attr('stroke-width', @options.hoverBorderWidth)
+      .attr('opacity', @options.hoverOpacity)
+    xLabel = @r.text(0, (@options.hoverFontSize * 0.75) - hoverHeight / 2, '')
+      .attr('fill', @options.hoverLabelColor)
+      .attr('font-weight', 'bold')
+      .attr('font-size', @options.hoverFontSize)
+    hoverSet = @r.set()
+    hoverSet.push(hover)
+    hoverSet.push(xLabel)
+    yLabels = []
+    for i in [0..@series.length-1]
+      yLabel = @r.text(0, @options.hoverFontSize * 1.5 * (i + 1.5) - hoverHeight / 2, '')
+        .attr('fill', @options.lineColors[i])
+        .attr('font-size', @options.hoverFontSize)
+      yLabels.push(yLabel)
+      hoverSet.push(yLabel)
+    updateHover = (index) =>
+      hoverSet.show()
+      xLabel.attr('text', @columnLabels[index])
+      for i in [0..@series.length-1]
+        yLabels[i].attr('text', "#{@seriesLabels[i]}: #{@commas(@series[i][index])}")
+      # recalculate hover box width
+      maxLabelWidth = Math.max.apply null, $.map yLabels, (l) ->
+        l.getBBox().width
+      maxLabelWidth = Math.max maxLabelWidth, xLabel.getBBox().width
+      hover.attr 'width', maxLabelWidth + @options.hoverPaddingX * 2
+      hover.attr 'x', -@options.hoverPaddingX - maxLabelWidth / 2
+      # move to y pos
+      yloc = Math.min.apply null, $.map @series, (s) =>
+        transY s[index]
+      if yloc > hoverHeight + @options.hoverPaddingY * 2 + @options.hoverMargin + @options.marginTop
+        yloc = yloc - hoverHeight / 2 - @options.hoverPaddingY - @options.hoverMargin
+      else
+        yloc = yloc + hoverHeight / 2 + @options.hoverPaddingY + @options.hoverMargin
+      yloc = Math.max @options.marginTop + hoverHeight / 2 + @options.hoverPaddingY, yloc
+      yloc = Math.min @options.marginTop + height - hoverHeight / 2 - @options.hoverPaddingY, yloc
+      xloc = Math.min left + width - maxLabelWidth / 2 - @options.hoverPaddingX, columns[index]
+      xloc = Math.max left + maxLabelWidth / 2 + @options.hoverPaddingX, xloc
+      hoverSet.attr 'transform', "t#{xloc},#{yloc}"
+    hideHover = ->
+      hoverSet.hide()
+
+    # column hilight
     hoverMargins = $.map columns.slice(1), (x, i) -> (x + columns[i]) / 2
+    prevHilight = null
+    pointGrow = Raphael.animation r: @options.pointSize + 3, 25, 'linear'
+    pointShrink = Raphael.animation r: @options.pointSize, 25, 'linear'
+    hilight = (index) =>
+      if prevHilight isnt null and prevHilight isnt index
+        for i in [0..seriesPoints.length-1]
+          seriesPoints[i][prevHilight].animate pointShrink
+      if index isnt null and prevHilight isnt index
+        for i in [0..seriesPoints.length-1]
+          seriesPoints[i][index].animate pointGrow
+        updateHover index
+      prevHilight = index
+      if index is null
+        hideHover()
+    updateHilight = (x) =>
+      x -= @el.offset().left
+      for i in [hoverMargins.length..1]
+        if hoverMargins[i - 1] > x
+          break
+      hilight i
+    @el.mousemove (evt) =>
+      updateHilight evt.pageX
+    touchHandler = (evt) =>
+      touch = evt.originalEvent.touches[0] or evt.originalEvent.changedTouches[0]
+      updateHilight touch.pageX
+      return touch
+    @el.bind 'touchstart', touchHandler
+    @el.bind 'touchmove', touchHandler
+    @el.bind 'touchend', touchHandler
+    hilight 0
 
   # create a path for a data series
   #
@@ -189,5 +275,11 @@ class window.Morris.Line
       parseInt(n[1], 10) + (parseInt(n[2], 10) - 1) / 12
     else
       parseInt(year, 10)
+
+  # make long numbers prettier by inserting commas
+  # eg: commas(1234567) -> '1,234,567'
+  #
+  commas: (num) ->
+      Math.max(0, num).toFixed(0).replace(/(?=(?:\d{3})+$)(?!^)/g, ',')
 
 # vim: set et ts=2 sw=2 sts=2
