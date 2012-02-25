@@ -45,7 +45,7 @@
       {"period": "1995 Q4", "licensed": 1702, "sorned": 0},
       {"period": "1994 Q4", "licensed": 1732, "sorned": 0}
     ];
-    $('#graph').hml({
+    new Morris.Line("graph", {
       data: tax_data,
       xkey: 'period',
       ykeys: ['licensed', 'sorned'],
