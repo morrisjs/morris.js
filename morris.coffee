@@ -1,14 +1,14 @@
 # The original line graph.
 #
-window.Morris = {}
-class window.Morris.Line
-
+Morris = {}
+class Morris.Line
   # Initialise the graph.
   #
-  # @param {string} id Target element's DOM ID
   # @param {Object} options
-  constructor: (id, options) ->
-    @el = $ document.getElementById(id)
+  constructor: (options) ->
+    if not (this instanceof Morris.Line)
+      return new Morris.Line(options)
+    @el = $ document.getElementById(options.element)
     @options = $.extend @defaults, options
     # bail if there's no data
     if @options.data is undefined or @options.data.length is 0
@@ -295,4 +295,5 @@ class window.Morris.Line
   commas: (num) ->
       Math.max(0, num).toFixed(0).replace(/(?=(?:\d{3})+$)(?!^)/g, ',')
 
+window.Morris = Morris
 # vim: set et ts=2 sw=2 sts=2

@@ -1,11 +1,13 @@
 (function() {
+  var Morris;
 
-  window.Morris = {};
+  Morris = {};
 
-  window.Morris.Line = (function() {
+  Morris.Line = (function() {
 
-    function Line(id, options) {
-      this.el = $(document.getElementById(id));
+    function Line(options) {
+      if (!(this instanceof Morris.Line)) return new Morris.Line(options);
+      this.el = $(document.getElementById(options.element));
       this.options = $.extend(this.defaults, options);
       if (this.options.data === void 0 || this.options.data.length === 0) return;
       this.el.addClass('graph-initialised');
@@ -314,5 +316,7 @@
     return Line;
 
   })();
+
+  window.Morris = Morris;
 
 }).call(this);
