@@ -303,7 +303,7 @@
         y2 = new Date(year + 1, 0, 1).getTime();
         return year + (timestamp - y1) / (y2 - y1);
       } else {
-        return parseInt(d, 10);
+        return parseInt(date, 10);
       }
     };
 

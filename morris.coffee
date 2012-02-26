@@ -287,7 +287,7 @@ class window.Morris.Line
       # calculate a decimal-year value
       year + (timestamp - y1) / (y2 - y1);
     else
-      parseInt(d, 10)
+      parseInt(date, 10)
 
   # make long numbers prettier by inserting commas
   # eg: commas(1234567) -> '1,234,567'
