@@ -41,7 +41,7 @@
     };
 
     Line.prototype.precalc = function() {
-      var all_y_vals, ykey, _i, _len, _ref,
+      var ykey, ymax, _i, _len, _ref,
         _this = this;
       this.columnLabels = $.map(this.options.data, function(d) {
         return d[_this.options.xkey];
@@ -64,11 +64,13 @@
         this.xmin -= 1;
         this.xmax += 1;
       }
-      if (this.options.ymax === 'auto') {
-        all_y_vals = $.map(this.series, function(x) {
-          return Math.max.apply(null, x);
-        });
-        return this.options.ymax = Math.max(20, Math.max.apply(null, all_y_vals));
+      if (typeof this.options.ymax === 'string' && this.options.ymax.slice(0, 4) === 'auto') {
+        ymax = Math.max.apply(null, Array.prototype.concat.apply([], this.series));
+        if (this.options.ymax.length > 5) {
+          return this.options.ymax = Math.max(parseInt(this.options.ymax.slice(5), 10), ymax);
+        } else {
+          return this.options.ymax = ymax;
+        }
       }
     };
 

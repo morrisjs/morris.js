@@ -73,10 +73,13 @@ class Morris.Line
       @xmax += 1
 
     # Compute the vertical range of the graph if desired
-    if @options.ymax == 'auto'
-        # use $.map to flatten arrays and find the max y value
-        all_y_vals = $.map @series, (x) -> Math.max.apply null, x
-        @options.ymax = Math.max(20, Math.max.apply(null, all_y_vals))
+    if typeof @options.ymax is 'string' and @options.ymax[0..3] is 'auto'
+        # use Array.concat to flatten arrays and find the max y value
+        ymax = Math.max.apply null, Array.prototype.concat.apply([], @series)
+        if @options.ymax.length > 5
+          @options.ymax = Math.max parseInt(@options.ymax[5..], 10), ymax
+        else
+          @options.ymax = ymax
 
   # Clear and redraw the graph
   #
