@@ -19,6 +19,7 @@
       lineWidth: 3,
       pointSize: 4,
       lineColors: ['#0b62a4', '#7A92A3', '#4da74d', '#afd8f8', '#edc240', '#cb4b4b', '#9440ed'],
+      ymax: 'auto',
       marginTop: 25,
       marginRight: 25,
       marginBottom: 30,
@@ -63,10 +64,12 @@
         this.xmin -= 1;
         this.xmax += 1;
       }
-      all_y_vals = $.map(this.series, function(x) {
-        return Math.max.apply(null, x);
-      });
-      return this.ymax = Math.max(20, Math.max.apply(null, all_y_vals));
+      if (this.options.ymax === 'auto') {
+        all_y_vals = $.map(this.series, function(x) {
+          return Math.max.apply(null, x);
+        });
+        return this.options.ymax = Math.max(20, Math.max.apply(null, all_y_vals));
+      }
     };
 
     Line.prototype.redraw = function() {
@@ -74,11 +77,11 @@
         _this = this;
       this.el.empty();
       this.r = new Raphael(this.el[0]);
-      left = this.measureText(this.ymax, this.options.gridTextSize).width + this.options.marginLeft;
+      left = this.measureText(this.options.ymax, this.options.gridTextSize).width + this.options.marginLeft;
       width = this.el.width() - left - this.options.marginRight;
       height = this.el.height() - this.options.marginTop - this.options.marginBottom;
       dx = width / (this.xmax - this.xmin);
-      dy = height / this.ymax;
+      dy = height / this.options.ymax;
       transX = function(x) {
         if (_this.xvals.length === 1) {
           return left + width / 2;
@@ -92,7 +95,7 @@
       lineInterval = height / (this.options.numLines - 1);
       for (i = 0, _ref = this.options.numLines - 1; 0 <= _ref ? i <= _ref : i >= _ref; 0 <= _ref ? i++ : i--) {
         y = this.options.marginTop + i * lineInterval;
-        v = Math.round((this.options.numLines - 1 - i) * this.ymax / (this.options.numLines - 1));
+        v = Math.round((this.options.numLines - 1 - i) * this.options.ymax / (this.options.numLines - 1));
         this.r.text(left - this.options.marginLeft / 2, y, v).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor).attr('text-anchor', 'end');
         this.r.path("M" + left + "," + y + 'H' + (left + width)).attr('stroke', this.options.gridLineColor).attr('stroke-width', this.options.gridStrokeWidth);
       }

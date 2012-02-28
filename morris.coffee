@@ -31,6 +31,7 @@ class Morris.Line
       '#cb4b4b'
       '#9440ed'
     ]
+    ymax: 'auto'
     marginTop: 25
     marginRight: 25
     marginBottom: 30
@@ -71,9 +72,11 @@ class Morris.Line
       @xmin -= 1
       @xmax += 1
 
-    # use $.map to flatten arrays and find the max y value
-    all_y_vals = $.map @series, (x) -> Math.max.apply null, x
-    @ymax = Math.max(20, Math.max.apply(null, all_y_vals))
+    # Compute the vertical range of the graph if desired
+    if @options.ymax == 'auto'
+        # use $.map to flatten arrays and find the max y value
+        all_y_vals = $.map @series, (x) -> Math.max.apply null, x
+        @options.ymax = Math.max(20, Math.max.apply(null, all_y_vals))
 
   # Clear and redraw the graph
   #
@@ -85,11 +88,11 @@ class Morris.Line
     @r = new Raphael(@el[0])
 
     # calculate grid dimensions
-    left = @measureText(@ymax, @options.gridTextSize).width + @options.marginLeft
+    left = @measureText(@options.ymax, @options.gridTextSize).width + @options.marginLeft
     width = @el.width() - left - @options.marginRight
     height = @el.height() - @options.marginTop - @options.marginBottom
     dx = width / (@xmax - @xmin)
-    dy = height / @ymax
+    dy = height / @options.ymax
 
     # quick translation helpers
     transX = (x) =>
@@ -104,7 +107,7 @@ class Morris.Line
     lineInterval = height / (@options.numLines - 1)
     for i in [0..@options.numLines-1]
       y = @options.marginTop + i * lineInterval
-      v = Math.round((@options.numLines - 1 - i) * @ymax / (@options.numLines - 1))
+      v = Math.round((@options.numLines - 1 - i) * @options.ymax / (@options.numLines - 1))
       @r.text(left - @options.marginLeft/2, y, v)
         .attr('font-size', @options.gridTextSize)
         .attr('fill', @options.gridTextColor)
