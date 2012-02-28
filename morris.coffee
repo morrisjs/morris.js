@@ -9,7 +9,7 @@ class Morris.Line
     if not (this instanceof Morris.Line)
       return new Morris.Line(options)
     @el = $ document.getElementById(options.element)
-    @options = $.extend @defaults, options
+    @options = $.extend $.extend({}, @defaults), options
     # bail if there's no data
     if @options.data is undefined or @options.data.length is 0
       return
