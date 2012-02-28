@@ -8,7 +8,10 @@ class Morris.Line
   constructor: (options) ->
     if not (this instanceof Morris.Line)
       return new Morris.Line(options)
-    @el = $ document.getElementById(options.element)
+    if typeof options.element is 'string'
+      @el = $ document.getElementById(options.element)
+    else
+      @el = $ options.element
     @options = $.extend {}, @defaults, options
     # bail if there's no data
     if @options.data is undefined or @options.data.length is 0
