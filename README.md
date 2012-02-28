@@ -23,6 +23,15 @@ Very daring.
 
 Fork, hack, send a pull request :)
 
+## Changelog
+
+### 0.2.1 - 28th Feb 2012
+
+- Accept a DOM element *or* an ID in `options.element`
+- Add `smooth` option
+- Bugfix: clone `@default`
+- Add `ymax` option
+
 ## License
 
 Copyright (c) 2012, Olly Smith
