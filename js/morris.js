@@ -7,8 +7,12 @@
 
     function Line(options) {
       if (!(this instanceof Morris.Line)) return new Morris.Line(options);
-      this.el = $(document.getElementById(options.element));
-      this.options = $.extend(this.defaults, options);
+      if (typeof options.element === 'string') {
+        this.el = $(document.getElementById(options.element));
+      } else {
+        this.el = $(options.element);
+      }
+      this.options = $.extend({}, this.defaults, options);
       if (this.options.data === void 0 || this.options.data.length === 0) return;
       this.el.addClass('graph-initialised');
       this.precalc();
@@ -19,6 +23,7 @@
       lineWidth: 3,
       pointSize: 4,
       lineColors: ['#0b62a4', '#7A92A3', '#4da74d', '#afd8f8', '#edc240', '#cb4b4b', '#9440ed'],
+      ymax: 'auto',
       marginTop: 25,
       marginRight: 25,
       marginBottom: 30,
@@ -36,11 +41,12 @@
       hoverBorderWidth: 2,
       hoverOpacity: 0.95,
       hoverLabelColor: '#444',
-      hoverFontSize: 12
+      hoverFontSize: 12,
+      smooth: true
     };
 
     Line.prototype.precalc = function() {
-      var all_y_vals, ykey, _i, _len, _ref,
+      var ykey, ymax, _i, _len, _ref,
         _this = this;
       this.columnLabels = $.map(this.options.data, function(d) {
         return d[_this.options.xkey];
@@ -63,10 +69,14 @@
         this.xmin -= 1;
         this.xmax += 1;
       }
-      all_y_vals = $.map(this.series, function(x) {
-        return Math.max.apply(null, x);
-      });
-      return this.ymax = Math.max(20, Math.max.apply(null, all_y_vals));
+      if (typeof this.options.ymax === 'string' && this.options.ymax.slice(0, 4) === 'auto') {
+        ymax = Math.max.apply(null, Array.prototype.concat.apply([], this.series));
+        if (this.options.ymax.length > 5) {
+          return this.options.ymax = Math.max(parseInt(this.options.ymax.slice(5), 10), ymax);
+        } else {
+          return this.options.ymax = ymax;
+        }
+      }
     };
 
     Line.prototype.redraw = function() {
@@ -74,11 +84,11 @@
         _this = this;
       this.el.empty();
       this.r = new Raphael(this.el[0]);
-      left = this.measureText(this.ymax, this.options.gridTextSize).width + this.options.marginLeft;
+      left = this.measureText(this.options.ymax, this.options.gridTextSize).width + this.options.marginLeft;
       width = this.el.width() - left - this.options.marginRight;
       height = this.el.height() - this.options.marginTop - this.options.marginBottom;
       dx = width / (this.xmax - this.xmin);
-      dy = height / this.ymax;
+      dy = height / this.options.ymax;
       transX = function(x) {
         if (_this.xvals.length === 1) {
           return left + width / 2;
@@ -92,7 +102,7 @@
       lineInterval = height / (this.options.numLines - 1);
       for (i = 0, _ref = this.options.numLines - 1; 0 <= _ref ? i <= _ref : i >= _ref; 0 <= _ref ? i++ : i--) {
         y = this.options.marginTop + i * lineInterval;
-        v = Math.round((this.options.numLines - 1 - i) * this.ymax / (this.options.numLines - 1));
+        v = Math.round((this.options.numLines - 1 - i) * this.options.ymax / (this.options.numLines - 1));
         this.r.text(left - this.options.marginLeft / 2, y, v).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor).attr('text-anchor', 'end');
         this.r.path("M" + left + "," + y + 'H' + (left + width)).attr('stroke', this.options.gridLineColor).attr('stroke-width', this.options.gridStrokeWidth);
       }
@@ -245,22 +255,28 @@
     Line.prototype.createPath = function(coords, top, left, bottom, right) {
       var c, g, grads, i, ix, lc, lg, path, x1, x2, y1, y2, _ref;
       path = "";
-      grads = this.gradients(coords);
-      for (i = 0, _ref = coords.length - 1; 0 <= _ref ? i <= _ref : i >= _ref; 0 <= _ref ? i++ : i--) {
-        c = coords[i];
-        if (i === 0) {
-          path += "M" + c.x + "," + c.y;
-        } else {
-          g = grads[i];
-          lc = coords[i - 1];
-          lg = grads[i - 1];
-          ix = (c.x - lc.x) / 4;
-          x1 = lc.x + ix;
-          y1 = Math.min(bottom, lc.y + ix * lg);
-          x2 = c.x - ix;
-          y2 = Math.min(bottom, c.y - ix * g);
-          path += "C" + x1 + "," + y1 + "," + x2 + "," + y2 + "," + c.x + "," + c.y;
+      if (this.options.smooth) {
+        grads = this.gradients(coords);
+        for (i = 0, _ref = coords.length - 1; 0 <= _ref ? i <= _ref : i >= _ref; 0 <= _ref ? i++ : i--) {
+          c = coords[i];
+          if (i === 0) {
+            path += "M" + c.x + "," + c.y;
+          } else {
+            g = grads[i];
+            lc = coords[i - 1];
+            lg = grads[i - 1];
+            ix = (c.x - lc.x) / 4;
+            x1 = lc.x + ix;
+            y1 = Math.min(bottom, lc.y + ix * lg);
+            x2 = c.x - ix;
+            y2 = Math.min(bottom, c.y - ix * g);
+            path += "C" + x1 + "," + y1 + "," + x2 + "," + y2 + "," + c.x + "," + c.y;
+          }
         }
+      } else {
+        path = "M" + $.map(coords, function(c) {
+          return "" + c.x + "," + c.y;
+        }).join("L");
       }
       return path;
     };
