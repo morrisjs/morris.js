@@ -50,6 +50,7 @@ class Morris.Line
     hoverOpacity: 0.95
     hoverLabelColor: '#444'
     hoverFontSize: 12
+    lineDrawer: 'spline'
 
   # Do any necessary pre-processing for a new dataset
   #
@@ -141,7 +142,10 @@ class Morris.Line
     for i in [seriesCoords.length-1..0]
       coords = seriesCoords[i]
       if coords.length > 1
-        path = @createPath coords, @options.marginTop, left, @options.marginTop + height, left + width
+        if @options.lineDrawer == 'straight'
+          path = @createStraightPath coords, @options.marginTop, left, @options.marginTop + height, left + width
+        else
+          path = @createPath coords, @options.marginTop, left, @options.marginTop + height, left + width
         @r.path(path)
           .attr('stroke', @options.lineColors[i])
           .attr('stroke-width', @options.lineWidth)
@@ -253,6 +257,18 @@ class Morris.Line
         x2 = c.x - ix
         y2 = Math.min(bottom, c.y - ix * g)
         path += "C#{x1},#{y1},#{x2},#{y2},#{c.x},#{c.y}"
+    return path
+
+  # creates a straight path for a data series
+  #
+  createStraightPath: (coords, top, left, bottom, right) ->
+    path = ""
+    for i in [0..coords.length-1]
+      c = coords[i]
+      if i is 0
+        path += "M#{c.x},#{c.y}"
+      else
+        path += "L#{c.x},#{c.y}"
     return path
 
   # calculate a gradient at each point for a series of points
