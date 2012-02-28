@@ -8,7 +8,7 @@
     function Line(options) {
       if (!(this instanceof Morris.Line)) return new Morris.Line(options);
       this.el = $(document.getElementById(options.element));
-      this.options = $.extend($.extend({}, this.defaults), options);
+      this.options = $.extend({}, this.defaults, options);
       if (this.options.data === void 0 || this.options.data.length === 0) return;
       this.el.addClass('graph-initialised');
       this.precalc();
@@ -37,7 +37,8 @@
       hoverBorderWidth: 2,
       hoverOpacity: 0.95,
       hoverLabelColor: '#444',
-      hoverFontSize: 12
+      hoverFontSize: 12,
+      smooth: true
     };
 
     Line.prototype.precalc = function() {
@@ -250,22 +251,28 @@
     Line.prototype.createPath = function(coords, top, left, bottom, right) {
       var c, g, grads, i, ix, lc, lg, path, x1, x2, y1, y2, _ref;
       path = "";
-      grads = this.gradients(coords);
-      for (i = 0, _ref = coords.length - 1; 0 <= _ref ? i <= _ref : i >= _ref; 0 <= _ref ? i++ : i--) {
-        c = coords[i];
-        if (i === 0) {
-          path += "M" + c.x + "," + c.y;
-        } else {
-          g = grads[i];
-          lc = coords[i - 1];
-          lg = grads[i - 1];
-          ix = (c.x - lc.x) / 4;
-          x1 = lc.x + ix;
-          y1 = Math.min(bottom, lc.y + ix * lg);
-          x2 = c.x - ix;
-          y2 = Math.min(bottom, c.y - ix * g);
-          path += "C" + x1 + "," + y1 + "," + x2 + "," + y2 + "," + c.x + "," + c.y;
+      if (this.options.smooth) {
+        grads = this.gradients(coords);
+        for (i = 0, _ref = coords.length - 1; 0 <= _ref ? i <= _ref : i >= _ref; 0 <= _ref ? i++ : i--) {
+          c = coords[i];
+          if (i === 0) {
+            path += "M" + c.x + "," + c.y;
+          } else {
+            g = grads[i];
+            lc = coords[i - 1];
+            lg = grads[i - 1];
+            ix = (c.x - lc.x) / 4;
+            x1 = lc.x + ix;
+            y1 = Math.min(bottom, lc.y + ix * lg);
+            x2 = c.x - ix;
+            y2 = Math.min(bottom, c.y - ix * g);
+            path += "C" + x1 + "," + y1 + "," + x2 + "," + y2 + "," + c.x + "," + c.y;
+          }
         }
+      } else {
+        path = "M" + $.map(coords, function(c) {
+          return "" + c.x + "," + c.y;
+        }).join("L");
       }
       return path;
     };
