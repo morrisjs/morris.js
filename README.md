@@ -25,6 +25,11 @@ Fork, hack, send a pull request :)
 
 ## Changelog
 
+### 0.2.2 - 29th Feb 2012
+
+- Bugfix: mouseover error when options.data.length == 2
+- Automatically sort options.data
+
 ### 0.2.1 - 28th Feb 2012
 
 - Accept a DOM element *or* an ID in `options.element`
