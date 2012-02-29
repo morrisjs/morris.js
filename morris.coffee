@@ -58,6 +58,8 @@ class Morris.Line
   # Do any necessary pre-processing for a new dataset
   #
   precalc: ->
+    # sort data
+    @options.data.sort (a, b) => (a[@options.xkey] < b[@options.xkey]) - (b[@options.xkey] < a[@options.xkey])
     # extract labels
     @columnLabels = $.map @options.data, (d) => d[@options.xkey]
     @seriesLabels = @options.labels

@@ -48,6 +48,9 @@
     Line.prototype.precalc = function() {
       var ykey, ymax, _i, _len, _ref,
         _this = this;
+      this.options.data.sort(function(a, b) {
+        return (a[_this.options.xkey] < b[_this.options.xkey]) - (b[_this.options.xkey] < a[_this.options.xkey]);
+      });
       this.columnLabels = $.map(this.options.data, function(d) {
         return d[_this.options.xkey];
       });
