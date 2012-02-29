@@ -230,12 +230,18 @@
         if (index === null) return hideHover();
       };
       updateHilight = function(x) {
-        var i, _ref9;
+        var hoverIndex, _ref9, _results;
         x -= _this.el.offset().left;
-        for (i = _ref9 = hoverMargins.length; _ref9 <= 1 ? i <= 1 : i >= 1; _ref9 <= 1 ? i++ : i--) {
-          if (hoverMargins[i - 1] > x) break;
+        _results = [];
+        for (hoverIndex = _ref9 = hoverMargins.length; _ref9 <= 0 ? hoverIndex <= 0 : hoverIndex >= 0; _ref9 <= 0 ? hoverIndex++ : hoverIndex--) {
+          if (hoverIndex === 0 || hoverMargins[hoverIndex - 1] > x) {
+            hilight(hoverIndex);
+            break;
+          } else {
+            _results.push(void 0);
+          }
         }
-        return hilight(i);
+        return _results;
       };
       this.el.mousemove(function(evt) {
         return updateHilight(evt.pageX);

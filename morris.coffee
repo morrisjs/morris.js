@@ -223,10 +223,10 @@ class Morris.Line
         hideHover()
     updateHilight = (x) =>
       x -= @el.offset().left
-      for i in [hoverMargins.length..1]
-        if hoverMargins[i - 1] > x
+      for hoverIndex in [hoverMargins.length..0]
+        if hoverIndex == 0 || hoverMargins[hoverIndex - 1] > x
+          hilight hoverIndex
           break
-      hilight i
     @el.mousemove (evt) =>
       updateHilight evt.pageX
     touchHandler = (evt) =>
