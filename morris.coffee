@@ -1,5 +1,7 @@
 # The original line graph.
 #
+$ = jQuery
+
 Morris = {}
 class Morris.Line
   # Initialise the graph.
