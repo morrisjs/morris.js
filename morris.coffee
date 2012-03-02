@@ -95,6 +95,9 @@ class Morris.Line
     # remove child elements (get rid of old drawings)
     @el.empty()
 
+    isNumber = (o) =>
+      ! isNan (o-0)
+
     # the raphael drawing instance
     @r = new Raphael(@el[0])
 
@@ -103,7 +106,7 @@ class Morris.Line
     width = @el.width() - left - @options.marginRight
     height = @el.height() - @options.marginTop - @options.marginBottom
     dx = width / (@xmax - @xmin)
-    dy = height / @options.ymax
+    dy = height / (if isNumber(@options.ymax) then @options.ymax else height)
 
     # quick translation helpers
     transX = (x) =>
@@ -112,13 +115,15 @@ class Morris.Line
       else
        left + (x - @xmin) * dx
     transY = (y) =>
-      return @options.marginTop + height - y * dy
+      return @options.marginTop + height - (if isNumber(y) then y * dy else dy)
 
     # draw y axis labels, horizontal lines
-    lineInterval = height / (@options.numLines - 1)
+    lineInterval = height / (if @options.numLines == 1 then 2 else (@options.numLines - 1))
     for i in [0..@options.numLines-1]
       y = @options.marginTop + i * lineInterval
-      v = Math.round((@options.numLines - 1 - i) * @options.ymax / (@options.numLines - 1))
+      v = Math.round((@options.numLines - 1 - i) * @options.ymax / (if @options.numLines == 1 then 1 else (@options.numLines - 1)))
+      if isNaN(v)
+        v = ""
       @r.text(left - @options.marginLeft/2, y, v)
         .attr('font-size', @options.gridTextSize)
         .attr('fill', @options.gridTextColor)
@@ -187,7 +192,7 @@ class Morris.Line
       hoverSet.show()
       xLabel.attr('text', @columnLabels[index])
       for i in [0..@series.length-1]
-        yLabels[i].attr('text', "#{@seriesLabels[i]}: #{@commas(@series[i][index])}")
+        yLabels[i].attr('text', "#{@seriesLabels[i]}: #{if isNumber(@series[i][index]) then @commas(@series[i][index]) else @series[i][index]}")
       # recalculate hover box width
       maxLabelWidth = Math.max.apply null, $.map yLabels, (l) ->
         l.getBBox().width

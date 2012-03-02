@@ -85,15 +85,18 @@
     };
 
     Line.prototype.redraw = function() {
-      var c, circle, columns, coords, dx, dy, height, hideHover, hilight, hover, hoverHeight, hoverMargins, hoverSet, i, label, labelBox, left, lineInterval, path, pointGrow, pointShrink, prevHilight, prevLabelMargin, s, seriesCoords, seriesPoints, touchHandler, transX, transY, updateHilight, updateHover, v, width, x, xLabel, xLabelMargin, y, yLabel, yLabels, _i, _j, _len, _len2, _ref, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8,
+      var c, circle, columns, coords, dx, dy, height, hideHover, hilight, hover, hoverHeight, hoverMargins, hoverSet, i, isNumber, label, labelBox, left, lineInterval, path, pointGrow, pointShrink, prevHilight, prevLabelMargin, s, seriesCoords, seriesPoints, touchHandler, transX, transY, updateHilight, updateHover, v, width, x, xLabel, xLabelMargin, y, yLabel, yLabels, _i, _j, _len, _len2, _ref, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8,
         _this = this;
       this.el.empty();
+      isNumber = function(o) {
+        return !isNan(o - 0);
+      };
       this.r = new Raphael(this.el[0]);
       left = this.measureText(this.options.ymax, this.options.gridTextSize).width + this.options.marginLeft;
       width = this.el.width() - left - this.options.marginRight;
       height = this.el.height() - this.options.marginTop - this.options.marginBottom;
       dx = width / (this.xmax - this.xmin);
-      dy = height / this.options.ymax;
+      dy = height / (isNumber(this.options.ymax) ? this.options.ymax : height);
       transX = function(x) {
         if (_this.xvals.length === 1) {
           return left + width / 2;
@@ -102,12 +105,13 @@
         }
       };
       transY = function(y) {
-        return _this.options.marginTop + height - y * dy;
+        return _this.options.marginTop + height - (isNumber(y) ? y * dy : dy);
       };
-      lineInterval = height / (this.options.numLines - 1);
+      lineInterval = height / (this.options.numLines === 1 ? 2 : this.options.numLines - 1);
       for (i = 0, _ref = this.options.numLines - 1; 0 <= _ref ? i <= _ref : i >= _ref; 0 <= _ref ? i++ : i--) {
         y = this.options.marginTop + i * lineInterval;
-        v = Math.round((this.options.numLines - 1 - i) * this.options.ymax / (this.options.numLines - 1));
+        v = Math.round((this.options.numLines - 1 - i) * this.options.ymax / (this.options.numLines === 1 ? 1 : this.options.numLines - 1));
+        if (isNaN(v)) v = "";
         this.r.text(left - this.options.marginLeft / 2, y, v).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor).attr('text-anchor', 'end');
         this.r.path("M" + left + "," + y + 'H' + (left + width)).attr('stroke', this.options.gridLineColor).attr('stroke-width', this.options.gridStrokeWidth);
       }
@@ -183,7 +187,7 @@
         hoverSet.show();
         xLabel.attr('text', _this.columnLabels[index]);
         for (i = 0, _ref9 = _this.series.length - 1; 0 <= _ref9 ? i <= _ref9 : i >= _ref9; 0 <= _ref9 ? i++ : i--) {
-          yLabels[i].attr('text', "" + _this.seriesLabels[i] + ": " + (_this.commas(_this.series[i][index])));
+          yLabels[i].attr('text', "" + _this.seriesLabels[i] + ": " + (isNumber(_this.series[i][index]) ? _this.commas(_this.series[i][index]) : _this.series[i][index]));
         }
         maxLabelWidth = Math.max.apply(null, $.map(yLabels, function(l) {
           return l.getBBox().width;

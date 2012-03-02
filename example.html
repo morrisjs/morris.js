@@ -114,4 +114,33 @@
       });
     });
   </script>
+  
+  <h3>Text values</h3>
+  <div id="graph-yyyy-mm-dd" class="graph" style="height:175px"></div>
+  <script>
+    $(function () {
+      // data from https://en.wikipedia.org/wiki/United_States_presidential_election,_2012_timeline
+      var day_data = [
+        {"period": "2012-01-03", "event": "Iowa"},
+        {"period": "2012-01-10", "event": "New Hampshire"},
+        {"period": "2012-01-21", "event": "South Carolina"},
+        {"period": "2012-01-31", "event": "Florida"},
+        {"period": "2012-02-04", "event": "Maine, Nevada"},
+        {"period": "2012-02-07", "event": "Colorado, Minnesota, Missouri"},
+        {"period": "2012-02-28", "event": "Arizona, Michigan"},
+        {"period": "2012-02-29", "event": "Wyoming"},
+        {"period": "2012-03-01", "event": "Washington"},
+        {"period": "2012-03-06", "event": "Super Tuesday"},
+      ];
+      Morris.Line({
+        element: 'graph-yyyy-mm-dd',
+        data: day_data,
+        xkey: 'period',
+        ykeys: ['event'],
+        labels: ['event'],
+		marginBottom: 100,
+		numLines: 1
+      });
+    });
+  </script>  
 </body>
