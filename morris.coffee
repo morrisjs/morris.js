@@ -96,7 +96,7 @@ class Morris.Line
     @el.empty()
 
     isNumber = (o) =>
-      ! isNan (o-0)
+      ! isNaN (o-0)
 
     # the raphael drawing instance
     @r = new Raphael(@el[0])
