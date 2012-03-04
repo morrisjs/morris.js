@@ -288,8 +288,23 @@ class Morris.Line
     m = s.match /^(\d+) Q(\d)$/
     n = s.match /^(\d+)-(\d+)$/
     o = s.match /^(\d+)-(\d+)-(\d+)$/
+    p = s.match /^(\d+) W(\d+)$/
     if m
       parseInt(m[1], 10) + (parseInt(m[2], 10) * 3 - 1) / 12
+    else if p
+      # calculate number of weeks in year given
+      year = parseInt(p[1], 10);
+      y1 = new Date(year, 0, 1);
+      y2 = new Date(year+1, 0, 1);
+      # first thursday in year (ISO 8601 standard)
+      if y1.getDay() isnt 4
+        y1.setMonth(0, 1 + ((4 - y1.getDay()) + 7) % 7);
+      # first thursday in following year
+      if y2.getDay() isnt 4
+        y2.setMonth(0, 1 + ((4 - y2.getDay()) + 7) % 7);
+      # Number of weeks between thursdays
+      weeks = Math.ceil((y2 - y1) / 604800000);
+      parseInt(p[1], 10) + (parseInt(p[2], 10) - 1) / weeks;
     else if n
       parseInt(n[1], 10) + (parseInt(n[2], 10) - 1) / 12
     else if o
