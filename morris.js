@@ -319,8 +319,11 @@
       m = s.match(/^(\d+) Q(\d)$/);
       n = s.match(/^(\d+)-(\d+)$/);
       o = s.match(/^(\d+)-(\d+)-(\d+)$/);
+      p = s.match(/^(\d+) W(\d)$/);
       if (m) {
         return parseInt(m[1], 10) + (parseInt(m[2], 10) * 3 - 1) / 12;
+      } else if (p) {
+        return parseInt(p[1], 10) + (parseInt(p[2], 10) - 1) / 53;
       } else if (n) {
         return parseInt(n[1], 10) + (parseInt(n[2], 10) - 1) / 12;
       } else if (o) {
