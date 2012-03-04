@@ -45,7 +45,8 @@
       hoverLabelColor: '#444',
       hoverFontSize: 12,
       smooth: true,
-      parseTime: true
+      parseTime: true,
+      hideHover: false
     };
 
     Line.prototype.precalc = function() {
@@ -263,6 +264,11 @@
       this.el.mousemove(function(evt) {
         return updateHilight(evt.pageX);
       });
+      if (_this.options.hideHover) {
+        this.el.mouseout(function(evt) {
+          return hilight(null);
+        });
+      }
       touchHandler = function(evt) {
         var touch;
         touch = evt.originalEvent.touches[0] || evt.originalEvent.changedTouches[0];
@@ -272,7 +278,11 @@
       this.el.bind('touchstart', touchHandler);
       this.el.bind('touchmove', touchHandler);
       this.el.bind('touchend', touchHandler);
-      return hilight(0);
+      if (_this.options.hideHover) {
+        return hilight(null);
+      } else {
+        return hilight(0);
+      }
     };
 
     Line.prototype.createPath = function(coords, top, left, bottom, right) {
