@@ -328,7 +328,7 @@
         y2 = new Date(year + 1, 0, 1);
         if (y1.getDay() !== 4) y1.setMonth(0, 1 + ((4 - y1.getDay()) + 7) % 7);
         if (y2.getDay() !== 4) y2.setMonth(0, 1 + ((4 - y2.getDay()) + 7) % 7);
-        weeks = 1 + Math.ceil((y2 - y1) / 604800000);
+        weeks = Math.ceil((y2 - y1) / 604800000);
         return parseInt(p[1], 10) + (parseInt(p[2], 10) - 1) / weeks;
       } else if (n) {
         return parseInt(n[1], 10) + (parseInt(n[2], 10) - 1) / 12;

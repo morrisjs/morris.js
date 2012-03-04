@@ -303,7 +303,7 @@ class Morris.Line
       if y2.getDay() isnt 4
         y2.setMonth(0, 1 + ((4 - y2.getDay()) + 7) % 7);
       # Number of weeks between thursdays
-      weeks = 1 + Math.ceil((y2 - y1) / 604800000);
+      weeks = Math.ceil((y2 - y1) / 604800000);
       parseInt(p[1], 10) + (parseInt(p[2], 10) - 1) / weeks;
     else if n
       parseInt(n[1], 10) + (parseInt(n[2], 10) - 1) / 12
