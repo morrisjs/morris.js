@@ -44,7 +44,8 @@
       hoverOpacity: 0.95,
       hoverLabelColor: '#444',
       hoverFontSize: 12,
-      smooth: true
+      smooth: true,
+      parseTime: true
     };
 
     Line.prototype.precalc = function() {
@@ -65,9 +66,16 @@
           return d[ykey];
         }));
       }
-      this.xvals = $.map(this.columnLabels, function(x) {
-        return _this.parseYear(x);
-      });
+      if (_this.options.parseTime) {
+        this.xvals = $.map(this.columnLabels, function(x) {
+          return _this.parseYear(x);
+        });
+      } else {
+        this.xvals = [];
+        for (_i = this.columnLabels.length - 1; _i >= 0; _i--) {
+          this.xvals.push(_i);
+        }
+      }
       this.xmin = Math.min.apply(null, this.xvals);
       this.xmax = Math.max.apply(null, this.xvals);
       if (this.xmin === this.xmax) {
@@ -115,6 +123,10 @@
       xLabelMargin = 50;
       for (i = _ref2 = Math.ceil(this.xmin), _ref3 = Math.floor(this.xmax); _ref2 <= _ref3 ? i <= _ref3 : i >= _ref3; _ref2 <= _ref3 ? i++ : i--) {
         label = this.r.text(transX(i), this.options.marginTop + height + this.options.marginBottom / 2, i).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor);
+        if (_this.options.parseTime == false) {
+          var l = this.columnLabels.length - 1;
+          label = label.attr('text', this.columnLabels[l - i]);
+        }
         labelBox = label.getBBox();
         if (prevLabelMargin === null || prevLabelMargin <= labelBox.x) {
           prevLabelMargin = labelBox.x + labelBox.width + xLabelMargin;
