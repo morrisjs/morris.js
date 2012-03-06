@@ -45,12 +45,12 @@
       hoverLabelColor: '#444',
       hoverFontSize: 12,
       smooth: true,
-      parseTime: true,
-      hideHover: false
+      hideHover: false,
+      parseTime: true
     };
 
     Line.prototype.precalc = function() {
-      var ykey, ymax, _i, _len, _ref,
+      var ykey, ymax, _i, _j, _len, _ref, _ref2, _results,
         _this = this;
       this.options.data.sort(function(a, b) {
         return (a[_this.options.xkey] < b[_this.options.xkey]) - (b[_this.options.xkey] < a[_this.options.xkey]);
@@ -67,15 +67,16 @@
           return d[ykey];
         }));
       }
-      if (_this.options.parseTime) {
+      if (this.options.parseTime) {
         this.xvals = $.map(this.columnLabels, function(x) {
           return _this.parseYear(x);
         });
       } else {
-        this.xvals = [];
-        for (_i = this.columnLabels.length - 1; _i >= 0; _i--) {
-          this.xvals.push(_i);
-        }
+        this.xvals = (function() {
+          _results = [];
+          for (var _j = _ref2 = this.columnLabels.length - 1; _ref2 <= 0 ? _j <= 0 : _j >= 0; _ref2 <= 0 ? _j++ : _j--){ _results.push(_j); }
+          return _results;
+        }).apply(this);
       }
       this.xmin = Math.min.apply(null, this.xvals);
       this.xmax = Math.max.apply(null, this.xvals);
@@ -94,7 +95,7 @@
     };
 
     Line.prototype.redraw = function() {
-      var c, circle, columns, coords, dx, dy, height, hideHover, hilight, hover, hoverHeight, hoverMargins, hoverSet, i, label, labelBox, left, lineInterval, path, pointGrow, pointShrink, prevHilight, prevLabelMargin, s, seriesCoords, seriesPoints, touchHandler, transX, transY, updateHilight, updateHover, v, width, x, xLabel, xLabelMargin, y, yLabel, yLabels, _i, _j, _len, _len2, _ref, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8,
+      var c, circle, columns, coords, dx, dy, height, hideHover, hilight, hover, hoverHeight, hoverMargins, hoverSet, i, label, labelBox, labelText, left, lineInterval, path, pointGrow, pointShrink, prevHilight, prevLabelMargin, s, seriesCoords, seriesPoints, touchHandler, transX, transY, updateHilight, updateHover, v, width, x, xLabel, xLabelMargin, y, yLabel, yLabels, _i, _j, _len, _len2, _ref, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8,
         _this = this;
       this.el.empty();
       this.r = new Raphael(this.el[0]);
@@ -123,11 +124,8 @@
       prevLabelMargin = null;
       xLabelMargin = 50;
       for (i = _ref2 = Math.ceil(this.xmin), _ref3 = Math.floor(this.xmax); _ref2 <= _ref3 ? i <= _ref3 : i >= _ref3; _ref2 <= _ref3 ? i++ : i--) {
-        label = this.r.text(transX(i), this.options.marginTop + height + this.options.marginBottom / 2, i).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor);
-        if (_this.options.parseTime == false) {
-          var l = this.columnLabels.length - 1;
-          label = label.attr('text', this.columnLabels[l - i]);
-        }
+        labelText = this.options.parseTime ? i : this.columnLabels[this.columnLabels.length - i - 1];
+        label = this.r.text(transX(i), this.options.marginTop + height + this.options.marginBottom / 2, labelText).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor);
         labelBox = label.getBBox();
         if (prevLabelMargin === null || prevLabelMargin <= labelBox.x) {
           prevLabelMargin = labelBox.x + labelBox.width + xLabelMargin;
@@ -264,7 +262,7 @@
       this.el.mousemove(function(evt) {
         return updateHilight(evt.pageX);
       });
-      if (_this.options.hideHover) {
+      if (this.options.hideHover) {
         this.el.mouseout(function(evt) {
           return hilight(null);
         });
@@ -278,11 +276,7 @@
       this.el.bind('touchstart', touchHandler);
       this.el.bind('touchmove', touchHandler);
       this.el.bind('touchend', touchHandler);
-      if (_this.options.hideHover) {
-        return hilight(null);
-      } else {
-        return hilight(0);
-      }
+      return hilight(this.options.hideHover ? null : 0);
     };
 
     Line.prototype.createPath = function(coords, top, left, bottom, right) {
