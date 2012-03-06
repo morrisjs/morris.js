@@ -1,5 +1,7 @@
 (function() {
-  var Morris;
+  var $, Morris;
+
+  $ = jQuery;
 
   Morris = {};
 
@@ -42,11 +44,13 @@
       hoverOpacity: 0.95,
       hoverLabelColor: '#444',
       hoverFontSize: 12,
-      smooth: true
+      smooth: true,
+      hideHover: false,
+      parseTime: true
     };
 
     Line.prototype.precalc = function() {
-      var ykey, ymax, _i, _len, _ref,
+      var ykey, ymax, _i, _j, _len, _ref, _ref2, _results,
         _this = this;
       this.options.data.sort(function(a, b) {
         return (a[_this.options.xkey] < b[_this.options.xkey]) - (b[_this.options.xkey] < a[_this.options.xkey]);
@@ -63,9 +67,17 @@
           return d[ykey];
         }));
       }
-      this.xvals = $.map(this.columnLabels, function(x) {
-        return _this.parseYear(x);
-      });
+      if (this.options.parseTime) {
+        this.xvals = $.map(this.columnLabels, function(x) {
+          return _this.parseYear(x);
+        });
+      } else {
+        this.xvals = (function() {
+          _results = [];
+          for (var _j = _ref2 = this.columnLabels.length - 1; _ref2 <= 0 ? _j <= 0 : _j >= 0; _ref2 <= 0 ? _j++ : _j--){ _results.push(_j); }
+          return _results;
+        }).apply(this);
+      }
       this.xmin = Math.min.apply(null, this.xvals);
       this.xmax = Math.max.apply(null, this.xvals);
       if (this.xmin === this.xmax) {
@@ -83,7 +95,7 @@
     };
 
     Line.prototype.redraw = function() {
-      var c, circle, columns, coords, dx, dy, height, hideHover, hilight, hover, hoverHeight, hoverMargins, hoverSet, i, label, labelBox, left, lineInterval, path, pointGrow, pointShrink, prevHilight, prevLabelMargin, s, seriesCoords, seriesPoints, touchHandler, transX, transY, updateHilight, updateHover, v, width, x, xLabel, xLabelMargin, y, yLabel, yLabels, _i, _j, _len, _len2, _ref, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8,
+      var c, circle, columns, coords, dx, dy, height, hideHover, hilight, hover, hoverHeight, hoverMargins, hoverSet, i, label, labelBox, labelText, left, lineInterval, path, pointGrow, pointShrink, prevHilight, prevLabelMargin, s, seriesCoords, seriesPoints, touchHandler, transX, transY, updateHilight, updateHover, v, width, x, xLabel, xLabelMargin, y, yLabel, yLabels, _i, _j, _len, _len2, _ref, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8,
         _this = this;
       this.el.empty();
       this.r = new Raphael(this.el[0]);
@@ -112,7 +124,8 @@
       prevLabelMargin = null;
       xLabelMargin = 50;
       for (i = _ref2 = Math.ceil(this.xmin), _ref3 = Math.floor(this.xmax); _ref2 <= _ref3 ? i <= _ref3 : i >= _ref3; _ref2 <= _ref3 ? i++ : i--) {
-        label = this.r.text(transX(i), this.options.marginTop + height + this.options.marginBottom / 2, i).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor);
+        labelText = this.options.parseTime ? i : this.columnLabels[this.columnLabels.length - i - 1];
+        label = this.r.text(transX(i), this.options.marginTop + height + this.options.marginBottom / 2, labelText).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor);
         labelBox = label.getBBox();
         if (prevLabelMargin === null || prevLabelMargin <= labelBox.x) {
           prevLabelMargin = labelBox.x + labelBox.width + xLabelMargin;
@@ -249,6 +262,11 @@
       this.el.mousemove(function(evt) {
         return updateHilight(evt.pageX);
       });
+      if (this.options.hideHover) {
+        this.el.mouseout(function(evt) {
+          return hilight(null);
+        });
+      }
       touchHandler = function(evt) {
         var touch;
         touch = evt.originalEvent.touches[0] || evt.originalEvent.changedTouches[0];
@@ -258,7 +276,7 @@
       this.el.bind('touchstart', touchHandler);
       this.el.bind('touchmove', touchHandler);
       this.el.bind('touchend', touchHandler);
-      return hilight(0);
+      return hilight(this.options.hideHover ? null : 0);
     };
 
     Line.prototype.createPath = function(coords, top, left, bottom, right) {
@@ -312,13 +330,22 @@
     };
 
     Line.prototype.parseYear = function(date) {
-      var day, m, month, n, o, s, timestamp, y1, y2, year;
+      var day, m, month, n, o, p, s, timestamp, weeks, y1, y2, year;
       s = date.toString();
       m = s.match(/^(\d+) Q(\d)$/);
       n = s.match(/^(\d+)-(\d+)$/);
       o = s.match(/^(\d+)-(\d+)-(\d+)$/);
+      p = s.match(/^(\d+) W(\d+)$/);
       if (m) {
         return parseInt(m[1], 10) + (parseInt(m[2], 10) * 3 - 1) / 12;
+      } else if (p) {
+        year = parseInt(p[1], 10);
+        y1 = new Date(year, 0, 1);
+        y2 = new Date(year + 1, 0, 1);
+        if (y1.getDay() !== 4) y1.setMonth(0, 1 + ((4 - y1.getDay()) + 7) % 7);
+        if (y2.getDay() !== 4) y2.setMonth(0, 1 + ((4 - y2.getDay()) + 7) % 7);
+        weeks = Math.ceil((y2 - y1) / 604800000);
+        return parseInt(p[1], 10) + (parseInt(p[2], 10) - 1) / weeks;
       } else if (n) {
         return parseInt(n[1], 10) + (parseInt(n[2], 10) - 1) / 12;
       } else if (o) {
