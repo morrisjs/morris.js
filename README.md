@@ -2,7 +2,7 @@
 
 Morris.js is the library that powers the graphs on http://howmanyleft.co.uk/.
 
-This is an early release.  It's pretty much a verbatim copy of the code fragment that's in use on *How Many Left*, so it's not really generically usable.  Expect that to improve soon.
+This is an early release.  It's a bit rough around the edges, but it's getting pretty usable now.  Expect it to get even better soon.
 
 Cheers!
 
