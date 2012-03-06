@@ -25,6 +25,13 @@ Fork, hack, send a pull request :)
 
 ## Changelog
 
+### 0.2.3 - 6th Mar 2012
+
+- jQuery no-conflict compatibility
+- Support ISO week-number dates
+- Optionally hide hover on mouseout (hideHover)
+- Optionally skip parsing dates, treating X values as an equally-spaced series (parseTime)
+
 ### 0.2.2 - 29th Feb 2012
 
 - Bugfix: mouseover error when options.data.length == 2
