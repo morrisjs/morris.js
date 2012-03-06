@@ -56,6 +56,7 @@ class Morris.Line
     hoverLabelColor: '#444'
     hoverFontSize: 12
     smooth: true
+    hideHover: false
 
   # Do any necessary pre-processing for a new dataset
   #
@@ -233,6 +234,9 @@ class Morris.Line
           break
     @el.mousemove (evt) =>
       updateHilight evt.pageX
+    if @options.hideHover
+      @el.mouseout (evt) =>
+        hilight null
     touchHandler = (evt) =>
       touch = evt.originalEvent.touches[0] or evt.originalEvent.changedTouches[0]
       updateHilight touch.pageX
@@ -240,7 +244,7 @@ class Morris.Line
     @el.bind 'touchstart', touchHandler
     @el.bind 'touchmove', touchHandler
     @el.bind 'touchend', touchHandler
-    hilight 0
+    hilight(if @options.hideHover then null else 0)
 
   # create a path for a data series
   #
