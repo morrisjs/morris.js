@@ -57,6 +57,7 @@ class Morris.Line
     hoverFontSize: 12
     smooth: true
     hideHover: false
+    parseTime: true
 
   # Do any necessary pre-processing for a new dataset
   #
@@ -74,7 +75,10 @@ class Morris.Line
 
     # translate x labels into nominal dates
     # note: currently using decimal years to specify dates
-    @xvals = $.map @columnLabels, (x) => @parseYear x
+    if @options.parseTime
+      @xvals = $.map @columnLabels, (x) => @parseYear x
+    else
+      @xvals = [(@columnLabels.length-1)..0]
     @xmin = Math.min.apply null, @xvals
     @xmax = Math.max.apply null, @xvals
     if @xmin is @xmax
@@ -132,7 +136,8 @@ class Morris.Line
     prevLabelMargin = null
     xLabelMargin = 50 # make this an option?
     for i in [Math.ceil(@xmin)..Math.floor(@xmax)]
-      label = @r.text(transX(i), @options.marginTop + height + @options.marginBottom / 2, i)
+      labelText = if @options.parseTime then i else @columnLabels[@columnLabels.length-i-1]
+      label = @r.text(transX(i), @options.marginTop + height + @options.marginBottom / 2, labelText)
         .attr('font-size', @options.gridTextSize)
         .attr('fill', @options.gridTextColor)
       labelBox = label.getBBox()
