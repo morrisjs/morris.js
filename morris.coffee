@@ -37,6 +37,7 @@ class Morris.Line
       '#9440ed'
     ]
     ymax: 'auto'
+    ymin: 'auto 0'
     marginTop: 25
     marginRight: 25
     marginBottom: 30
@@ -87,12 +88,18 @@ class Morris.Line
 
     # Compute the vertical range of the graph if desired
     if typeof @options.ymax is 'string' and @options.ymax[0..3] is 'auto'
-        # use Array.concat to flatten arrays and find the max y value
-        ymax = Math.max.apply null, Array.prototype.concat.apply([], @series)
-        if @options.ymax.length > 5
-          @options.ymax = Math.max parseInt(@options.ymax[5..], 10), ymax
-        else
-          @options.ymax = ymax
+      # use Array.concat to flatten arrays and find the max y value
+      ymax = Math.max.apply null, Array.prototype.concat.apply([], @series)
+      if @options.ymax.length > 5
+        @options.ymax = Math.max parseInt(@options.ymax[5..], 10), ymax
+      else
+        @options.ymax = ymax
+    if typeof @options.ymin is 'string' and @options.ymin[0..3] is 'auto'
+      ymin = Math.min.apply null, Array.prototype.concat.apply([], @series)
+      if @options.ymin.length > 5
+        @options.ymin = Math.min parseInt(@options.ymin[5..], 10), ymin
+      else
+        @options.ymin = ymin
 
   # Clear and redraw the graph
   #
@@ -104,11 +111,14 @@ class Morris.Line
     @r = new Raphael(@el[0])
 
     # calculate grid dimensions
-    left = @measureText(@options.ymax, @options.gridTextSize).width + @options.marginLeft
+    maxYLabelWidth = Math.max(
+      @measureText(@options.ymin, @options.gridTextSize).width,
+      @measureText(@options.ymax, @options.gridTextSize).width)
+    left = maxYLabelWidth + @options.marginLeft
     width = @el.width() - left - @options.marginRight
     height = @el.height() - @options.marginTop - @options.marginBottom
     dx = width / (@xmax - @xmin)
-    dy = height / @options.ymax
+    dy = height / (@options.ymax - @options.ymin)
 
     # quick translation helpers
     transX = (x) =>
@@ -117,13 +127,15 @@ class Morris.Line
       else
        left + (x - @xmin) * dx
     transY = (y) =>
-      return @options.marginTop + height - y * dy
+      return @options.marginTop + height - (y - @options.ymin) * dy
 
     # draw y axis labels, horizontal lines
-    lineInterval = height / (@options.numLines - 1)
-    for i in [0..@options.numLines-1]
-      y = @options.marginTop + i * lineInterval
-      v = Math.round((@options.numLines - 1 - i) * @options.ymax / (@options.numLines - 1))
+    yInterval = (@options.ymax - @options.ymin) / (@options.numLines - 1)
+    firstY = Math.ceil(@options.ymin / yInterval) * yInterval
+    lastY = Math.floor(@options.ymax / yInterval) * yInterval
+    for lineY in [firstY..lastY] by yInterval
+      v = Math.floor(lineY)
+      y = transY(v)
       @r.text(left - @options.marginLeft/2, y, v)
         .attr('font-size', @options.gridTextSize)
         .attr('fill', @options.gridTextColor)
@@ -334,7 +346,7 @@ class Morris.Line
   # eg: commas(1234567) -> '1,234,567'
   #
   commas: (num) ->
-      Math.max(0, num).toFixed(0).replace(/(?=(?:\d{3})+$)(?!^)/g, ',')
+      num.toFixed(0).replace(/(?=(?:\d{3})+$)(?!^)/g, ',')
 
 window.Morris = Morris
 # vim: set et ts=2 sw=2 sts=2
