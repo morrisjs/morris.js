@@ -25,12 +25,18 @@ Fork, hack, send a pull request :)
 
 ## Changelog
 
+### 0.2.4 - 8th March 2012
+
+- Negative y-values support
+- `ymin` option
+- `units` options
+
 ### 0.2.3 - 6th Mar 2012
 
 - jQuery no-conflict compatibility
 - Support ISO week-number dates
-- Optionally hide hover on mouseout (hideHover)
-- Optionally skip parsing dates, treating X values as an equally-spaced series (parseTime)
+- Optionally hide hover on mouseout (`hideHover`)
+- Optionally skip parsing dates, treating X values as an equally-spaced series (`parseTime`)
 
 ### 0.2.2 - 29th Feb 2012
 
