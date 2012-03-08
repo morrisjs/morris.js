@@ -47,7 +47,8 @@
       hoverFontSize: 12,
       smooth: true,
       hideHover: false,
-      parseTime: true
+      parseTime: true,
+      units: ''
     };
 
     Line.prototype.precalc = function() {
@@ -108,7 +109,7 @@
         _this = this;
       this.el.empty();
       this.r = new Raphael(this.el[0]);
-      maxYLabelWidth = Math.max(this.measureText(this.options.ymin, this.options.gridTextSize).width, this.measureText(this.options.ymax, this.options.gridTextSize).width);
+      maxYLabelWidth = Math.max(this.measureText(this.options.ymin + this.options.units, this.options.gridTextSize).width, this.measureText(this.options.ymax + this.options.units, this.options.gridTextSize).width);
       left = maxYLabelWidth + this.options.marginLeft;
       width = this.el.width() - left - this.options.marginRight;
       height = this.el.height() - this.options.marginTop - this.options.marginBottom;
@@ -130,7 +131,7 @@
       for (lineY = firstY; firstY <= lastY ? lineY <= lastY : lineY >= lastY; lineY += yInterval) {
         v = Math.floor(lineY);
         y = transY(v);
-        this.r.text(left - this.options.marginLeft / 2, y, v).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor).attr('text-anchor', 'end');
+        this.r.text(left - this.options.marginLeft / 2, y, v + this.options.units).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor).attr('text-anchor', 'end');
         this.r.path("M" + left + "," + y + 'H' + (left + width)).attr('stroke', this.options.gridLineColor).attr('stroke-width', this.options.gridStrokeWidth);
       }
       prevLabelMargin = null;
@@ -206,7 +207,7 @@
         hoverSet.show();
         xLabel.attr('text', _this.columnLabels[index]);
         for (i = 0, _ref8 = _this.series.length - 1; 0 <= _ref8 ? i <= _ref8 : i >= _ref8; 0 <= _ref8 ? i++ : i--) {
-          yLabels[i].attr('text', "" + _this.seriesLabels[i] + ": " + (_this.commas(_this.series[i][index])));
+          yLabels[i].attr('text', "" + _this.seriesLabels[i] + ": " + (_this.commas(_this.series[i][index])) + _this.options.units);
         }
         maxLabelWidth = Math.max.apply(null, $.map(yLabels, function(l) {
           return l.getBBox().width;
@@ -374,7 +375,9 @@
     };
 
     Line.prototype.commas = function(num) {
-      return num.toFixed(0).replace(/(?=(?:\d{3})+$)(?!^)/g, ',');
+      var ret;
+      ret = num < 0 ? "-" : "";
+      return ret + Math.abs(num).toFixed(0).replace(/(?=(?:\d{3})+$)(?!^)/g, ',');
     };
 
     return Line;

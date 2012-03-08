@@ -59,6 +59,7 @@ class Morris.Line
     smooth: true
     hideHover: false
     parseTime: true
+    units: ''
 
   # Do any necessary pre-processing for a new dataset
   #
@@ -112,8 +113,8 @@ class Morris.Line
 
     # calculate grid dimensions
     maxYLabelWidth = Math.max(
-      @measureText(@options.ymin, @options.gridTextSize).width,
-      @measureText(@options.ymax, @options.gridTextSize).width)
+      @measureText(@options.ymin + @options.units, @options.gridTextSize).width,
+      @measureText(@options.ymax + @options.units, @options.gridTextSize).width)
     left = maxYLabelWidth + @options.marginLeft
     width = @el.width() - left - @options.marginRight
     height = @el.height() - @options.marginTop - @options.marginBottom
@@ -136,7 +137,7 @@ class Morris.Line
     for lineY in [firstY..lastY] by yInterval
       v = Math.floor(lineY)
       y = transY(v)
-      @r.text(left - @options.marginLeft/2, y, v)
+      @r.text(left - @options.marginLeft/2, y, v + @options.units)
         .attr('font-size', @options.gridTextSize)
         .attr('fill', @options.gridTextColor)
         .attr('text-anchor', 'end')
@@ -205,7 +206,7 @@ class Morris.Line
       hoverSet.show()
       xLabel.attr('text', @columnLabels[index])
       for i in [0..@series.length-1]
-        yLabels[i].attr('text', "#{@seriesLabels[i]}: #{@commas(@series[i][index])}")
+        yLabels[i].attr('text', "#{@seriesLabels[i]}: #{@commas(@series[i][index])}#{@options.units}")
       # recalculate hover box width
       maxLabelWidth = Math.max.apply null, $.map yLabels, (l) ->
         l.getBBox().width
@@ -346,7 +347,8 @@ class Morris.Line
   # eg: commas(1234567) -> '1,234,567'
   #
   commas: (num) ->
-      num.toFixed(0).replace(/(?=(?:\d{3})+$)(?!^)/g, ',')
+    ret = if num < 0 then "-" else ""
+    ret + Math.abs(num).toFixed(0).replace(/(?=(?:\d{3})+$)(?!^)/g, ',')
 
 window.Morris = Morris
 # vim: set et ts=2 sw=2 sts=2
