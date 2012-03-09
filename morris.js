@@ -343,11 +343,9 @@
     };
 
     Line.prototype.parseYear = function(date) {
-      var day, m, month, n, o, p, s, timestamp, weeks, y1, y2, year;
+      var d, m, p, portionOfThisYear, s, weeks, y1, y2, year;
       s = date.toString();
       m = s.match(/^(\d+) Q(\d)$/);
-      n = s.match(/^(\d+)-(\d+)$/);
-      o = s.match(/^(\d+)-(\d+)-(\d+)$/);
       p = s.match(/^(\d+) W(\d+)$/);
       if (m) {
         return parseInt(m[1], 10) + (parseInt(m[2], 10) * 3 - 1) / 12;
@@ -359,18 +357,13 @@
         if (y2.getDay() !== 4) y2.setMonth(0, 1 + ((4 - y2.getDay()) + 7) % 7);
         weeks = Math.ceil((y2 - y1) / 604800000);
         return parseInt(p[1], 10) + (parseInt(p[2], 10) - 1) / weeks;
-      } else if (n) {
-        return parseInt(n[1], 10) + (parseInt(n[2], 10) - 1) / 12;
-      } else if (o) {
-        year = parseInt(o[1], 10);
-        month = parseInt(o[2], 10);
-        day = parseInt(o[3], 10);
-        timestamp = new Date(year, month - 1, day).getTime();
-        y1 = new Date(year, 0, 1).getTime();
-        y2 = new Date(year + 1, 0, 1).getTime();
-        return year + (timestamp - y1) / (y2 - y1);
       } else {
-        return parseInt(date, 10);
+        d = Date.parse(s);
+        year = new Date(d).getFullYear();
+        y1 = Date.parse(year);
+        y2 = Date.parse(year + 1);
+        portionOfThisYear = (d - y1) / (y2 - y1);
+        return year + portionOfThisYear;
       }
     };
 

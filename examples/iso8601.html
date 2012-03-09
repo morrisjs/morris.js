@@ -1,0 +1,25 @@
+<!doctype html>
+<head>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+  <script src="https://raw.github.com/DmitryBaranovskiy/raphael/300aa589f5a0ba7fce667cd62c7cdda0bd5ad904/raphael-min.js"></script>
+  <script src="../morris.js"></script>
+  <script src="lib/prettify.js"></script>
+  <script src="lib/example.js"></script>
+  <link rel="stylesheet" href="lib/example.css">
+  <link rel="stylesheet" href="lib/prettify.css">
+</head>
+<body>
+<h1>Formatting Dates YYYY-MM-DD HH:MM:SS +0000</h1>
+<div id="graph"></div>
+<pre id="code" class="prettyprint linenums">
+// pulled out data on the last 25 commits using grit
+var commit_data = [{"Date Authored":"2012-03-08 15:04:12 -0600","Number of Files":16,"Total Bytes":65572},{"Date Authored":"2012-03-08 14:50:43 -0600","Number of Files":16,"Total Bytes":65477},{"Date Authored":"2012-03-08 14:03:45 -0600","Number of Files":16,"Total Bytes":65050},{"Date Authored":"2012-03-07 15:35:25 -0600","Number of Files":15,"Total Bytes":62472},{"Date Authored":"2012-03-06 16:21:36 -0600","Number of Files":6,"Total Bytes":46401},{"Date Authored":"2012-03-06 16:13:18 -0600","Number of Files":6,"Total Bytes":46451},{"Date Authored":"2012-03-06 16:06:40 -0600","Number of Files":6,"Total Bytes":46218},{"Date Authored":"2012-03-06 16:05:00 -0600","Number of Files":6,"Total Bytes":45804},{"Date Authored":"2012-03-06 15:38:01 -0600","Number of Files":6,"Total Bytes":45602},{"Date Authored":"2012-03-04 16:31:26 -0600","Number of Files":6,"Total Bytes":45222},{"Date Authored":"2012-03-04 17:03:56 -0600","Number of Files":6,"Total Bytes":45468},{"Date Authored":"2012-03-04 15:43:54 -0600","Number of Files":6,"Total Bytes":44063},{"Date Authored":"2012-03-04 15:41:54 -0600","Number of Files":6,"Total Bytes":44024},{"Date Authored":"2012-03-04 11:03:11 -0600","Number of Files":6,"Total Bytes":44024},{"Date Authored":"2012-03-04 11:01:09 -0600","Number of Files":6,"Total Bytes":44034},{"Date Authored":"2012-03-04 10:11:48 -0600","Number of Files":6,"Total Bytes":43900},{"Date Authored":"2012-03-04 07:36:44 -0600","Number of Files":6,"Total Bytes":40658},{"Date Authored":"2012-03-01 02:06:38 -0600","Number of Files":6,"Total Bytes":40533},{"Date Authored":"2012-02-29 22:20:37 -0600","Number of Files":6,"Total Bytes":41183},{"Date Authored":"2012-02-29 15:10:48 -0600","Number of Files":6,"Total Bytes":40492},{"Date Authored":"2012-02-29 14:53:53 -0600","Number of Files":6,"Total Bytes":40374},{"Date Authored":"2012-02-29 02:10:48 -0600","Number of Files":6,"Total Bytes":39956},{"Date Authored":"2012-02-28 16:29:33 -0600","Number of Files":6,"Total Bytes":39646},{"Date Authored":"2012-02-28 16:00:08 -0600","Number of Files":6,"Total Bytes":39480},{"Date Authored":"2012-02-28 15:27:33 -0600","Number of Files":6,"Total Bytes":39237}]
+Morris.Line({
+  element: 'graph',
+  data: commit_data,
+  xkey: 'Date Authored',
+  ykeys: ['Total Bytes'],
+  labels: ['Total Bytes']
+});
+</pre>
+</body>
