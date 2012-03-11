@@ -73,7 +73,10 @@ class Morris.Line
     # extract series data
     @series = []
     for ykey in @options.ykeys
-      @series.push $.map @options.data, (d) -> d[ykey]
+      series_data = []
+      for d in @options.data
+        series_data.push(d[ykey])
+      @series.push(series_data)
 
     # translate x labels into nominal dates
     # note: currently using decimal years to specify dates
@@ -164,7 +167,13 @@ class Morris.Line
     columns = (transX(x) for x in @xvals)
     seriesCoords = []
     for s in @series
-      seriesCoords.push($.map(s, (y, i) -> x: columns[i], y: transY(y)))
+      scoords = []
+      $.each s, (i, y) =>
+          if y == null
+            scoords.push(null)
+          else
+            scoords.push(x: columns[i], y: transY(y))
+      seriesCoords.push(scoords)
     for i in [seriesCoords.length-1..0]
       coords = seriesCoords[i]
       if coords.length > 1
@@ -175,10 +184,13 @@ class Morris.Line
     seriesPoints = ([] for i in [0..seriesCoords.length-1])
     for i in [seriesCoords.length-1..0]
       for c in seriesCoords[i]
-        circle = @r.circle(c.x, c.y, @options.pointSize)
-          .attr('fill', @options.lineColors[i])
-          .attr('stroke-width', 1)
-          .attr('stroke', '#ffffff')
+        if c == null
+          circle = null
+        else
+          circle = @r.circle(c.x, c.y, @options.pointSize)
+            .attr('fill', @options.lineColors[i])
+            .attr('stroke-width', 1)
+            .attr('stroke', '#ffffff')
         seriesPoints[i].push(circle)
 
     # hover labels
@@ -206,7 +218,7 @@ class Morris.Line
       hoverSet.show()
       xLabel.attr('text', @columnLabels[index])
       for i in [0..@series.length-1]
-        yLabels[i].attr('text', "#{@seriesLabels[i]}: #{@commas(@series[i][index])}#{@options.units}")
+        yLabels[i].attr('text', "#{@seriesLabels[i]}: #{@prettifylabel(@series[i][index])}#{@options.units}")
       # recalculate hover box width
       maxLabelWidth = Math.max.apply null, $.map yLabels, (l) ->
         l.getBBox().width
@@ -236,10 +248,12 @@ class Morris.Line
     hilight = (index) =>
       if prevHilight isnt null and prevHilight isnt index
         for i in [0..seriesPoints.length-1]
-          seriesPoints[i][prevHilight].animate pointShrink
+          if seriesPoints[i][prevHilight]
+            seriesPoints[i][prevHilight].animate pointShrink
       if index isnt null and prevHilight isnt index
         for i in [0..seriesPoints.length-1]
-          seriesPoints[i][index].animate pointGrow
+          if seriesPoints[i][index]
+            seriesPoints[i][index].animate pointGrow
         updateHover index
       prevHilight = index
       if index is null
@@ -266,8 +280,9 @@ class Morris.Line
 
   # create a path for a data series
   #
-  createPath: (coords, top, left, bottom, right) ->
+  createPath: (all_coords, top, left, bottom, right) ->
     path = ""
+    coords = $.map(all_coords, (c) -> c)
     if @options.smooth
       grads = @gradients coords
       for i in [0..coords.length-1]
@@ -343,6 +358,11 @@ class Morris.Line
     else
       parseInt(date, 10)
 
+  prettifylabel: (num) ->
+    if num == null
+      return "n/a"
+    return @commas(num)
+    
   # make long numbers prettier by inserting commas
   # eg: commas(1234567) -> '1,234,567'
   #
