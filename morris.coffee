@@ -148,17 +148,23 @@ class Morris.Line
     # draw x axis labels
     prevLabelMargin = null
     xLabelMargin = 50 # make this an option?
+    pointsPerPixel =  (Math.floor(@xmax) - Math.ceil(@xmin)) / width
+    nextPoint = null
     for i in [Math.ceil(@xmin)..Math.floor(@xmax)]
-      labelText = if @options.parseTime then i else @columnLabels[@columnLabels.length-i-1]
-      label = @r.text(transX(i), @options.marginTop + height + @options.marginBottom / 2, labelText)
-        .attr('font-size', @options.gridTextSize)
-        .attr('fill', @options.gridTextColor)
-      labelBox = label.getBBox()
-      # ensure a minimum of `xLabelMargin` pixels between labels
-      if prevLabelMargin is null or prevLabelMargin <= labelBox.x
-        prevLabelMargin = labelBox.x + labelBox.width + xLabelMargin
-      else
-        label.remove()
+      if null == nextPoint or i >= nextPoint
+        labelText = if @options.parseTime then i else @columnLabels[@columnLabels.length-i-1]
+        label = @r.text(transX(i), @options.marginTop + height + @options.marginBottom / 2, labelText)
+          .attr('font-size', @options.gridTextSize)
+          .attr('fill', @options.gridTextColor)
+        labelBox = label.getBBox()
+        # Calculate the next value of i to use
+        nextPoint = (labelBox.x + labelBox.width + xLabelMargin) * pointsPerPixel
+        # ensure a minimum of `xLabelMargin` pixels between labels
+        if prevLabelMargin is null or prevLabelMargin <= labelBox.x
+          prevLabelMargin = labelBox.x + labelBox.width + xLabelMargin
+        else
+          label.remove()
+          nextPoint = i + 1
 
     # draw the actual series
     columns = (transX(x) for x in @xvals)
