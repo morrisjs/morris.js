@@ -148,17 +148,17 @@ class Morris.Line
     # draw x axis labels
     prevLabelMargin = null
     xLabelMargin = 50 # make this an option?
-    xstep = width / @xvals.length
-    next_x = null
+    pointsPerPixel =  (Math.floor(@xmax) - Math.ceil(@xmin)) / width
+    nextPoint = null
     for i in [Math.ceil(@xmin)..Math.floor(@xmax)]
-      if xstep < 1 or null == next_x or i >= next_x
+      if null == nextPoint or i >= nextPoint
         labelText = if @options.parseTime then i else @columnLabels[@columnLabels.length-i-1]
         label = @r.text(transX(i), @options.marginTop + height + @options.marginBottom / 2, labelText)
           .attr('font-size', @options.gridTextSize)
           .attr('fill', @options.gridTextColor)
         labelBox = label.getBBox()
         # Calculate the next value of i to use
-        next_x = (labelBox.x + labelBox.width + xLabelMargin) * xstep
+        nextPoint = (labelBox.x + labelBox.width + xLabelMargin) * pointsPerPixel
         # ensure a minimum of `xLabelMargin` pixels between labels
         if prevLabelMargin is null or prevLabelMargin <= labelBox.x
           prevLabelMargin = labelBox.x + labelBox.width + xLabelMargin

@@ -105,7 +105,7 @@
     };
 
     Line.prototype.redraw = function() {
-      var c, circle, columns, coords, dx, dy, firstY, height, hideHover, hilight, hover, hoverHeight, hoverMargins, hoverSet, i, label, labelBox, labelText, lastY, left, lineY, maxYLabelWidth, next_x, path, pointGrow, pointShrink, prevHilight, prevLabelMargin, s, seriesCoords, seriesPoints, touchHandler, transX, transY, updateHilight, updateHover, v, width, x, xLabel, xLabelMargin, xstep, y, yInterval, yLabel, yLabels, _i, _j, _len, _len2, _ref, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7,
+      var c, circle, columns, coords, dx, dy, firstY, height, hideHover, hilight, hover, hoverHeight, hoverMargins, hoverSet, i, label, labelBox, labelText, lastY, left, lineY, maxYLabelWidth, nextPoint, path, pointGrow, pointShrink, pointsPerPixel, prevHilight, prevLabelMargin, s, seriesCoords, seriesPoints, touchHandler, transX, transY, updateHilight, updateHover, v, width, x, xLabel, xLabelMargin, y, yInterval, yLabel, yLabels, _i, _j, _len, _len2, _ref, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7,
         _this = this;
       this.el.empty();
       this.r = new Raphael(this.el[0]);
@@ -136,14 +136,14 @@
       }
       prevLabelMargin = null;
       xLabelMargin = 50;
-      xstep = width / this.xvals.length;
-      next_x = null;
+      pointsPerPixel = (Math.floor(this.xmax) - Math.ceil(this.xmin)) / width;
+      nextPoint = null;
       for (i = _ref = Math.ceil(this.xmin), _ref2 = Math.floor(this.xmax); _ref <= _ref2 ? i <= _ref2 : i >= _ref2; _ref <= _ref2 ? i++ : i--) {
-        if (xstep < 1 || null === next_x || i >= next_x) {
+        if (null === nextPoint || i >= nextPoint) {
           labelText = this.options.parseTime ? i : this.columnLabels[this.columnLabels.length - i - 1];
           label = this.r.text(transX(i), this.options.marginTop + height + this.options.marginBottom / 2, labelText).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor);
           labelBox = label.getBBox();
-          next_x = (labelBox.x + labelBox.width + xLabelMargin) * xstep;
+          nextPoint = (labelBox.x + labelBox.width + xLabelMargin) * pointsPerPixel;
           if (prevLabelMargin === null || prevLabelMargin <= labelBox.x) {
             prevLabelMargin = labelBox.x + labelBox.width + xLabelMargin;
           } else {
