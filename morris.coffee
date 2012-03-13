@@ -164,6 +164,7 @@ class Morris.Line
           prevLabelMargin = labelBox.x + labelBox.width + xLabelMargin
         else
           label.remove()
+          nextPoint = i + 1
 
     # draw the actual series
     columns = (transX(x) for x in @xvals)

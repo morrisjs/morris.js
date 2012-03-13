@@ -148,6 +148,7 @@
             prevLabelMargin = labelBox.x + labelBox.width + xLabelMargin;
           } else {
             label.remove();
+            nextPoint = i + 1;
           }
         }
       }
