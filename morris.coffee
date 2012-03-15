@@ -146,19 +146,31 @@ class Morris.Line
         .attr('stroke-width', @options.gridStrokeWidth)
 
     ## draw x axis labels
-    #prevLabelMargin = null
-    #xLabelMargin = 50 # make this an option?
-    #for i in [Math.ceil(@xmin)..Math.floor(@xmax)]
-    #  labelText = if @options.parseTime then i else @columnLabels[@columnLabels.length-i-1]
-    #  label = @r.text(transX(i), @options.marginTop + height + @options.marginBottom / 2, labelText)
-    #    .attr('font-size', @options.gridTextSize)
-    #    .attr('fill', @options.gridTextColor)
-    #  labelBox = label.getBBox()
-    #  # ensure a minimum of `xLabelMargin` pixels between labels
-    #  if prevLabelMargin is null or prevLabelMargin <= labelBox.x
-    #    prevLabelMargin = labelBox.x + labelBox.width + xLabelMargin
-    #  else
-    #    label.remove()
+    prevLabelMargin = null
+    xLabelMargin = 50 # make this an option?
+    if @options.parseTime
+      x1 = new Date(@xmin).getFullYear()
+      x2 = new Date(@xmax).getFullYear()
+    else
+      x1 = @xmin
+      x2 = @xmax
+    for i in [x1..x2]
+      if @options.parseTime
+        xpos = new Date(i, 0, 1).getTime()
+        if xpos < @xmin
+          continue
+      else
+        xpos = i
+      labelText = if @options.parseTime then i else @columnLabels[@columnLabels.length-i-1]
+      label = @r.text(transX(xpos), @options.marginTop + height + @options.marginBottom / 2, labelText)
+        .attr('font-size', @options.gridTextSize)
+        .attr('fill', @options.gridTextColor)
+      labelBox = label.getBBox()
+      # ensure a minimum of `xLabelMargin` pixels between labels
+      if prevLabelMargin is null or prevLabelMargin <= labelBox.x
+        prevLabelMargin = labelBox.x + labelBox.width + xLabelMargin
+      else
+        label.remove()
 
     # draw the actual series
     columns = (transX(x) for x in @xvals)
@@ -315,11 +327,13 @@ class Morris.Line
     if m
       new Date(
         parseInt(m[1], 10),
-        parseInt(m[2], 10) * 3 - 1).getTime()
+        parseInt(m[2], 10) * 3 - 1,
+        1).getTime()
     else if n
       new Date(
         parseInt(n[1], 10),
-        parseInt(n[2], 10) - 1).getTime()
+        parseInt(n[2], 10) - 1,
+        1).getTime()
     else if o
       new Date(
         parseInt(o[1], 10),
@@ -334,7 +348,7 @@ class Morris.Line
       # add weeks
       ret.getTime() + parseInt(p[2], 10) * 604800000
     else
-      new Date(parseInt(date, 10))
+      new Date(parseInt(date, 10), 0, 1)
 
   # make long numbers prettier by inserting commas
   # eg: commas(1234567) -> '1,234,567'

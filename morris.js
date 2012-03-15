@@ -105,7 +105,7 @@
     };
 
     Line.prototype.redraw = function() {
-      var c, circle, columns, coords, dx, dy, firstY, height, hideHover, hilight, hover, hoverHeight, hoverMargins, hoverSet, i, lastY, left, lineY, maxYLabelWidth, path, pointGrow, pointShrink, prevHilight, s, seriesCoords, seriesPoints, touchHandler, transX, transY, updateHilight, updateHover, v, width, x, xLabel, y, yInterval, yLabel, yLabels, _i, _j, _len, _len2, _ref, _ref2, _ref3, _ref4, _ref5,
+      var c, circle, columns, coords, dx, dy, firstY, height, hideHover, hilight, hover, hoverHeight, hoverMargins, hoverSet, i, label, labelBox, labelText, lastY, left, lineY, maxYLabelWidth, path, pointGrow, pointShrink, prevHilight, prevLabelMargin, s, seriesCoords, seriesPoints, touchHandler, transX, transY, updateHilight, updateHover, v, width, x, x1, x2, xLabel, xLabelMargin, xpos, y, yInterval, yLabel, yLabels, _i, _j, _len, _len2, _ref, _ref2, _ref3, _ref4, _ref5,
         _this = this;
       this.el.empty();
       this.r = new Raphael(this.el[0]);
@@ -133,6 +133,31 @@
         y = transY(v);
         this.r.text(left - this.options.marginLeft / 2, y, v + this.options.units).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor).attr('text-anchor', 'end');
         this.r.path("M" + left + "," + y + 'H' + (left + width)).attr('stroke', this.options.gridLineColor).attr('stroke-width', this.options.gridStrokeWidth);
+      }
+      prevLabelMargin = null;
+      xLabelMargin = 50;
+      if (this.options.parseTime) {
+        x1 = new Date(this.xmin).getFullYear();
+        x2 = new Date(this.xmax).getFullYear();
+      } else {
+        x1 = this.xmin;
+        x2 = this.xmax;
+      }
+      for (i = x1; x1 <= x2 ? i <= x2 : i >= x2; x1 <= x2 ? i++ : i--) {
+        if (this.options.parseTime) {
+          xpos = new Date(i, 0, 1).getTime();
+          if (xpos < this.xmin) continue;
+        } else {
+          xpos = i;
+        }
+        labelText = this.options.parseTime ? i : this.columnLabels[this.columnLabels.length - i - 1];
+        label = this.r.text(transX(xpos), this.options.marginTop + height + this.options.marginBottom / 2, labelText).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor);
+        labelBox = label.getBBox();
+        if (prevLabelMargin === null || prevLabelMargin <= labelBox.x) {
+          prevLabelMargin = labelBox.x + labelBox.width + xLabelMargin;
+        } else {
+          label.remove();
+        }
       }
       columns = (function() {
         var _i, _len, _ref, _results;
@@ -338,9 +363,9 @@
       o = date.match(/^(\d+)-(\d+)-(\d+)$/);
       p = date.match(/^(\d+) W(\d+)$/);
       if (m) {
-        return new Date(parseInt(m[1], 10), parseInt(m[2], 10) * 3 - 1).getTime();
+        return new Date(parseInt(m[1], 10), parseInt(m[2], 10) * 3 - 1, 1).getTime();
       } else if (n) {
-        return new Date(parseInt(n[1], 10), parseInt(n[2], 10) - 1).getTime();
+        return new Date(parseInt(n[1], 10), parseInt(n[2], 10) - 1, 1).getTime();
       } else if (o) {
         return new Date(parseInt(o[1], 10), parseInt(o[2], 10) - 1, parseInt(o[3], 10)).getTime();
       } else if (p) {
@@ -348,7 +373,7 @@
         if (ret.getDay() !== 4) ret.setMonth(0, 1 + ((4 - ret.getDay()) + 7) % 7);
         return ret.getTime() + parseInt(p[2], 10) * 604800000;
       } else {
-        return new Date(parseInt(date, 10));
+        return new Date(parseInt(date, 10), 0, 1);
       }
     };
 
