@@ -25,6 +25,12 @@ Fork, hack, send a pull request :)
 
 ## Changelog
 
+### 0.2.5 - 15th March 2012
+
+- Raw millisecond timestamp support (with `dateFormat` option)
+- YYYY-MM-DD HH:MM[:SS[.SSS]] date support
+- Decimal number labels
+
 ### 0.2.4 - 8th March 2012
 
 - Negative y-values support
