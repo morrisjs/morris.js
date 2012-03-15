@@ -60,6 +60,7 @@ class Morris.Line
     hideHover: false
     parseTime: true
     units: ''
+    dateFormat: (x) -> new Date(x).toString()
 
   # Do any necessary pre-processing for a new dataset
   #
@@ -81,6 +82,12 @@ class Morris.Line
       @xvals = $.map @columnLabels, (x) => @parseYear x
     else
       @xvals = [(@columnLabels.length-1)..0]
+    # translate column labels, if they're timestamps
+    @columnLabels = $.map @columnLabels, (d) =>
+      if typeof d is 'number'
+        @options.dateFormat(d)
+      else
+        d
     @xmin = Math.min.apply null, @xvals
     @xmax = Math.max.apply null, @xvals
     if @xmin is @xmax

@@ -48,7 +48,10 @@
       smooth: true,
       hideHover: false,
       parseTime: true,
-      units: ''
+      units: '',
+      dateFormat: function(x) {
+        return new Date(x).toString();
+      }
     };
 
     Line.prototype.precalc = function() {
@@ -80,6 +83,13 @@
           return _results;
         }).apply(this);
       }
+      this.columnLabels = $.map(this.columnLabels, function(d) {
+        if (typeof d === 'number') {
+          return _this.options.dateFormat(d);
+        } else {
+          return d;
+        }
+      });
       this.xmin = Math.min.apply(null, this.xvals);
       this.xmax = Math.max.apply(null, this.xvals);
       if (this.xmin === this.xmax) {
