@@ -375,9 +375,14 @@
     };
 
     Line.prototype.commas = function(num) {
-      var ret;
+      var absnum, intnum, ret, strabsnum;
       ret = num < 0 ? "-" : "";
-      return ret + Math.abs(num).toFixed(0).replace(/(?=(?:\d{3})+$)(?!^)/g, ',');
+      absnum = Math.abs(num);
+      intnum = Math.floor(absnum).toFixed(0);
+      ret += intnum.replace(/(?=(?:\d{3})+$)(?!^)/g, ',');
+      strabsnum = absnum.toString();
+      if (strabsnum.length > intnum.length) ret += strabsnum.slice(intnum.length);
+      return ret;
     };
 
     return Line;

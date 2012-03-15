@@ -348,7 +348,13 @@ class Morris.Line
   #
   commas: (num) ->
     ret = if num < 0 then "-" else ""
-    ret + Math.abs(num).toFixed(0).replace(/(?=(?:\d{3})+$)(?!^)/g, ',')
+    absnum = Math.abs(num)
+    intnum = Math.floor(absnum).toFixed(0)
+    ret += intnum.replace(/(?=(?:\d{3})+$)(?!^)/g, ',')
+    strabsnum = absnum.toString()
+    if strabsnum.length > intnum.length
+      ret += strabsnum.slice(intnum.length)
+    ret
 
 window.Morris = Morris
 # vim: set et ts=2 sw=2 sts=2
