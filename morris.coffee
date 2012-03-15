@@ -145,20 +145,20 @@ class Morris.Line
         .attr('stroke', @options.gridLineColor)
         .attr('stroke-width', @options.gridStrokeWidth)
 
-    # draw x axis labels
-    prevLabelMargin = null
-    xLabelMargin = 50 # make this an option?
-    for i in [Math.ceil(@xmin)..Math.floor(@xmax)]
-      labelText = if @options.parseTime then i else @columnLabels[@columnLabels.length-i-1]
-      label = @r.text(transX(i), @options.marginTop + height + @options.marginBottom / 2, labelText)
-        .attr('font-size', @options.gridTextSize)
-        .attr('fill', @options.gridTextColor)
-      labelBox = label.getBBox()
-      # ensure a minimum of `xLabelMargin` pixels between labels
-      if prevLabelMargin is null or prevLabelMargin <= labelBox.x
-        prevLabelMargin = labelBox.x + labelBox.width + xLabelMargin
-      else
-        label.remove()
+    ## draw x axis labels
+    #prevLabelMargin = null
+    #xLabelMargin = 50 # make this an option?
+    #for i in [Math.ceil(@xmin)..Math.floor(@xmax)]
+    #  labelText = if @options.parseTime then i else @columnLabels[@columnLabels.length-i-1]
+    #  label = @r.text(transX(i), @options.marginTop + height + @options.marginBottom / 2, labelText)
+    #    .attr('font-size', @options.gridTextSize)
+    #    .attr('fill', @options.gridTextColor)
+    #  labelBox = label.getBBox()
+    #  # ensure a minimum of `xLabelMargin` pixels between labels
+    #  if prevLabelMargin is null or prevLabelMargin <= labelBox.x
+    #    prevLabelMargin = labelBox.x + labelBox.width + xLabelMargin
+    #  else
+    #    label.remove()
 
     # draw the actual series
     columns = (transX(x) for x in @xvals)
@@ -306,42 +306,35 @@ class Morris.Line
     return ret
 
   parseYear: (date) ->
-    s = date.toString()
-    m = s.match /^(\d+) Q(\d)$/
-    n = s.match /^(\d+)-(\d+)$/
-    o = s.match /^(\d+)-(\d+)-(\d+)$/
-    p = s.match /^(\d+) W(\d+)$/
+    if typeof date is 'number'
+      return date
+    m = date.match /^(\d+) Q(\d)$/
+    n = date.match /^(\d+)-(\d+)$/
+    o = date.match /^(\d+)-(\d+)-(\d+)$/
+    p = date.match /^(\d+) W(\d+)$/
     if m
-      parseInt(m[1], 10) + (parseInt(m[2], 10) * 3 - 1) / 12
+      new Date(
+        parseInt(m[1], 10),
+        parseInt(m[2], 10) * 3 - 1).getTime()
+    else if n
+      new Date(
+        parseInt(n[1], 10),
+        parseInt(n[2], 10) - 1).getTime()
+    else if o
+      new Date(
+        parseInt(o[1], 10),
+        parseInt(o[2], 10) - 1,
+        parseInt(o[3], 10)).getTime()
     else if p
       # calculate number of weeks in year given
-      year = parseInt(p[1], 10);
-      y1 = new Date(year, 0, 1);
-      y2 = new Date(year+1, 0, 1);
+      ret = new Date(parseInt(p[1], 10), 0, 1);
       # first thursday in year (ISO 8601 standard)
-      if y1.getDay() isnt 4
-        y1.setMonth(0, 1 + ((4 - y1.getDay()) + 7) % 7);
-      # first thursday in following year
-      if y2.getDay() isnt 4
-        y2.setMonth(0, 1 + ((4 - y2.getDay()) + 7) % 7);
-      # Number of weeks between thursdays
-      weeks = Math.ceil((y2 - y1) / 604800000);
-      parseInt(p[1], 10) + (parseInt(p[2], 10) - 1) / weeks;
-    else if n
-      parseInt(n[1], 10) + (parseInt(n[2], 10) - 1) / 12
-    else if o
-      # parse to a timestamp
-      year = parseInt(o[1], 10);
-      month = parseInt(o[2], 10);
-      day = parseInt(o[3], 10);
-      timestamp = new Date(year, month - 1, day).getTime();
-      # get timestamps for the beginning and end of the year
-      y1 = new Date(year, 0, 1).getTime();
-      y2 = new Date(year+1, 0, 1).getTime();
-      # calculate a decimal-year value
-      year + (timestamp - y1) / (y2 - y1);
+      if ret.getDay() isnt 4
+        ret.setMonth(0, 1 + ((4 - ret.getDay()) + 7) % 7);
+      # add weeks
+      ret.getTime() + parseInt(p[2], 10) * 604800000
     else
-      parseInt(date, 10)
+      new Date(parseInt(date, 10))
 
   # make long numbers prettier by inserting commas
   # eg: commas(1234567) -> '1,234,567'

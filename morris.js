@@ -105,7 +105,7 @@
     };
 
     Line.prototype.redraw = function() {
-      var c, circle, columns, coords, dx, dy, firstY, height, hideHover, hilight, hover, hoverHeight, hoverMargins, hoverSet, i, label, labelBox, labelText, lastY, left, lineY, maxYLabelWidth, path, pointGrow, pointShrink, prevHilight, prevLabelMargin, s, seriesCoords, seriesPoints, touchHandler, transX, transY, updateHilight, updateHover, v, width, x, xLabel, xLabelMargin, y, yInterval, yLabel, yLabels, _i, _j, _len, _len2, _ref, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7,
+      var c, circle, columns, coords, dx, dy, firstY, height, hideHover, hilight, hover, hoverHeight, hoverMargins, hoverSet, i, lastY, left, lineY, maxYLabelWidth, path, pointGrow, pointShrink, prevHilight, s, seriesCoords, seriesPoints, touchHandler, transX, transY, updateHilight, updateHover, v, width, x, xLabel, y, yInterval, yLabel, yLabels, _i, _j, _len, _len2, _ref, _ref2, _ref3, _ref4, _ref5,
         _this = this;
       this.el.empty();
       this.r = new Raphael(this.el[0]);
@@ -134,32 +134,20 @@
         this.r.text(left - this.options.marginLeft / 2, y, v + this.options.units).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor).attr('text-anchor', 'end');
         this.r.path("M" + left + "," + y + 'H' + (left + width)).attr('stroke', this.options.gridLineColor).attr('stroke-width', this.options.gridStrokeWidth);
       }
-      prevLabelMargin = null;
-      xLabelMargin = 50;
-      for (i = _ref = Math.ceil(this.xmin), _ref2 = Math.floor(this.xmax); _ref <= _ref2 ? i <= _ref2 : i >= _ref2; _ref <= _ref2 ? i++ : i--) {
-        labelText = this.options.parseTime ? i : this.columnLabels[this.columnLabels.length - i - 1];
-        label = this.r.text(transX(i), this.options.marginTop + height + this.options.marginBottom / 2, labelText).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor);
-        labelBox = label.getBBox();
-        if (prevLabelMargin === null || prevLabelMargin <= labelBox.x) {
-          prevLabelMargin = labelBox.x + labelBox.width + xLabelMargin;
-        } else {
-          label.remove();
-        }
-      }
       columns = (function() {
-        var _i, _len, _ref3, _results;
-        _ref3 = this.xvals;
+        var _i, _len, _ref, _results;
+        _ref = this.xvals;
         _results = [];
-        for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
-          x = _ref3[_i];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          x = _ref[_i];
           _results.push(transX(x));
         }
         return _results;
       }).call(this);
       seriesCoords = [];
-      _ref3 = this.series;
-      for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
-        s = _ref3[_i];
+      _ref = this.series;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        s = _ref[_i];
         seriesCoords.push($.map(s, function(y, i) {
           return {
             x: columns[i],
@@ -167,7 +155,7 @@
           };
         }));
       }
-      for (i = _ref4 = seriesCoords.length - 1; _ref4 <= 0 ? i <= 0 : i >= 0; _ref4 <= 0 ? i++ : i--) {
+      for (i = _ref2 = seriesCoords.length - 1; _ref2 <= 0 ? i <= 0 : i >= 0; _ref2 <= 0 ? i++ : i--) {
         coords = seriesCoords[i];
         if (coords.length > 1) {
           path = this.createPath(coords, this.options.marginTop, left, this.options.marginTop + height, left + width);
@@ -175,17 +163,17 @@
         }
       }
       seriesPoints = (function() {
-        var _ref5, _results;
+        var _ref3, _results;
         _results = [];
-        for (i = 0, _ref5 = seriesCoords.length - 1; 0 <= _ref5 ? i <= _ref5 : i >= _ref5; 0 <= _ref5 ? i++ : i--) {
+        for (i = 0, _ref3 = seriesCoords.length - 1; 0 <= _ref3 ? i <= _ref3 : i >= _ref3; 0 <= _ref3 ? i++ : i--) {
           _results.push([]);
         }
         return _results;
       })();
-      for (i = _ref5 = seriesCoords.length - 1; _ref5 <= 0 ? i <= 0 : i >= 0; _ref5 <= 0 ? i++ : i--) {
-        _ref6 = seriesCoords[i];
-        for (_j = 0, _len2 = _ref6.length; _j < _len2; _j++) {
-          c = _ref6[_j];
+      for (i = _ref3 = seriesCoords.length - 1; _ref3 <= 0 ? i <= 0 : i >= 0; _ref3 <= 0 ? i++ : i--) {
+        _ref4 = seriesCoords[i];
+        for (_j = 0, _len2 = _ref4.length; _j < _len2; _j++) {
+          c = _ref4[_j];
           circle = this.r.circle(c.x, c.y, this.options.pointSize).attr('fill', this.options.lineColors[i]).attr('stroke-width', 1).attr('stroke', '#ffffff');
           seriesPoints[i].push(circle);
         }
@@ -197,16 +185,16 @@
       hoverSet.push(hover);
       hoverSet.push(xLabel);
       yLabels = [];
-      for (i = 0, _ref7 = this.series.length - 1; 0 <= _ref7 ? i <= _ref7 : i >= _ref7; 0 <= _ref7 ? i++ : i--) {
+      for (i = 0, _ref5 = this.series.length - 1; 0 <= _ref5 ? i <= _ref5 : i >= _ref5; 0 <= _ref5 ? i++ : i--) {
         yLabel = this.r.text(0, this.options.hoverFontSize * 1.5 * (i + 1.5) - hoverHeight / 2, '').attr('fill', this.options.lineColors[i]).attr('font-size', this.options.hoverFontSize);
         yLabels.push(yLabel);
         hoverSet.push(yLabel);
       }
       updateHover = function(index) {
-        var i, maxLabelWidth, xloc, yloc, _ref8;
+        var i, maxLabelWidth, xloc, yloc, _ref6;
         hoverSet.show();
         xLabel.attr('text', _this.columnLabels[index]);
-        for (i = 0, _ref8 = _this.series.length - 1; 0 <= _ref8 ? i <= _ref8 : i >= _ref8; 0 <= _ref8 ? i++ : i--) {
+        for (i = 0, _ref6 = _this.series.length - 1; 0 <= _ref6 ? i <= _ref6 : i >= _ref6; 0 <= _ref6 ? i++ : i--) {
           yLabels[i].attr('text', "" + _this.seriesLabels[i] + ": " + (_this.commas(_this.series[i][index])) + _this.options.units);
         }
         maxLabelWidth = Math.max.apply(null, $.map(yLabels, function(l) {
@@ -243,14 +231,14 @@
         r: this.options.pointSize
       }, 25, 'linear');
       hilight = function(index) {
-        var i, _ref8, _ref9;
+        var i, _ref6, _ref7;
         if (prevHilight !== null && prevHilight !== index) {
-          for (i = 0, _ref8 = seriesPoints.length - 1; 0 <= _ref8 ? i <= _ref8 : i >= _ref8; 0 <= _ref8 ? i++ : i--) {
+          for (i = 0, _ref6 = seriesPoints.length - 1; 0 <= _ref6 ? i <= _ref6 : i >= _ref6; 0 <= _ref6 ? i++ : i--) {
             seriesPoints[i][prevHilight].animate(pointShrink);
           }
         }
         if (index !== null && prevHilight !== index) {
-          for (i = 0, _ref9 = seriesPoints.length - 1; 0 <= _ref9 ? i <= _ref9 : i >= _ref9; 0 <= _ref9 ? i++ : i--) {
+          for (i = 0, _ref7 = seriesPoints.length - 1; 0 <= _ref7 ? i <= _ref7 : i >= _ref7; 0 <= _ref7 ? i++ : i--) {
             seriesPoints[i][index].animate(pointGrow);
           }
           updateHover(index);
@@ -259,10 +247,10 @@
         if (index === null) return hideHover();
       };
       updateHilight = function(x) {
-        var hoverIndex, _ref8, _results;
+        var hoverIndex, _ref6, _results;
         x -= _this.el.offset().left;
         _results = [];
-        for (hoverIndex = _ref8 = hoverMargins.length; _ref8 <= 0 ? hoverIndex <= 0 : hoverIndex >= 0; _ref8 <= 0 ? hoverIndex++ : hoverIndex--) {
+        for (hoverIndex = _ref6 = hoverMargins.length; _ref6 <= 0 ? hoverIndex <= 0 : hoverIndex >= 0; _ref6 <= 0 ? hoverIndex++ : hoverIndex--) {
           if (hoverIndex === 0 || hoverMargins[hoverIndex - 1] > x) {
             hilight(hoverIndex);
             break;
@@ -343,34 +331,24 @@
     };
 
     Line.prototype.parseYear = function(date) {
-      var day, m, month, n, o, p, s, timestamp, weeks, y1, y2, year;
-      s = date.toString();
-      m = s.match(/^(\d+) Q(\d)$/);
-      n = s.match(/^(\d+)-(\d+)$/);
-      o = s.match(/^(\d+)-(\d+)-(\d+)$/);
-      p = s.match(/^(\d+) W(\d+)$/);
+      var m, n, o, p, ret;
+      if (typeof date === 'number') return date;
+      m = date.match(/^(\d+) Q(\d)$/);
+      n = date.match(/^(\d+)-(\d+)$/);
+      o = date.match(/^(\d+)-(\d+)-(\d+)$/);
+      p = date.match(/^(\d+) W(\d+)$/);
       if (m) {
-        return parseInt(m[1], 10) + (parseInt(m[2], 10) * 3 - 1) / 12;
-      } else if (p) {
-        year = parseInt(p[1], 10);
-        y1 = new Date(year, 0, 1);
-        y2 = new Date(year + 1, 0, 1);
-        if (y1.getDay() !== 4) y1.setMonth(0, 1 + ((4 - y1.getDay()) + 7) % 7);
-        if (y2.getDay() !== 4) y2.setMonth(0, 1 + ((4 - y2.getDay()) + 7) % 7);
-        weeks = Math.ceil((y2 - y1) / 604800000);
-        return parseInt(p[1], 10) + (parseInt(p[2], 10) - 1) / weeks;
+        return new Date(parseInt(m[1], 10), parseInt(m[2], 10) * 3 - 1).getTime();
       } else if (n) {
-        return parseInt(n[1], 10) + (parseInt(n[2], 10) - 1) / 12;
+        return new Date(parseInt(n[1], 10), parseInt(n[2], 10) - 1).getTime();
       } else if (o) {
-        year = parseInt(o[1], 10);
-        month = parseInt(o[2], 10);
-        day = parseInt(o[3], 10);
-        timestamp = new Date(year, month - 1, day).getTime();
-        y1 = new Date(year, 0, 1).getTime();
-        y2 = new Date(year + 1, 0, 1).getTime();
-        return year + (timestamp - y1) / (y2 - y1);
+        return new Date(parseInt(o[1], 10), parseInt(o[2], 10) - 1, parseInt(o[3], 10)).getTime();
+      } else if (p) {
+        ret = new Date(parseInt(p[1], 10), 0, 1);
+        if (ret.getDay() !== 4) ret.setMonth(0, 1 + ((4 - ret.getDay()) + 7) % 7);
+        return ret.getTime() + parseInt(p[2], 10) * 604800000;
       } else {
-        return parseInt(date, 10);
+        return new Date(parseInt(date, 10));
       }
     };
 
