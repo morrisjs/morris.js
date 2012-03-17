@@ -61,12 +61,20 @@ class Morris.Line
     parseTime: true
     units: ''
     dateFormat: (x) -> new Date(x).toString()
+    sortData: true
+    sortDataFunction: null
+    drawYlabel: true
+    drawXlabel: true
 
   # Do any necessary pre-processing for a new dataset
   #
   precalc: ->
     # sort data
-    @options.data.sort (a, b) => (a[@options.xkey] < b[@options.xkey]) - (b[@options.xkey] < a[@options.xkey])
+    if @options.sortData
+        if typeof @options.sortDataFunction isnt 'function' 
+            @options.data.sort (a,b) => (a[@options.xkey] < b[@options.xkey]) - (b[@options.xkey] < a[@options.xkey])
+        else
+            @options.data.sort @options.sortDataFunction
     # extract labels
     @columnLabels = $.map @options.data, (d) => d[@options.xkey]
     @seriesLabels = @options.labels
@@ -144,40 +152,43 @@ class Morris.Line
     for lineY in [firstY..lastY] by yInterval
       v = Math.floor(lineY)
       y = transY(v)
-      @r.text(left - @options.marginLeft/2, y, v + @options.units)
-        .attr('font-size', @options.gridTextSize)
-        .attr('fill', @options.gridTextColor)
-        .attr('text-anchor', 'end')
+      if @options.drawYlabels
+        @r.text(left - @options.marginLeft/2, y, v + @options.units)
+            .attr('font-size', @options.gridTextSize)
+            .attr('fill', @options.gridTextColor)
+            .attr('text-anchor', 'end')
       @r.path("M" + left + "," + y + 'H' + (left + width))
         .attr('stroke', @options.gridLineColor)
         .attr('stroke-width', @options.gridStrokeWidth)
 
     ## draw x axis labels
-    prevLabelMargin = null
-    xLabelMargin = 50 # make this an option?
-    if @options.parseTime
-      x1 = new Date(@xmin).getFullYear()
-      x2 = new Date(@xmax).getFullYear()
-    else
-      x1 = @xmin
-      x2 = @xmax
-    for i in [x1..x2]
+    if @options.drawXlabel
+      prevLabelMargin = null
+      xLabelMargin = 50 # make this an option?
       if @options.parseTime
-        xpos = new Date(i, 0, 1).getTime()
-        if xpos < @xmin
-          continue
+        x1 = new Date(@xmin).getFullYear()
+        x2 = new Date(@xmax).getFullYear()
       else
-        xpos = i
-      labelText = if @options.parseTime then i else @columnLabels[@columnLabels.length-i-1]
-      label = @r.text(transX(xpos), @options.marginTop + height + @options.marginBottom / 2, labelText)
-        .attr('font-size', @options.gridTextSize)
-        .attr('fill', @options.gridTextColor)
-      labelBox = label.getBBox()
+        x1 = @xmin
+        x2 = @xmax
+      for i in [x1..x2]
+        if @options.parseTime
+          xpos = new Date(i, 0, 1).getTime()
+          if xpos < @xmin
+            continue
+        else
+          xpos = i
+          
+        labelText = if @options.parseTime then i else @columnLabels[@columnLabels.length-i-1]
+        label = @r.text(transX(xpos), @options.marginTop + height + @options.marginBottom / 2, labelText)
+          .attr('font-size', @options.gridTextSize)
+          .attr('fill', @options.gridTextColor)
+        labelBox = label.getBBox()
       # ensure a minimum of `xLabelMargin` pixels between labels
-      if prevLabelMargin is null or prevLabelMargin <= labelBox.x
-        prevLabelMargin = labelBox.x + labelBox.width + xLabelMargin
-      else
-        label.remove()
+        if prevLabelMargin is null or prevLabelMargin <= labelBox.x
+          prevLabelMargin = labelBox.x + labelBox.width + xLabelMargin
+        else
+          label.remove()
 
     # draw the actual series
     columns = (transX(x) for x in @xvals)

@@ -25,6 +25,13 @@ Fork, hack, send a pull request :)
 
 ## Changelog
 
+### 0.2.6 - 17th March 2012
+
+- The X labels can be disabled (with `drawXlabels` option, default is true)
+- The Y labels can be disabled (with `drawYlabels` option, default is true)
+- The automatic data sort can be disabled (with `sortData` option, default is true)
+- The options.data can be sorted via custom function  (with `sortDataFunction` option, default is null)
+
 ### 0.2.5 - 15th March 2012
 
 - Raw millisecond timestamp support (with `dateFormat` option)

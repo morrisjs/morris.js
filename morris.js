@@ -51,15 +51,25 @@
       units: '',
       dateFormat: function(x) {
         return new Date(x).toString();
-      }
+      },
+      sortData: true,
+      sortDataFunction: null,
+      drawYlabel: true,
+      drawXlabel: true
     };
 
     Line.prototype.precalc = function() {
       var ykey, ymax, ymin, _i, _j, _len, _ref, _ref2, _results,
         _this = this;
-      this.options.data.sort(function(a, b) {
-        return (a[_this.options.xkey] < b[_this.options.xkey]) - (b[_this.options.xkey] < a[_this.options.xkey]);
-      });
+      if (this.options.sortData) {
+        if (typeof this.options.sortDataFunction !== 'function') {
+          this.options.data.sort(function(a, b) {
+            return (a[_this.options.xkey] < b[_this.options.xkey]) - (b[_this.options.xkey] < a[_this.options.xkey]);
+          });
+        } else {
+          this.options.data.sort(this.options.sortDataFunction);
+        }
+      }
       this.columnLabels = $.map(this.options.data, function(d) {
         return d[_this.options.xkey];
       });
@@ -141,32 +151,36 @@
       for (lineY = firstY; firstY <= lastY ? lineY <= lastY : lineY >= lastY; lineY += yInterval) {
         v = Math.floor(lineY);
         y = transY(v);
-        this.r.text(left - this.options.marginLeft / 2, y, v + this.options.units).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor).attr('text-anchor', 'end');
+        if (this.options.drawYlabels) {
+          this.r.text(left - this.options.marginLeft / 2, y, v + this.options.units).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor).attr('text-anchor', 'end');
+        }
         this.r.path("M" + left + "," + y + 'H' + (left + width)).attr('stroke', this.options.gridLineColor).attr('stroke-width', this.options.gridStrokeWidth);
       }
-      prevLabelMargin = null;
-      xLabelMargin = 50;
-      if (this.options.parseTime) {
-        x1 = new Date(this.xmin).getFullYear();
-        x2 = new Date(this.xmax).getFullYear();
-      } else {
-        x1 = this.xmin;
-        x2 = this.xmax;
-      }
-      for (i = x1; x1 <= x2 ? i <= x2 : i >= x2; x1 <= x2 ? i++ : i--) {
+      if (this.options.drawXlabel) {
+        prevLabelMargin = null;
+        xLabelMargin = 50;
         if (this.options.parseTime) {
-          xpos = new Date(i, 0, 1).getTime();
-          if (xpos < this.xmin) continue;
+          x1 = new Date(this.xmin).getFullYear();
+          x2 = new Date(this.xmax).getFullYear();
         } else {
-          xpos = i;
+          x1 = this.xmin;
+          x2 = this.xmax;
         }
-        labelText = this.options.parseTime ? i : this.columnLabels[this.columnLabels.length - i - 1];
-        label = this.r.text(transX(xpos), this.options.marginTop + height + this.options.marginBottom / 2, labelText).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor);
-        labelBox = label.getBBox();
-        if (prevLabelMargin === null || prevLabelMargin <= labelBox.x) {
-          prevLabelMargin = labelBox.x + labelBox.width + xLabelMargin;
-        } else {
-          label.remove();
+        for (i = x1; x1 <= x2 ? i <= x2 : i >= x2; x1 <= x2 ? i++ : i--) {
+          if (this.options.parseTime) {
+            xpos = new Date(i, 0, 1).getTime();
+            if (xpos < this.xmin) continue;
+          } else {
+            xpos = i;
+          }
+          labelText = this.options.parseTime ? i : this.columnLabels[this.columnLabels.length - i - 1];
+          label = this.r.text(transX(xpos), this.options.marginTop + height + this.options.marginBottom / 2, labelText).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor);
+          labelBox = label.getBBox();
+          if (prevLabelMargin === null || prevLabelMargin <= labelBox.x) {
+            prevLabelMargin = labelBox.x + labelBox.width + xLabelMargin;
+          } else {
+            label.remove();
+          }
         }
       }
       columns = (function() {
