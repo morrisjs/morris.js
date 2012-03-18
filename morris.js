@@ -53,15 +53,25 @@
       xlabelMargin: 50,
       dateFormat: function(x) {
         return new Date(x).toString();
-      }
+      },
+      sortData: true,
+      sortDataFunction: null,
+      drawYlabel: true,
+      drawXlabel: true
     };
 
     Line.prototype.precalc = function() {
       var ykey, ymax, ymin, _i, _j, _len, _ref, _ref2, _results,
         _this = this;
-      this.options.data.sort(function(a, b) {
-        return (a[_this.options.xkey] < b[_this.options.xkey]) - (b[_this.options.xkey] < a[_this.options.xkey]);
-      });
+      if (this.options.sortData) {
+        if (typeof this.options.sortDataFunction !== 'function') {
+          this.options.data.sort(function(a, b) {
+            return (a[_this.options.xkey] < b[_this.options.xkey]) - (b[_this.options.xkey] < a[_this.options.xkey]);
+          });
+        } else {
+          this.options.data.sort(this.options.sortDataFunction);
+        }
+      }
       this.columnLabels = $.map(this.options.data, function(d) {
         return d[_this.options.xkey];
       });
@@ -145,86 +155,90 @@
       for (lineY = firstY; firstY <= lastY ? lineY <= lastY : lineY >= lastY; lineY += yInterval) {
         v = Math.floor(lineY);
         y = transY(v);
-        this.r.text(left - this.options.marginLeft / 2, y, v + this.options.units).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor).attr('text-anchor', 'end');
+        if (this.options.drawYlabels) {
+          this.r.text(left - this.options.marginLeft / 2, y, v + this.options.units).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor).attr('text-anchor', 'end');
+        }
         this.r.path("M" + left + "," + y + 'H' + (left + width)).attr('stroke', this.options.gridLineColor).attr('stroke-width', this.options.gridStrokeWidth);
       }
-      prevLabelMargin = null;
-      xLabelMargin = this.options.xlabelMargin;
-      xLabel = this.options.xlabel;
-      nextLabel = function(cur) {
-        switch (xLabel) {
-          case 'day':
-            return new Date(cur.getFullYear(), cur.getMonth(), cur.getDate() + 1, 0);
-          case 'month':
-            if (cur.getMonth() === 11) {
+      if (this.options.drawXlabel) {
+        prevLabelMargin = null;
+        xLabelMargin = this.options.xlabelMargin;
+        xLabel = this.options.xlabel;
+        nextLabel = function(cur) {
+          switch (xLabel) {
+            case 'day':
+              return new Date(cur.getFullYear(), cur.getMonth(), cur.getDate() + 1, 0);
+            case 'month':
+              if (cur.getMonth() === 11) {
+                return new Date(cur.getFullYear() + 1, 0, 1);
+              } else {
+                return new Date(cur.getFullYear(), cur.getMonth() + 1, 1);
+              }
+              break;
+            default:
               return new Date(cur.getFullYear() + 1, 0, 1);
-            } else {
-              return new Date(cur.getFullYear(), cur.getMonth() + 1, 1);
-            }
-            break;
-          default:
-            return new Date(cur.getFullYear() + 1, 0, 1);
-        }
-      };
-      startLabel = function(cur) {
-        if (xLabel === 'day' && cur.getHours() === 0) {
-          return cur;
-        } else if (xLabel === 'month' && cur.getDate() === 1) {
-          return cur;
-        } else if (xLabel === 'year' && cur.getDate() === 1 && cur.getMonth() === 0) {
-          return cur;
+          }
+        };
+        startLabel = function(cur) {
+          if (xLabel === 'day' && cur.getHours() === 0) {
+            return cur;
+          } else if (xLabel === 'month' && cur.getDate() === 1) {
+            return cur;
+          } else if (xLabel === 'year' && cur.getDate() === 1 && cur.getMonth() === 0) {
+            return cur;
+          } else {
+            return nextLabel(cur);
+          }
+        };
+        labelText = function(cur) {
+          var d, m;
+          switch (xLabel) {
+            case 'day':
+              d = cur.getDate().toString();
+              if (d.length === 2) {
+                return d;
+              } else {
+                return '0' + d;
+              }
+              break;
+            case 'month':
+              m = (cur.getMonth() + 1).toString();
+              if (m.length === 2) {
+                return m;
+              } else {
+                return '0' + m;
+              }
+              break;
+            default:
+              return cur.getFullYear();
+          }
+        };
+        r = this.r;
+        options = this.options;
+        renderLabel = function(xpos, text) {
+          var label, labelBox;
+          label = r.text(transX(xpos), options.marginTop + height + options.marginBottom / 2, text).attr('font-size', options.gridTextSize).attr('fill', options.gridTextColor);
+          labelBox = label.getBBox();
+          if (prevLabelMargin === null || prevLabelMargin <= labelBox.x) {
+            return prevLabelMargin = labelBox.x + labelBox.width + xLabelMargin;
+          } else {
+            return label.remove();
+          }
+        };
+        if (this.options.parseTime) {
+          start = startLabel(new Date(this.xmin));
+          end = new Date(this.xmax);
+          cur = start;
+          while (cur <= end) {
+            xpos = cur.getTime();
+            if (xpos < this.xmin) continue;
+            renderLabel(xpos, labelText(cur));
+            cur = nextLabel(cur);
+          }
         } else {
-          return nextLabel(cur);
-        }
-      };
-      labelText = function(cur) {
-        var d, m;
-        switch (xLabel) {
-          case 'day':
-            d = cur.getDate().toString();
-            if (d.length === 2) {
-              return d;
-            } else {
-              return '0' + d;
-            }
-            break;
-          case 'month':
-            m = (cur.getMonth() + 1).toString();
-            if (m.length === 2) {
-              return m;
-            } else {
-              return '0' + m;
-            }
-            break;
-          default:
-            return cur.getFullYear();
-        }
-      };
-      r = this.r;
-      options = this.options;
-      renderLabel = function(xpos, text) {
-        var label, labelBox;
-        label = r.text(transX(xpos), options.marginTop + height + options.marginBottom / 2, text).attr('font-size', options.gridTextSize).attr('fill', options.gridTextColor);
-        labelBox = label.getBBox();
-        if (prevLabelMargin === null || prevLabelMargin <= labelBox.x) {
-          return prevLabelMargin = labelBox.x + labelBox.width + xLabelMargin;
-        } else {
-          return label.remove();
-        }
-      };
-      if (this.options.parseTime) {
-        start = startLabel(new Date(this.xmin));
-        end = new Date(this.xmax);
-        cur = start;
-        while (cur <= end) {
-          xpos = cur.getTime();
-          if (xpos < this.xmin) continue;
-          renderLabel(xpos, labelText(cur));
-          cur = nextLabel(cur);
-        }
-      } else {
-        for (i = _ref = this.xmin, _ref2 = this.xmax; _ref <= _ref2 ? i <= _ref2 : i >= _ref2; _ref <= _ref2 ? i++ : i--) {
-          renderLabel(i, this.columnLabels[this.columnLabels.length - i - 1]);
+          for (i = _ref = this.xmin, _ref2 = this.xmax; _ref <= _ref2 ? i <= _ref2 : i >= _ref2; _ref <= _ref2 ? i++ : i--) {
+            renderLabel(i, this.columnLabels[this.columnLabels.length - i - 1]);
+          }
         }
       }
       columns = (function() {

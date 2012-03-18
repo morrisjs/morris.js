@@ -63,12 +63,20 @@ class Morris.Line
     xlabel: 'year'
     xlabelMargin: 50
     dateFormat: (x) -> new Date(x).toString()
+    sortData: true
+    sortDataFunction: null
+    drawYlabel: true
+    drawXlabel: true
 
   # Do any necessary pre-processing for a new dataset
   #
   precalc: ->
     # sort data
-    @options.data.sort (a, b) => (a[@options.xkey] < b[@options.xkey]) - (b[@options.xkey] < a[@options.xkey])
+    if @options.sortData
+        if typeof @options.sortDataFunction isnt 'function'
+            @options.data.sort (a,b) => (a[@options.xkey] < b[@options.xkey]) - (b[@options.xkey] < a[@options.xkey])
+        else
+            @options.data.sort @options.sortDataFunction
     # extract labels
     @columnLabels = $.map @options.data, (d) => d[@options.xkey]
     @seriesLabels = @options.labels
@@ -147,74 +155,76 @@ class Morris.Line
     for lineY in [firstY..lastY] by yInterval
       v = Math.floor(lineY)
       y = transY(v)
-      @r.text(left - @options.marginLeft/2, y, v + @options.units)
-        .attr('font-size', @options.gridTextSize)
-        .attr('fill', @options.gridTextColor)
-        .attr('text-anchor', 'end')
+      if @options.drawYlabels
+        @r.text(left - @options.marginLeft/2, y, v + @options.units)
+            .attr('font-size', @options.gridTextSize)
+            .attr('fill', @options.gridTextColor)
+            .attr('text-anchor', 'end')
       @r.path("M" + left + "," + y + 'H' + (left + width))
         .attr('stroke', @options.gridLineColor)
         .attr('stroke-width', @options.gridStrokeWidth)
 
-    ## draw x axis labels
-    prevLabelMargin = null
-    xLabelMargin = @options.xlabelMargin # make this an option?
-    xLabel = @options.xlabel
-    nextLabel = (cur) -> # cur is a Date()
-      switch xLabel
-        when 'day'
-          new Date(cur.getFullYear(), cur.getMonth(), cur.getDate() + 1, 0)
-        when 'month'
-          if cur.getMonth() == 11
+    ## draw x axis labels (if enabled)
+    if @options.drawXlabel
+      prevLabelMargin = null
+      xLabelMargin = @options.xlabelMargin # make this an option?
+      xLabel = @options.xlabel
+      nextLabel = (cur) -> # cur is a Date()
+        switch xLabel
+          when 'day'
+            new Date(cur.getFullYear(), cur.getMonth(), cur.getDate() + 1, 0)
+          when 'month'
+            if cur.getMonth() == 11
+              new Date(cur.getFullYear() + 1, 0, 1)
+            else
+              new Date(cur.getFullYear(), cur.getMonth() + 1, 1)
+          else # default: year
             new Date(cur.getFullYear() + 1, 0, 1)
-          else
-            new Date(cur.getFullYear(), cur.getMonth() + 1, 1)
-        else # default: year
-          new Date(cur.getFullYear() + 1, 0, 1)
-    startLabel = (cur) -> # cur is a Date()
-      if xLabel == 'day' and cur.getHours() == 0
-        cur
-      else if xLabel == 'month' and cur.getDate() == 1
-        cur
-      else if xLabel == 'year' and cur.getDate() == 1 && cur.getMonth() == 0
-        cur
-      else
-        nextLabel(cur)
-    labelText = (cur) -> # cur is still a Date()
-      switch xLabel
-        when 'day'
-          d = cur.getDate().toString()
-          if d.length == 2 then d else '0' + d
-        when 'month'
-          m = (cur.getMonth() + 1).toString()
-          if m.length == 2 then m else '0' + m
-        else cur.getFullYear()
+      startLabel = (cur) -> # cur is a Date()
+        if xLabel == 'day' and cur.getHours() == 0
+          cur
+        else if xLabel == 'month' and cur.getDate() == 1
+          cur
+        else if xLabel == 'year' and cur.getDate() == 1 && cur.getMonth() == 0
+          cur
+        else
+          nextLabel(cur)
+      labelText = (cur) -> # cur is still a Date()
+        switch xLabel
+          when 'day'
+            d = cur.getDate().toString()
+            if d.length == 2 then d else '0' + d
+          when 'month'
+            m = (cur.getMonth() + 1).toString()
+            if m.length == 2 then m else '0' + m
+          else cur.getFullYear()
 
-    r = @r
-    options = @options
-    renderLabel = (xpos, text) ->
-      label = r.text(transX(xpos), options.marginTop + height + options.marginBottom / 2, text)
+      r = @r
+      options = @options
+      renderLabel = (xpos, text) ->
+        label = r.text(transX(xpos), options.marginTop + height + options.marginBottom / 2, text)
                 .attr('font-size', options.gridTextSize)
                 .attr('fill', options.gridTextColor)
-      labelBox = label.getBBox()
-      # ensure a minimum of `xLabelMargin` pixels between labels
-      if prevLabelMargin is null or prevLabelMargin <= labelBox.x
-        prevLabelMargin = labelBox.x + labelBox.width + xLabelMargin
-      else
-        label.remove()
+        labelBox = label.getBBox()
+        # ensure a minimum of `xLabelMargin` pixels between labels
+        if prevLabelMargin is null or prevLabelMargin <= labelBox.x
+          prevLabelMargin = labelBox.x + labelBox.width + xLabelMargin
+        else
+          label.remove()
 
-    if @options.parseTime
-      start = startLabel(new Date(@xmin))
-      end = new Date(@xmax)
-      cur = start
-      while cur <= end
-        xpos = cur.getTime()
-        if xpos < @xmin
-          continue
-        renderLabel(xpos, labelText cur)
-        cur = nextLabel cur
-    else
-      for i in [@xmin..@xmax]
-        renderLabel(i, @columnLabels[@columnLabels.length-i-1])
+      if @options.parseTime
+        start = startLabel(new Date(@xmin))
+        end = new Date(@xmax)
+        cur = start
+        while cur <= end
+          xpos = cur.getTime()
+          if xpos < @xmin
+            continue
+          renderLabel(xpos, labelText cur)
+          cur = nextLabel cur
+      else
+        for i in [@xmin..@xmax]
+          renderLabel(i, @columnLabels[@columnLabels.length-i-1])
 
     # draw the actual series
     columns = (transX(x) for x in @xvals)
