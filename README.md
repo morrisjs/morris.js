@@ -25,6 +25,11 @@ Fork, hack, send a pull request :)
 
 ## Changelog
 
+### 0.2.6 - 18th March 2012
+
+- Partial series support (see `null` y-values in `examples/quarters.html`)
+- `parseTime` option bugfix for non-time-series data
+
 ### 0.2.5 - 15th March 2012
 
 - Raw millisecond timestamp support (with `dateFormat` option)
