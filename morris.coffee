@@ -86,11 +86,12 @@ class Morris.Line
     else
       @xvals = [(@columnLabels.length-1)..0]
     # translate column labels, if they're timestamps
-    @columnLabels = $.map @columnLabels, (d) =>
-      if typeof d is 'number'
-        @options.dateFormat(d)
-      else
-        d
+    if @options.parseTime
+      @columnLabels = $.map @columnLabels, (d) =>
+        if typeof d is 'number'
+          @options.dateFormat(d)
+        else
+          d
     @xmin = Math.min.apply null, @xvals
     @xmax = Math.max.apply null, @xvals
     if @xmin is @xmax
@@ -197,7 +198,7 @@ class Morris.Line
     for lineY in [firstY..lastY] by yInterval
       v = Math.floor(lineY)
       y = @transY(v)
-      @r.text(@left - @options.marginLeft/2, y, v + @options.units)
+      @r.text(@left - @options.marginLeft/2, y, @commas(v) + @options.units)
         .attr('font-size', @options.gridTextSize)
         .attr('fill', @options.gridTextColor)
         .attr('text-anchor', 'end')
@@ -319,7 +320,7 @@ class Morris.Line
     @hoverSet.show()
     @xLabel.attr('text', @columnLabels[index])
     for i in [0..@series.length-1]
-      @yLabels[i].attr('text', "#{@seriesLabels[i]}: #{@prettifylabel(@series[i][index])}#{@options.units}")
+      @yLabels[i].attr('text', "#{@seriesLabels[i]}: #{@commas(@series[i][index])}#{@options.units}")
     # recalculate hover box width
     maxLabelWidth = Math.max.apply null, $.map @yLabels, (l) ->
       l.getBBox().width
@@ -423,23 +424,21 @@ class Morris.Line
     else
       new Date(parseInt(date, 10), 0, 1)
 
-  prettifylabel: (num) ->
-    if num == null
-      return "n/a"
-    return @commas(num)
-    
   # make long numbers prettier by inserting commas
   # eg: commas(1234567) -> '1,234,567'
   #
   commas: (num) ->
-    ret = if num < 0 then "-" else ""
-    absnum = Math.abs(num)
-    intnum = Math.floor(absnum).toFixed(0)
-    ret += intnum.replace(/(?=(?:\d{3})+$)(?!^)/g, ',')
-    strabsnum = absnum.toString()
-    if strabsnum.length > intnum.length
-      ret += strabsnum.slice(intnum.length)
-    ret
+    if num is null
+      "n/a"
+    else
+      ret = if num < 0 then "-" else ""
+      absnum = Math.abs(num)
+      intnum = Math.floor(absnum).toFixed(0)
+      ret += intnum.replace(/(?=(?:\d{3})+$)(?!^)/g, ',')
+      strabsnum = absnum.toString()
+      if strabsnum.length > intnum.length
+        ret += strabsnum.slice(intnum.length)
+      ret
 
 window.Morris = Morris
 # vim: set et ts=2 sw=2 sts=2
