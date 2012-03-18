@@ -111,6 +111,66 @@ class Morris.Line
         @options.ymin = Math.min parseInt(@options.ymin[5..], 10), ymin
       else
         @options.ymin = ymin
+    
+    # Some instance variables for later
+    @pointGrow = Raphael.animation r: @options.pointSize + 3, 25, 'linear'
+    @pointShrink = Raphael.animation r: @options.pointSize, 25, 'linear'
+    @elementWidth = null
+    @elementHeight = null
+    # column hilight events
+    @prevHilight = null
+    @el.mousemove (evt) =>
+      @updateHilight evt.pageX
+    if @options.hideHover
+      @el.mouseout (evt) =>
+        @hilight null
+    touchHandler = (evt) =>
+      touch = evt.originalEvent.touches[0] or evt.originalEvent.changedTouches[0]
+      @updateHilight touch.pageX
+      return touch
+    @el.bind 'touchstart', touchHandler
+    @el.bind 'touchmove', touchHandler
+    @el.bind 'touchend', touchHandler    
+
+  # Do any size-related calculations
+  #
+  calc: ->
+    w = @el.width()
+    h = @el.height()
+    if @elementWidth != w or @elementHeight != h
+      # calculate grid dimensions
+      @maxYLabelWidth = Math.max(
+        @measureText(@options.ymin + @options.units, @options.gridTextSize).width,
+        @measureText(@options.ymax + @options.units, @options.gridTextSize).width)
+      @left = @maxYLabelWidth + @options.marginLeft
+      @width = @el.width() - @left - @options.marginRight
+      @height = @el.height() - @options.marginTop - @options.marginBottom
+      @dx = @width / (@xmax - @xmin)
+      @dy = @height / (@options.ymax - @options.ymin)
+      # calculate series data point coordinates
+      @columns = (@transX(x) for x in @xvals)
+      @seriesCoords = []
+      for s in @series
+        scoords = []
+        $.each s, (i, y) =>
+            if y == null
+              scoords.push(null)
+            else
+              scoords.push(x: @columns[i], y: @transY(y))
+        @seriesCoords.push(scoords)
+      # calculate hover margins
+      @hoverMargins = $.map @columns.slice(1), (x, i) => (x + @columns[i]) / 2      
+    
+  # quick translation helpers
+  #
+  transX: (x) =>
+    if @xvals.length is 1
+      @left + @width / 2
+    else
+     @left + (x - @xmin) * @dx
+
+  transY: (y) =>
+    return @options.marginTop + @height - (y - @options.ymin) * @dy
 
   # Clear and redraw the graph
   #
@@ -120,38 +180,28 @@ class Morris.Line
 
     # the raphael drawing instance
     @r = new Raphael(@el[0])
+    
+    @calc()
+    @drawGrid()
+    @drawSeries()
+    @drawHover()
+    @hilight(if @options.hideHover then null else 0)
 
-    # calculate grid dimensions
-    maxYLabelWidth = Math.max(
-      @measureText(@options.ymin + @options.units, @options.gridTextSize).width,
-      @measureText(@options.ymax + @options.units, @options.gridTextSize).width)
-    left = maxYLabelWidth + @options.marginLeft
-    width = @el.width() - left - @options.marginRight
-    height = @el.height() - @options.marginTop - @options.marginBottom
-    dx = width / (@xmax - @xmin)
-    dy = height / (@options.ymax - @options.ymin)
-
-    # quick translation helpers
-    transX = (x) =>
-      if @xvals.length is 1
-        left + width / 2
-      else
-       left + (x - @xmin) * dx
-    transY = (y) =>
-      return @options.marginTop + height - (y - @options.ymin) * dy
-
+  # draw the grid, and axes labels
+  #
+  drawGrid: ->
     # draw y axis labels, horizontal lines
     yInterval = (@options.ymax - @options.ymin) / (@options.numLines - 1)
     firstY = Math.ceil(@options.ymin / yInterval) * yInterval
     lastY = Math.floor(@options.ymax / yInterval) * yInterval
     for lineY in [firstY..lastY] by yInterval
       v = Math.floor(lineY)
-      y = transY(v)
-      @r.text(left - @options.marginLeft/2, y, v + @options.units)
+      y = @transY(v)
+      @r.text(@left - @options.marginLeft/2, y, v + @options.units)
         .attr('font-size', @options.gridTextSize)
         .attr('fill', @options.gridTextColor)
         .attr('text-anchor', 'end')
-      @r.path("M" + left + "," + y + 'H' + (left + width))
+      @r.path("M#{@left},#{y}H#{@left + @width}")
         .attr('stroke', @options.gridLineColor)
         .attr('stroke-width', @options.gridStrokeWidth)
 
@@ -172,7 +222,7 @@ class Morris.Line
       else
         xpos = i
       labelText = if @options.parseTime then i else @columnLabels[@columnLabels.length-i-1]
-      label = @r.text(transX(xpos), @options.marginTop + height + @options.marginBottom / 2, labelText)
+      label = @r.text(@transX(xpos), @options.marginTop + @height + @options.marginBottom / 2, labelText)
         .attr('font-size', @options.gridTextSize)
         .attr('fill', @options.gridTextColor)
       labelBox = label.getBBox()
@@ -181,28 +231,20 @@ class Morris.Line
         prevLabelMargin = labelBox.x + labelBox.width + xLabelMargin
       else
         label.remove()
-
-    # draw the actual series
-    columns = (transX(x) for x in @xvals)
-    seriesCoords = []
-    for s in @series
-      scoords = []
-      $.each s, (i, y) =>
-          if y == null
-            scoords.push(null)
-          else
-            scoords.push(x: columns[i], y: transY(y))
-      seriesCoords.push(scoords)
-    for i in [seriesCoords.length-1..0]
-      coords = seriesCoords[i]
+        
+  # draw the data series
+  #
+  drawSeries: ->
+    for i in [@seriesCoords.length-1..0]
+      coords = @seriesCoords[i]
       if coords.length > 1
-        path = @createPath coords, @options.marginTop, left, @options.marginTop + height, left + width
+        path = @createPath coords, @options.marginTop, @left, @options.marginTop + @height, @left + @width
         @r.path(path)
           .attr('stroke', @options.lineColors[i])
           .attr('stroke-width', @options.lineWidth)
-    seriesPoints = ([] for i in [0..seriesCoords.length-1])
-    for i in [seriesCoords.length-1..0]
-      for c in seriesCoords[i]
+    @seriesPoints = ([] for i in [0..@seriesCoords.length-1])
+    for i in [@seriesCoords.length-1..0]
+      for c in @seriesCoords[i]
         if c == null
           circle = null
         else
@@ -210,93 +252,8 @@ class Morris.Line
             .attr('fill', @options.lineColors[i])
             .attr('stroke-width', 1)
             .attr('stroke', '#ffffff')
-        seriesPoints[i].push(circle)
-
-    # hover labels
-    hoverHeight = @options.hoverFontSize * 1.5 * (@series.length + 1)
-    hover = @r.rect(-10, -hoverHeight / 2 - @options.hoverPaddingY, 20, hoverHeight + @options.hoverPaddingY * 2, 10)
-      .attr('fill', @options.hoverFillColor)
-      .attr('stroke', @options.hoverBorderColor)
-      .attr('stroke-width', @options.hoverBorderWidth)
-      .attr('opacity', @options.hoverOpacity)
-    xLabel = @r.text(0, (@options.hoverFontSize * 0.75) - hoverHeight / 2, '')
-      .attr('fill', @options.hoverLabelColor)
-      .attr('font-weight', 'bold')
-      .attr('font-size', @options.hoverFontSize)
-    hoverSet = @r.set()
-    hoverSet.push(hover)
-    hoverSet.push(xLabel)
-    yLabels = []
-    for i in [0..@series.length-1]
-      yLabel = @r.text(0, @options.hoverFontSize * 1.5 * (i + 1.5) - hoverHeight / 2, '')
-        .attr('fill', @options.lineColors[i])
-        .attr('font-size', @options.hoverFontSize)
-      yLabels.push(yLabel)
-      hoverSet.push(yLabel)
-    updateHover = (index) =>
-      hoverSet.show()
-      xLabel.attr('text', @columnLabels[index])
-      for i in [0..@series.length-1]
-        yLabels[i].attr('text', "#{@seriesLabels[i]}: #{@prettifylabel(@series[i][index])}#{@options.units}")
-      # recalculate hover box width
-      maxLabelWidth = Math.max.apply null, $.map yLabels, (l) ->
-        l.getBBox().width
-      maxLabelWidth = Math.max maxLabelWidth, xLabel.getBBox().width
-      hover.attr 'width', maxLabelWidth + @options.hoverPaddingX * 2
-      hover.attr 'x', -@options.hoverPaddingX - maxLabelWidth / 2
-      # move to y pos
-      yloc = Math.min.apply null, $.map @series, (s) =>
-        transY s[index]
-      if yloc > hoverHeight + @options.hoverPaddingY * 2 + @options.hoverMargin + @options.marginTop
-        yloc = yloc - hoverHeight / 2 - @options.hoverPaddingY - @options.hoverMargin
-      else
-        yloc = yloc + hoverHeight / 2 + @options.hoverPaddingY + @options.hoverMargin
-      yloc = Math.max @options.marginTop + hoverHeight / 2 + @options.hoverPaddingY, yloc
-      yloc = Math.min @options.marginTop + height - hoverHeight / 2 - @options.hoverPaddingY, yloc
-      xloc = Math.min left + width - maxLabelWidth / 2 - @options.hoverPaddingX, columns[index]
-      xloc = Math.max left + maxLabelWidth / 2 + @options.hoverPaddingX, xloc
-      hoverSet.attr 'transform', "t#{xloc},#{yloc}"
-    hideHover = ->
-      hoverSet.hide()
-
-    # column hilight
-    hoverMargins = $.map columns.slice(1), (x, i) -> (x + columns[i]) / 2
-    prevHilight = null
-    pointGrow = Raphael.animation r: @options.pointSize + 3, 25, 'linear'
-    pointShrink = Raphael.animation r: @options.pointSize, 25, 'linear'
-    hilight = (index) =>
-      if prevHilight isnt null and prevHilight isnt index
-        for i in [0..seriesPoints.length-1]
-          if seriesPoints[i][prevHilight]
-            seriesPoints[i][prevHilight].animate pointShrink
-      if index isnt null and prevHilight isnt index
-        for i in [0..seriesPoints.length-1]
-          if seriesPoints[i][index]
-            seriesPoints[i][index].animate pointGrow
-        updateHover index
-      prevHilight = index
-      if index is null
-        hideHover()
-    updateHilight = (x) =>
-      x -= @el.offset().left
-      for hoverIndex in [hoverMargins.length..0]
-        if hoverIndex == 0 || hoverMargins[hoverIndex - 1] > x
-          hilight hoverIndex
-          break
-    @el.mousemove (evt) =>
-      updateHilight evt.pageX
-    if @options.hideHover
-      @el.mouseout (evt) =>
-        hilight null
-    touchHandler = (evt) =>
-      touch = evt.originalEvent.touches[0] or evt.originalEvent.changedTouches[0]
-      updateHilight touch.pageX
-      return touch
-    @el.bind 'touchstart', touchHandler
-    @el.bind 'touchmove', touchHandler
-    @el.bind 'touchend', touchHandler
-    hilight(if @options.hideHover then null else 0)
-
+        @seriesPoints[i].push(circle)
+        
   # create a path for a data series
   #
   createPath: (all_coords, top, left, bottom, right) ->
@@ -333,6 +290,79 @@ class Morris.Line
       else
         (coords[i + 1].y - coords[i - 1].y) / (coords[i + 1].x - coords[i - 1].x)
 
+  # draw the hover tooltip
+  #
+  drawHover: ->
+    # hover labels
+    @hoverHeight = @options.hoverFontSize * 1.5 * (@series.length + 1)
+    @hover = @r.rect(-10, -@hoverHeight / 2 - @options.hoverPaddingY, 20, @hoverHeight + @options.hoverPaddingY * 2, 10)
+      .attr('fill', @options.hoverFillColor)
+      .attr('stroke', @options.hoverBorderColor)
+      .attr('stroke-width', @options.hoverBorderWidth)
+      .attr('opacity', @options.hoverOpacity)
+    @xLabel = @r.text(0, (@options.hoverFontSize * 0.75) - @hoverHeight / 2, '')
+      .attr('fill', @options.hoverLabelColor)
+      .attr('font-weight', 'bold')
+      .attr('font-size', @options.hoverFontSize)
+    @hoverSet = @r.set()
+    @hoverSet.push(@hover)
+    @hoverSet.push(@xLabel)
+    @yLabels = []
+    for i in [0..@series.length-1]
+      yLabel = @r.text(0, @options.hoverFontSize * 1.5 * (i + 1.5) - @hoverHeight / 2, '')
+        .attr('fill', @options.lineColors[i])
+        .attr('font-size', @options.hoverFontSize)
+      @yLabels.push(yLabel)
+      @hoverSet.push(yLabel)
+
+  updateHover: (index) =>
+    @hoverSet.show()
+    @xLabel.attr('text', @columnLabels[index])
+    for i in [0..@series.length-1]
+      @yLabels[i].attr('text', "#{@seriesLabels[i]}: #{@prettifylabel(@series[i][index])}#{@options.units}")
+    # recalculate hover box width
+    maxLabelWidth = Math.max.apply null, $.map @yLabels, (l) ->
+      l.getBBox().width
+    maxLabelWidth = Math.max maxLabelWidth, @xLabel.getBBox().width
+    @hover.attr 'width', maxLabelWidth + @options.hoverPaddingX * 2
+    @hover.attr 'x', -@options.hoverPaddingX - maxLabelWidth / 2
+    # move to y pos
+    yloc = Math.min.apply null, $.map @series, (s) =>
+      @transY s[index]
+    if yloc > @hoverHeight + @options.hoverPaddingY * 2 + @options.hoverMargin + @options.marginTop
+      yloc = yloc - @hoverHeight / 2 - @options.hoverPaddingY - @options.hoverMargin
+    else
+      yloc = yloc + @hoverHeight / 2 + @options.hoverPaddingY + @options.hoverMargin
+    yloc = Math.max @options.marginTop + @hoverHeight / 2 + @options.hoverPaddingY, yloc
+    yloc = Math.min @options.marginTop + @height - @hoverHeight / 2 - @options.hoverPaddingY, yloc
+    xloc = Math.min @left + @width - maxLabelWidth / 2 - @options.hoverPaddingX, @columns[index]
+    xloc = Math.max @left + maxLabelWidth / 2 + @options.hoverPaddingX, xloc
+    @hoverSet.attr 'transform', "t#{xloc},#{yloc}"
+  
+  hideHover: ->
+    @hoverSet.hide()
+
+  hilight: (index) =>
+    if @prevHilight isnt null and @prevHilight isnt index
+      for i in [0..@seriesPoints.length-1]
+        if @seriesPoints[i][@prevHilight]
+          @seriesPoints[i][@prevHilight].animate @pointShrink
+    if index isnt null and @prevHilight isnt index
+      for i in [0..@seriesPoints.length-1]
+        if @seriesPoints[i][index]
+          @seriesPoints[i][index].animate @pointGrow
+      @updateHover index
+    @prevHilight = index
+    if index is null
+      @hideHover()
+
+  updateHilight: (x) =>
+    x -= @el.offset().left
+    for hoverIndex in [@hoverMargins.length..0]
+      if hoverIndex == 0 || @hoverMargins[hoverIndex - 1] > x
+        @hilight hoverIndex
+        break
+  
   measureText: (text, fontSize = 12) ->
     tt = @r.text(100, 100, text).attr('font-size', fontSize)
     ret = tt.getBBox()
