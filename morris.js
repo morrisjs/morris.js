@@ -49,17 +49,29 @@
       hideHover: false,
       parseTime: true,
       units: '',
+      xlabel: 'year',
+      xlabelMargin: 50,
       dateFormat: function(x) {
         return new Date(x).toString();
-      }
+      },
+      sortData: true,
+      sortDataFunction: null,
+      drawYlabel: true,
+      drawXlabel: true
     };
 
     Line.prototype.precalc = function() {
       var ykey, ymax, ymin, _i, _j, _len, _ref, _ref2, _results,
         _this = this;
-      this.options.data.sort(function(a, b) {
-        return (a[_this.options.xkey] < b[_this.options.xkey]) - (b[_this.options.xkey] < a[_this.options.xkey]);
-      });
+      if (this.options.sortData) {
+        if (typeof this.options.sortDataFunction !== 'function') {
+          this.options.data.sort(function(a, b) {
+            return (a[_this.options.xkey] < b[_this.options.xkey]) - (b[_this.options.xkey] < a[_this.options.xkey]);
+          });
+        } else {
+          this.options.data.sort(this.options.sortDataFunction);
+        }
+      }
       this.columnLabels = $.map(this.options.data, function(d) {
         return d[_this.options.xkey];
       });
@@ -83,13 +95,15 @@
           return _results;
         }).apply(this);
       }
-      this.columnLabels = $.map(this.columnLabels, function(d) {
-        if (typeof d === 'number') {
-          return _this.options.dateFormat(d);
-        } else {
-          return d;
-        }
-      });
+      if (this.options.parseTime) {
+        this.columnLabels = $.map(this.columnLabels, function(d) {
+          if (typeof d === 'number') {
+            return _this.options.dateFormat(d);
+          } else {
+            return d;
+          }
+        });
+      }
       this.xmin = Math.min.apply(null, this.xvals);
       this.xmax = Math.max.apply(null, this.xvals);
       if (this.xmin === this.xmax) {
@@ -115,7 +129,7 @@
     };
 
     Line.prototype.redraw = function() {
-      var c, circle, columns, coords, dx, dy, firstY, height, hideHover, hilight, hover, hoverHeight, hoverMargins, hoverSet, i, label, labelBox, labelText, lastY, left, lineY, maxYLabelWidth, path, pointGrow, pointShrink, prevHilight, prevLabelMargin, s, seriesCoords, seriesPoints, touchHandler, transX, transY, updateHilight, updateHover, v, width, x, x1, x2, xLabel, xLabelMargin, xpos, y, yInterval, yLabel, yLabels, _i, _j, _len, _len2, _ref, _ref2, _ref3, _ref4, _ref5,
+      var c, circle, columns, coords, cur, dx, dy, end, firstY, height, hideHover, hilight, hover, hoverHeight, hoverMargins, hoverSet, i, labelText, lastY, left, lineY, maxYLabelWidth, nextLabel, options, path, pointGrow, pointShrink, prevHilight, prevLabelMargin, r, renderLabel, s, seriesCoords, seriesPoints, start, startLabel, touchHandler, transX, transY, updateHilight, updateHover, v, width, x, xLabel, xLabelMargin, xpos, y, yInterval, yLabel, yLabels, _i, _j, _len, _len2, _ref, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7,
         _this = this;
       this.el.empty();
       this.r = new Raphael(this.el[0]);
@@ -141,48 +155,106 @@
       for (lineY = firstY; firstY <= lastY ? lineY <= lastY : lineY >= lastY; lineY += yInterval) {
         v = Math.floor(lineY);
         y = transY(v);
-        this.r.text(left - this.options.marginLeft / 2, y, v + this.options.units).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor).attr('text-anchor', 'end');
+        if (this.options.drawYlabels) {
+          this.r.text(left - this.options.marginLeft / 2, y, v + this.options.units).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor).attr('text-anchor', 'end');
+        }
         this.r.path("M" + left + "," + y + 'H' + (left + width)).attr('stroke', this.options.gridLineColor).attr('stroke-width', this.options.gridStrokeWidth);
       }
-      prevLabelMargin = null;
-      xLabelMargin = 50;
-      if (this.options.parseTime) {
-        x1 = new Date(this.xmin).getFullYear();
-        x2 = new Date(this.xmax).getFullYear();
-      } else {
-        x1 = this.xmin;
-        x2 = this.xmax;
-      }
-      for (i = x1; x1 <= x2 ? i <= x2 : i >= x2; x1 <= x2 ? i++ : i--) {
+      if (this.options.drawXlabel) {
+        prevLabelMargin = null;
+        xLabelMargin = this.options.xlabelMargin;
+        xLabel = this.options.xlabel;
+        nextLabel = function(cur) {
+          switch (xLabel) {
+            case 'day':
+              return new Date(cur.getFullYear(), cur.getMonth(), cur.getDate() + 1, 0);
+            case 'month':
+              if (cur.getMonth() === 11) {
+                return new Date(cur.getFullYear() + 1, 0, 1);
+              } else {
+                return new Date(cur.getFullYear(), cur.getMonth() + 1, 1);
+              }
+              break;
+            default:
+              return new Date(cur.getFullYear() + 1, 0, 1);
+          }
+        };
+        startLabel = function(cur) {
+          if (xLabel === 'day' && cur.getHours() === 0) {
+            return cur;
+          } else if (xLabel === 'month' && cur.getDate() === 1) {
+            return cur;
+          } else if (xLabel === 'year' && cur.getDate() === 1 && cur.getMonth() === 0) {
+            return cur;
+          } else {
+            return nextLabel(cur);
+          }
+        };
+        labelText = function(cur) {
+          var d, m;
+          switch (xLabel) {
+            case 'day':
+              d = cur.getDate().toString();
+              if (d.length === 2) {
+                return d;
+              } else {
+                return '0' + d;
+              }
+              break;
+            case 'month':
+              m = (cur.getMonth() + 1).toString();
+              if (m.length === 2) {
+                return m;
+              } else {
+                return '0' + m;
+              }
+              break;
+            default:
+              return cur.getFullYear();
+          }
+        };
+        r = this.r;
+        options = this.options;
+        renderLabel = function(xpos, text) {
+          var label, labelBox;
+          label = r.text(transX(xpos), options.marginTop + height + options.marginBottom / 2, text).attr('font-size', options.gridTextSize).attr('fill', options.gridTextColor);
+          labelBox = label.getBBox();
+          if (prevLabelMargin === null || prevLabelMargin <= labelBox.x) {
+            return prevLabelMargin = labelBox.x + labelBox.width + xLabelMargin;
+          } else {
+            return label.remove();
+          }
+        };
         if (this.options.parseTime) {
-          xpos = new Date(i, 0, 1).getTime();
-          if (xpos < this.xmin) continue;
+          start = startLabel(new Date(this.xmin));
+          end = new Date(this.xmax);
+          cur = start;
+          while (cur <= end) {
+            xpos = cur.getTime();
+            if (xpos < this.xmin) continue;
+            renderLabel(xpos, labelText(cur));
+            cur = nextLabel(cur);
+          }
         } else {
-          xpos = i;
-        }
-        labelText = this.options.parseTime ? i : this.columnLabels[this.columnLabels.length - i - 1];
-        label = this.r.text(transX(xpos), this.options.marginTop + height + this.options.marginBottom / 2, labelText).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor);
-        labelBox = label.getBBox();
-        if (prevLabelMargin === null || prevLabelMargin <= labelBox.x) {
-          prevLabelMargin = labelBox.x + labelBox.width + xLabelMargin;
-        } else {
-          label.remove();
+          for (i = _ref = this.xmin, _ref2 = this.xmax; _ref <= _ref2 ? i <= _ref2 : i >= _ref2; _ref <= _ref2 ? i++ : i--) {
+            renderLabel(i, this.columnLabels[this.columnLabels.length - i - 1]);
+          }
         }
       }
       columns = (function() {
-        var _i, _len, _ref, _results;
-        _ref = this.xvals;
+        var _i, _len, _ref3, _results;
+        _ref3 = this.xvals;
         _results = [];
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          x = _ref[_i];
+        for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
+          x = _ref3[_i];
           _results.push(transX(x));
         }
         return _results;
       }).call(this);
       seriesCoords = [];
-      _ref = this.series;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        s = _ref[_i];
+      _ref3 = this.series;
+      for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
+        s = _ref3[_i];
         seriesCoords.push($.map(s, function(y, i) {
           return {
             x: columns[i],
@@ -190,7 +262,7 @@
           };
         }));
       }
-      for (i = _ref2 = seriesCoords.length - 1; _ref2 <= 0 ? i <= 0 : i >= 0; _ref2 <= 0 ? i++ : i--) {
+      for (i = _ref4 = seriesCoords.length - 1; _ref4 <= 0 ? i <= 0 : i >= 0; _ref4 <= 0 ? i++ : i--) {
         coords = seriesCoords[i];
         if (coords.length > 1) {
           path = this.createPath(coords, this.options.marginTop, left, this.options.marginTop + height, left + width);
@@ -198,17 +270,17 @@
         }
       }
       seriesPoints = (function() {
-        var _ref3, _results;
+        var _ref5, _results;
         _results = [];
-        for (i = 0, _ref3 = seriesCoords.length - 1; 0 <= _ref3 ? i <= _ref3 : i >= _ref3; 0 <= _ref3 ? i++ : i--) {
+        for (i = 0, _ref5 = seriesCoords.length - 1; 0 <= _ref5 ? i <= _ref5 : i >= _ref5; 0 <= _ref5 ? i++ : i--) {
           _results.push([]);
         }
         return _results;
       })();
-      for (i = _ref3 = seriesCoords.length - 1; _ref3 <= 0 ? i <= 0 : i >= 0; _ref3 <= 0 ? i++ : i--) {
-        _ref4 = seriesCoords[i];
-        for (_j = 0, _len2 = _ref4.length; _j < _len2; _j++) {
-          c = _ref4[_j];
+      for (i = _ref5 = seriesCoords.length - 1; _ref5 <= 0 ? i <= 0 : i >= 0; _ref5 <= 0 ? i++ : i--) {
+        _ref6 = seriesCoords[i];
+        for (_j = 0, _len2 = _ref6.length; _j < _len2; _j++) {
+          c = _ref6[_j];
           circle = this.r.circle(c.x, c.y, this.options.pointSize).attr('fill', this.options.lineColors[i]).attr('stroke-width', 1).attr('stroke', '#ffffff');
           seriesPoints[i].push(circle);
         }
@@ -220,16 +292,16 @@
       hoverSet.push(hover);
       hoverSet.push(xLabel);
       yLabels = [];
-      for (i = 0, _ref5 = this.series.length - 1; 0 <= _ref5 ? i <= _ref5 : i >= _ref5; 0 <= _ref5 ? i++ : i--) {
+      for (i = 0, _ref7 = this.series.length - 1; 0 <= _ref7 ? i <= _ref7 : i >= _ref7; 0 <= _ref7 ? i++ : i--) {
         yLabel = this.r.text(0, this.options.hoverFontSize * 1.5 * (i + 1.5) - hoverHeight / 2, '').attr('fill', this.options.lineColors[i]).attr('font-size', this.options.hoverFontSize);
         yLabels.push(yLabel);
         hoverSet.push(yLabel);
       }
       updateHover = function(index) {
-        var i, maxLabelWidth, xloc, yloc, _ref6;
+        var i, maxLabelWidth, xloc, yloc, _ref8;
         hoverSet.show();
         xLabel.attr('text', _this.columnLabels[index]);
-        for (i = 0, _ref6 = _this.series.length - 1; 0 <= _ref6 ? i <= _ref6 : i >= _ref6; 0 <= _ref6 ? i++ : i--) {
+        for (i = 0, _ref8 = _this.series.length - 1; 0 <= _ref8 ? i <= _ref8 : i >= _ref8; 0 <= _ref8 ? i++ : i--) {
           yLabels[i].attr('text', "" + _this.seriesLabels[i] + ": " + (_this.commas(_this.series[i][index])) + _this.options.units);
         }
         maxLabelWidth = Math.max.apply(null, $.map(yLabels, function(l) {
@@ -266,14 +338,14 @@
         r: this.options.pointSize
       }, 25, 'linear');
       hilight = function(index) {
-        var i, _ref6, _ref7;
+        var i, _ref8, _ref9;
         if (prevHilight !== null && prevHilight !== index) {
-          for (i = 0, _ref6 = seriesPoints.length - 1; 0 <= _ref6 ? i <= _ref6 : i >= _ref6; 0 <= _ref6 ? i++ : i--) {
+          for (i = 0, _ref8 = seriesPoints.length - 1; 0 <= _ref8 ? i <= _ref8 : i >= _ref8; 0 <= _ref8 ? i++ : i--) {
             seriesPoints[i][prevHilight].animate(pointShrink);
           }
         }
         if (index !== null && prevHilight !== index) {
-          for (i = 0, _ref7 = seriesPoints.length - 1; 0 <= _ref7 ? i <= _ref7 : i >= _ref7; 0 <= _ref7 ? i++ : i--) {
+          for (i = 0, _ref9 = seriesPoints.length - 1; 0 <= _ref9 ? i <= _ref9 : i >= _ref9; 0 <= _ref9 ? i++ : i--) {
             seriesPoints[i][index].animate(pointGrow);
           }
           updateHover(index);
@@ -282,10 +354,10 @@
         if (index === null) return hideHover();
       };
       updateHilight = function(x) {
-        var hoverIndex, _ref6, _results;
+        var hoverIndex, _ref8, _results;
         x -= _this.el.offset().left;
         _results = [];
-        for (hoverIndex = _ref6 = hoverMargins.length; _ref6 <= 0 ? hoverIndex <= 0 : hoverIndex >= 0; _ref6 <= 0 ? hoverIndex++ : hoverIndex--) {
+        for (hoverIndex = _ref8 = hoverMargins.length; _ref8 <= 0 ? hoverIndex <= 0 : hoverIndex >= 0; _ref8 <= 0 ? hoverIndex++ : hoverIndex--) {
           if (hoverIndex === 0 || hoverMargins[hoverIndex - 1] > x) {
             hilight(hoverIndex);
             break;
