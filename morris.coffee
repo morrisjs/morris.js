@@ -379,6 +379,9 @@ class Morris.Line
     p = date.match /^(\d+) W(\d+)$/
     q = date.match /^(\d+)-(\d+)-(\d+) (\d+):(\d+)$/
     r = date.match /^(\d+)-(\d+)-(\d+) (\d+):(\d+):(\d+(\.\d+)?)$/
+    # parse isoDate like '2012-03-09T21:59:08'
+    # pattern from http://webcloud.se/log/JavaScript-and-ISO-8601/
+    z = date.match /^([0-9]{4})(-([0-9]{2})(-([0-9]{2})(T([0-9]{2}):([0-9]{2})(:([0-9]{2})(\.([0-9]+))?)?(Z|(([-+])([0-9]{2}):([0-9]{2})))?)?)?)?$/ 
     if m
       new Date(
         parseInt(m[1], 10),
@@ -421,6 +424,13 @@ class Morris.Line
         parseInt(r[5], 10),
         isecs,
         msecs).getTime()
+    else if z
+      new Date(
+        parseInt(z[1], 10),
+        parseInt(z[3], 10) - 1,
+        parseInt(z[5], 10),
+        parseInt(z[7], 10),
+        parseInt(z[8], 10)).getTime()
     else
       new Date(parseInt(date, 10), 0, 1)
 
