@@ -437,7 +437,7 @@
     };
 
     Line.prototype.parseYear = function(date) {
-      var isecs, m, msecs, n, o, p, q, r, ret, secs;
+      var isecs, m, msecs, n, o, p, q, r, ret, secs, z;
       if (typeof date === 'number') return date;
       m = date.match(/^(\d+) Q(\d)$/);
       n = date.match(/^(\d+)-(\d+)$/);
@@ -445,6 +445,7 @@
       p = date.match(/^(\d+) W(\d+)$/);
       q = date.match(/^(\d+)-(\d+)-(\d+) (\d+):(\d+)$/);
       r = date.match(/^(\d+)-(\d+)-(\d+) (\d+):(\d+):(\d+(\.\d+)?)$/);
+      z = date.match(/^([0-9]{4})(-([0-9]{2})(-([0-9]{2})(T([0-9]{2}):([0-9]{2})(:([0-9]{2})(\.([0-9]+))?)?(Z|(([-+])([0-9]{2}):([0-9]{2})))?)?)?)?$/);
       if (m) {
         return new Date(parseInt(m[1], 10), parseInt(m[2], 10) * 3 - 1, 1).getTime();
       } else if (n) {
@@ -462,6 +463,8 @@
         isecs = Math.floor(secs);
         msecs = Math.floor((secs - isecs) * 1000);
         return new Date(parseInt(r[1], 10), parseInt(r[2], 10) - 1, parseInt(r[3], 10), parseInt(r[4], 10), parseInt(r[5], 10), isecs, msecs).getTime();
+      } else if (z) {
+        return new Date(parseInt(z[1], 10), parseInt(z[3], 10) - 1, parseInt(z[5], 10), parseInt(z[7], 10), parseInt(z[8], 10)).getTime();
       } else {
         return new Date(parseInt(date, 10), 0, 1);
       }
