@@ -83,7 +83,7 @@
       }
       if (this.options.parseTime) {
         this.xvals = $.map(this.columnLabels, function(x) {
-          return _this.parseYear(x);
+          return _this.parseDate(x);
         });
       } else {
         this.xvals = (function() {
@@ -436,15 +436,15 @@
       return ret;
     };
 
-    Line.prototype.parseYear = function(date) {
+    Line.prototype.parseDate = function(date) {
       var isecs, m, msecs, n, o, p, q, r, ret, secs;
       if (typeof date === 'number') return date;
       m = date.match(/^(\d+) Q(\d)$/);
       n = date.match(/^(\d+)-(\d+)$/);
       o = date.match(/^(\d+)-(\d+)-(\d+)$/);
       p = date.match(/^(\d+) W(\d+)$/);
-      q = date.match(/^(\d+)-(\d+)-(\d+) (\d+):(\d+)$/);
-      r = date.match(/^(\d+)-(\d+)-(\d+) (\d+):(\d+):(\d+(\.\d+)?)$/);
+      q = date.match(/^(\d+)-(\d+)-(\d+)[ T](\d+):(\d+)Z?$/);
+      r = date.match(/^(\d+)-(\d+)-(\d+)[ T](\d+):(\d+):(\d+(\.\d+)?)Z?$/);
       if (m) {
         return new Date(parseInt(m[1], 10), parseInt(m[2], 10) * 3 - 1, 1).getTime();
       } else if (n) {

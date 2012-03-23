@@ -82,7 +82,7 @@ class Morris.Line
     # translate x labels into nominal dates
     # note: currently using decimal years to specify dates
     if @options.parseTime
-      @xvals = $.map @columnLabels, (x) => @parseYear x
+      @xvals = $.map @columnLabels, (x) => @parseDate x
     else
       @xvals = [(@columnLabels.length-1)..0]
     # translate column labels, if they're timestamps
@@ -370,15 +370,15 @@ class Morris.Line
     tt.remove()
     return ret
 
-  parseYear: (date) ->
+  parseDate: (date) ->
     if typeof date is 'number'
       return date
     m = date.match /^(\d+) Q(\d)$/
     n = date.match /^(\d+)-(\d+)$/
     o = date.match /^(\d+)-(\d+)-(\d+)$/
     p = date.match /^(\d+) W(\d+)$/
-    q = date.match /^(\d+)-(\d+)-(\d+) (\d+):(\d+)$/
-    r = date.match /^(\d+)-(\d+)-(\d+) (\d+):(\d+):(\d+(\.\d+)?)$/
+    q = date.match /^(\d+)-(\d+)-(\d+)[ T](\d+):(\d+)Z?$/
+    r = date.match /^(\d+)-(\d+)-(\d+)[ T](\d+):(\d+):(\d+(\.\d+)?)Z?$/
     if m
       new Date(
         parseInt(m[1], 10),
