@@ -213,8 +213,8 @@ class Morris.Line
       x1 = new Date(@xmin).getFullYear()
       x2 = new Date(@xmax).getFullYear()
     else
-      x1 = @xmin
-      x2 = @xmax
+      x1 = 0
+      x2 = @columnLabels.length
     for i in [x1..x2]
       if @options.parseTime
         xpos = new Date(i, 0, 1).getTime()

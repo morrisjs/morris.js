@@ -235,8 +235,8 @@
         x1 = new Date(this.xmin).getFullYear();
         x2 = new Date(this.xmax).getFullYear();
       } else {
-        x1 = this.xmin;
-        x2 = this.xmax;
+        x1 = 0;
+        x2 = this.columnLabels.length;
       }
       _results = [];
       for (i = x1; x1 <= x2 ? i <= x2 : i >= x2; x1 <= x2 ? i++ : i--) {
