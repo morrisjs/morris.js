@@ -37,6 +37,11 @@
       marginBottom: 30,
       marginLeft: 25,
       numLines: 5,
+      numXLabels: 5,
+      xLabelMargin: 50,
+      xLabelFormat: function(x) {
+        return new Date(x).getFullYear();
+      },
       gridLineColor: '#aaa',
       gridTextColor: '#888',
       gridTextSize: 12,
@@ -219,7 +224,7 @@
     };
 
     Line.prototype.drawGrid = function() {
-      var firstY, i, label, labelBox, labelText, lastY, lineY, prevLabelMargin, v, x1, x2, xLabelMargin, xpos, y, yInterval, _results;
+      var firstY, i, label, labelBox, labelText, lastY, lineY, prevLabelMargin, prevLabelText, step, v, x1, x2, xpos, y, yInterval, _results;
       yInterval = (this.options.ymax - this.options.ymin) / (this.options.numLines - 1);
       firstY = Math.ceil(this.options.ymin / yInterval) * yInterval;
       lastY = Math.floor(this.options.ymax / yInterval) * yInterval;
@@ -230,10 +235,11 @@
         this.r.path("M" + this.left + "," + y + "H" + (this.left + this.width)).attr('stroke', this.options.gridLineColor).attr('stroke-width', this.options.gridStrokeWidth);
       }
       prevLabelMargin = null;
-      xLabelMargin = 50;
+      prevLabelText = null;
       if (this.options.parseTime) {
-        x1 = new Date(this.xmin).getFullYear();
-        x2 = new Date(this.xmax).getFullYear();
+        step = (this.xmax - this.xmin) / (this.options.numXLabels - 1);
+        x1 = this.xmin / step;
+        x2 = this.xmax / step;
       } else {
         x1 = 0;
         x2 = this.columnLabels.length;
@@ -241,16 +247,18 @@
       _results = [];
       for (i = x1; x1 <= x2 ? i <= x2 : i >= x2; x1 <= x2 ? i++ : i--) {
         if (this.options.parseTime) {
-          xpos = new Date(i, 0, 1).getTime();
+          xpos = i * step;
           if (xpos < this.xmin) continue;
         } else {
           xpos = i;
         }
-        labelText = this.options.parseTime ? i : this.columnLabels[this.columnLabels.length - i - 1];
+        labelText = this.options.parseTime ? this.options.xLabelFormat(xpos) : this.columnLabels[this.columnLabels.length - i - 1];
+        if (labelText === prevLabelText) continue;
+        prevLabelText = labelText;
         label = this.r.text(this.transX(xpos), this.options.marginTop + this.height + this.options.marginBottom / 2, labelText).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor);
         labelBox = label.getBBox();
         if (prevLabelMargin === null || prevLabelMargin <= labelBox.x) {
-          _results.push(prevLabelMargin = labelBox.x + labelBox.width + xLabelMargin);
+          _results.push(prevLabelMargin = labelBox.x + labelBox.width + this.options.xLabelMargin);
         } else {
           _results.push(label.remove());
         }

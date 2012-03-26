@@ -46,7 +46,11 @@ Morris.Line({
   data: week_data,
   xkey: 'period',
   ykeys: ['licensed', 'sorned'],
-  labels: ['Licensed', 'SORN']
+  labels: ['Licensed', 'SORN'],
+  numXLabels: 7,
+  xLabelFormat: function(x) {
+    var d = new Date(x); return (d.getMonth()+1)+'-'+d.getFullYear()
+  }
 });
 </pre>
 </body>
