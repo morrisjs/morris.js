@@ -43,6 +43,9 @@ class Morris.Line
     marginBottom: 30
     marginLeft: 25
     numLines: 5
+    numXLabels: 5
+    xLabelMargin: 50
+    xLabelFormat: (x) -> new Date(x).getFullYear()
     gridLineColor: '#aaa'
     gridTextColor: '#888'
     gridTextSize: 12
@@ -112,7 +115,7 @@ class Morris.Line
         @options.ymin = Math.min parseInt(@options.ymin[5..], 10), ymin
       else
         @options.ymin = ymin
-    
+
     # Some instance variables for later
     @pointGrow = Raphael.animation r: @options.pointSize + 3, 25, 'linear'
     @pointShrink = Raphael.animation r: @options.pointSize, 25, 'linear'
@@ -131,7 +134,7 @@ class Morris.Line
       return touch
     @el.bind 'touchstart', touchHandler
     @el.bind 'touchmove', touchHandler
-    @el.bind 'touchend', touchHandler    
+    @el.bind 'touchend', touchHandler
 
   # Do any size-related calculations
   #
@@ -160,8 +163,8 @@ class Morris.Line
               scoords.push(x: @columns[i], y: @transY(y))
         @seriesCoords.push(scoords)
       # calculate hover margins
-      @hoverMargins = $.map @columns.slice(1), (x, i) => (x + @columns[i]) / 2      
-    
+      @hoverMargins = $.map @columns.slice(1), (x, i) => (x + @columns[i]) / 2
+
   # quick translation helpers
   #
   transX: (x) =>
@@ -181,7 +184,7 @@ class Morris.Line
 
     # the raphael drawing instance
     @r = new Raphael(@el[0])
-    
+
     @calc()
     @drawGrid()
     @drawSeries()
@@ -208,31 +211,35 @@ class Morris.Line
 
     ## draw x axis labels
     prevLabelMargin = null
-    xLabelMargin = 50 # make this an option?
+    prevLabelText = null
     if @options.parseTime
-      x1 = new Date(@xmin).getFullYear()
-      x2 = new Date(@xmax).getFullYear()
+      step = (@xmax - @xmin)/(@options.numXLabels-1)
+      x1 = @xmin/step
+      x2 = @xmax/step
     else
       x1 = 0
       x2 = @columnLabels.length
     for i in [x1..x2]
       if @options.parseTime
-        xpos = new Date(i, 0, 1).getTime()
+        xpos = i*step
         if xpos < @xmin
           continue
       else
         xpos = i
-      labelText = if @options.parseTime then i else @columnLabels[@columnLabels.length-i-1]
+      labelText = if @options.parseTime then @options.xLabelFormat(xpos) else @columnLabels[@columnLabels.length-i-1]
+      if labelText == prevLabelText
+        continue
+      prevLabelText = labelText
       label = @r.text(@transX(xpos), @options.marginTop + @height + @options.marginBottom / 2, labelText)
         .attr('font-size', @options.gridTextSize)
         .attr('fill', @options.gridTextColor)
       labelBox = label.getBBox()
       # ensure a minimum of `xLabelMargin` pixels between labels
       if prevLabelMargin is null or prevLabelMargin <= labelBox.x
-        prevLabelMargin = labelBox.x + labelBox.width + xLabelMargin
+        prevLabelMargin = labelBox.x + labelBox.width + @options.xLabelMargin
       else
         label.remove()
-        
+
   # draw the data series
   #
   drawSeries: ->
@@ -254,7 +261,7 @@ class Morris.Line
             .attr('stroke-width', 1)
             .attr('stroke', '#ffffff')
         @seriesPoints[i].push(circle)
-        
+
   # create a path for a data series
   #
   createPath: (all_coords, top, left, bottom, right) ->
@@ -339,7 +346,7 @@ class Morris.Line
     xloc = Math.min @left + @width - maxLabelWidth / 2 - @options.hoverPaddingX, @columns[index]
     xloc = Math.max @left + maxLabelWidth / 2 + @options.hoverPaddingX, xloc
     @hoverSet.attr 'transform', "t#{xloc},#{yloc}"
-  
+
   hideHover: ->
     @hoverSet.hide()
 
@@ -363,7 +370,7 @@ class Morris.Line
       if hoverIndex == 0 || @hoverMargins[hoverIndex - 1] > x
         @hilight hoverIndex
         break
-  
+
   measureText: (text, fontSize = 12) ->
     tt = @r.text(100, 100, text).attr('font-size', fontSize)
     ret = tt.getBBox()
