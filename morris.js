@@ -19,6 +19,7 @@
       } else {
         this.el = $(options.element);
       }
+      if (typeof options.units === 'string') options.postunits = options.units;
       this.options = $.extend({}, this.defaults, options);
       if (this.options.data === void 0 || this.options.data.length === 0) return;
       this.el.addClass('graph-initialised');
@@ -53,7 +54,8 @@
       smooth: true,
       hideHover: false,
       parseTime: true,
-      units: '',
+      preunits: '',
+      postunits: '',
       dateFormat: function(x) {
         return new Date(x).toString();
       },
@@ -159,7 +161,7 @@
       w = this.el.width();
       h = this.el.height();
       if (this.elementWidth !== w || this.elementHeight !== h) {
-        this.maxYLabelWidth = Math.max(this.measureText(this.options.ymin + this.options.units, this.options.gridTextSize).width, this.measureText(this.options.ymax + this.options.units, this.options.gridTextSize).width);
+        this.maxYLabelWidth = Math.max(this.measureText(this.options.preunits + this.options.ymin + this.options.postunits, this.options.gridTextSize).width, this.measureText(this.options.preunits + this.options.ymax + this.options.postunits, this.options.gridTextSize).width);
         this.left = this.maxYLabelWidth + this.options.marginLeft;
         this.width = this.el.width() - this.left - this.options.marginRight;
         this.height = this.el.height() - this.options.marginTop - this.options.marginBottom;
@@ -229,7 +231,7 @@
       for (lineY = firstY; firstY <= lastY ? lineY <= lastY : lineY >= lastY; lineY += yInterval) {
         v = Math.floor(lineY);
         y = this.transY(v);
-        this.r.text(this.left - this.options.marginLeft / 2, y, Morris.commas(v) + this.options.units).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor).attr('text-anchor', 'end');
+        this.r.text(this.left - this.options.marginLeft / 2, y, this.options.preunits + Morris.commas(v) + this.options.postunits).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor).attr('text-anchor', 'end');
         this.r.path("M" + this.left + "," + y + "H" + (this.left + this.width)).attr('stroke', this.options.gridLineColor).attr('stroke-width', this.options.gridStrokeWidth);
       }
       ypos = this.options.marginTop + this.height + this.options.marginBottom / 2;
@@ -373,7 +375,7 @@
       this.hoverSet.show();
       this.xLabel.attr('text', this.columnLabels[index]);
       for (i = 0, _ref = this.series.length - 1; 0 <= _ref ? i <= _ref : i >= _ref; 0 <= _ref ? i++ : i--) {
-        this.yLabels[i].attr('text', "" + this.seriesLabels[i] + ": " + (Morris.commas(this.series[i][index])) + this.options.units);
+        this.yLabels[i].attr('text', "" + this.seriesLabels[i] + ": " + this.options.preunits + (Morris.commas(this.series[i][index])) + this.options.postunits);
       }
       maxLabelWidth = Math.max.apply(null, $.map(this.yLabels, function(l) {
         return l.getBBox().width;

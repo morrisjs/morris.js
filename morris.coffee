@@ -14,6 +14,9 @@ class Morris.Line
       @el = $ document.getElementById(options.element)
     else
       @el = $ options.element
+    #backwards compatibility for units -> postunits
+    if typeof options.units is 'string'
+      options.postunits = options.units
     @options = $.extend {}, @defaults, options
     # bail if there's no data
     if @options.data is undefined or @options.data.length is 0
@@ -59,7 +62,8 @@ class Morris.Line
     smooth: true
     hideHover: false
     parseTime: true
-    units: ''
+    preunits: ''
+    postunits: ''
     dateFormat: (x) -> new Date(x).toString()
     xLabels: 'auto'
     xLabelFormat: null
@@ -143,8 +147,8 @@ class Morris.Line
     if @elementWidth != w or @elementHeight != h
       # calculate grid dimensions
       @maxYLabelWidth = Math.max(
-        @measureText(@options.ymin + @options.units, @options.gridTextSize).width,
-        @measureText(@options.ymax + @options.units, @options.gridTextSize).width)
+        @measureText(@options.preunits + @options.ymin + @options.postunits, @options.gridTextSize).width,
+        @measureText(@options.preunits + @options.ymax + @options.postunits, @options.gridTextSize).width)
       @left = @maxYLabelWidth + @options.marginLeft
       @width = @el.width() - @left - @options.marginRight
       @height = @el.height() - @options.marginTop - @options.marginBottom
@@ -200,7 +204,7 @@ class Morris.Line
     for lineY in [firstY..lastY] by yInterval
       v = Math.floor(lineY)
       y = @transY(v)
-      @r.text(@left - @options.marginLeft/2, y, Morris.commas(v) + @options.units)
+      @r.text(@left - @options.marginLeft/2, y, @options.preunits + Morris.commas(v) + @options.postunits)
         .attr('font-size', @options.gridTextSize)
         .attr('fill', @options.gridTextColor)
         .attr('text-anchor', 'end')
@@ -323,7 +327,7 @@ class Morris.Line
     @hoverSet.show()
     @xLabel.attr('text', @columnLabels[index])
     for i in [0..@series.length-1]
-      @yLabels[i].attr('text', "#{@seriesLabels[i]}: #{Morris.commas(@series[i][index])}#{@options.units}")
+      @yLabels[i].attr('text', "#{@seriesLabels[i]}: #{@options.preunits}#{Morris.commas(@series[i][index])}#{@options.postunits}")
     # recalculate hover box width
     maxLabelWidth = Math.max.apply null, $.map @yLabels, (l) ->
       l.getBBox().width
