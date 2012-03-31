@@ -437,14 +437,14 @@
     };
 
     Line.prototype.parseDate = function(date) {
-      var isecs, m, msecs, n, o, p, q, r, ret, secs;
+      var isecs, m, msecs, n, o, offsetmins, p, q, r, ret, secs;
       if (typeof date === 'number') return date;
       m = date.match(/^(\d+) Q(\d)$/);
       n = date.match(/^(\d+)-(\d+)$/);
       o = date.match(/^(\d+)-(\d+)-(\d+)$/);
       p = date.match(/^(\d+) W(\d+)$/);
-      q = date.match(/^(\d+)-(\d+)-(\d+)[ T](\d+):(\d+)Z?$/);
-      r = date.match(/^(\d+)-(\d+)-(\d+)[ T](\d+):(\d+):(\d+(\.\d+)?)Z?$/);
+      q = date.match(/^(\d+)-(\d+)-(\d+)[ T](\d+):(\d+)(Z|([+-])(\d+):(\d+))?$/);
+      r = date.match(/^(\d+)-(\d+)-(\d+)[ T](\d+):(\d+):(\d+(\.\d+)?)(Z|([+-])(\d+):(\d+))?$/);
       if (m) {
         return new Date(parseInt(m[1], 10), parseInt(m[2], 10) * 3 - 1, 1).getTime();
       } else if (n) {
@@ -456,12 +456,22 @@
         if (ret.getDay() !== 4) ret.setMonth(0, 1 + ((4 - ret.getDay()) + 7) % 7);
         return ret.getTime() + parseInt(p[2], 10) * 604800000;
       } else if (q) {
-        return new Date(parseInt(q[1], 10), parseInt(q[2], 10) - 1, parseInt(q[3], 10), parseInt(q[4], 10), parseInt(q[5], 10)).getTime();
+        offsetmins = 0;
+        if (q[6] !== 'Z') {
+          offsetmins = parseInt(q[8], 10) * 60 + parseInt(q[9], 10);
+          if (q[7] === '+') offsetmins = 0 - offsetmins;
+        }
+        return Date.UTC(parseInt(q[1], 10), parseInt(q[2], 10) - 1, parseInt(q[3], 10), parseInt(q[4], 10), parseInt(q[5], 10) + offsetmins);
       } else if (r) {
+        offsetmins = 0;
+        if (r[8] !== 'Z') {
+          offsetmins = parseInt(r[10], 10) * 60 + parseInt(r[11], 10);
+          if (r[9] === '+') offsetmins = 0 - offsetmins;
+        }
         secs = parseFloat(r[6]);
         isecs = Math.floor(secs);
         msecs = Math.floor((secs - isecs) * 1000);
-        return new Date(parseInt(r[1], 10), parseInt(r[2], 10) - 1, parseInt(r[3], 10), parseInt(r[4], 10), parseInt(r[5], 10), isecs, msecs).getTime();
+        return Date.UTC(parseInt(r[1], 10), parseInt(r[2], 10) - 1, parseInt(r[3], 10), parseInt(r[4], 10), parseInt(r[5], 10) + offsetmins, isecs, msecs);
       } else {
         return new Date(parseInt(date, 10), 0, 1);
       }
