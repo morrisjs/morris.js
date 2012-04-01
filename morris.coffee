@@ -82,7 +82,7 @@ class Morris.Line
     # translate x labels into nominal dates
     # note: currently using decimal years to specify dates
     if @options.parseTime
-      @xvals = $.map @columnLabels, (x) => @parseDate x
+      @xvals = $.map @columnLabels, (x) -> Morris.parseDate x
     else
       @xvals = [(@columnLabels.length-1)..0]
     # translate column labels, if they're timestamps
@@ -198,7 +198,7 @@ class Morris.Line
     for lineY in [firstY..lastY] by yInterval
       v = Math.floor(lineY)
       y = @transY(v)
-      @r.text(@left - @options.marginLeft/2, y, @commas(v) + @options.units)
+      @r.text(@left - @options.marginLeft/2, y, Morris.commas(v) + @options.units)
         .attr('font-size', @options.gridTextSize)
         .attr('fill', @options.gridTextColor)
         .attr('text-anchor', 'end')
@@ -207,23 +207,11 @@ class Morris.Line
         .attr('stroke-width', @options.gridStrokeWidth)
 
     ## draw x axis labels
-    prevLabelMargin = null
+    ypos = @options.marginTop + @height + @options.marginBottom / 2
     xLabelMargin = 50 # make this an option?
-    if @options.parseTime
-      x1 = new Date(@xmin).getFullYear()
-      x2 = new Date(@xmax).getFullYear()
-    else
-      x1 = 0
-      x2 = @columnLabels.length
-    for i in [x1..x2]
-      if @options.parseTime
-        xpos = new Date(i, 0, 1).getTime()
-        if xpos < @xmin
-          continue
-      else
-        xpos = i
-      labelText = if @options.parseTime then i else @columnLabels[@columnLabels.length-i-1]
-      label = @r.text(@transX(xpos), @options.marginTop + @height + @options.marginBottom / 2, labelText)
+    prevLabelMargin = null
+    drawLabel = (labelText, xpos) =>
+      label = @r.text(@transX(xpos), ypos, labelText)
         .attr('font-size', @options.gridTextSize)
         .attr('fill', @options.gridTextColor)
       labelBox = label.getBBox()
@@ -232,6 +220,13 @@ class Morris.Line
         prevLabelMargin = labelBox.x + labelBox.width + xLabelMargin
       else
         label.remove()
+    if @options.parseTime
+      for l in Morris.labelSeries(@xmin, @xmax, @width, xLabelMargin)
+        drawLabel(l[0], l[1])
+    else
+      for i in [0..@columnLabels.length]
+        labelText = @columnLabels[@columnLabels.length - i - 1]
+        drawLabel(labelText, i)
         
   # draw the data series
   #
@@ -320,7 +315,7 @@ class Morris.Line
     @hoverSet.show()
     @xLabel.attr('text', @columnLabels[index])
     for i in [0..@series.length-1]
-      @yLabels[i].attr('text', "#{@seriesLabels[i]}: #{@commas(@series[i][index])}#{@options.units}")
+      @yLabels[i].attr('text', "#{@seriesLabels[i]}: #{Morris.commas(@series[i][index])}#{@options.units}")
     # recalculate hover box width
     maxLabelWidth = Math.max.apply null, $.map @yLabels, (l) ->
       l.getBBox().width
@@ -370,75 +365,143 @@ class Morris.Line
     tt.remove()
     return ret
 
-  parseDate: (date) ->
-    if typeof date is 'number'
-      return date
-    m = date.match /^(\d+) Q(\d)$/
-    n = date.match /^(\d+)-(\d+)$/
-    o = date.match /^(\d+)-(\d+)-(\d+)$/
-    p = date.match /^(\d+) W(\d+)$/
-    q = date.match /^(\d+)-(\d+)-(\d+)[ T](\d+):(\d+)Z?$/
-    r = date.match /^(\d+)-(\d+)-(\d+)[ T](\d+):(\d+):(\d+(\.\d+)?)Z?$/
-    if m
-      new Date(
-        parseInt(m[1], 10),
-        parseInt(m[2], 10) * 3 - 1,
-        1).getTime()
-    else if n
-      new Date(
-        parseInt(n[1], 10),
-        parseInt(n[2], 10) - 1,
-        1).getTime()
-    else if o
-      new Date(
-        parseInt(o[1], 10),
-        parseInt(o[2], 10) - 1,
-        parseInt(o[3], 10)).getTime()
-    else if p
-      # calculate number of weeks in year given
-      ret = new Date(parseInt(p[1], 10), 0, 1);
-      # first thursday in year (ISO 8601 standard)
-      if ret.getDay() isnt 4
-        ret.setMonth(0, 1 + ((4 - ret.getDay()) + 7) % 7);
-      # add weeks
-      ret.getTime() + parseInt(p[2], 10) * 604800000
-    else if q
-      new Date(
-        parseInt(q[1], 10),
-        parseInt(q[2], 10) - 1,
-        parseInt(q[3], 10),
-        parseInt(q[4], 10),
-        parseInt(q[5], 10)).getTime()
-    else if r
-      secs = parseFloat(r[6])
-      isecs = Math.floor(secs)
-      msecs = Math.floor((secs - isecs) * 1000)
-      new Date(
-        parseInt(r[1], 10),
-        parseInt(r[2], 10) - 1,
-        parseInt(r[3], 10),
-        parseInt(r[4], 10),
-        parseInt(r[5], 10),
-        isecs,
-        msecs).getTime()
-    else
-      new Date(parseInt(date, 10), 0, 1)
+# parse a date into a javascript timestamp
+#
+Morris.parseDate = (date) ->
+  if typeof date is 'number'
+    return date
+  m = date.match /^(\d+) Q(\d)$/
+  n = date.match /^(\d+)-(\d+)$/
+  o = date.match /^(\d+)-(\d+)-(\d+)$/
+  p = date.match /^(\d+) W(\d+)$/
+  q = date.match /^(\d+)-(\d+)-(\d+)[ T](\d+):(\d+)Z?$/
+  r = date.match /^(\d+)-(\d+)-(\d+)[ T](\d+):(\d+):(\d+(\.\d+)?)Z?$/
+  if m
+    new Date(
+      parseInt(m[1], 10),
+      parseInt(m[2], 10) * 3 - 1,
+      1).getTime()
+  else if n
+    new Date(
+      parseInt(n[1], 10),
+      parseInt(n[2], 10) - 1,
+      1).getTime()
+  else if o
+    new Date(
+      parseInt(o[1], 10),
+      parseInt(o[2], 10) - 1,
+      parseInt(o[3], 10)).getTime()
+  else if p
+    # calculate number of weeks in year given
+    ret = new Date(parseInt(p[1], 10), 0, 1);
+    # first thursday in year (ISO 8601 standard)
+    if ret.getDay() isnt 4
+      ret.setMonth(0, 1 + ((4 - ret.getDay()) + 7) % 7);
+    # add weeks
+    ret.getTime() + parseInt(p[2], 10) * 604800000
+  else if q
+    new Date(
+      parseInt(q[1], 10),
+      parseInt(q[2], 10) - 1,
+      parseInt(q[3], 10),
+      parseInt(q[4], 10),
+      parseInt(q[5], 10)).getTime()
+  else if r
+    secs = parseFloat(r[6])
+    isecs = Math.floor(secs)
+    msecs = Math.round((secs - isecs) * 1000)
+    new Date(
+      parseInt(r[1], 10),
+      parseInt(r[2], 10) - 1,
+      parseInt(r[3], 10),
+      parseInt(r[4], 10),
+      parseInt(r[5], 10),
+      isecs,
+      msecs).getTime()
+  else
+    new Date(parseInt(date, 10), 0, 1).getTime()
 
-  # make long numbers prettier by inserting commas
-  # eg: commas(1234567) -> '1,234,567'
-  #
-  commas: (num) ->
-    if num is null
-      "n/a"
-    else
-      ret = if num < 0 then "-" else ""
-      absnum = Math.abs(num)
-      intnum = Math.floor(absnum).toFixed(0)
-      ret += intnum.replace(/(?=(?:\d{3})+$)(?!^)/g, ',')
-      strabsnum = absnum.toString()
-      if strabsnum.length > intnum.length
-        ret += strabsnum.slice(intnum.length)
-      ret
+# make long numbers prettier by inserting commas
+# eg: commas(1234567) -> '1,234,567'
+#
+Morris.commas = (num) ->
+  if num is null
+    "n/a"
+  else
+    ret = if num < 0 then "-" else ""
+    absnum = Math.abs(num)
+    intnum = Math.floor(absnum).toFixed(0)
+    ret += intnum.replace(/(?=(?:\d{3})+$)(?!^)/g, ',')
+    strabsnum = absnum.toString()
+    if strabsnum.length > intnum.length
+      ret += strabsnum.slice(intnum.length)
+    ret
+
+# zero-pad numbers to two characters wide
+#
+Morris.pad2 = (number) -> (if number < 10 then '0' else '') + number
+
+# generate a series of label, timestamp pairs for x-axis labels
+#
+Morris.labelSeries = (dmin, dmax, pxwidth) ->
+  ddensity = 200 * (dmax - dmin) / pxwidth # seconds per `margin` pixels
+  d0 = new Date(dmin)
+  for s in Morris.LABEL_SPECS
+    if ddensity >= s.span or s.span == Morris.LABEL_SPECS[Morris.LABEL_SPECS.length - 1].span
+      d = s.start(d0)
+      ret = []
+      while  (t = d.getTime()) <= dmax
+        if t >= dmin
+          ret.push [s.fmt(d), t]
+        s.incr(d)
+      return ret
+
+minutesSpecHelper = (interval) ->
+  {
+    span: interval * 60 * 1000
+    start: (d) -> new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours())
+    fmt: (d) -> "#{Morris.pad2(d.getHours())}:#{Morris.pad2(d.getMinutes())}"
+    incr: (d) -> d.setMinutes(d.getMinutes() + interval)
+  }
+secondsSpecHelper = (interval) ->
+  {
+    span: interval * 1000
+    start: (d) -> new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes())
+    fmt: (d) -> "#{Morris.pad2(d.getHours())}:#{Morris.pad2(d.getMinutes())}:#{Morris.pad2(d.getSeconds())}"
+    incr: (d) -> d.setSeconds(d.getSeconds() + interval)
+  }
+
+Morris.LABEL_SPECS = [
+  { 
+    span: 17280000000 # 365 * 24 * 60 * 60 * 1000
+    start: (d) -> new Date(d.getFullYear(), 0, 1)
+    fmt: (d) -> "#{d.getFullYear()}"
+    incr: (d) -> d.setFullYear(d.getFullYear() + 1)
+  }
+  { 
+    span: 2419200000 # 28 * 24 * 60 * 60 * 1000
+    start: (d) -> new Date(d.getFullYear(), d.getMonth(), 1)
+    fmt: (d) -> "#{d.getFullYear()}-#{Morris.pad2(d.getMonth() + 1)}"
+    incr: (d) -> d.setMonth(d.getMonth() + 1)
+  }
+  {
+    span: 86400000 # 24 * 60 * 60 * 1000
+    start: (d) -> new Date(d.getFullYear(), d.getMonth(), d.getDate())
+    fmt: (d) -> "#{d.getFullYear()}-#{Morris.pad2(d.getMonth() + 1)}-#{Morris.pad2(d.getDate())}"
+    incr: (d) -> d.setDate(d.getDate() + 1)
+  }
+  minutesSpecHelper(60)
+  minutesSpecHelper(30)
+  minutesSpecHelper(15)
+  minutesSpecHelper(10)
+  minutesSpecHelper(5)
+  minutesSpecHelper(1)
+  secondsSpecHelper(30)
+  secondsSpecHelper(15)
+  secondsSpecHelper(10)
+  secondsSpecHelper(5)
+  secondsSpecHelper(1)
+]
 
 window.Morris = Morris
 # vim: set et ts=2 sw=2 sts=2

@@ -1,0 +1,192 @@
+<!doctype html>
+<head>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+  <link rel="stylesheet" href="http://code.jquery.com/qunit/git/qunit.css" type="text/css" media="screen" />
+  <script type="text/javascript" src="http://code.jquery.com/qunit/git/qunit.js"></script>
+  <script type="text/javascript" src="morris.js"></script>
+
+  <script>
+  $(document).ready(function(){
+
+    module("Morris");
+
+    test("Morris.commas", function () {
+      // zero
+      equal(Morris.commas(0), "0", "commas(0) = 0")
+      // positive integers
+      equal(Morris.commas(1), "1", "commas(1) = 1")
+      equal(Morris.commas(12), "12", "commas(12) = 12")
+      equal(Morris.commas(123), "123", "commas(123) = 123");
+      equal(Morris.commas(1234), "1,234", "commas(1234) = 1,234");
+      equal(Morris.commas(12345), "12,345", "commas(12345) = 12,345");
+      equal(Morris.commas(123456), "123,456", "commas(123456) = 123,456");
+      equal(Morris.commas(1234567), "1,234,567", "commas(1234567) = 1,234,567");
+      // negative integers
+      equal(Morris.commas(-1), "-1", "commas(-1) = -1")
+      equal(Morris.commas(-12), "-12", "commas(-12) = -12")
+      equal(Morris.commas(-123), "-123", "commas(-123) = -123");
+      equal(Morris.commas(-1234), "-1,234", "commas(-1234) = -1,234");
+      equal(Morris.commas(-12345), "-12,345", "commas(-12345) = -12,345");
+      equal(Morris.commas(-123456), "-123,456", "commas(-123456) = -123,456");
+      equal(Morris.commas(-1234567), "-1,234,567", "commas(-1234567) = -1,234,567");
+      // positive decimals
+      equal(Morris.commas(1.2), "1.2", "commas(1.2) = 1.2")
+      equal(Morris.commas(12.34), "12.34", "commas(12.34) = 12.34")
+      equal(Morris.commas(123.456), "123.456", "commas(123.456) = 123.456")
+      equal(Morris.commas(1234.56), "1,234.56", "commas(1234.56) = 1,234.56")
+      // negative decimals
+      equal(Morris.commas(-1.2), "-1.2", "commas(-1.2) = -1.2")
+      equal(Morris.commas(-12.34), "-12.34", "commas(-12.34) = -12.34")
+      equal(Morris.commas(-123.456), "-123.456", "commas(-123.456) = -123.456")
+      equal(Morris.commas(-1234.56), "-1,234.56", "commas(-1234.56) = -1,234.56")
+    });
+  
+    test("Morris.pad2", function () {
+      equal(Morris.pad2(0), "00", "pad2(0) = 0")
+      equal(Morris.pad2(1), "01", "pad2(1) = 1")
+      equal(Morris.pad2(2), "02", "pad2(2) = 2")
+      equal(Morris.pad2(3), "03", "pad2(3) = 3")
+      equal(Morris.pad2(4), "04", "pad2(4) = 4")
+      equal(Morris.pad2(5), "05", "pad2(5) = 5")
+      equal(Morris.pad2(6), "06", "pad2(6) = 6")
+      equal(Morris.pad2(7), "07", "pad2(7) = 7")
+      equal(Morris.pad2(8), "08", "pad2(8) = 8")
+      equal(Morris.pad2(9), "09", "pad2(9) = 9")
+      equal(Morris.pad2(10), "10", "pad2(10) = 10")
+      equal(Morris.pad2(12), "12", "pad2(12) = 12")
+      equal(Morris.pad2(34), "34", "pad2(34) = 34")
+      equal(Morris.pad2(123), "123", "pad2(123) = 123")
+    });
+  
+    test("Morris.labelSeries", function () {
+      var expected = [
+        [ 
+          new Date(2007, 0, 1).getTime(),
+          new Date(2012, 0, 1).getTime(),
+          [["2007", new Date(2007, 0, 1).getTime()],
+           ["2008", new Date(2008, 0, 1).getTime()],
+           ["2009", new Date(2009, 0, 1).getTime()],
+           ["2010", new Date(2010, 0, 1).getTime()],
+           ["2011", new Date(2011, 0, 1).getTime()],
+           ["2012", new Date(2012, 0, 1).getTime()]]
+        ],
+        [
+          new Date(2007, 3, 1).getTime(),
+          new Date(2012, 3, 1).getTime(),
+          [["2008", new Date(2008, 0, 1).getTime()],
+           ["2009", new Date(2009, 0, 1).getTime()],
+           ["2010", new Date(2010, 0, 1).getTime()],
+           ["2011", new Date(2011, 0, 1).getTime()],
+           ["2012", new Date(2012, 0, 1).getTime()]]
+        ],
+        [
+          new Date(2012, 0, 1).getTime(),
+          new Date(2012, 5, 1).getTime(),
+          [["2012-01", new Date(2012, 0, 1).getTime()],
+           ["2012-02", new Date(2012, 1, 1).getTime()],
+           ["2012-03", new Date(2012, 2, 1).getTime()],
+           ["2012-04", new Date(2012, 3, 1).getTime()],
+           ["2012-05", new Date(2012, 4, 1).getTime()],
+           ["2012-06", new Date(2012, 5, 1).getTime()]]
+        ],
+        [
+          new Date(2012, 0, 1).getTime(),
+          new Date(2012, 0, 6).getTime(),
+          [["2012-01-01", new Date(2012, 0, 1).getTime()],
+           ["2012-01-02", new Date(2012, 0, 2).getTime()],
+           ["2012-01-03", new Date(2012, 0, 3).getTime()],
+           ["2012-01-04", new Date(2012, 0, 4).getTime()],
+           ["2012-01-05", new Date(2012, 0, 5).getTime()],
+           ["2012-01-06", new Date(2012, 0, 6).getTime()]]
+        ],
+        [
+          new Date(2012, 0, 1, 0).getTime(),
+          new Date(2012, 0, 1, 5).getTime(),
+          [["00:00", new Date(2012, 0, 1, 0).getTime()],
+           ["01:00", new Date(2012, 0, 1, 1).getTime()],
+           ["02:00", new Date(2012, 0, 1, 2).getTime()],
+           ["03:00", new Date(2012, 0, 1, 3).getTime()],
+           ["04:00", new Date(2012, 0, 1, 4).getTime()],
+           ["05:00", new Date(2012, 0, 1, 5).getTime()]]
+        ],
+        [
+          new Date(2012, 0, 1, 0, 0).getTime(),
+          new Date(2012, 0, 1, 2, 30).getTime(),
+          [["00:00", new Date(2012, 0, 1, 0, 0).getTime()],
+           ["00:30", new Date(2012, 0, 1, 0, 30).getTime()],
+           ["01:00", new Date(2012, 0, 1, 1, 0).getTime()],
+           ["01:30", new Date(2012, 0, 1, 1, 30).getTime()],
+           ["02:00", new Date(2012, 0, 1, 2, 0).getTime()],
+           ["02:30", new Date(2012, 0, 1, 2, 30).getTime()]]
+        ],
+        [
+          new Date(2012, 0, 1, 0, 0).getTime(),
+          new Date(2012, 0, 1, 1, 15).getTime(),
+          [["00:00", new Date(2012, 0, 1, 0, 0).getTime()],
+           ["00:15", new Date(2012, 0, 1, 0, 15).getTime()],
+           ["00:30", new Date(2012, 0, 1, 0, 30).getTime()],
+           ["00:45", new Date(2012, 0, 1, 0, 45).getTime()],
+           ["01:00", new Date(2012, 0, 1, 1, 0).getTime()],
+           ["01:15", new Date(2012, 0, 1, 1, 15).getTime()]]
+        ],
+        [
+          new Date(2012, 4, 12, 0, 0).getTime(),
+          new Date(2012, 4, 12, 2, 30).getTime(),
+          [["00:00", new Date(2012, 4, 12, 0, 0).getTime()],
+           ["00:30", new Date(2012, 4, 12, 0, 30).getTime()],
+           ["01:00", new Date(2012, 4, 12, 1, 0).getTime()],
+           ["01:30", new Date(2012, 4, 12, 1, 30).getTime()],
+           ["02:00", new Date(2012, 4, 12, 2, 0).getTime()],
+           ["02:30", new Date(2012, 4, 12, 2, 30).getTime()]]
+        ],
+        [
+          new Date(2012, 4, 12, 0, 0).getTime(),
+          new Date(2012, 4, 12, 1, 15).getTime(),
+          [["00:00", new Date(2012, 4, 12, 0, 0).getTime()],
+           ["00:15", new Date(2012, 4, 12, 0, 15).getTime()],
+           ["00:30", new Date(2012, 4, 12, 0, 30).getTime()],
+           ["00:45", new Date(2012, 4, 12, 0, 45).getTime()],
+           ["01:00", new Date(2012, 4, 12, 1, 0).getTime()],
+           ["01:15", new Date(2012, 4, 12, 1, 15).getTime()]]
+        ]
+      ];
+      for (var i = 0; i < expected.length; i++) {
+        var dmin = expected[i][0],
+            dmax = expected[i][1],
+            ret = expected[i][2];
+        deepEqual(Morris.labelSeries(dmin, dmax, 1000), ret);
+      }
+    });
+  
+    test("Morris.parseDate", function () {
+      equal(Morris.parseDate("2012"), new Date(2012, 0, 1).getTime());
+      equal(Morris.parseDate("2012 Q1"), new Date(2012, 2, 1).getTime());
+      equal(Morris.parseDate("2012-09"), new Date(2012, 8, 1).getTime());
+      equal(Morris.parseDate("2012-10"), new Date(2012, 9, 1).getTime());
+      equal(Morris.parseDate("2012-09-15"), new Date(2012, 8, 15).getTime());
+      equal(Morris.parseDate("2012-10-15"), new Date(2012, 9, 15).getTime());
+      equal(Morris.parseDate("2012-10-15 12:34"), new Date(2012, 9, 15, 12, 34).getTime());
+      equal(Morris.parseDate("2012-10-15T12:34"), new Date(2012, 9, 15, 12, 34).getTime());
+      equal(Morris.parseDate("2012-10-15T12:34Z"), new Date(2012, 9, 15, 12, 34).getTime());
+      equal(Morris.parseDate("2012-10-15 12:34:55"), new Date(2012, 9, 15, 12, 34, 55).getTime());
+      equal(Morris.parseDate("2012-10-15T12:34:55"), new Date(2012, 9, 15, 12, 34, 55).getTime());
+      equal(Morris.parseDate("2012-10-15T12:34:55Z"), new Date(2012, 9, 15, 12, 34, 55).getTime());
+      equal(Morris.parseDate("2012-10-15 12:34:55.123"), new Date(2012, 9, 15, 12, 34, 55, 123).getTime());
+      equal(Morris.parseDate("2012-10-15T12:34:55.123"), new Date(2012, 9, 15, 12, 34, 55, 123).getTime());
+      equal(Morris.parseDate("2012-10-15T12:34:55.123Z"), new Date(2012, 9, 15, 12, 34, 55, 123).getTime());
+      equal(Morris.parseDate(new Date(2012, 9, 15, 12, 34, 55, 123).getTime()),
+        new Date(2012, 9, 15, 12, 34, 55, 123).getTime());
+    });
+  });
+  </script>
+  
+</head>
+<body>
+  <h1 id="qunit-header">Morris.js tests</h1>
+  <h2 id="qunit-banner"></h2>
+  <div id="qunit-testrunner-toolbar"></div>
+  <h2 id="qunit-userAgent"></h2>
+  <ol id="qunit-tests"></ol>
+  <div id="qunit-fixture">test markup, will be hidden</div>
+</body>
+</html>

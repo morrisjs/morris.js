@@ -1,5 +1,5 @@
 (function() {
-  var $, Morris,
+  var $, Morris, minutesSpecHelper, secondsSpecHelper,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   $ = jQuery;
@@ -83,7 +83,7 @@
       }
       if (this.options.parseTime) {
         this.xvals = $.map(this.columnLabels, function(x) {
-          return _this.parseDate(x);
+          return Morris.parseDate(x);
         });
       } else {
         this.xvals = (function() {
@@ -219,43 +219,46 @@
     };
 
     Line.prototype.drawGrid = function() {
-      var firstY, i, label, labelBox, labelText, lastY, lineY, prevLabelMargin, v, x1, x2, xLabelMargin, xpos, y, yInterval, _results;
+      var drawLabel, firstY, i, l, labelText, lastY, lineY, prevLabelMargin, v, xLabelMargin, y, yInterval, ypos, _i, _len, _ref, _ref2, _results, _results2,
+        _this = this;
       yInterval = (this.options.ymax - this.options.ymin) / (this.options.numLines - 1);
       firstY = Math.ceil(this.options.ymin / yInterval) * yInterval;
       lastY = Math.floor(this.options.ymax / yInterval) * yInterval;
       for (lineY = firstY; firstY <= lastY ? lineY <= lastY : lineY >= lastY; lineY += yInterval) {
         v = Math.floor(lineY);
         y = this.transY(v);
-        this.r.text(this.left - this.options.marginLeft / 2, y, this.commas(v) + this.options.units).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor).attr('text-anchor', 'end');
+        this.r.text(this.left - this.options.marginLeft / 2, y, Morris.commas(v) + this.options.units).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor).attr('text-anchor', 'end');
         this.r.path("M" + this.left + "," + y + "H" + (this.left + this.width)).attr('stroke', this.options.gridLineColor).attr('stroke-width', this.options.gridStrokeWidth);
       }
-      prevLabelMargin = null;
+      ypos = this.options.marginTop + this.height + this.options.marginBottom / 2;
       xLabelMargin = 50;
-      if (this.options.parseTime) {
-        x1 = new Date(this.xmin).getFullYear();
-        x2 = new Date(this.xmax).getFullYear();
-      } else {
-        x1 = 0;
-        x2 = this.columnLabels.length;
-      }
-      _results = [];
-      for (i = x1; x1 <= x2 ? i <= x2 : i >= x2; x1 <= x2 ? i++ : i--) {
-        if (this.options.parseTime) {
-          xpos = new Date(i, 0, 1).getTime();
-          if (xpos < this.xmin) continue;
-        } else {
-          xpos = i;
-        }
-        labelText = this.options.parseTime ? i : this.columnLabels[this.columnLabels.length - i - 1];
-        label = this.r.text(this.transX(xpos), this.options.marginTop + this.height + this.options.marginBottom / 2, labelText).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor);
+      prevLabelMargin = null;
+      drawLabel = function(labelText, xpos) {
+        var label, labelBox;
+        label = _this.r.text(_this.transX(xpos), ypos, labelText).attr('font-size', _this.options.gridTextSize).attr('fill', _this.options.gridTextColor);
         labelBox = label.getBBox();
         if (prevLabelMargin === null || prevLabelMargin <= labelBox.x) {
-          _results.push(prevLabelMargin = labelBox.x + labelBox.width + xLabelMargin);
+          return prevLabelMargin = labelBox.x + labelBox.width + xLabelMargin;
         } else {
-          _results.push(label.remove());
+          return label.remove();
         }
+      };
+      if (this.options.parseTime) {
+        _ref = Morris.labelSeries(this.xmin, this.xmax, this.width, xLabelMargin);
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          l = _ref[_i];
+          _results.push(drawLabel(l[0], l[1]));
+        }
+        return _results;
+      } else {
+        _results2 = [];
+        for (i = 0, _ref2 = this.columnLabels.length; 0 <= _ref2 ? i <= _ref2 : i >= _ref2; 0 <= _ref2 ? i++ : i--) {
+          labelText = this.columnLabels[this.columnLabels.length - i - 1];
+          _results2.push(drawLabel(labelText, i));
+        }
+        return _results2;
       }
-      return _results;
     };
 
     Line.prototype.drawSeries = function() {
@@ -364,7 +367,7 @@
       this.hoverSet.show();
       this.xLabel.attr('text', this.columnLabels[index]);
       for (i = 0, _ref = this.series.length - 1; 0 <= _ref ? i <= _ref : i >= _ref; 0 <= _ref ? i++ : i--) {
-        this.yLabels[i].attr('text', "" + this.seriesLabels[i] + ": " + (this.commas(this.series[i][index])) + this.options.units);
+        this.yLabels[i].attr('text', "" + this.seriesLabels[i] + ": " + (Morris.commas(this.series[i][index])) + this.options.units);
       }
       maxLabelWidth = Math.max.apply(null, $.map(this.yLabels, function(l) {
         return l.getBBox().width;
@@ -436,57 +439,145 @@
       return ret;
     };
 
-    Line.prototype.parseDate = function(date) {
-      var isecs, m, msecs, n, o, p, q, r, ret, secs;
-      if (typeof date === 'number') return date;
-      m = date.match(/^(\d+) Q(\d)$/);
-      n = date.match(/^(\d+)-(\d+)$/);
-      o = date.match(/^(\d+)-(\d+)-(\d+)$/);
-      p = date.match(/^(\d+) W(\d+)$/);
-      q = date.match(/^(\d+)-(\d+)-(\d+)[ T](\d+):(\d+)Z?$/);
-      r = date.match(/^(\d+)-(\d+)-(\d+)[ T](\d+):(\d+):(\d+(\.\d+)?)Z?$/);
-      if (m) {
-        return new Date(parseInt(m[1], 10), parseInt(m[2], 10) * 3 - 1, 1).getTime();
-      } else if (n) {
-        return new Date(parseInt(n[1], 10), parseInt(n[2], 10) - 1, 1).getTime();
-      } else if (o) {
-        return new Date(parseInt(o[1], 10), parseInt(o[2], 10) - 1, parseInt(o[3], 10)).getTime();
-      } else if (p) {
-        ret = new Date(parseInt(p[1], 10), 0, 1);
-        if (ret.getDay() !== 4) ret.setMonth(0, 1 + ((4 - ret.getDay()) + 7) % 7);
-        return ret.getTime() + parseInt(p[2], 10) * 604800000;
-      } else if (q) {
-        return new Date(parseInt(q[1], 10), parseInt(q[2], 10) - 1, parseInt(q[3], 10), parseInt(q[4], 10), parseInt(q[5], 10)).getTime();
-      } else if (r) {
-        secs = parseFloat(r[6]);
-        isecs = Math.floor(secs);
-        msecs = Math.floor((secs - isecs) * 1000);
-        return new Date(parseInt(r[1], 10), parseInt(r[2], 10) - 1, parseInt(r[3], 10), parseInt(r[4], 10), parseInt(r[5], 10), isecs, msecs).getTime();
-      } else {
-        return new Date(parseInt(date, 10), 0, 1);
-      }
-    };
-
-    Line.prototype.commas = function(num) {
-      var absnum, intnum, ret, strabsnum;
-      if (num === null) {
-        return "n/a";
-      } else {
-        ret = num < 0 ? "-" : "";
-        absnum = Math.abs(num);
-        intnum = Math.floor(absnum).toFixed(0);
-        ret += intnum.replace(/(?=(?:\d{3})+$)(?!^)/g, ',');
-        strabsnum = absnum.toString();
-        if (strabsnum.length > intnum.length) {
-          ret += strabsnum.slice(intnum.length);
-        }
-        return ret;
-      }
-    };
-
     return Line;
 
   })();
+
+  Morris.parseDate = function(date) {
+    var isecs, m, msecs, n, o, p, q, r, ret, secs;
+    if (typeof date === 'number') return date;
+    m = date.match(/^(\d+) Q(\d)$/);
+    n = date.match(/^(\d+)-(\d+)$/);
+    o = date.match(/^(\d+)-(\d+)-(\d+)$/);
+    p = date.match(/^(\d+) W(\d+)$/);
+    q = date.match(/^(\d+)-(\d+)-(\d+)[ T](\d+):(\d+)Z?$/);
+    r = date.match(/^(\d+)-(\d+)-(\d+)[ T](\d+):(\d+):(\d+(\.\d+)?)Z?$/);
+    if (m) {
+      return new Date(parseInt(m[1], 10), parseInt(m[2], 10) * 3 - 1, 1).getTime();
+    } else if (n) {
+      return new Date(parseInt(n[1], 10), parseInt(n[2], 10) - 1, 1).getTime();
+    } else if (o) {
+      return new Date(parseInt(o[1], 10), parseInt(o[2], 10) - 1, parseInt(o[3], 10)).getTime();
+    } else if (p) {
+      ret = new Date(parseInt(p[1], 10), 0, 1);
+      if (ret.getDay() !== 4) ret.setMonth(0, 1 + ((4 - ret.getDay()) + 7) % 7);
+      return ret.getTime() + parseInt(p[2], 10) * 604800000;
+    } else if (q) {
+      return new Date(parseInt(q[1], 10), parseInt(q[2], 10) - 1, parseInt(q[3], 10), parseInt(q[4], 10), parseInt(q[5], 10)).getTime();
+    } else if (r) {
+      secs = parseFloat(r[6]);
+      isecs = Math.floor(secs);
+      msecs = Math.round((secs - isecs) * 1000);
+      return new Date(parseInt(r[1], 10), parseInt(r[2], 10) - 1, parseInt(r[3], 10), parseInt(r[4], 10), parseInt(r[5], 10), isecs, msecs).getTime();
+    } else {
+      return new Date(parseInt(date, 10), 0, 1).getTime();
+    }
+  };
+
+  Morris.commas = function(num) {
+    var absnum, intnum, ret, strabsnum;
+    if (num === null) {
+      return "n/a";
+    } else {
+      ret = num < 0 ? "-" : "";
+      absnum = Math.abs(num);
+      intnum = Math.floor(absnum).toFixed(0);
+      ret += intnum.replace(/(?=(?:\d{3})+$)(?!^)/g, ',');
+      strabsnum = absnum.toString();
+      if (strabsnum.length > intnum.length) ret += strabsnum.slice(intnum.length);
+      return ret;
+    }
+  };
+
+  Morris.pad2 = function(number) {
+    return (number < 10 ? '0' : '') + number;
+  };
+
+  Morris.labelSeries = function(dmin, dmax, pxwidth) {
+    var d, d0, ddensity, ret, s, t, _i, _len, _ref;
+    ddensity = 200 * (dmax - dmin) / pxwidth;
+    d0 = new Date(dmin);
+    _ref = Morris.LABEL_SPECS;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      s = _ref[_i];
+      if (ddensity >= s.span || s.span === Morris.LABEL_SPECS[Morris.LABEL_SPECS.length - 1].span) {
+        d = s.start(d0);
+        ret = [];
+        while ((t = d.getTime()) <= dmax) {
+          if (t >= dmin) ret.push([s.fmt(d), t]);
+          s.incr(d);
+        }
+        return ret;
+      }
+    }
+  };
+
+  minutesSpecHelper = function(interval) {
+    return {
+      span: interval * 60 * 1000,
+      start: function(d) {
+        return new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours());
+      },
+      fmt: function(d) {
+        return "" + (Morris.pad2(d.getHours())) + ":" + (Morris.pad2(d.getMinutes()));
+      },
+      incr: function(d) {
+        return d.setMinutes(d.getMinutes() + interval);
+      }
+    };
+  };
+
+  secondsSpecHelper = function(interval) {
+    return {
+      span: interval * 1000,
+      start: function(d) {
+        return new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes());
+      },
+      fmt: function(d) {
+        return "" + (Morris.pad2(d.getHours())) + ":" + (Morris.pad2(d.getMinutes())) + ":" + (Morris.pad2(d.getSeconds()));
+      },
+      incr: function(d) {
+        return d.setSeconds(d.getSeconds() + interval);
+      }
+    };
+  };
+
+  Morris.LABEL_SPECS = [
+    {
+      span: 17280000000,
+      start: function(d) {
+        return new Date(d.getFullYear(), 0, 1);
+      },
+      fmt: function(d) {
+        return "" + (d.getFullYear());
+      },
+      incr: function(d) {
+        return d.setFullYear(d.getFullYear() + 1);
+      }
+    }, {
+      span: 2419200000,
+      start: function(d) {
+        return new Date(d.getFullYear(), d.getMonth(), 1);
+      },
+      fmt: function(d) {
+        return "" + (d.getFullYear()) + "-" + (Morris.pad2(d.getMonth() + 1));
+      },
+      incr: function(d) {
+        return d.setMonth(d.getMonth() + 1);
+      }
+    }, {
+      span: 86400000,
+      start: function(d) {
+        return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      },
+      fmt: function(d) {
+        return "" + (d.getFullYear()) + "-" + (Morris.pad2(d.getMonth() + 1)) + "-" + (Morris.pad2(d.getDate()));
+      },
+      incr: function(d) {
+        return d.setDate(d.getDate() + 1);
+      }
+    }, minutesSpecHelper(60), minutesSpecHelper(30), minutesSpecHelper(15), minutesSpecHelper(10), minutesSpecHelper(5), minutesSpecHelper(1), secondsSpecHelper(30), secondsSpecHelper(15), secondsSpecHelper(10), secondsSpecHelper(5), secondsSpecHelper(1)
+  ];
 
   window.Morris = Morris;
 
