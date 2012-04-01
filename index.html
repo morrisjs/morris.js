@@ -143,16 +143,28 @@
                   date (X) values.
                   <br>
                   Timestamps are accepted in the form of millisecond timestamps (as
-                  returned by <code>Date.getTime</code> or as strings in the following 
+                  returned by <code>Date.getTime()</code> or as strings in the following 
                   formats:
-                  <code>2012</code>, <code>2012 Q1</code>, <code>2012 W1</code>,
-                  <code>2012-02</code>, <code>2012-02-24</code>,
-                  <code>2012-02-24 15:00</code>, <code>2012-02-24 15:00:00</code>,
-                  <code>2012-02-24 15:00:00.000</code>.
-                  <br>
+                  <ul>
+                    <li><code>2012</code></li>
+                    <li><code>2012 Q1</code></li>
+                    <li><code>2012 W1</code></li>
+                    <li><code>2012-02</code></li>
+                    <li><code>2012-02-24</code></li>
+                    <li><code>2012-02-24 15:00</code></li>
+                    <li><code>2012-02-24 15:00:00</code></li>
+                    <li><code>2012-02-24 15:00:00.000</code></li>
+                  </ul>
                   <em>
                     Note: when using millisecond timestamps, it's recommended that
                     you check out the <code>dateFormat</code> option.
+                  </em>
+                  <br>
+                  <em>
+                    Note 2: date/time strings can optionally contain a
+                    <code>T</code> between the date and time parts, and/or a
+                    <code>Z</code> suffix, for compatibility with ISO-8601
+                    dates.
                   </em>
                 </td>
               </tr>
