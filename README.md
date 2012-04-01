@@ -2,7 +2,7 @@
 
 Morris.js is the library that powers the graphs on http://howmanyleft.co.uk/.
 
-This is an early release.  It's a bit rough around the edges, but it's getting pretty usable now.  Expect it to get even better soon.
+It's a bit rough around the edges, but it's getting pretty usable now.  Expect it to get even better soon.
 
 Cheers!
 
@@ -21,9 +21,17 @@ See [the website](http://oesmith.github.com/morris.js/).
 
 Very daring.
 
-Fork, hack, send a pull request :)
+Fork, hack, possibly even add some tests, then send a pull request :)
+
+Tests use [qunit](http://docs.jquery.com/QUnit), and are in `test.html`.
 
 ## Changelog
+
+### 0.2.7 - (tba)
+
+- Refactored x-axis labelling
+- Better ISO date support
+- Fix bug with single value in non time-series graphs
 
 ### 0.2.6 - 18th March 2012
 
