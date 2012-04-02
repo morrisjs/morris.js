@@ -1,5 +1,7 @@
 # Morris.js - pretty time-series line graphs
 
+[![Build Status](https://secure.travis-ci.org/oesmith/morris.js.png?branch=master)](http://travis-ci.org/oesmith/morris.js)
+
 Morris.js is the library that powers the graphs on http://howmanyleft.co.uk/.
 
 It's a bit rough around the edges, but it's getting pretty usable now.  Expect it to get even better soon.
