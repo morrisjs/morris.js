@@ -29,8 +29,9 @@ Tests use [qunit](http://docs.jquery.com/QUnit), and are in `test.html`.
 
 ## Changelog
 
-### 0.2.7 - (tba)
+### 0.2.7 - 2nd April 2012
 
+- Added `xLabels` option
 - Refactored x-axis labelling
 - Better ISO date support
 - Fix bug with single value in non time-series graphs
