@@ -56,7 +56,8 @@
       units: '',
       dateFormat: function(x) {
         return new Date(x).toString();
-      }
+      },
+      xLabels: 'auto'
     };
 
     Line.prototype.precalc = function() {
@@ -244,13 +245,17 @@
         }
       };
       if (this.options.parseTime) {
-        _ref = Morris.labelSeries(this.xmin, this.xmax, this.width, xLabelMargin);
-        _results = [];
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          l = _ref[_i];
-          _results.push(drawLabel(l[0], l[1]));
+        if (this.columnLabels.length === 1 && this.options.xLabels === 'auto') {
+          return drawLabel(this.columnLabels[0], this.xvals[0]);
+        } else {
+          _ref = Morris.labelSeries(this.xmin, this.xmax, this.width, this.options.xLabels);
+          _results = [];
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            l = _ref[_i];
+            _results.push(drawLabel(l[0], l[1]));
+          }
+          return _results;
         }
-        return _results;
       } else {
         _results2 = [];
         for (i = 0, _ref2 = this.columnLabels.length; 0 <= _ref2 ? i <= _ref2 : i >= _ref2; 0 <= _ref2 ? i++ : i--) {
@@ -493,23 +498,30 @@
     return (number < 10 ? '0' : '') + number;
   };
 
-  Morris.labelSeries = function(dmin, dmax, pxwidth) {
-    var d, d0, ddensity, ret, s, t, _i, _len, _ref;
+  Morris.labelSeries = function(dmin, dmax, pxwidth, specName) {
+    var d, d0, ddensity, name, ret, s, spec, t, _i, _len, _ref;
     ddensity = 200 * (dmax - dmin) / pxwidth;
     d0 = new Date(dmin);
-    _ref = Morris.LABEL_SPECS;
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      s = _ref[_i];
-      if (ddensity >= s.span || s.span === Morris.LABEL_SPECS[Morris.LABEL_SPECS.length - 1].span) {
-        d = s.start(d0);
-        ret = [];
-        while ((t = d.getTime()) <= dmax) {
-          if (t >= dmin) ret.push([s.fmt(d), t]);
-          s.incr(d);
+    spec = Morris.LABEL_SPECS[specName];
+    if (spec === void 0) {
+      _ref = Morris.AUTO_LABEL_ORDER;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        name = _ref[_i];
+        s = Morris.LABEL_SPECS[name];
+        if (ddensity >= s.span) {
+          spec = s;
+          break;
         }
-        return ret;
       }
     }
+    if (spec === void 0) spec = Morris.LABEL_SPECS["second"];
+    d = spec.start(d0);
+    ret = [];
+    while ((t = d.getTime()) <= dmax) {
+      if (t >= dmin) ret.push([spec.fmt(d), t]);
+      spec.incr(d);
+    }
+    return ret;
   };
 
   minutesSpecHelper = function(interval) {
@@ -542,8 +554,8 @@
     };
   };
 
-  Morris.LABEL_SPECS = [
-    {
+  Morris.LABEL_SPECS = {
+    "year": {
       span: 17280000000,
       start: function(d) {
         return new Date(d.getFullYear(), 0, 1);
@@ -554,7 +566,8 @@
       incr: function(d) {
         return d.setFullYear(d.getFullYear() + 1);
       }
-    }, {
+    },
+    "month": {
       span: 2419200000,
       start: function(d) {
         return new Date(d.getFullYear(), d.getMonth(), 1);
@@ -565,7 +578,8 @@
       incr: function(d) {
         return d.setMonth(d.getMonth() + 1);
       }
-    }, {
+    },
+    "day": {
       span: 86400000,
       start: function(d) {
         return new Date(d.getFullYear(), d.getMonth(), d.getDate());
@@ -576,8 +590,21 @@
       incr: function(d) {
         return d.setDate(d.getDate() + 1);
       }
-    }, minutesSpecHelper(60), minutesSpecHelper(30), minutesSpecHelper(15), minutesSpecHelper(10), minutesSpecHelper(5), minutesSpecHelper(1), secondsSpecHelper(30), secondsSpecHelper(15), secondsSpecHelper(10), secondsSpecHelper(5), secondsSpecHelper(1)
-  ];
+    },
+    "hour": minutesSpecHelper(60),
+    "30min": minutesSpecHelper(30),
+    "15min": minutesSpecHelper(15),
+    "10min": minutesSpecHelper(10),
+    "5min": minutesSpecHelper(5),
+    "minute": minutesSpecHelper(1),
+    "30sec": secondsSpecHelper(30),
+    "15sec": secondsSpecHelper(15),
+    "10sec": secondsSpecHelper(10),
+    "5sec": secondsSpecHelper(5),
+    "second": secondsSpecHelper(1)
+  };
+
+  Morris.AUTO_LABEL_ORDER = ["year", "month", "day", "hour", "30min", "15min", "10min", "5min", "minute", "30sec", "15sec", "10sec", "5sec", "second"];
 
   window.Morris = Morris;
 

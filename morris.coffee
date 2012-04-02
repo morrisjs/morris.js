@@ -61,6 +61,7 @@ class Morris.Line
     parseTime: true
     units: ''
     dateFormat: (x) -> new Date(x).toString()
+    xLabels: 'auto'
 
   # Do any necessary pre-processing for a new dataset
   #
@@ -112,7 +113,7 @@ class Morris.Line
         @options.ymin = Math.min parseInt(@options.ymin[5..], 10), ymin
       else
         @options.ymin = ymin
-    
+
     # Some instance variables for later
     @pointGrow = Raphael.animation r: @options.pointSize + 3, 25, 'linear'
     @pointShrink = Raphael.animation r: @options.pointSize, 25, 'linear'
@@ -131,7 +132,7 @@ class Morris.Line
       return touch
     @el.bind 'touchstart', touchHandler
     @el.bind 'touchmove', touchHandler
-    @el.bind 'touchend', touchHandler    
+    @el.bind 'touchend', touchHandler
 
   # Do any size-related calculations
   #
@@ -160,8 +161,8 @@ class Morris.Line
               scoords.push(x: @columns[i], y: @transY(y))
         @seriesCoords.push(scoords)
       # calculate hover margins
-      @hoverMargins = $.map @columns.slice(1), (x, i) => (x + @columns[i]) / 2      
-    
+      @hoverMargins = $.map @columns.slice(1), (x, i) => (x + @columns[i]) / 2
+
   # quick translation helpers
   #
   transX: (x) =>
@@ -181,7 +182,7 @@ class Morris.Line
 
     # the raphael drawing instance
     @r = new Raphael(@el[0])
-    
+
     @calc()
     @drawGrid()
     @drawSeries()
@@ -221,13 +222,19 @@ class Morris.Line
       else
         label.remove()
     if @options.parseTime
-      for l in Morris.labelSeries(@xmin, @xmax, @width, xLabelMargin)
-        drawLabel(l[0], l[1])
+      if @columnLabels.length == 1 and @options.xLabels == 'auto'
+        # where there's only one value in the series, we can't make a
+        # sensible guess for an x labelling scheme, so just use the original
+        # column label
+        drawLabel(@columnLabels[0], @xvals[0])
+      else
+        for l in Morris.labelSeries(@xmin, @xmax, @width, @options.xLabels)
+          drawLabel(l[0], l[1])
     else
       for i in [0..@columnLabels.length]
         labelText = @columnLabels[@columnLabels.length - i - 1]
         drawLabel(labelText, i)
-        
+
   # draw the data series
   #
   drawSeries: ->
@@ -249,7 +256,7 @@ class Morris.Line
             .attr('stroke-width', 1)
             .attr('stroke', '#ffffff')
         @seriesPoints[i].push(circle)
-        
+
   # create a path for a data series
   #
   createPath: (all_coords, top, left, bottom, right) ->
@@ -334,7 +341,7 @@ class Morris.Line
     xloc = Math.min @left + @width - maxLabelWidth / 2 - @options.hoverPaddingX, @columns[index]
     xloc = Math.max @left + maxLabelWidth / 2 + @options.hoverPaddingX, xloc
     @hoverSet.attr 'transform', "t#{xloc},#{yloc}"
-  
+
   hideHover: ->
     @hoverSet.hide()
 
@@ -358,7 +365,7 @@ class Morris.Line
       if hoverIndex == 0 || @hoverMargins[hoverIndex - 1] > x
         @hilight hoverIndex
         break
-  
+
   measureText: (text, fontSize = 12) ->
     tt = @r.text(100, 100, text).attr('font-size', fontSize)
     ret = tt.getBBox()
@@ -443,64 +450,73 @@ Morris.pad2 = (number) -> (if number < 10 then '0' else '') + number
 
 # generate a series of label, timestamp pairs for x-axis labels
 #
-Morris.labelSeries = (dmin, dmax, pxwidth) ->
+Morris.labelSeries = (dmin, dmax, pxwidth, specName) ->
   ddensity = 200 * (dmax - dmin) / pxwidth # seconds per `margin` pixels
   d0 = new Date(dmin)
-  for s in Morris.LABEL_SPECS
-    if ddensity >= s.span or s.span == Morris.LABEL_SPECS[Morris.LABEL_SPECS.length - 1].span
-      d = s.start(d0)
-      ret = []
-      while  (t = d.getTime()) <= dmax
-        if t >= dmin
-          ret.push [s.fmt(d), t]
-        s.incr(d)
-      return ret
+  spec = Morris.LABEL_SPECS[specName]
+  # if the spec doesn't exist, search for the closest one in the list
+  if spec is undefined
+    for name in Morris.AUTO_LABEL_ORDER
+      s = Morris.LABEL_SPECS[name]
+      if ddensity >= s.span
+        spec = s
+        break
+  # if we run out of options, use second-intervals
+  if spec is undefined
+    spec = Morris.LABEL_SPECS["second"]
+  # calculate labels
+  d = spec.start(d0)
+  ret = []
+  while  (t = d.getTime()) <= dmax
+    if t >= dmin
+      ret.push [spec.fmt(d), t]
+    spec.incr(d)
+  return ret
 
 minutesSpecHelper = (interval) ->
-  {
-    span: interval * 60 * 1000
-    start: (d) -> new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours())
-    fmt: (d) -> "#{Morris.pad2(d.getHours())}:#{Morris.pad2(d.getMinutes())}"
-    incr: (d) -> d.setMinutes(d.getMinutes() + interval)
-  }
-secondsSpecHelper = (interval) ->
-  {
-    span: interval * 1000
-    start: (d) -> new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes())
-    fmt: (d) -> "#{Morris.pad2(d.getHours())}:#{Morris.pad2(d.getMinutes())}:#{Morris.pad2(d.getSeconds())}"
-    incr: (d) -> d.setSeconds(d.getSeconds() + interval)
-  }
+  span: interval * 60 * 1000
+  start: (d) -> new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours())
+  fmt: (d) -> "#{Morris.pad2(d.getHours())}:#{Morris.pad2(d.getMinutes())}"
+  incr: (d) -> d.setMinutes(d.getMinutes() + interval)
 
-Morris.LABEL_SPECS = [
-  { 
+secondsSpecHelper = (interval) ->
+  span: interval * 1000
+  start: (d) -> new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes())
+  fmt: (d) -> "#{Morris.pad2(d.getHours())}:#{Morris.pad2(d.getMinutes())}:#{Morris.pad2(d.getSeconds())}"
+  incr: (d) -> d.setSeconds(d.getSeconds() + interval)
+
+Morris.LABEL_SPECS =
+  "year":
     span: 17280000000 # 365 * 24 * 60 * 60 * 1000
     start: (d) -> new Date(d.getFullYear(), 0, 1)
     fmt: (d) -> "#{d.getFullYear()}"
     incr: (d) -> d.setFullYear(d.getFullYear() + 1)
-  }
-  { 
+  "month":
     span: 2419200000 # 28 * 24 * 60 * 60 * 1000
     start: (d) -> new Date(d.getFullYear(), d.getMonth(), 1)
     fmt: (d) -> "#{d.getFullYear()}-#{Morris.pad2(d.getMonth() + 1)}"
     incr: (d) -> d.setMonth(d.getMonth() + 1)
-  }
-  {
+  "day":
     span: 86400000 # 24 * 60 * 60 * 1000
     start: (d) -> new Date(d.getFullYear(), d.getMonth(), d.getDate())
     fmt: (d) -> "#{d.getFullYear()}-#{Morris.pad2(d.getMonth() + 1)}-#{Morris.pad2(d.getDate())}"
     incr: (d) -> d.setDate(d.getDate() + 1)
-  }
-  minutesSpecHelper(60)
-  minutesSpecHelper(30)
-  minutesSpecHelper(15)
-  minutesSpecHelper(10)
-  minutesSpecHelper(5)
-  minutesSpecHelper(1)
-  secondsSpecHelper(30)
-  secondsSpecHelper(15)
-  secondsSpecHelper(10)
-  secondsSpecHelper(5)
-  secondsSpecHelper(1)
+  "hour": minutesSpecHelper(60)
+  "30min": minutesSpecHelper(30)
+  "15min": minutesSpecHelper(15)
+  "10min": minutesSpecHelper(10)
+  "5min": minutesSpecHelper(5)
+  "minute": minutesSpecHelper(1)
+  "30sec": secondsSpecHelper(30)
+  "15sec": secondsSpecHelper(15)
+  "10sec": secondsSpecHelper(10)
+  "5sec": secondsSpecHelper(5)
+  "second": secondsSpecHelper(1)
+
+Morris.AUTO_LABEL_ORDER = [
+  "year", "month", "day", "hour",
+  "30min", "15min", "10min", "5min", "minute",
+  "30sec", "15sec", "10sec", "5sec", "second"
 ]
 
 window.Morris = Morris
