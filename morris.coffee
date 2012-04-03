@@ -62,6 +62,7 @@ class Morris.Line
     units: ''
     dateFormat: (x) -> new Date(x).toString()
     xLabels: 'auto'
+    xLabelsFormat: null
 
   # Do any necessary pre-processing for a new dataset
   #
@@ -228,7 +229,7 @@ class Morris.Line
         # column label
         drawLabel(@columnLabels[0], @xvals[0])
       else
-        for l in Morris.labelSeries(@xmin, @xmax, @width, @options.xLabels)
+        for l in Morris.labelSeries(@xmin, @xmax, @width, @options.xLabels, @options.xLabelsFormat)
           drawLabel(l[0], l[1])
     else
       for i in [0..@columnLabels.length]
@@ -450,7 +451,7 @@ Morris.pad2 = (number) -> (if number < 10 then '0' else '') + number
 
 # generate a series of label, timestamp pairs for x-axis labels
 #
-Morris.labelSeries = (dmin, dmax, pxwidth, specName) ->
+Morris.labelSeries = (dmin, dmax, pxwidth, specName, xLabelsFormat) ->
   ddensity = 200 * (dmax - dmin) / pxwidth # seconds per `margin` pixels
   d0 = new Date(dmin)
   spec = Morris.LABEL_SPECS[specName]
@@ -464,6 +465,9 @@ Morris.labelSeries = (dmin, dmax, pxwidth, specName) ->
   # if we run out of options, use second-intervals
   if spec is undefined
     spec = Morris.LABEL_SPECS["second"]
+  # check if there's a user-defined formatting function
+  if xLabelsFormat
+    spec.fmt = xLabelsFormat
   # calculate labels
   d = spec.start(d0)
   ret = []
