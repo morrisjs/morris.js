@@ -12,7 +12,7 @@
 <h1>Formatting Dates YYYY-MM-DD</h1>
 <div id="graph"></div>
 <pre id="code" class="prettyprint linenums">
-// data stolen from http://howmanyleft.co.uk/vehicle/jaguar_'e'_type
+/* data stolen from http://howmanyleft.co.uk/vehicle/jaguar_'e'_type */
 var day_data = [
   {"period": "2012-10-01", "licensed": 3407, "sorned": 660},
   {"period": "2012-09-30", "licensed": 3351, "sorned": 629},
@@ -23,7 +23,7 @@ var day_data = [
   {"period": "2012-09-17", "licensed": 3171, "sorned": 660},
   {"period": "2012-09-16", "licensed": 3171, "sorned": 676},
   {"period": "2012-09-15", "licensed": 3201, "sorned": 656},
-  {"period": "2012-09-10", "licensed": 3215, "sorned": 622},
+  {"period": "2012-09-10", "licensed": 3215, "sorned": 622}
 ];
 Morris.Line({
   element: 'graph',
@@ -31,9 +31,9 @@ Morris.Line({
   xkey: 'period',
   ykeys: ['licensed', 'sorned'],
   labels: ['Licensed', 'SORN'],
-  // custom label formatting with `xLabelFormat`
+  /* custom label formatting with `xLabelFormat` */
   xLabelFormat: function(d) { return (d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear(); },
-  // setting `xLabels` is recommended when using xLabelFormat
+  /* setting `xLabels` is recommended when using xLabelFormat */
   xLabels: 'day'
 });
 </pre>

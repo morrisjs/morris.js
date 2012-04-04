@@ -469,7 +469,7 @@
       if (ret.getDay() !== 4) ret.setMonth(0, 1 + ((4 - ret.getDay()) + 7) % 7);
       return ret.getTime() + parseInt(p[2], 10) * 604800000;
     } else if (q) {
-      if (q[6] === void 0) {
+      if (!q[6]) {
         return new Date(parseInt(q[1], 10), parseInt(q[2], 10) - 1, parseInt(q[3], 10), parseInt(q[4], 10), parseInt(q[5], 10)).getTime();
       } else {
         offsetmins = 0;
@@ -483,7 +483,7 @@
       secs = parseFloat(r[6]);
       isecs = Math.floor(secs);
       msecs = Math.round((secs - isecs) * 1000);
-      if (r[8] === void 0) {
+      if (!r[8]) {
         return new Date(parseInt(r[1], 10), parseInt(r[2], 10) - 1, parseInt(r[3], 10), parseInt(r[4], 10), parseInt(r[5], 10), isecs, msecs).getTime();
       } else {
         offsetmins = 0;

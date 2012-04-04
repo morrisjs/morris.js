@@ -408,7 +408,7 @@ Morris.parseDate = (date) ->
     # add weeks
     ret.getTime() + parseInt(p[2], 10) * 604800000
   else if q
-    if q[6] is undefined
+    if not q[6]
       # no timezone info, use local
       new Date(
         parseInt(q[1], 10),
@@ -432,7 +432,7 @@ Morris.parseDate = (date) ->
     secs = parseFloat(r[6])
     isecs = Math.floor(secs)
     msecs = Math.round((secs - isecs) * 1000)
-    if r[8] is undefined
+    if not r[8]
       # no timezone info, use local
       new Date(
         parseInt(r[1], 10),
