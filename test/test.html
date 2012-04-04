@@ -187,13 +187,21 @@
       equal(Morris.parseDate("2012-10-15"), new Date(2012, 9, 15).getTime());
       equal(Morris.parseDate("2012-10-15 12:34"), new Date(2012, 9, 15, 12, 34).getTime());
       equal(Morris.parseDate("2012-10-15T12:34"), new Date(2012, 9, 15, 12, 34).getTime());
-      equal(Morris.parseDate("2012-10-15T12:34Z"), new Date(2012, 9, 15, 12, 34).getTime());
+      equal(Morris.parseDate("2012-10-15T12:34Z"), Date.UTC(2012, 9, 15, 12, 34));
+      equal(Morris.parseDate("2012-10-15T12:34+0100"), Date.UTC(2012, 9, 15, 11, 34));
+      equal(Morris.parseDate("2012-10-15T12:34+02:00"), Date.UTC(2012, 9, 15, 10, 34));
+      equal(Morris.parseDate("2012-10-15T12:34-0100"), Date.UTC(2012, 9, 15, 13, 34));
+      equal(Morris.parseDate("2012-10-15T12:34-02:00"), Date.UTC(2012, 9, 15, 14, 34));
       equal(Morris.parseDate("2012-10-15 12:34:55"), new Date(2012, 9, 15, 12, 34, 55).getTime());
       equal(Morris.parseDate("2012-10-15T12:34:55"), new Date(2012, 9, 15, 12, 34, 55).getTime());
-      equal(Morris.parseDate("2012-10-15T12:34:55Z"), new Date(2012, 9, 15, 12, 34, 55).getTime());
+      equal(Morris.parseDate("2012-10-15T12:34:55Z"), Date.UTC(2012, 9, 15, 12, 34, 55));
+      equal(Morris.parseDate("2012-10-15T12:34:55+0600"), Date.UTC(2012, 9, 15, 6, 34, 55));
+      equal(Morris.parseDate("2012-10-15T12:34:55+04:00"), Date.UTC(2012, 9, 15, 8, 34, 55));
+      equal(Morris.parseDate("2012-10-15T12:34:55-0600"), Date.UTC(2012, 9, 15, 18, 34, 55));
+      equal(Morris.parseDate("2012-10-15T12:34:55-04:00"), Date.UTC(2012, 9, 15, 16, 34, 55));
       equal(Morris.parseDate("2012-10-15 12:34:55.123"), new Date(2012, 9, 15, 12, 34, 55, 123).getTime());
       equal(Morris.parseDate("2012-10-15T12:34:55.123"), new Date(2012, 9, 15, 12, 34, 55, 123).getTime());
-      equal(Morris.parseDate("2012-10-15T12:34:55.123Z"), new Date(2012, 9, 15, 12, 34, 55, 123).getTime());
+      equal(Morris.parseDate("2012-10-15T12:34:55.123Z"), Date.UTC(2012, 9, 15, 12, 34, 55, 123));
       equal(Morris.parseDate(new Date(2012, 9, 15, 12, 34, 55, 123).getTime()),
         new Date(2012, 9, 15, 12, 34, 55, 123).getTime());
     });
