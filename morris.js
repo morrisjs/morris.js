@@ -58,7 +58,7 @@
         return new Date(x).toString();
       },
       xLabels: 'auto',
-      xLabelsFormat: null
+      xLabelFormat: null
     };
 
     Line.prototype.precalc = function() {
@@ -249,7 +249,7 @@
         if (this.columnLabels.length === 1 && this.options.xLabels === 'auto') {
           return drawLabel(this.columnLabels[0], this.xvals[0]);
         } else {
-          _ref = Morris.labelSeries(this.xmin, this.xmax, this.width, this.options.xLabels, this.options.xLabelsFormat);
+          _ref = Morris.labelSeries(this.xmin, this.xmax, this.width, this.options.xLabels, this.options.xLabelFormat);
           _results = [];
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             l = _ref[_i];
@@ -499,7 +499,7 @@
     return (number < 10 ? '0' : '') + number;
   };
 
-  Morris.labelSeries = function(dmin, dmax, pxwidth, specName, xLabelsFormat) {
+  Morris.labelSeries = function(dmin, dmax, pxwidth, specName, xLabelFormat) {
     var d, d0, ddensity, name, ret, s, spec, t, _i, _len, _ref;
     ddensity = 200 * (dmax - dmin) / pxwidth;
     d0 = new Date(dmin);
@@ -516,7 +516,11 @@
       }
     }
     if (spec === void 0) spec = Morris.LABEL_SPECS["second"];
-    if (xLabelsFormat) spec.fmt = xLabelsFormat;
+    if (xLabelFormat) {
+      spec = $.extend({}, spec, {
+        fmt: xLabelFormat
+      });
+    }
     d = spec.start(d0);
     ret = [];
     while ((t = d.getTime()) <= dmax) {

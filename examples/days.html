@@ -31,7 +31,10 @@ Morris.Line({
   xkey: 'period',
   ykeys: ['licensed', 'sorned'],
   labels: ['Licensed', 'SORN'],
-  xLabelsFormat: function(d) { return (d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear(); }
+  // custom label formatting with `xLabelFormat`
+  xLabelFormat: function(d) { return (d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear(); },
+  // setting `xLabels` is recommended when using xLabelFormat
+  xLabels: 'day'
 });
 </pre>
 </body>
