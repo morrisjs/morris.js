@@ -382,8 +382,8 @@ Morris.parseDate = (date) ->
   n = date.match /^(\d+)-(\d+)$/
   o = date.match /^(\d+)-(\d+)-(\d+)$/
   p = date.match /^(\d+) W(\d+)$/
-  q = date.match /^(\d+)-(\d+)-(\d+)[ T](\d+):(\d+)Z?$/
-  r = date.match /^(\d+)-(\d+)-(\d+)[ T](\d+):(\d+):(\d+(\.\d+)?)Z?$/
+  q = date.match /^(\d+)-(\d+)-(\d+)[ T](\d+):(\d+)(Z|([+-])(\d+):(\d+))?$/
+  r = date.match /^(\d+)-(\d+)-(\d+)[ T](\d+):(\d+):(\d+(\.\d+)?)(Z|([+-])(\d+):(\d+))?$/
   if m
     new Date(
       parseInt(m[1], 10),
@@ -408,24 +408,32 @@ Morris.parseDate = (date) ->
     # add weeks
     ret.getTime() + parseInt(p[2], 10) * 604800000
   else if q
-    new Date(
+    offsetmins = 0
+    if q[6] != 'Z'
+      offsetmins = parseInt(q[8], 10) * 60 + parseInt(q[9], 10)
+      offsetmins = 0 - offsetmins if q[7] == '+'
+    Date.UTC(
       parseInt(q[1], 10),
       parseInt(q[2], 10) - 1,
       parseInt(q[3], 10),
       parseInt(q[4], 10),
-      parseInt(q[5], 10)).getTime()
+      parseInt(q[5], 10) + offsetmins)
   else if r
+    offsetmins = 0
+    if r[8] != 'Z'
+      offsetmins = parseInt(r[10], 10) * 60 + parseInt(r[11], 10)
+      offsetmins = 0 - offsetmins if r[9] == '+'
     secs = parseFloat(r[6])
     isecs = Math.floor(secs)
-    msecs = Math.round((secs - isecs) * 1000)
-    new Date(
+    msecs = Math.floor((secs - isecs) * 1000)
+    Date.UTC(
       parseInt(r[1], 10),
       parseInt(r[2], 10) - 1,
       parseInt(r[3], 10),
       parseInt(r[4], 10),
-      parseInt(r[5], 10),
+      parseInt(r[5], 10) + offsetmins,
       isecs,
-      msecs).getTime()
+      msecs)
   else
     new Date(parseInt(date, 10), 0, 1).getTime()
 
