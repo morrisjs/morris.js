@@ -76,7 +76,7 @@
           <h2 id="download">Download</h2>
           <p>Get the latest version.</p>
           <p>
-            <a href="https://raw.github.com/oesmith/morris.js/0.2.7/morris.min.js" class="btn-large btn-primary">v0.2.7 (compressed js)</a>
+            <a href="https://raw.github.com/oesmith/morris.js/0.2.8/morris.min.js" class="btn-large btn-primary">v0.2.8 (compressed js)</a>
           </p>
         </div>
         <div class="span4">
@@ -251,8 +251,23 @@
               <tr>
                 <td><code>units</code></td><td>optional</td>
                 <td>
+                  <em>
+                    Deprecated.  Please use <code>postUnits</code>.
+                  </em>
+                </td>
+              </tr>
+              <tr>
+                <td><code>postUnits</code></td><td>optional</td>
+                <td>
                   Set to a string value (eg: <code>'%'</code>) to add a
-                  unit suffix all y-labels.
+                  label suffix all y-labels.
+                </td>
+              </tr>
+              <tr>
+                <td><code>preUnits</code></td><td>optional</td>
+                <td>
+                  Set to a string value (eg: <code>'$'</code>) to add a
+                  label prefix all y-labels.
                 </td>
               </tr>
               <tr>
@@ -286,6 +301,17 @@
                     <li><code>"5sec"</code></li>
                     <li><code>"second"</code></li>
                   </ul>
+                </td>
+              </tr>
+              <tr>
+                <td><code>xLabelFormat</code></td><td>optional</td>
+                <td>
+                  A function that accepts Date objects and formats
+                  them for display as x-axis labels.  Overrides the default
+                  formatter chosen by the automatic labeller or the
+                  <code>xLabels</code> option.
+                  <br>
+                  eg: <code>function (x) { return x.toString(); }</code>
                 </td>
               </tr>
             </tbody>
