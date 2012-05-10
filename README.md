@@ -29,6 +29,14 @@ Tests use [qunit](http://docs.jquery.com/QUnit), and are in `test.html`.
 
 ## Changelog
 
+### 0.2.8 - 10th May 2012
+
+- Customising x-axis labels with `xLabelFormat` option
+- Only use timezones when timezone info is specified
+- Fix old IE bugs (mostly in examples!)
+- Added `preunits` and `postunits` options
+- Better non-continuous series data support
+
 ### 0.2.7 - 2nd April 2012
 
 - Added `xLabels` option
