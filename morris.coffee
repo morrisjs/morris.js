@@ -14,6 +14,10 @@ class Morris.Line
       @el = $ document.getElementById(options.element)
     else
       @el = $ options.element
+
+    if @el == null || @el.length == 0
+      throw new Error("Graph placeholder not found.")
+
     @options = $.extend {}, @defaults, options
     # backwards compatibility for units -> postUnits
     if typeof @options.units is 'string'
@@ -21,6 +25,10 @@ class Morris.Line
     # bail if there's no data
     if @options.data is undefined or @options.data.length is 0
       return
+    else
+       # otherwise create a deep copy of the input data: we'll perform
+       # operations on it later so better not taint the user's data.
+       @options.data = clone(@options.data)
     @el.addClass 'graph-initialised'
     @precalc()
     @redraw()
@@ -513,6 +521,31 @@ Morris.labelSeries = (dmin, dmax, pxwidth, specName, xLabelFormat) ->
       ret.push [spec.fmt(d), t]
     spec.incr(d)
   return ret
+
+# Perform a deep copy of the given object.
+# Source: http://coffeescriptcookbook.com/chapters/classes_and_objects/cloning
+clone = (obj) ->
+  if not obj? or typeof obj isnt 'object'
+    return obj
+
+  if obj instanceof Date
+    return new Date(obj.getTime())
+
+  if obj instanceof RegExp
+    flags = ''
+    flags += 'g' if obj.global?
+    flags += 'i' if obj.ignoreCase?
+    flags += 'm' if obj.multiline?
+    flags += 'y' if obj.sticky?
+    return new RegExp(obj.source, flags)
+
+  newInstance = new obj.constructor()
+
+  for key of obj
+    newInstance[key] = clone obj[key]
+
+  return newInstance
+
 
 minutesSpecHelper = (interval) ->
   span: interval * 60 * 1000
