@@ -29,6 +29,9 @@
       } else {
         this.el = $(options.element);
       }
+      if (this.el === null || this.el.length === 0) {
+        throw new Error("Graph placeholder not found.");
+      }
       this.options = $.extend({}, this.defaults, options);
       if (typeof this.options.units === 'string') {
         this.options.postUnits = options.units;

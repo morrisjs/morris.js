@@ -14,6 +14,10 @@ class Morris.Line
       @el = $ document.getElementById(options.element)
     else
       @el = $ options.element
+
+    if @el == null || @el.length == 0
+      throw new Error("Graph placeholder not found.")
+
     @options = $.extend {}, @defaults, options
     # backwards compatibility for units -> postUnits
     if typeof @options.units is 'string'

@@ -11,7 +11,7 @@
 
     module("Morris");
 
-    test("Input data remains untouched", function() {
+    test("Input data remains untouched", function () {
         var my_data = [{x: 1, y: 1}, {x: 2, y: 2}];
         var expected_data = [{x: 1, y: 1}, {x: 2, y: 2}];
         Morris.Line({
@@ -22,6 +22,18 @@
             labels: ['dontcare']
         });
         deepEqual(my_data, expected_data);
+    });
+
+    test("Nicer error when the placeholder was not found.", function () {
+        var my_data = [{x: 1, y: 1}, {x: 2, y: 2}];
+        raises(function() {
+            Morris.Line({
+                element: "thisplacedoesnotexist",
+                data: my_data,
+                xkey: 'x',
+                ykeys: ['y'],
+                labels: ['dontcare']})
+        }, "Graph placeholder not found.");
     });
 
     test("Morris.commas", function () {
