@@ -247,9 +247,9 @@ class Morris.Line
       coords = @seriesCoords[i]
       if coords.length > 1
         path = @createPath coords, @options.marginTop, @left, @options.marginTop + @height, @left + @width
-        @r.path(path)
-          .attr('stroke', @options.lineColors[i])
-          .attr('stroke-width', @options.lineWidth)
+        tmp=@r.path(path)
+        tmp.attr('stroke', @options.lineColors[i])
+        tmp.attr('stroke-width', @options.lineWidth)
     @seriesPoints = ([] for i in [0..@seriesCoords.length-1])
     for i in [@seriesCoords.length-1..0]
       for c in @seriesCoords[i]
@@ -257,9 +257,9 @@ class Morris.Line
           circle = null
         else
           circle = @r.circle(c.x, c.y, @options.pointSize)
-            .attr('fill', @options.lineColors[i])
-            .attr('stroke-width', 1)
-            .attr('stroke', '#ffffff')
+          circle.attr('fill', @options.lineColors[i])
+          circle.attr('stroke-width', 1)
+          circle.attr('stroke', '#ffffff')
         @seriesPoints[i].push(circle)
 
   # create a path for a data series
@@ -318,8 +318,8 @@ class Morris.Line
     @yLabels = []
     for i in [0..@series.length-1]
       yLabel = @r.text(0, @options.hoverFontSize * 1.5 * (i + 1.5) - @hoverHeight / 2, '')
-        .attr('fill', @options.lineColors[i])
-        .attr('font-size', @options.hoverFontSize)
+      yLabel.attr('fill', @options.lineColors[i])
+      yLabel.attr('font-size', @options.hoverFontSize)
       @yLabels.push(yLabel)
       @hoverSet.push(yLabel)
 
