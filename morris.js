@@ -241,15 +241,20 @@
     };
 
     Line.prototype.drawGrid = function() {
-      var drawLabel, firstY, i, l, labelText, lastY, lineY, prevLabelMargin, v, xLabelMargin, y, yInterval, ypos, _i, _j, _k, _len, _ref, _ref1, _results, _results1,
+      var drawLabel, firstY, i, l, labelText, lastY, lineY, precision, prevLabelMargin, v, xLabelMargin, y, yInterval, ypos, _i, _j, _k, _len, _ref, _ref1, _results, _results1,
         _this = this;
       yInterval = (this.options.ymax - this.options.ymin) / (this.options.numLines - 1);
-      firstY = Math.ceil(this.options.ymin / yInterval) * yInterval;
-      lastY = Math.floor(this.options.ymax / yInterval) * yInterval;
+      firstY = (this.options.ymin / yInterval) * yInterval;
+      lastY = (this.options.ymax / yInterval) * yInterval;
+      if (yInterval < 1) {
+        precision = -parseInt(yInterval.toExponential().split('e')[1]);
+      } else {
+        precision = 0;
+      }
       for (lineY = _i = firstY; firstY <= lastY ? _i <= lastY : _i >= lastY; lineY = _i += yInterval) {
-        v = Math.floor(lineY);
+        v = lineY;
         y = this.transY(v);
-        this.r.text(this.left - this.options.marginLeft / 2, y, this.yLabelFormat(v)).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor).attr('text-anchor', 'end');
+        this.r.text(this.left - this.options.marginLeft / 2, y, this.yLabelFormat(v.toFixed(precision))).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor).attr('text-anchor', 'end');
         this.r.path("M" + this.left + "," + y + "H" + (this.left + this.width)).attr('stroke', this.options.gridLineColor).attr('stroke-width', this.options.gridStrokeWidth);
       }
       ypos = this.options.marginTop + this.height + this.options.marginBottom / 2;

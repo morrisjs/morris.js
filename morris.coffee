@@ -204,12 +204,18 @@ class Morris.Line
   drawGrid: ->
     # draw y axis labels, horizontal lines
     yInterval = (@options.ymax - @options.ymin) / (@options.numLines - 1)
-    firstY = Math.ceil(@options.ymin / yInterval) * yInterval
-    lastY = Math.floor(@options.ymax / yInterval) * yInterval
+    firstY = (@options.ymin / yInterval) * yInterval
+    lastY = (@options.ymax / yInterval) * yInterval
+
+    if (yInterval < 1)
+        precision =  -parseInt(yInterval.toExponential().split('e')[1])
+    else
+        precision = 0
+
     for lineY in [firstY..lastY] by yInterval
-      v = Math.floor(lineY)
+      v = lineY
       y = @transY(v)
-      @r.text(@left - @options.marginLeft/2, y, @yLabelFormat(v))
+      @r.text(@left - @options.marginLeft/2, y, @yLabelFormat(v.toFixed(precision)))
         .attr('font-size', @options.gridTextSize)
         .attr('fill', @options.gridTextColor)
         .attr('text-anchor', 'end')
