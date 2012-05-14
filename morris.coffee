@@ -149,6 +149,14 @@ class Morris.Line
   calc: ->
     w = @el.width()
     h = @el.height()
+
+    @yInterval = (@options.ymax - @options.ymin) / (@options.numLines - 1)
+
+    if (@yInterval < 1)
+        @precision =  -parseInt(@yInterval.toExponential().split('e')[1])
+    else
+        @precision = 0
+
     if @elementWidth != w or @elementHeight != h
       # calculate grid dimensions
       @maxYLabelWidth = Math.max(
@@ -203,11 +211,12 @@ class Morris.Line
   #
   drawGrid: ->
     # draw y axis labels, horizontal lines
-    yInterval = (@options.ymax - @options.ymin) / (@options.numLines - 1)
-    firstY = Math.ceil(@options.ymin / yInterval) * yInterval
-    lastY = Math.floor(@options.ymax / yInterval) * yInterval
-    for lineY in [firstY..lastY] by yInterval
-      v = Math.floor(lineY)
+    firstY = @options.ymin
+    lastY = @options.ymax
+
+
+    for lineY in [firstY..lastY] by @yInterval
+      v = lineY
       y = @transY(v)
       @r.text(@left - @options.marginLeft/2, y, @yLabelFormat(v))
         .attr('font-size', @options.gridTextSize)
@@ -383,7 +392,7 @@ class Morris.Line
     return ret
 
   yLabelFormat: (label) ->
-    "#{@options.preUnits}#{Morris.commas(label)}#{@options.postUnits}"
+    "#{@options.preUnits}#{Morris.commas(label.toFixed(@precision || 0))}#{@options.postUnits}"
 
 # parse a date into a javascript timestamp
 #
