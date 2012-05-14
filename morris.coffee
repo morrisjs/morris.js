@@ -149,11 +149,19 @@ class Morris.Line
   calc: ->
     w = @el.width()
     h = @el.height()
+
+    @yInterval = (@options.ymax - @options.ymin) / (@options.numLines - 1)
+
+    if (@yInterval < 1)
+        @precision =  -parseInt(@yInterval.toExponential().split('e')[1])
+    else
+        @precision = 0
+
     if @elementWidth != w or @elementHeight != h
       # calculate grid dimensions
       @maxYLabelWidth = Math.max(
-        @measureText(@yLabelFormat(@options.ymin), @options.gridTextSize).width,
-        @measureText(@yLabelFormat(@options.ymax), @options.gridTextSize).width)
+        @measureText(@yLabelFormat(@options.ymin.toFixed(@precision)), @options.gridTextSize).width,
+        @measureText(@yLabelFormat(@options.ymax.toFixed(@precision)), @options.gridTextSize).width)
       @left = @maxYLabelWidth + @options.marginLeft
       @width = @el.width() - @left - @options.marginRight
       @height = @el.height() - @options.marginTop - @options.marginBottom
@@ -203,19 +211,14 @@ class Morris.Line
   #
   drawGrid: ->
     # draw y axis labels, horizontal lines
-    yInterval = (@options.ymax - @options.ymin) / (@options.numLines - 1)
-    firstY = (@options.ymin / yInterval) * yInterval
-    lastY = (@options.ymax / yInterval) * yInterval
+    firstY = @options.ymin
+    lastY = @options.ymax
 
-    if (yInterval < 1)
-        precision =  -parseInt(yInterval.toExponential().split('e')[1])
-    else
-        precision = 0
 
-    for lineY in [firstY..lastY] by yInterval
+    for lineY in [firstY..lastY] by @yInterval
       v = lineY
       y = @transY(v)
-      @r.text(@left - @options.marginLeft/2, y, @yLabelFormat(v.toFixed(precision)))
+      @r.text(@left - @options.marginLeft/2, y, @yLabelFormat(v.toFixed(@precision)))
         .attr('font-size', @options.gridTextSize)
         .attr('fill', @options.gridTextColor)
         .attr('text-anchor', 'end')

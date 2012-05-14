@@ -178,8 +178,14 @@
         _this = this;
       w = this.el.width();
       h = this.el.height();
+      this.yInterval = (this.options.ymax - this.options.ymin) / (this.options.numLines - 1);
+      if (this.yInterval < 1) {
+        this.precision = -parseInt(this.yInterval.toExponential().split('e')[1]);
+      } else {
+        this.precision = 0;
+      }
       if (this.elementWidth !== w || this.elementHeight !== h) {
-        this.maxYLabelWidth = Math.max(this.measureText(this.yLabelFormat(this.options.ymin), this.options.gridTextSize).width, this.measureText(this.yLabelFormat(this.options.ymax), this.options.gridTextSize).width);
+        this.maxYLabelWidth = Math.max(this.measureText(this.yLabelFormat(this.options.ymin.toFixed(this.precision)), this.options.gridTextSize).width, this.measureText(this.yLabelFormat(this.options.ymax.toFixed(this.precision)), this.options.gridTextSize).width);
         this.left = this.maxYLabelWidth + this.options.marginLeft;
         this.width = this.el.width() - this.left - this.options.marginRight;
         this.height = this.el.height() - this.options.marginTop - this.options.marginBottom;
@@ -241,20 +247,14 @@
     };
 
     Line.prototype.drawGrid = function() {
-      var drawLabel, firstY, i, l, labelText, lastY, lineY, precision, prevLabelMargin, v, xLabelMargin, y, yInterval, ypos, _i, _j, _k, _len, _ref, _ref1, _results, _results1,
+      var drawLabel, firstY, i, l, labelText, lastY, lineY, prevLabelMargin, v, xLabelMargin, y, ypos, _i, _j, _k, _len, _ref, _ref1, _ref2, _results, _results1,
         _this = this;
-      yInterval = (this.options.ymax - this.options.ymin) / (this.options.numLines - 1);
-      firstY = (this.options.ymin / yInterval) * yInterval;
-      lastY = (this.options.ymax / yInterval) * yInterval;
-      if (yInterval < 1) {
-        precision = -parseInt(yInterval.toExponential().split('e')[1]);
-      } else {
-        precision = 0;
-      }
-      for (lineY = _i = firstY; firstY <= lastY ? _i <= lastY : _i >= lastY; lineY = _i += yInterval) {
+      firstY = this.options.ymin;
+      lastY = this.options.ymax;
+      for (lineY = _i = firstY, _ref = this.yInterval; firstY <= lastY ? _i <= lastY : _i >= lastY; lineY = _i += _ref) {
         v = lineY;
         y = this.transY(v);
-        this.r.text(this.left - this.options.marginLeft / 2, y, this.yLabelFormat(v.toFixed(precision))).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor).attr('text-anchor', 'end');
+        this.r.text(this.left - this.options.marginLeft / 2, y, this.yLabelFormat(v.toFixed(this.precision))).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor).attr('text-anchor', 'end');
         this.r.path("M" + this.left + "," + y + "H" + (this.left + this.width)).attr('stroke', this.options.gridLineColor).attr('stroke-width', this.options.gridStrokeWidth);
       }
       ypos = this.options.marginTop + this.height + this.options.marginBottom / 2;
@@ -274,17 +274,17 @@
         if (this.columnLabels.length === 1 && this.options.xLabels === 'auto') {
           return drawLabel(this.columnLabels[0], this.xvals[0]);
         } else {
-          _ref = Morris.labelSeries(this.xmin, this.xmax, this.width, this.options.xLabels, this.options.xLabelFormat);
+          _ref1 = Morris.labelSeries(this.xmin, this.xmax, this.width, this.options.xLabels, this.options.xLabelFormat);
           _results = [];
-          for (_j = 0, _len = _ref.length; _j < _len; _j++) {
-            l = _ref[_j];
+          for (_j = 0, _len = _ref1.length; _j < _len; _j++) {
+            l = _ref1[_j];
             _results.push(drawLabel(l[0], l[1]));
           }
           return _results;
         }
       } else {
         _results1 = [];
-        for (i = _k = 0, _ref1 = this.columnLabels.length; 0 <= _ref1 ? _k <= _ref1 : _k >= _ref1; i = 0 <= _ref1 ? ++_k : --_k) {
+        for (i = _k = 0, _ref2 = this.columnLabels.length; 0 <= _ref2 ? _k <= _ref2 : _k >= _ref2; i = 0 <= _ref2 ? ++_k : --_k) {
           labelText = this.columnLabels[this.columnLabels.length - i - 1];
           _results1.push(drawLabel(labelText, i));
         }
