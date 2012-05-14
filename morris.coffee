@@ -160,8 +160,8 @@ class Morris.Line
     if @elementWidth != w or @elementHeight != h
       # calculate grid dimensions
       @maxYLabelWidth = Math.max(
-        @measureText(@yLabelFormat(@options.ymin.toFixed(@precision)), @options.gridTextSize).width,
-        @measureText(@yLabelFormat(@options.ymax.toFixed(@precision)), @options.gridTextSize).width)
+        @measureText(@yLabelFormat(@options.ymin), @options.gridTextSize).width,
+        @measureText(@yLabelFormat(@options.ymax), @options.gridTextSize).width)
       @left = @maxYLabelWidth + @options.marginLeft
       @width = @el.width() - @left - @options.marginRight
       @height = @el.height() - @options.marginTop - @options.marginBottom
@@ -218,7 +218,7 @@ class Morris.Line
     for lineY in [firstY..lastY] by @yInterval
       v = lineY
       y = @transY(v)
-      @r.text(@left - @options.marginLeft/2, y, @yLabelFormat(v.toFixed(@precision)))
+      @r.text(@left - @options.marginLeft/2, y, @yLabelFormat(v))
         .attr('font-size', @options.gridTextSize)
         .attr('fill', @options.gridTextColor)
         .attr('text-anchor', 'end')
@@ -392,7 +392,7 @@ class Morris.Line
     return ret
 
   yLabelFormat: (label) ->
-    "#{@options.preUnits}#{Morris.commas(label)}#{@options.postUnits}"
+    "#{@options.preUnits}#{Morris.commas(label.toFixed(@precision || 0))}#{@options.postUnits}"
 
 # parse a date into a javascript timestamp
 #

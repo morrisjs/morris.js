@@ -185,7 +185,7 @@
         this.precision = 0;
       }
       if (this.elementWidth !== w || this.elementHeight !== h) {
-        this.maxYLabelWidth = Math.max(this.measureText(this.yLabelFormat(this.options.ymin.toFixed(this.precision)), this.options.gridTextSize).width, this.measureText(this.yLabelFormat(this.options.ymax.toFixed(this.precision)), this.options.gridTextSize).width);
+        this.maxYLabelWidth = Math.max(this.measureText(this.yLabelFormat(this.options.ymin), this.options.gridTextSize).width, this.measureText(this.yLabelFormat(this.options.ymax), this.options.gridTextSize).width);
         this.left = this.maxYLabelWidth + this.options.marginLeft;
         this.width = this.el.width() - this.left - this.options.marginRight;
         this.height = this.el.height() - this.options.marginTop - this.options.marginBottom;
@@ -254,7 +254,7 @@
       for (lineY = _i = firstY, _ref = this.yInterval; firstY <= lastY ? _i <= lastY : _i >= lastY; lineY = _i += _ref) {
         v = lineY;
         y = this.transY(v);
-        this.r.text(this.left - this.options.marginLeft / 2, y, this.yLabelFormat(v.toFixed(this.precision))).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor).attr('text-anchor', 'end');
+        this.r.text(this.left - this.options.marginLeft / 2, y, this.yLabelFormat(v)).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor).attr('text-anchor', 'end');
         this.r.path("M" + this.left + "," + y + "H" + (this.left + this.width)).attr('stroke', this.options.gridLineColor).attr('stroke-width', this.options.gridStrokeWidth);
       }
       ypos = this.options.marginTop + this.height + this.options.marginBottom / 2;
@@ -475,7 +475,7 @@
     };
 
     Line.prototype.yLabelFormat = function(label) {
-      return "" + this.options.preUnits + (Morris.commas(label)) + this.options.postUnits;
+      return "" + this.options.preUnits + (Morris.commas(label.toFixed(this.precision || 0))) + this.options.postUnits;
     };
 
     return Line;
