@@ -25,10 +25,6 @@ class Morris.Line
     # bail if there's no data
     if @options.data is undefined or @options.data.length is 0
       return
-    else
-       # otherwise create a deep copy of the input data: we'll perform
-       # operations on it later so better not taint the user's data.
-       @options.data = clone(@options.data)
     @el.addClass 'graph-initialised'
     @precalc()
     @redraw()
@@ -79,7 +75,8 @@ class Morris.Line
   # Do any necessary pre-processing for a new dataset
   #
   precalc: ->
-    # sort data
+    # shallow copy & sort data
+    @options.data = @options.data.slice(0)
     @options.data.sort (a, b) => (a[@options.xkey] < b[@options.xkey]) - (b[@options.xkey] < a[@options.xkey])
     # extract labels
     @columnLabels = $.map @options.data, (d) => d[@options.xkey]
@@ -521,31 +518,6 @@ Morris.labelSeries = (dmin, dmax, pxwidth, specName, xLabelFormat) ->
       ret.push [spec.fmt(d), t]
     spec.incr(d)
   return ret
-
-# Perform a deep copy of the given object.
-# Source: http://coffeescriptcookbook.com/chapters/classes_and_objects/cloning
-clone = (obj) ->
-  if not obj? or typeof obj isnt 'object'
-    return obj
-
-  if obj instanceof Date
-    return new Date(obj.getTime())
-
-  if obj instanceof RegExp
-    flags = ''
-    flags += 'g' if obj.global?
-    flags += 'i' if obj.ignoreCase?
-    flags += 'm' if obj.multiline?
-    flags += 'y' if obj.sticky?
-    return new RegExp(obj.source, flags)
-
-  newInstance = new obj.constructor()
-
-  for key of obj
-    newInstance[key] = clone obj[key]
-
-  return newInstance
-
 
 minutesSpecHelper = (interval) ->
   span: interval * 60 * 1000
