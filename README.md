@@ -29,6 +29,11 @@ Tests use [qunit](http://docs.jquery.com/QUnit), and are in `test.html`.
 
 ## Changelog
 
+### 0.2.9 - 15th May 2012
+
+- Bugfix: Fix zero-value regression
+- Bugfix: Don't modify user-supplied data
+
 ### 0.2.8 - 10th May 2012
 
 - Customising x-axis labels with `xLabelFormat` option
