@@ -99,7 +99,7 @@
         _ref1 = this.options.data;
         for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
           d = _ref1[_j];
-          series_data.push(d[ykey] || null);
+          series_data.push(d[ykey] || 0);
         }
         this.series.push(series_data);
       }

@@ -87,7 +87,7 @@ class Morris.Line
     for ykey in @options.ykeys
       series_data = []
       for d in @options.data
-        series_data.push(d[ykey] or null)
+        series_data.push(d[ykey] or 0)
       @series.push(series_data)
 
     # translate x labels into nominal dates
