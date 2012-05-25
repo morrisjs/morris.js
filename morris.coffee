@@ -71,6 +71,9 @@ class Morris.Line
     dateFormat: (x) -> new Date(x).toString()
     xLabels: 'auto'
     xLabelFormat: null
+    animate: true
+    easing: "bounce"
+    duration: 1500
 
   # Do any necessary pre-processing for a new dataset
   #
@@ -248,23 +251,39 @@ class Morris.Line
   # draw the data series
   #
   drawSeries: ->
+    averages = []
     for i in [@seriesCoords.length-1..0]
       coords = @seriesCoords[i]
       if coords.length > 1
         path = @createPath coords, @options.marginTop, @left, @options.marginTop + @height, @left + @width
-        @r.path(path)
-          .attr('stroke', @options.lineColors[i])
-          .attr('stroke-width', @options.lineWidth)
+        if @options.animate
+          averages[i] = average = Morris.seriesAverage(coords)
+          straightCoords = ({x:c.x, y:average} for c in coords)
+          straightPath = @createPath straightCoords, @options.marginTop, @left, @options.marginTop + @height, @left + @width
+          rPath = @r.path(straightPath)
+            .attr('stroke', @options.lineColors[i])
+            .attr('stroke-width', @options.lineWidth)
+          do (rPath, path) =>
+            rPath.animate {path}, @options.duration, @options.easing
+        else
+          @r.path(path)
+            .attr('stroke', @options.lineColors[i])
+            .attr('stroke-width', @options.lineWidth)
     @seriesPoints = ([] for i in [0..@seriesCoords.length-1])
     for i in [@seriesCoords.length-1..0]
       for c in @seriesCoords[i]
         if c == null
           circle = null
         else
-          circle = @r.circle(c.x, c.y, @options.pointSize)
+          y = if @options.animate then averages[i] else c.y
+          circle = @r.circle(c.x, y, @options.pointSize)
             .attr('fill', @options.lineColors[i])
             .attr('stroke-width', 1)
             .attr('stroke', '#ffffff')
+          if @options.animate
+            do (circle, c) =>
+              circle.animate {cy:c.y}, @options.duration, @options.easing
+
         @seriesPoints[i].push(circle)
 
   # create a path for a data series
@@ -564,6 +583,13 @@ Morris.AUTO_LABEL_ORDER = [
   "30min", "15min", "10min", "5min", "minute",
   "30sec", "15sec", "10sec", "5sec", "second"
 ]
+
+Morris.seriesAverage = (series) ->
+  total = 0
+  for point in series
+    total += point.y ? 0
+  (total / series.length) / 2
+
 
 window.Morris = Morris
 # vim: set et ts=2 sw=2 sts=2
