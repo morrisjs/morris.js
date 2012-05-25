@@ -538,6 +538,7 @@ Morris.labelSeries = (dmin, dmax, pxwidth, specName, xLabelFormat) ->
   return ret
 
 Morris.seriesAverage = (series) ->
+  console.log series
   total = 0
   for point in series
     total += point.y ? 0 if point?
