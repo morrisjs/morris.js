@@ -303,10 +303,12 @@
               _results = [];
               for (_j = 0, _len = coords.length; _j < _len; _j++) {
                 c = coords[_j];
-                _results.push({
-                  x: c.x,
-                  y: average
-                });
+                if (c != null) {
+                  _results.push({
+                    x: c.x,
+                    y: average
+                  });
+                }
               }
               return _results;
             })();
@@ -627,10 +629,13 @@
 
   Morris.seriesAverage = function(series) {
     var point, total, _i, _len, _ref;
+    console.log(series);
     total = 0;
     for (_i = 0, _len = series.length; _i < _len; _i++) {
       point = series[_i];
-      total += (_ref = point.y) != null ? _ref : 0;
+      if (point != null) {
+        total += (_ref = point.y) != null ? _ref : 0;
+      }
     }
     return (total / series.length) / 2;
   };

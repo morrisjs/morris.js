@@ -258,7 +258,7 @@ class Morris.Line
         path = @createPath coords, @options.marginTop, @left, @options.marginTop + @height, @left + @width
         if @options.animate
           averages[i] = average = Morris.seriesAverage(coords)
-          straightCoords = ({x:c.x, y:average} for c in coords)
+          straightCoords = ({x:c.x, y:average} for c in coords when c?)
           straightPath = @createPath straightCoords, @options.marginTop, @left, @options.marginTop + @height, @left + @width
           rPath = @r.path(straightPath)
             .attr('stroke', @options.lineColors[i])
@@ -540,7 +540,7 @@ Morris.labelSeries = (dmin, dmax, pxwidth, specName, xLabelFormat) ->
 Morris.seriesAverage = (series) ->
   total = 0
   for point in series
-    total += point.y ? 0
+    total += point.y ? 0 if point?
   (total / series.length) / 2
 
 minutesSpecHelper = (interval) ->
