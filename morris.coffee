@@ -237,8 +237,10 @@ class Morris.Line
         .attr('font-size', @options.gridTextSize)
         .attr('fill', @options.gridTextColor)
       labelBox = label.getBBox()
-      # ensure a minimum of `xLabelMargin` pixels between labels
-      if prevLabelMargin is null or prevLabelMargin <= labelBox.x
+      # ensure a minimum of `xLabelMargin` pixels between labels, and ensure
+      # labels don't overflow the container
+      if (prevLabelMargin is null or prevLabelMargin <= labelBox.x) and
+          labelBox.x >= 0 and (labelBox.x + labelBox.width) < @el.width()
         prevLabelMargin = labelBox.x + labelBox.width + xLabelMargin
       else
         label.remove()

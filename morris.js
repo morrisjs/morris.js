@@ -271,7 +271,7 @@
         var label, labelBox;
         label = _this.r.text(_this.transX(xpos), ypos, labelText).attr('font-size', _this.options.gridTextSize).attr('fill', _this.options.gridTextColor);
         labelBox = label.getBBox();
-        if (prevLabelMargin === null || prevLabelMargin <= labelBox.x) {
+        if ((prevLabelMargin === null || prevLabelMargin <= labelBox.x) && labelBox.x >= 0 && (labelBox.x + labelBox.width) < _this.el.width()) {
           return prevLabelMargin = labelBox.x + labelBox.width + xLabelMargin;
         } else {
           return label.remove();
