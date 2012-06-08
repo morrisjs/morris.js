@@ -87,7 +87,10 @@ class Morris.Line
     for ykey in @options.ykeys
       series_data = []
       for d in @options.data
-        series_data.push(if typeof d[ykey] == 'number' then d[ykey] else null)
+        series_data.push switch typeof d[ykey]
+          when 'number' then d[ykey]
+          when 'string' then parseFloat(d[ykey])
+          else null
       @series.push(series_data)
 
     # translate x labels into nominal dates

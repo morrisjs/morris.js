@@ -97,7 +97,16 @@
         _ref1 = this.options.data;
         for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
           d = _ref1[_j];
-          series_data.push(typeof d[ykey] === 'number' ? d[ykey] : null);
+          series_data.push((function() {
+            switch (typeof d[ykey]) {
+              case 'number':
+                return d[ykey];
+              case 'string':
+                return parseFloat(d[ykey]);
+              default:
+                return null;
+            }
+          })());
         }
         this.series.push(series_data);
       }
