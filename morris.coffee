@@ -127,6 +127,12 @@ class Morris.Line
       else
         @options.ymin = ymin
 
+    @yInterval = (@options.ymax - @options.ymin) / (@options.numLines - 1)
+    if @yInterval > 0 and @yInterval < 1
+        @precision =  -Math.floor(Math.log(@yInterval) / Math.log(10))
+    else
+        @precision = 0
+
     # Some instance variables for later
     @pointGrow = Raphael.animation r: @options.pointSize + 3, 25, 'linear'
     @pointShrink = Raphael.animation r: @options.pointSize, 25, 'linear'
@@ -152,13 +158,6 @@ class Morris.Line
   calc: ->
     w = @el.width()
     h = @el.height()
-
-    @yInterval = (@options.ymax - @options.ymin) / (@options.numLines - 1)
-
-    if (@yInterval < 1)
-        @precision =  -parseInt(@yInterval.toExponential().split('e')[1])
-    else
-        @precision = 0
 
     if @elementWidth != w or @elementHeight != h
       # calculate grid dimensions
@@ -219,7 +218,7 @@ class Morris.Line
 
 
     for lineY in [firstY..lastY] by @yInterval
-      v = lineY
+      v = parseFloat(lineY.toFixed(@precision))
       y = @transY(v)
       @r.text(@left - @options.marginLeft/2, y, @yLabelFormat(v))
         .attr('font-size', @options.gridTextSize)
@@ -395,7 +394,7 @@ class Morris.Line
     return ret
 
   yLabelFormat: (label) ->
-    "#{@options.preUnits}#{Morris.commas(label.toFixed(@precision || 0))}#{@options.postUnits}"
+    "#{@options.preUnits}#{Morris.commas(label)}#{@options.postUnits}"
 
 # parse a date into a javascript timestamp
 #

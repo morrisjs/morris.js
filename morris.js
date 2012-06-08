@@ -152,6 +152,12 @@
           this.options.ymin = ymin;
         }
       }
+      this.yInterval = (this.options.ymax - this.options.ymin) / (this.options.numLines - 1);
+      if (this.yInterval > 0 && this.yInterval < 1) {
+        this.precision = -Math.floor(Math.log(this.yInterval) / Math.log(10));
+      } else {
+        this.precision = 0;
+      }
       this.pointGrow = Raphael.animation({
         r: this.options.pointSize + 3
       }, 25, 'linear');
@@ -185,12 +191,6 @@
         _this = this;
       w = this.el.width();
       h = this.el.height();
-      this.yInterval = (this.options.ymax - this.options.ymin) / (this.options.numLines - 1);
-      if (this.yInterval < 1) {
-        this.precision = -parseInt(this.yInterval.toExponential().split('e')[1]);
-      } else {
-        this.precision = 0;
-      }
       if (this.elementWidth !== w || this.elementHeight !== h) {
         this.maxYLabelWidth = Math.max(this.measureText(this.yLabelFormat(this.options.ymin), this.options.gridTextSize).width, this.measureText(this.yLabelFormat(this.options.ymax), this.options.gridTextSize).width);
         this.left = this.maxYLabelWidth + this.options.marginLeft;
@@ -259,7 +259,7 @@
       firstY = this.options.ymin;
       lastY = this.options.ymax;
       for (lineY = _i = firstY, _ref = this.yInterval; firstY <= lastY ? _i <= lastY : _i >= lastY; lineY = _i += _ref) {
-        v = lineY;
+        v = parseFloat(lineY.toFixed(this.precision));
         y = this.transY(v);
         this.r.text(this.left - this.options.marginLeft / 2, y, this.yLabelFormat(v)).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor).attr('text-anchor', 'end');
         this.r.path("M" + this.left + "," + y + "H" + (this.left + this.width)).attr('stroke', this.options.gridLineColor).attr('stroke-width', this.options.gridStrokeWidth);
@@ -482,7 +482,7 @@
     };
 
     Line.prototype.yLabelFormat = function(label) {
-      return "" + this.options.preUnits + (Morris.commas(label.toFixed(this.precision || 0))) + this.options.postUnits;
+      return "" + this.options.preUnits + (Morris.commas(label)) + this.options.postUnits;
     };
 
     return Line;
