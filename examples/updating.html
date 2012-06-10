@@ -13,30 +13,36 @@
 <div id="graph"></div>
 <div id="reloadStatus">
 <pre id="code" class="prettyprint linenums">
+
 var nReloads = 0;
-var data = [
-  {'date': '2012-06-01 15:06:57', 'Apples': 672, 'Bananas': 644, 'Oranges': 185, 'Peaches': 218, 'Pears': 0},
-  {'date': '2012-06-01 15:06:58', 'Apples': 380, 'Bananas': 259, 'Oranges': 65, 'Peaches': 115, 'Pears': 0},
-  {'date': '2012-06-01 15:06:59', 'Apples': 305, 'Bananas': 258, 'Oranges': 60, 'Peaches': 132, 'Pears': 0},
-  {'date': '2012-06-01 15:07:00', 'Apples': 568, 'Bananas': 481, 'Oranges': 137, 'Peaches': 215, 'Pears': 0},
-  {'date': '2012-06-01 15:07:01', 'Apples': 654, 'Bananas': 538, 'Oranges': 162, 'Peaches': 265, 'Pears': 0}
-];
+function data(offset) {
+  var ret = [];
+  for (var x = 0; x <= 360; x += 10) {
+    var v = (offset + x) % 360;
+    ret.push({
+      x: x,
+      y: Math.sin(Math.PI * v / 180).toFixed(4),
+      z: Math.cos(Math.PI * v / 180).toFixed(4)
+    });
+  }
+  return ret;
+}
 var graph = Morris.Line({
     element: 'graph',
-    data: data,
-    xkey: 'date',
-    ykeys: ['Apples', 'Bananas', 'Oranges', 'Peaches', 'Pears'],
-    labels: ['Apples', 'Bananas', 'Oranges', 'Peaches', 'Pears'],
+    data: data(0),
+    xkey: 'x',
+    ykeys: ['y', 'z'],
+    labels: ['sin()', 'cos()'],
     parseTime: false,
-    hideHover: true,
-    ymin: 0,
-    ymax: 'auto 100'
+    ymin: -1.0,
+    ymax: 1.0,
+    hideHover: true
 });
 function update() {
-  graph.setData(data);
   nReloads++;
+  graph.setData(data(5 * nReloads));
   $('#reloadStatus').text(nReloads + ' reloads');
 }
-setInterval(update, 50);
+setInterval(update, 100);
 </pre>
 </body>
