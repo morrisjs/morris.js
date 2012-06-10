@@ -19,6 +19,9 @@
       this.transY = __bind(this.transY, this);
 
       this.transX = __bind(this.transX, this);
+
+      var touchHandler,
+        _this = this;
       if (!(this instanceof Morris.Line)) {
         return new Morris.Line(options);
       }
@@ -38,8 +41,35 @@
         return;
       }
       this.el.addClass('graph-initialised');
-      this.precalc();
-      this.redraw();
+      this.r = new Raphael(this.el[0]);
+      this.pointGrow = Raphael.animation({
+        r: this.options.pointSize + 3
+      }, 25, 'linear');
+      this.pointShrink = Raphael.animation({
+        r: this.options.pointSize
+      }, 25, 'linear');
+      this.elementWidth = null;
+      this.elementHeight = null;
+      this.dirty = false;
+      this.prevHilight = null;
+      this.el.mousemove(function(evt) {
+        return _this.updateHilight(evt.pageX);
+      });
+      if (this.options.hideHover) {
+        this.el.mouseout(function(evt) {
+          return _this.hilight(null);
+        });
+      }
+      touchHandler = function(evt) {
+        var touch;
+        touch = evt.originalEvent.touches[0] || evt.originalEvent.changedTouches[0];
+        _this.updateHilight(touch.pageX);
+        return touch;
+      };
+      this.el.bind('touchstart', touchHandler);
+      this.el.bind('touchmove', touchHandler);
+      this.el.bind('touchend', touchHandler);
+      this.setData(this.options.data);
     }
 
     Line.prototype.defaults = {
@@ -78,10 +108,13 @@
       xLabelFormat: null
     };
 
-    Line.prototype.precalc = function() {
-      var d, series_data, touchHandler, ykey, ymax, ymin, _i, _j, _k, _len, _len1, _ref, _ref1, _ref2, _results,
+    Line.prototype.setData = function(data, redraw) {
+      var d, series_data, ykey, ymax, ymin, _i, _j, _k, _len, _len1, _ref, _ref1, _ref2, _results,
         _this = this;
-      this.options.data = this.options.data.slice(0);
+      if (redraw == null) {
+        redraw = true;
+      }
+      this.options.data = data.slice(0);
       this.options.data.sort(function(a, b) {
         return (a[_this.options.xkey] < b[_this.options.xkey]) - (b[_this.options.xkey] < a[_this.options.xkey]);
       });
@@ -158,32 +191,10 @@
       } else {
         this.precision = 0;
       }
-      this.pointGrow = Raphael.animation({
-        r: this.options.pointSize + 3
-      }, 25, 'linear');
-      this.pointShrink = Raphael.animation({
-        r: this.options.pointSize
-      }, 25, 'linear');
-      this.elementWidth = null;
-      this.elementHeight = null;
-      this.prevHilight = null;
-      this.el.mousemove(function(evt) {
-        return _this.updateHilight(evt.pageX);
-      });
-      if (this.options.hideHover) {
-        this.el.mouseout(function(evt) {
-          return _this.hilight(null);
-        });
+      this.dirty = true;
+      if (redraw) {
+        return this.redraw();
       }
-      touchHandler = function(evt) {
-        var touch;
-        touch = evt.originalEvent.touches[0] || evt.originalEvent.changedTouches[0];
-        _this.updateHilight(touch.pageX);
-        return touch;
-      };
-      this.el.bind('touchstart', touchHandler);
-      this.el.bind('touchmove', touchHandler);
-      return this.el.bind('touchend', touchHandler);
     };
 
     Line.prototype.calc = function() {
@@ -191,7 +202,10 @@
         _this = this;
       w = this.el.width();
       h = this.el.height();
-      if (this.elementWidth !== w || this.elementHeight !== h) {
+      if (this.elementWidth !== w || this.elementHeight !== h || this.dirty) {
+        this.elementWidth = w;
+        this.elementHeight = h;
+        this.dirty = false;
         this.maxYLabelWidth = Math.max(this.measureText(this.yLabelFormat(this.options.ymin), this.options.gridTextSize).width, this.measureText(this.yLabelFormat(this.options.ymax), this.options.gridTextSize).width);
         this.left = this.maxYLabelWidth + this.options.marginLeft;
         this.width = this.el.width() - this.left - this.options.marginRight;
@@ -244,8 +258,7 @@
     };
 
     Line.prototype.redraw = function() {
-      this.el.empty();
-      this.r = new Raphael(this.el[0]);
+      this.r.clear();
       this.calc();
       this.drawGrid();
       this.drawSeries();

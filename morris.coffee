@@ -26,8 +26,32 @@ class Morris.Line
     if @options.data is undefined or @options.data.length is 0
       return
     @el.addClass 'graph-initialised'
-    @precalc()
-    @redraw()
+
+    # the raphael drawing instance
+    @r = new Raphael(@el[0])
+
+    # Some instance variables for later
+    @pointGrow = Raphael.animation r: @options.pointSize + 3, 25, 'linear'
+    @pointShrink = Raphael.animation r: @options.pointSize, 25, 'linear'
+    @elementWidth = null
+    @elementHeight = null
+    @dirty = false
+    # column hilight events
+    @prevHilight = null
+    @el.mousemove (evt) =>
+      @updateHilight evt.pageX
+    if @options.hideHover
+      @el.mouseout (evt) =>
+        @hilight null
+    touchHandler = (evt) =>
+      touch = evt.originalEvent.touches[0] or evt.originalEvent.changedTouches[0]
+      @updateHilight touch.pageX
+      return touch
+    @el.bind 'touchstart', touchHandler
+    @el.bind 'touchmove', touchHandler
+    @el.bind 'touchend', touchHandler
+
+    @setData(@options.data)
 
   # Default configuration
   #
@@ -72,11 +96,11 @@ class Morris.Line
     xLabels: 'auto'
     xLabelFormat: null
 
-  # Do any necessary pre-processing for a new dataset
+  # Pre-process data
   #
-  precalc: ->
+  setData: (data, redraw = true) ->
     # shallow copy & sort data
-    @options.data = @options.data.slice(0)
+    @options.data = data.slice(0)
     @options.data.sort (a, b) => (a[@options.xkey] < b[@options.xkey]) - (b[@options.xkey] < a[@options.xkey])
     # extract labels
     @columnLabels = $.map @options.data, (d) => d[@options.xkey]
@@ -133,25 +157,8 @@ class Morris.Line
     else
         @precision = 0
 
-    # Some instance variables for later
-    @pointGrow = Raphael.animation r: @options.pointSize + 3, 25, 'linear'
-    @pointShrink = Raphael.animation r: @options.pointSize, 25, 'linear'
-    @elementWidth = null
-    @elementHeight = null
-    # column hilight events
-    @prevHilight = null
-    @el.mousemove (evt) =>
-      @updateHilight evt.pageX
-    if @options.hideHover
-      @el.mouseout (evt) =>
-        @hilight null
-    touchHandler = (evt) =>
-      touch = evt.originalEvent.touches[0] or evt.originalEvent.changedTouches[0]
-      @updateHilight touch.pageX
-      return touch
-    @el.bind 'touchstart', touchHandler
-    @el.bind 'touchmove', touchHandler
-    @el.bind 'touchend', touchHandler
+    @dirty = true
+    @redraw() if redraw
 
   # Do any size-related calculations
   #
@@ -159,7 +166,10 @@ class Morris.Line
     w = @el.width()
     h = @el.height()
 
-    if @elementWidth != w or @elementHeight != h
+    if @elementWidth != w or @elementHeight != h or @dirty
+      @elementWidth = w
+      @elementHeight = h
+      @dirty = false
       # calculate grid dimensions
       @maxYLabelWidth = Math.max(
         @measureText(@yLabelFormat(@options.ymin), @options.gridTextSize).width,
@@ -197,12 +207,7 @@ class Morris.Line
   # Clear and redraw the graph
   #
   redraw: ->
-    # remove child elements (get rid of old drawings)
-    @el.empty()
-
-    # the raphael drawing instance
-    @r = new Raphael(@el[0])
-
+    @r.clear()
     @calc()
     @drawGrid()
     @drawSeries()
