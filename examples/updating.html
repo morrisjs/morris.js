@@ -1,0 +1,42 @@
+<!doctype html>
+<head>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+  <script src="https://raw.github.com/DmitryBaranovskiy/raphael/300aa589f5a0ba7fce667cd62c7cdda0bd5ad904/raphael-min.js"></script>
+  <script src="../morris.js"></script>
+  <script src="lib/prettify.js"></script>
+  <script src="lib/example.js"></script>
+  <link rel="stylesheet" href="lib/example.css">
+  <link rel="stylesheet" href="lib/prettify.css">
+</head>
+<body>
+<h1>Memory leak test</h1>
+<div id="graph"></div>
+<div id="reloadStatus">
+<pre id="code" class="prettyprint linenums">
+var nReloads = 0;
+var data = [
+  {'date': '2012-06-01 15:06:57', 'Apples': 672, 'Bananas': 644, 'Oranges': 185, 'Peaches': 218, 'Pears': 0},
+  {'date': '2012-06-01 15:06:58', 'Apples': 380, 'Bananas': 259, 'Oranges': 65, 'Peaches': 115, 'Pears': 0},
+  {'date': '2012-06-01 15:06:59', 'Apples': 305, 'Bananas': 258, 'Oranges': 60, 'Peaches': 132, 'Pears': 0},
+  {'date': '2012-06-01 15:07:00', 'Apples': 568, 'Bananas': 481, 'Oranges': 137, 'Peaches': 215, 'Pears': 0},
+  {'date': '2012-06-01 15:07:01', 'Apples': 654, 'Bananas': 538, 'Oranges': 162, 'Peaches': 265, 'Pears': 0}
+];
+var graph = Morris.Line({
+    element: 'graph',
+    data: data,
+    xkey: 'date',
+    ykeys: ['Apples', 'Bananas', 'Oranges', 'Peaches', 'Pears'],
+    labels: ['Apples', 'Bananas', 'Oranges', 'Peaches', 'Pears'],
+    parseTime: false,
+    hideHover: true,
+    ymin: 0,
+    ymax: 'auto 100'
+});
+function update() {
+  graph.setData(data);
+  nReloads++;
+  $('#reloadStatus').text(nReloads + ' reloads');
+}
+setInterval(update, 50);
+</pre>
+</body>
