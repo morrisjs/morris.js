@@ -267,7 +267,7 @@ class Morris.Line
   #
   drawSeries: ->
     for i in [@seriesCoords.length-1..0]
-      coords = @seriesCoords[i]
+      coords = $.map(@seriesCoords[i], (c) -> c)
       if coords.length > 1
         path = @createPath coords, @options.marginTop, @left, @options.marginTop + @height, @left + @width
         @r.path(path)
@@ -287,9 +287,8 @@ class Morris.Line
 
   # create a path for a data series
   #
-  createPath: (all_coords, top, left, bottom, right) ->
+  createPath: (coords, top, left, bottom, right) ->
     path = ""
-    coords = $.map(all_coords, (c) -> c)
     if @options.smooth
       grads = @gradients coords
       for i in [0..coords.length-1]
