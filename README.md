@@ -41,7 +41,7 @@ Once you're all set up, you can compile, minify and run the tests using `grunt`.
 
 ### 0.2.10 - 26th June 2012
 
-- Support for decimal labels on y-axis [#62](https://github.com/oesmith/morris.js/issues/62).
+- Support for decimal labels on y-axis [#58](https://github.com/oesmith/morris.js/issues/58).
 - Better axis label clipping [#63](https://github.com/oesmith/morris.js/issues/63).
 - Redraw graphs with updated data using `setData` method [#64](https://github.com/oesmith/morris.js/issues/64).
 - Bugfix: series with zero or one non-null values [#65](https://github.com/oesmith/morris.js/issues/65).
