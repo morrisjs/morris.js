@@ -1,0 +1,21 @@
+{
+  "name": "Morris.js",
+  "version": "0.2.10",
+  "homepage": "http://oesmith.github.com/morris.js",
+  "description": "Pretty time-series line graphs",
+  "author": {
+    "name": "Olly Smith",
+    "email": "olly@oesmith.co.uk"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/oesmith/morris.js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/oesmith/morris.js/issues"
+  },
+  "devDependencies": {
+    "grunt-coffee": "0.0.x",
+    "grunt-mocha": "git+https://github.com/oesmith/grunt-mocha.git#0e67fc4"
+  }
+}
