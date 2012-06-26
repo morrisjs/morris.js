@@ -314,7 +314,9 @@
     Line.prototype.drawSeries = function() {
       var c, circle, coords, i, path, _i, _j, _ref, _ref1, _results;
       for (i = _i = _ref = this.seriesCoords.length - 1; _ref <= 0 ? _i <= 0 : _i >= 0; i = _ref <= 0 ? ++_i : --_i) {
-        coords = this.seriesCoords[i];
+        coords = $.map(this.seriesCoords[i], function(c) {
+          return c;
+        });
         if (coords.length > 1) {
           path = this.createPath(coords, this.options.marginTop, this.left, this.options.marginTop + this.height, this.left + this.width);
           this.r.path(path).attr('stroke', this.options.lineColors[i]).attr('stroke-width', this.options.lineWidth);
@@ -349,12 +351,9 @@
       return _results;
     };
 
-    Line.prototype.createPath = function(all_coords, top, left, bottom, right) {
-      var c, coords, g, grads, i, ix, lc, lg, path, x1, x2, y1, y2, _i, _ref;
+    Line.prototype.createPath = function(coords, top, left, bottom, right) {
+      var c, g, grads, i, ix, lc, lg, path, x1, x2, y1, y2, _i, _ref;
       path = "";
-      coords = $.map(all_coords, function(c) {
-        return c;
-      });
       if (this.options.smooth) {
         grads = this.gradients(coords);
         for (i = _i = 0, _ref = coords.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
