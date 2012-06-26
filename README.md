@@ -25,7 +25,17 @@ Very daring.
 
 Fork, hack, possibly even add some tests, then send a pull request :)
 
-Tests use [qunit](http://docs.jquery.com/QUnit), and are in `test.html`.
+### Developer quick-start
+
+You'll need [node.js](https://nodejs.org).  I recommend using
+[nvm](https://github.com/creationix/nvm) for installing node in
+development environments.
+
+With node installed, install [grunt](https://github.com/cowboy/grunt) using
+`npm install -g grunt`, and then the rest of the test/build dependencies
+with `npm install` in the morris.js project folder.
+
+Once you're all set up, you can compile, minify and run the tests using `grunt`.
 
 ## Changelog
 
