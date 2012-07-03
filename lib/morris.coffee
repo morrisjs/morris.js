@@ -51,6 +51,7 @@ class Morris.Line
     @el.bind 'touchmove', touchHandler
     @el.bind 'touchend', touchHandler
 
+    @seriesLabels = @options.labels
     @setData(@options.data)
 
   # Default configuration
@@ -104,7 +105,6 @@ class Morris.Line
     @options.data.sort (a, b) => (a[@options.xkey] < b[@options.xkey]) - (b[@options.xkey] < a[@options.xkey])
     # extract labels
     @columnLabels = $.map @options.data, (d) => d[@options.xkey]
-    @seriesLabels = @options.labels
 
     # extract series data
     @series = []
@@ -141,17 +141,20 @@ class Morris.Line
       # use Array.concat to flatten arrays and find the max y value
       ymax = Math.max.apply null, Array.prototype.concat.apply([], @series)
       if @options.ymax.length > 5
-        @options.ymax = Math.max parseInt(@options.ymax[5..], 10), ymax
+        @ymax = Math.max parseInt(@options.ymax[5..], 10), ymax
       else
-        @options.ymax = ymax
+        @ymax = ymax
     if typeof @options.ymin is 'string' and @options.ymin[0..3] is 'auto'
       ymin = Math.min.apply null, Array.prototype.concat.apply([], @series)
       if @options.ymin.length > 5
-        @options.ymin = Math.min parseInt(@options.ymin[5..], 10), ymin
+        @ymin = Math.min parseInt(@options.ymin[5..], 10), ymin
       else
-        @options.ymin = ymin
+        @ymin = ymin
+    if @ymin is @ymax
+      @ymin -= 1
+      @ymax += 1
 
-    @yInterval = (@options.ymax - @options.ymin) / (@options.numLines - 1)
+    @yInterval = (@ymax - @ymin) / (@options.numLines - 1)
     if @yInterval > 0 and @yInterval < 1
         @precision =  -Math.floor(Math.log(@yInterval) / Math.log(10))
     else
@@ -172,13 +175,13 @@ class Morris.Line
       @dirty = false
       # calculate grid dimensions
       @maxYLabelWidth = Math.max(
-        @measureText(@yLabelFormat(@options.ymin), @options.gridTextSize).width,
-        @measureText(@yLabelFormat(@options.ymax), @options.gridTextSize).width)
+        @measureText(@yLabelFormat(@ymin), @options.gridTextSize).width,
+        @measureText(@yLabelFormat(@ymax), @options.gridTextSize).width)
       @left = @maxYLabelWidth + @options.marginLeft
       @width = @el.width() - @left - @options.marginRight
       @height = @el.height() - @options.marginTop - @options.marginBottom
       @dx = @width / (@xmax - @xmin)
-      @dy = @height / (@options.ymax - @options.ymin)
+      @dy = @height / (@ymax - @ymin)
       # calculate series data point coordinates
       @columns = (@transX(x) for x in @xvals)
       @seriesCoords = []
@@ -202,7 +205,7 @@ class Morris.Line
      @left + (x - @xmin) * @dx
 
   transY: (y) =>
-    return @options.marginTop + @height - (y - @options.ymin) * @dy
+    return @options.marginTop + @height - (y - @ymin) * @dy
 
   # Clear and redraw the graph
   #
@@ -218,8 +221,8 @@ class Morris.Line
   #
   drawGrid: ->
     # draw y axis labels, horizontal lines
-    firstY = @options.ymin
-    lastY = @options.ymax
+    firstY = @ymin
+    lastY = @ymax
 
 
     for lineY in [firstY..lastY] by @yInterval

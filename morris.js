@@ -68,6 +68,7 @@
       this.el.bind('touchstart', touchHandler);
       this.el.bind('touchmove', touchHandler);
       this.el.bind('touchend', touchHandler);
+      this.seriesLabels = this.options.labels;
       this.setData(this.options.data);
     }
 
@@ -120,7 +121,6 @@
       this.columnLabels = $.map(this.options.data, function(d) {
         return d[_this.options.xkey];
       });
-      this.seriesLabels = this.options.labels;
       this.series = [];
       _ref = this.options.ykeys;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -171,20 +171,24 @@
       if (typeof this.options.ymax === 'string' && this.options.ymax.slice(0, 4) === 'auto') {
         ymax = Math.max.apply(null, Array.prototype.concat.apply([], this.series));
         if (this.options.ymax.length > 5) {
-          this.options.ymax = Math.max(parseInt(this.options.ymax.slice(5), 10), ymax);
+          this.ymax = Math.max(parseInt(this.options.ymax.slice(5), 10), ymax);
         } else {
-          this.options.ymax = ymax;
+          this.ymax = ymax;
         }
       }
       if (typeof this.options.ymin === 'string' && this.options.ymin.slice(0, 4) === 'auto') {
         ymin = Math.min.apply(null, Array.prototype.concat.apply([], this.series));
         if (this.options.ymin.length > 5) {
-          this.options.ymin = Math.min(parseInt(this.options.ymin.slice(5), 10), ymin);
+          this.ymin = Math.min(parseInt(this.options.ymin.slice(5), 10), ymin);
         } else {
-          this.options.ymin = ymin;
+          this.ymin = ymin;
         }
       }
-      this.yInterval = (this.options.ymax - this.options.ymin) / (this.options.numLines - 1);
+      if (this.ymin === this.ymax) {
+        this.ymin -= 1;
+        this.ymax += 1;
+      }
+      this.yInterval = (this.ymax - this.ymin) / (this.options.numLines - 1);
       if (this.yInterval > 0 && this.yInterval < 1) {
         this.precision = -Math.floor(Math.log(this.yInterval) / Math.log(10));
       } else {
@@ -205,12 +209,12 @@
         this.elementWidth = w;
         this.elementHeight = h;
         this.dirty = false;
-        this.maxYLabelWidth = Math.max(this.measureText(this.yLabelFormat(this.options.ymin), this.options.gridTextSize).width, this.measureText(this.yLabelFormat(this.options.ymax), this.options.gridTextSize).width);
+        this.maxYLabelWidth = Math.max(this.measureText(this.yLabelFormat(this.ymin), this.options.gridTextSize).width, this.measureText(this.yLabelFormat(this.ymax), this.options.gridTextSize).width);
         this.left = this.maxYLabelWidth + this.options.marginLeft;
         this.width = this.el.width() - this.left - this.options.marginRight;
         this.height = this.el.height() - this.options.marginTop - this.options.marginBottom;
         this.dx = this.width / (this.xmax - this.xmin);
-        this.dy = this.height / (this.options.ymax - this.options.ymin);
+        this.dy = this.height / (this.ymax - this.ymin);
         this.columns = (function() {
           var _i, _len, _ref, _results;
           _ref = this.xvals;
@@ -253,7 +257,7 @@
     };
 
     Line.prototype.transY = function(y) {
-      return this.options.marginTop + this.height - (y - this.options.ymin) * this.dy;
+      return this.options.marginTop + this.height - (y - this.ymin) * this.dy;
     };
 
     Line.prototype.redraw = function() {
@@ -268,8 +272,8 @@
     Line.prototype.drawGrid = function() {
       var drawLabel, firstY, i, l, labelText, lastY, lineY, prevLabelMargin, v, xLabelMargin, y, ypos, _i, _j, _k, _len, _ref, _ref1, _ref2, _results, _results1,
         _this = this;
-      firstY = this.options.ymin;
-      lastY = this.options.ymax;
+      firstY = this.ymin;
+      lastY = this.ymax;
       for (lineY = _i = firstY, _ref = this.yInterval; firstY <= lastY ? _i <= lastY : _i >= lastY; lineY = _i += _ref) {
         v = parseFloat(lineY.toFixed(this.precision));
         y = this.transY(v);

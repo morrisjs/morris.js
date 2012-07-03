@@ -243,8 +243,3 @@ describe 'Morris.line', ->
         ["1/5/2012", new Date(2012, 0, 5).getTime()],
         ["1/6/2012", new Date(2012, 0, 6).getTime()]
       ])
-
-
-
-
-
