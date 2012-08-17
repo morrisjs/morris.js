@@ -175,6 +175,10 @@
         } else {
           this.ymax = ymax;
         }
+      } else if (typeof this.options.ymax === 'string') {
+        this.ymax = parseInt(this.options.ymax, 10);
+      } else {
+        this.ymax = this.options.ymax;
       }
       if (typeof this.options.ymin === 'string' && this.options.ymin.slice(0, 4) === 'auto') {
         ymin = Math.min.apply(null, Array.prototype.concat.apply([], this.series));
@@ -183,6 +187,10 @@
         } else {
           this.ymin = ymin;
         }
+      } else if (typeof this.options.ymin === 'string') {
+        this.ymin = parseInt(this.options.ymin, 10);
+      } else {
+        this.ymin = this.options.ymin;
       }
       if (this.ymin === this.ymax) {
         this.ymin -= 1;

@@ -144,12 +144,20 @@ class Morris.Line
         @ymax = Math.max parseInt(@options.ymax[5..], 10), ymax
       else
         @ymax = ymax
+    else if typeof @options.ymax is 'string'
+      @ymax = parseInt(@options.ymax, 10)
+    else
+      @ymax = @options.ymax
     if typeof @options.ymin is 'string' and @options.ymin[0..3] is 'auto'
       ymin = Math.min.apply null, Array.prototype.concat.apply([], @series)
       if @options.ymin.length > 5
         @ymin = Math.min parseInt(@options.ymin[5..], 10), ymin
       else
         @ymin = ymin
+    else if typeof @options.ymin is 'string'
+      @ymin = parseInt(@options.ymin, 10)
+    else
+      @ymin = @options.ymin
     if @ymin is @ymax
       @ymin -= 1
       @ymax += 1
