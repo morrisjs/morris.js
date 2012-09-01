@@ -2,8 +2,8 @@ module.exports = function (grunt) {
   grunt.initConfig({
     coffee: {
       lib: {
-        src: ['lib/morris.coffee'],
-        dest: 'build/lib',
+        src: ['build/morris.coffee'],
+        dest: '.',
         options: { bare: false }
       },
       spec: {
@@ -13,7 +13,7 @@ module.exports = function (grunt) {
       }
     },
     concat: {
-      'morris.js': ['build/lib/*.js']
+      'build/morris.coffee': ['lib/**/*.coffee']
     },
     min: {
       'morris.min.js': 'morris.js'
@@ -29,5 +29,5 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-coffee');
   grunt.loadNpmTasks('grunt-mocha');
 
-  grunt.registerTask('default', 'coffee concat min mocha');
+  grunt.registerTask('default', 'concat coffee min mocha');
 };
