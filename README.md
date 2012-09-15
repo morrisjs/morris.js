@@ -3,12 +3,11 @@
 [![Build Status](https://secure.travis-ci.org/oesmith/morris.js.png?branch=master)](http://travis-ci.org/oesmith/morris.js)
 
 Morris.js is the library that powers the graphs on http://howmanyleft.co.uk/.
-
-It's a bit rough around the edges, but it's getting pretty usable now.  Expect it to get even better soon.
+It's a very simple API for drawing line and donut charts.
 
 Cheers!
 
-\- Olly
+\- Olly (olly@oesmith.co.uk)
 
 ## Requirements
 
@@ -38,6 +37,12 @@ with `npm install` in the morris.js project folder.
 Once you're all set up, you can compile, minify and run the tests using `grunt`.
 
 ## Changelog
+
+### 0.3.0 - 15th September 2012
+
+- Donut charts!
+- Bugfix: ymin/ymax bug [#71](https://github.com/oesmith/morris.js/issues/71).
+- Bugfix: infinite loop when data indicates horizontal line [#66](https://github.com/oesmith/morris.js/issues/66).
 
 ### 0.2.10 - 26th June 2012
 
@@ -108,13 +113,13 @@ Copyright (c) 2012, Olly Smith
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met: 
+modification, are permitted provided that the following conditions are met:
 
 1. Redistributions of source code must retain the above copyright notice, this
-   list of conditions and the following disclaimer. 
+   list of conditions and the following disclaimer.
 2. Redistributions in binary form must reproduce the above copyright notice,
    this list of conditions and the following disclaimer in the documentation
-   and/or other materials provided with the distribution. 
+   and/or other materials provided with the distribution.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
