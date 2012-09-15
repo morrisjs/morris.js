@@ -1,3 +1,13 @@
+# Donut charts.
+#
+# @example
+#   Morris.Donut({
+#     el: $('#donut-container'),
+#     data: [
+#       { label: 'yin',  value: 50 },
+#       { label: 'yang', value: 50 }
+#     ]
+#   });
 class Morris.Donut
   colors: [
     '#0B62A4'
@@ -12,6 +22,8 @@ class Morris.Donut
     '#042135'
   ]
 
+  # Create and render a donut chart.
+  #
   constructor: (options) ->
     if not (this instanceof Morris.Donut)
       return new Morris.Donut(options)
@@ -34,12 +46,17 @@ class Morris.Donut
 
     @el.addClass 'graph-initialised'
 
-    # the raphael drawing instance
+    @redraw()
+
+  # Clear and redraw the chart.
+  #
+  # If you need to re-size your charts, call this method after changing the
+  # size of the container element.
+  redraw: ->
+    @el.clear()
+
     @r = new Raphael(@el[0])
 
-    @draw()
-
-  draw: ->
     cx = @el.width() / 2
     cy = @el.height() / 2
     w = (Math.min(cx, cy) - 10) / 3
@@ -71,11 +88,13 @@ class Morris.Donut
         break
       idx += 1
 
+  # @private
   select: (segment) =>
     s.deselect() for s in @segments
     segment.select()
     @setLabels segment.data.label, Morris.commas(segment.data.value)
 
+  # @private
   setLabels: (label1, label2) ->
     inner = (Math.min(@el.width() / 2, @el.height() / 2) - 10) * 2 / 3
     maxWidth = 1.8 * inner
@@ -90,6 +109,10 @@ class Morris.Donut
     text2scale = Math.min(maxWidth / text2bbox.width, maxHeightBottom / text2bbox.height)
     @text2.attr(transform: "S#{text2scale},#{text2scale},#{text2bbox.x + text2bbox.width / 2},#{text2bbox.y}")
 
+
+# A segment within a donut chart.
+#
+# @private
 class Morris.DonutSegment extends Morris.EventEmitter
   constructor: (@cx, @cy, @inner, @outer, p0, p1, @color, @data) ->
     @sin_p0 = Math.sin(p0)

@@ -1,7 +1,6 @@
 class Morris.Line
   # Initialise the graph.
   #
-  # @param {Object} options
   constructor: (options) ->
     if not (this instanceof Morris.Line)
       return new Morris.Line(options)
@@ -92,7 +91,7 @@ class Morris.Line
     xLabels: 'auto'
     xLabelFormat: null
 
-  # Pre-process data
+  # Update the data series and redraw the chart.
   #
   setData: (data, redraw = true) ->
     # shallow copy & sort data
@@ -168,6 +167,7 @@ class Morris.Line
 
   # Do any size-related calculations
   #
+  # @private
   calc: ->
     w = @el.width()
     h = @el.height()
@@ -201,17 +201,21 @@ class Morris.Line
 
   # quick translation helpers
   #
+  # @private
   transX: (x) =>
     if @xvals.length is 1
       @left + @width / 2
     else
      @left + (x - @xmin) * @dx
 
+  # @private
   transY: (y) =>
     return @options.marginTop + @height - (y - @ymin) * @dy
 
-  # Clear and redraw the graph
+  # Clear and redraw the chart.
   #
+  # If you need to re-size your charts, call this method after changing the
+  # size of the container element.
   redraw: ->
     @r.clear()
     @calc()
@@ -222,6 +226,7 @@ class Morris.Line
 
   # draw the grid, and axes labels
   #
+  # @private
   drawGrid: ->
     # draw y axis labels, horizontal lines
     firstY = @ymin
@@ -271,6 +276,7 @@ class Morris.Line
 
   # draw the data series
   #
+  # @private
   drawSeries: ->
     for i in [@seriesCoords.length-1..0]
       coords = $.map(@seriesCoords[i], (c) -> c)
@@ -293,6 +299,7 @@ class Morris.Line
 
   # create a path for a data series
   #
+  # @private
   createPath: (coords, top, left, bottom, right) ->
     path = ""
     if @options.smooth
@@ -317,6 +324,7 @@ class Morris.Line
 
   # calculate a gradient at each point for a series of points
   #
+  # @private
   gradients: (coords) ->
     $.map coords, (c, i) ->
       if i is 0
@@ -328,6 +336,7 @@ class Morris.Line
 
   # draw the hover tooltip
   #
+  # @private
   drawHover: ->
     # hover labels
     @hoverHeight = @options.hoverFontSize * 1.5 * (@series.length + 1)
@@ -351,6 +360,7 @@ class Morris.Line
       @yLabels.push(yLabel)
       @hoverSet.push(yLabel)
 
+  # @private
   updateHover: (index) =>
     @hoverSet.show()
     @xLabel.attr('text', @columnLabels[index])
@@ -375,9 +385,11 @@ class Morris.Line
     xloc = Math.max @left + maxLabelWidth / 2 + @options.hoverPaddingX, xloc
     @hoverSet.attr 'transform', "t#{xloc},#{yloc}"
 
+  # @private
   hideHover: ->
     @hoverSet.hide()
 
+  # @private
   hilight: (index) =>
     if @prevHilight isnt null and @prevHilight isnt index
       for i in [0..@seriesPoints.length-1]
@@ -392,6 +404,7 @@ class Morris.Line
     if index is null
       @hideHover()
 
+  # @private
   updateHilight: (x) =>
     x -= @el.offset().left
     for hoverIndex in [@hoverMargins.length..0]
@@ -399,17 +412,20 @@ class Morris.Line
         @hilight hoverIndex
         break
 
+  # @private
   measureText: (text, fontSize = 12) ->
     tt = @r.text(100, 100, text).attr('font-size', fontSize)
     ret = tt.getBBox()
     tt.remove()
     return ret
 
+  # @private
   yLabelFormat: (label) ->
     "#{@options.preUnits}#{Morris.commas(label)}#{@options.postUnits}"
 
 
-# parse a date into a javascript timestamp
+# Parse a date into a javascript timestamp
+#
 #
 Morris.parseDate = (date) ->
   if typeof date is 'number'
@@ -497,6 +513,7 @@ Morris.parseDate = (date) ->
 
 # generate a series of label, timestamp pairs for x-axis labels
 #
+# @private
 Morris.labelSeries = (dmin, dmax, pxwidth, specName, xLabelFormat) ->
   ddensity = 200 * (dmax - dmin) / pxwidth # seconds per `margin` pixels
   d0 = new Date(dmin)
@@ -523,12 +540,14 @@ Morris.labelSeries = (dmin, dmax, pxwidth, specName, xLabelFormat) ->
     spec.incr(d)
   return ret
 
+# @private
 minutesSpecHelper = (interval) ->
   span: interval * 60 * 1000
   start: (d) -> new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours())
   fmt: (d) -> "#{Morris.pad2(d.getHours())}:#{Morris.pad2(d.getMinutes())}"
   incr: (d) -> d.setMinutes(d.getMinutes() + interval)
 
+# @private
 secondsSpecHelper = (interval) ->
   span: interval * 1000
   start: (d) -> new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes())

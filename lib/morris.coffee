@@ -4,6 +4,7 @@ $ = jQuery
 
 # Very simple event-emitter class.
 #
+# @private
 class Morris.EventEmitter
   on: (name, handler) ->
     unless @handlers?
@@ -18,8 +19,9 @@ class Morris.EventEmitter
         handler(args...)
 
 # Make long numbers prettier by inserting commas.
-# eg: commas(1234567) -> '1,234,567'
 #
+# @example
+#   Morris.commas(1234567) -> '1,234,567'
 Morris.commas = (num) ->
   if num is null
     "n/a"
@@ -33,6 +35,8 @@ Morris.commas = (num) ->
       ret += strabsnum.slice(intnum.length)
     ret
 
-# zero-pad numbers to two characters wide
+# Zero-pad numbers to two characters wide.
 #
+# @example
+#   Morris.pad2(1) -> '01'
 Morris.pad2 = (number) -> (if number < 10 then '0' else '') + number
