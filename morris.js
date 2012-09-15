@@ -87,12 +87,13 @@
       }
       this.data = options.data;
       this.el.addClass('graph-initialised');
-      this.r = new Raphael(this.el[0]);
-      this.draw();
+      this.redraw();
     }
 
-    Donut.prototype.draw = function() {
+    Donut.prototype.redraw = function() {
       var C, cx, cy, d, idx, last, max_value, min, next, seg, total, w, x, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _results;
+      this.el.empty();
+      this.r = new Raphael(this.el[0]);
       cx = this.el.width() / 2;
       cy = this.el.height() / 2;
       w = (Math.min(cx, cy) - 10) / 3;

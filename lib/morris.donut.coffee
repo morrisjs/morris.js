@@ -53,7 +53,7 @@ class Morris.Donut
   # If you need to re-size your charts, call this method after changing the
   # size of the container element.
   redraw: ->
-    @el.clear()
+    @el.empty()
 
     @r = new Raphael(@el[0])
 
