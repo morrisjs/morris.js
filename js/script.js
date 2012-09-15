@@ -4,7 +4,7 @@
 
 $(function () {
   // data stolen from http://howmanyleft.co.uk/vehicle/jaguar_'e'_type
-  tax_data = [
+  var tax_data = [
        {"period": "2011 Q3", "licensed": 3407, "sorned": 660},
        {"period": "2011 Q2", "licensed": 3351, "sorned": 629},
        {"period": "2011 Q1", "licensed": 3269, "sorned": 618},
@@ -33,13 +33,24 @@ $(function () {
        {"period": "1995 Q4", "licensed": 1702, "sorned": 0},
        {"period": "1994 Q4", "licensed": 1732, "sorned": 0}
   ];
-  new Morris.Line({
+  Morris.Line({
     element: 'hero-graph',
     data: tax_data,
     xkey: 'period',
     ykeys: ['licensed', 'sorned'],
     labels: ['Licensed', 'Off the road']
   });
+
+  Morris.Donut({
+    element: 'hero-donut',
+    data: [
+      {label: 'Jam', value: 25 },
+      {label: 'Frosted', value: 40 },
+      {label: 'Custard', value: 25 },
+      {label: 'Sugar', value: 10 }
+    ]
+  });
+
   $('.code-example').each(function (index, el) {
     eval($(el).text());
   });

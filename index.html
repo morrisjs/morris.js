@@ -28,10 +28,12 @@
           <a class="brand" href="#">Morris.js</a>
           <div class="nav-collapse">
             <ul class="nav">
-              <li><a href="#about">About</a></li>
-              <li><a href="#usage">Usage</a></li>
+              <li><a href="#lines">Lines</a></li>
+              <li><a href="#donuts">Donuts</a></li>
               <li><a href="#examples">Examples</a></li>
-              <li><a href="https://github.com/oesmith/morris.js">GitHub</a></li>
+            </ul>
+            <ul class="nav pull-right">
+              <li><a href="https://github.com/oesmith/morris.js">Project on GitHub</a></li>
             </ul>
           </div><!--/.nav-collapse -->
         </div>
@@ -40,19 +42,33 @@
 
     <div class="container">
 
-      <div class="docrow">
-        <h1 id="about">Morris.js</h1>
-        <p>
-          Making good-looking graphs shouldn't be hard.  Morris.js is a
-          lightweight library that uses <a href="http://jquery.com">jQuery</a>
-          and <a href="http://raphaeljs.com">Raphaël</a> to make drawing
-          time-series graphs easy.
-        </p>
-        <div class="graph-container">
-          <div class="caption">
-            <b>Example</b> Jaguar 'E' Type vehicles in the UK
+      <div class="row docrow">
+        <div class="span12">
+          <h1>Morris.js</h1>
+          <p>
+            Making good-looking graphs shouldn't be hard.  Morris.js is a
+            lightweight library that uses <a href="http://jquery.com">jQuery</a>
+            and <a href="http://raphaeljs.com">Raphaël</a> to make drawing
+            simple charts easy.
+          </p>
+          <div class="row">
+            <div class="span8">
+              <div class="graph-container">
+                <div class="caption">
+                  <b>Example</b> Jaguar 'E' Type vehicles in the UK
+                </div>
+                <div id="hero-graph" class="graph"></div>
+              </div>
+            </div>
+            <div class="span4">
+              <div class="graph-container">
+                <div class="caption">
+                  <b>Example</b> Donut flavours
+                </div>
+                <div id="hero-donut" class="graph"></div>
+              </div>
+            </div>
           </div>
-          <div id="hero-graph" class="graph"></div>
         </div>
       </div>
 
@@ -76,7 +92,7 @@
           <h2 id="download">Download</h2>
           <p>Get the latest version.</p>
           <p>
-            <a href="https://raw.github.com/oesmith/morris.js/0.2.9/morris.min.js" class="btn-large btn-primary">v0.2.9 (compressed js)</a>
+            <a href="https://raw.github.com/oesmith/morris.js/0.3.0/morris.min.js" class="btn-large btn-primary">v0.3.0 (compressed js)</a>
           </p>
           <p>
             <small>
@@ -104,7 +120,7 @@
             <li>iOS 3+</li>
             <li>Android 3+</li>
             <li class="moresupp">
-              Possibly more? Let me know at 
+              Possibly more? Let me know at
               <a href="http://twitter.com/olly_smith">@olly_smith</a>
             </li>
           </ul>
@@ -113,7 +129,7 @@
 
       <div class="row docrow">
         <div class="span12">
-          <h2 id="usage">Usage</h2>
+          <h2 id="lines">Line Charts</h2>
           <p>
             The public API is terribly simple.  It's just one function:
             <code>Morris.Line(<em>options</em>)</code>, where options is an
@@ -149,7 +165,7 @@
                   date (X) values.
                   <br>
                   Timestamps are accepted in the form of millisecond timestamps (as
-                  returned by <code>Date.getTime()</code> or as strings in the following 
+                  returned by <code>Date.getTime()</code> or as strings in the following
                   formats:
                   <ul>
                     <li><code>2012</code></li>
@@ -327,6 +343,49 @@
 
       <div class="row docrow">
         <div class="span12">
+          <h2 id="donuts">Donut Charts</h2>
+          <p>
+            This really couldn't be easier.  Create a Donut chart using
+            <code>Morris.Donut(<em>options</em>)</code>, with the following
+            options.
+          </p>
+          <table class="table table-striped table-bordered">
+            <tbody>
+              <tr>
+                <td><code>data</code></td><td><b>required</b></td>
+                <td>
+                  The data to plot.  This is an array of objects, containing
+                  <code>label</code> and <code>value</code> attributes
+                  corresponding to the labels and sizes of the segments of the
+                  donut chart.
+                </td>
+              </tr>
+              <tr>
+                <td><code>element</code></td><td><b>required</b></td>
+                <td>
+                  The ID of (or a reference to) the element into which to insert the graph.
+                  <br>
+                  <em>Note: this element must have a width and height defined in its styling.</em>
+                </td>
+              </tr>
+              <tr>
+                <td><code>colors</code></td><td>optional</td>
+                <td>
+                  An array of strings containing HTML-style hex colors for each
+                  of the donut segments.
+                  <em>
+                    Note: if there are fewer colors than segments, the colors
+                    will cycle back to the start of the array when exhausted.
+                  </em>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="row docrow">
+        <div class="span12">
           <h2 id="examples">Examples</h2>
         </div>
       </div>
@@ -383,6 +442,27 @@ Morris.Line({
         </div>
       </div>
       <div class="row">
+        <div class="span6">
+          <pre class="code-example">
+
+// dead simple donut charts
+Morris.Donut({
+  element: 'sales',
+  data: [
+    {label: "Download Sales", value: 12},
+    {label: "In-Store Sales", value: 30},
+    {label: "Mail-Order Sales", value: 20}
+  ]
+});
+
+
+          </pre>
+        </div>
+        <div class="span6">
+          <div class="graph" id="sales"></div>
+        </div>
+      </div>
+      <div class="row">
         <div class="span12">
           <p>
             You can find <a href="https://github.com/oesmith/morris.js/tree/master/examples">more examples</a>
@@ -400,13 +480,13 @@ Copyright (c) 2012, Olly Smith
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met: 
+modification, are permitted provided that the following conditions are met:
 
 1. Redistributions of source code must retain the above copyright notice, this
-   list of conditions and the following disclaimer. 
+   list of conditions and the following disclaimer.
 2. Redistributions in binary form must reproduce the above copyright notice,
    this list of conditions and the following disclaimer in the documentation
-   and/or other materials provided with the distribution. 
+   and/or other materials provided with the distribution.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
