@@ -64,7 +64,10 @@
 
   Morris.Donut = (function() {
 
-    Donut.prototype.colors = ['#0B62A4', '#3980B5', '#679DC6', '#95BBD7', '#B0CCE1', '#095791', '#095085', '#083E67', '#052C48', '#042135'];
+    Donut.prototype.defaults = {
+      colors: ['#0B62A4', '#3980B5', '#679DC6', '#95BBD7', '#B0CCE1', '#095791', '#095085', '#083E67', '#052C48', '#042135'],
+      formatter: Morris.commas
+    };
 
     function Donut(options) {
       this.select = __bind(this.select, this);
@@ -76,9 +79,7 @@
       } else {
         this.el = $(options.element);
       }
-      if (options.colors != null) {
-        this.colors = options.colors;
-      }
+      this.options = $.extend({}, this.defaults, options);
       if (this.el === null || this.el.length === 0) {
         throw new Error("Graph placeholder not found.");
       }
@@ -112,7 +113,7 @@
       for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
         d = _ref1[_j];
         next = last + min + C * (d.value / total);
-        seg = new Morris.DonutSegment(cx, cy, w * 2, w, last, next, this.colors[idx % this.colors.length], d);
+        seg = new Morris.DonutSegment(cx, cy, w * 2, w, last, next, this.options.colors[idx % this.options.colors.length], d);
         seg.render(this.r);
         this.segments.push(seg);
         seg.on('hover', this.select);
@@ -158,7 +159,7 @@
         s.deselect();
       }
       segment.select();
-      return this.setLabels(segment.data.label, Morris.commas(segment.data.value));
+      return this.setLabels(segment.data.label, this.options.formatter(segment.data.value));
     };
 
     Donut.prototype.setLabels = function(label1, label2) {
