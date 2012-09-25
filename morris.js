@@ -603,7 +603,7 @@
         });
         if (coords.length > 1) {
           path = this.createPath(coords, this.options.marginTop, this.left, this.options.marginTop + this.height, this.left + this.width);
-          this.r.path(path).attr('stroke', this.options.lineColors[i]).attr('stroke-width', this.options.lineWidth);
+          this.r.path(path).attr('stroke', this.colorForSeries(i)).attr('stroke-width', this.options.lineWidth);
         }
       }
       this.seriesPoints = (function() {
@@ -625,7 +625,7 @@
             if (c === null) {
               circle = null;
             } else {
-              circle = this.r.circle(c.x, c.y, this.options.pointSize).attr('fill', this.options.lineColors[i]).attr('stroke-width', 1).attr('stroke', '#ffffff');
+              circle = this.r.circle(c.x, c.y, this.options.pointSize).attr('fill', this.colorForSeries(i)).attr('stroke-width', 1).attr('stroke', '#ffffff');
             }
             _results1.push(this.seriesPoints[i].push(circle));
           }
@@ -687,7 +687,7 @@
       this.yLabels = [];
       _results = [];
       for (i = _i = 0, _ref = this.series.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
-        yLabel = this.r.text(0, this.options.hoverFontSize * 1.5 * (i + 1.5) - this.hoverHeight / 2, '').attr('fill', this.options.lineColors[i]).attr('font-size', this.options.hoverFontSize);
+        yLabel = this.r.text(0, this.options.hoverFontSize * 1.5 * (i + 1.5) - this.hoverHeight / 2, '').attr('fill', this.colorForSeries(i)).attr('font-size', this.options.hoverFontSize);
         this.yLabels.push(yLabel);
         _results.push(this.hoverSet.push(yLabel));
       }
@@ -778,6 +778,10 @@
 
     Line.prototype.yLabelFormat = function(label) {
       return "" + this.options.preUnits + (Morris.commas(label)) + this.options.postUnits;
+    };
+
+    Line.prototype.colorForSeries = function(index) {
+      return this.options.lineColors[index % this.options.lineColors.length];
     };
 
     return Line;
