@@ -85,13 +85,14 @@ class Morris.Donut
     idx = 0
     for d in @data
       if d.value == max_value
-        @select @segments[idx]
+        @select idx
         break
       idx += 1
 
-  # @private
-  select: (segment) =>
+  # Select the segment at the given index.
+  select: (idx) =>
     s.deselect() for s in @segments
+    segment = @segments[idx]
     segment.select()
     @setLabels segment.data.label, @options.formatter(segment.data.value)
 

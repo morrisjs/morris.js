@@ -143,7 +143,7 @@
       for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
         d = _ref2[_k];
         if (d.value === max_value) {
-          this.select(this.segments[idx]);
+          this.select(idx);
           break;
         }
         _results.push(idx += 1);
@@ -151,13 +151,14 @@
       return _results;
     };
 
-    Donut.prototype.select = function(segment) {
-      var s, _i, _len, _ref;
+    Donut.prototype.select = function(idx) {
+      var s, segment, _i, _len, _ref;
       _ref = this.segments;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         s = _ref[_i];
         s.deselect();
       }
+      segment = this.segments[idx];
       segment.select();
       return this.setLabels(segment.data.label, this.options.formatter(segment.data.value));
     };
