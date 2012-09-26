@@ -9,18 +9,20 @@
 #     ]
 #   });
 class Morris.Donut
-  colors: [
-    '#0B62A4'
-    '#3980B5'
-    '#679DC6'
-    '#95BBD7'
-    '#B0CCE1'
-    '#095791'
-    '#095085'
-    '#083E67'
-    '#052C48'
-    '#042135'
-  ]
+  defaults:
+    colors: [
+      '#0B62A4'
+      '#3980B5'
+      '#679DC6'
+      '#95BBD7'
+      '#B0CCE1'
+      '#095791'
+      '#095085'
+      '#083E67'
+      '#052C48'
+      '#042135'
+    ],
+    formatter: Morris.commas
 
   # Create and render a donut chart.
   #
@@ -33,8 +35,7 @@ class Morris.Donut
     else
       @el = $ options.element
 
-    if options.colors?
-      @colors = options.colors
+    @options = $.extend {}, @defaults, options
 
     if @el == null || @el.length == 0
       throw new Error("Graph placeholder not found.")
@@ -72,7 +73,7 @@ class Morris.Donut
     @segments = []
     for d in @data
       next = last + min + C * (d.value / total)
-      seg = new Morris.DonutSegment(cx, cy, w*2, w, last, next, @colors[idx % @colors.length], d)
+      seg = new Morris.DonutSegment(cx, cy, w*2, w, last, next, @options.colors[idx % @options.colors.length], d)
       seg.render @r
       @segments.push seg
       seg.on 'hover', @select
@@ -92,7 +93,7 @@ class Morris.Donut
   select: (segment) =>
     s.deselect() for s in @segments
     segment.select()
-    @setLabels segment.data.label, Morris.commas(segment.data.value)
+    @setLabels segment.data.label, @options.formatter(segment.data.value)
 
   # @private
   setLabels: (label1, label2) ->
