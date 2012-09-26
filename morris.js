@@ -464,7 +464,9 @@
         this.ymin = this.options.ymin;
       }
       if (this.ymin === this.ymax) {
-        this.ymin -= 1;
+        if (this.ymin === !0) {
+          this.ymin -= 1;
+        }
         this.ymax += 1;
       }
       this.yInterval = (this.ymax - this.ymin) / (this.options.numLines - 1);

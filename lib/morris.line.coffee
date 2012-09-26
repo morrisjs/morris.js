@@ -153,7 +153,7 @@ class Morris.Line
     else
       @ymin = @options.ymin
     if @ymin is @ymax
-      @ymin -= 1
+      if @ymin is not 0 then @ymin -= 1
       @ymax += 1
 
     @yInterval = (@ymax - @ymin) / (@options.numLines - 1)
