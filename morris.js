@@ -158,7 +158,11 @@
         s = _ref[_i];
         s.deselect();
       }
-      segment = this.segments[idx];
+      if (typeof idx === 'number') {
+        segment = this.segments[idx];
+      } else {
+        segment = idx;
+      }
       segment.select();
       return this.setLabels(segment.data.label, this.options.formatter(segment.data.value));
     };

@@ -92,7 +92,7 @@ class Morris.Donut
   # Select the segment at the given index.
   select: (idx) =>
     s.deselect() for s in @segments
-    segment = @segments[idx]
+    if typeof idx is 'number' then segment = @segments[idx] else segment = idx
     segment.select()
     @setLabels segment.data.label, @options.formatter(segment.data.value)
 
