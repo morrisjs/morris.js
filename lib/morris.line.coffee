@@ -178,8 +178,8 @@ class Morris.Line
       @dirty = false
       # calculate grid dimensions
       @maxYLabelWidth = Math.max(
-        @measureText(@yLabelFormat(@ymin), @options.gridTextSize).width,
-        @measureText(@yLabelFormat(@ymax), @options.gridTextSize).width)
+        @measureText(@yAxisFormat(@ymin), @options.gridTextSize).width,
+        @measureText(@yAxisFormat(@ymax), @options.gridTextSize).width)
       @left = @maxYLabelWidth + @options.marginLeft
       @width = @el.width() - @left - @options.marginRight
       @height = @el.height() - @options.marginTop - @options.marginBottom
@@ -236,7 +236,7 @@ class Morris.Line
     for lineY in [firstY..lastY] by @yInterval
       v = parseFloat(lineY.toFixed(@precision))
       y = @transY(v)
-      @r.text(@left - @options.marginLeft/2, y, @yLabelFormat(v))
+      @r.text(@left - @options.marginLeft/2, y, @yAxisFormat(v))
         .attr('font-size', @options.gridTextSize)
         .attr('fill', @options.gridTextColor)
         .attr('text-anchor', 'end')
@@ -418,6 +418,10 @@ class Morris.Line
     ret = tt.getBBox()
     tt.remove()
     return ret
+
+  # @private
+  yAxisFormat: (label) ->
+    @yLabelFormat(label)
 
   # @private
   yLabelFormat: (label) ->
