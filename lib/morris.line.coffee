@@ -96,7 +96,11 @@ class Morris.Line
   setData: (data, redraw = true) ->
     # shallow copy & sort data
     @options.data = data.slice(0)
-    @options.data.sort (a, b) => (a[@options.xkey] < b[@options.xkey]) - (b[@options.xkey] < a[@options.xkey])
+    if @options.parseTime
+      @options.data.sort (a, b) =>
+        (a[@options.xkey] < b[@options.xkey]) - (b[@options.xkey] < a[@options.xkey])
+    else
+      @options.data.reverse()
     # extract labels
     @columnLabels = $.map @options.data, (d) => d[@options.xkey]
 

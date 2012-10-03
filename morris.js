@@ -392,9 +392,13 @@
         redraw = true;
       }
       this.options.data = data.slice(0);
-      this.options.data.sort(function(a, b) {
-        return (a[_this.options.xkey] < b[_this.options.xkey]) - (b[_this.options.xkey] < a[_this.options.xkey]);
-      });
+      if (this.options.parseTime) {
+        this.options.data.sort(function(a, b) {
+          return (a[_this.options.xkey] < b[_this.options.xkey]) - (b[_this.options.xkey] < a[_this.options.xkey]);
+        });
+      } else {
+        this.options.data.reverse();
+      }
       this.columnLabels = $.map(this.options.data, function(d) {
         return d[_this.options.xkey];
       });
