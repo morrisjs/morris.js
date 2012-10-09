@@ -79,6 +79,8 @@ class Morris.Line
       '#ffffff'
       '#ffffff'
     ]
+    pointFillColors: [
+    ]
     ymax: 'auto'
     ymin: 'auto 0'
     marginTop: 25
@@ -313,7 +315,7 @@ class Morris.Line
           circle = null
         else
           circle = @r.circle(c.x, c.y, @options.pointSize)
-            .attr('fill', @colorForSeries(i))
+            .attr('fill', @pointFillColorForSeries(i) || @colorForSeries(i))
             .attr('stroke-width', @strokeWidthForSeries(i))
             .attr('stroke', @strokeForSeries(i))
         @seriesPoints[i].push(circle)
@@ -459,6 +461,10 @@ class Morris.Line
   # @private
   strokeForSeries: (index) ->
     @options.pointStrokeColors[index % @options.pointStrokeColors.length]
+
+  # @private
+  pointFillColorForSeries: (index) ->
+    @options.pointFillColors[index % @options.pointFillColors.length]
 
 
 # Parse a date into a javascript timestamp

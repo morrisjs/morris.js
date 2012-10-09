@@ -355,6 +355,7 @@
       lineColors: ['#0b62a4', '#7A92A3', '#4da74d', '#afd8f8', '#edc240', '#cb4b4b', '#9440ed'],
       pointWidths: [1, 1, 1, 1, 1, 1],
       pointStrokeColors: ['#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff'],
+      pointFillColors: [],
       ymax: 'auto',
       ymin: 'auto 0',
       marginTop: 25,
@@ -638,11 +639,9 @@
             if (c === null) {
               circle = null;
             } else {
-              circle = this.r.circle(c.x, c.y, this.options.pointSize).attr('fill', this.colorForSeries(i)).attr('stroke-width', this.strokeWidthForSeries(i)).attr('stroke', this.strokeForSeries(i));
+              circle = this.r.circle(c.x, c.y, this.options.pointSize).attr('fill', this.pointFillColorForSeries(i) || this.colorForSeries(i)).attr('stroke-width', this.strokeWidthForSeries(i)).attr('stroke', this.strokeForSeries(i));
             }
-            this.seriesPoints[i].push(circle);
-            console.log(this.strokeWidthForSeries(i));
-            _results1.push(console.log(this.strokeForSeries(i)));
+            _results1.push(this.seriesPoints[i].push(circle));
           }
           return _results1;
         }).call(this));
@@ -809,6 +808,10 @@
 
     Line.prototype.strokeForSeries = function(index) {
       return this.options.pointStrokeColors[index % this.options.pointStrokeColors.length];
+    };
+
+    Line.prototype.pointFillColorForSeries = function(index) {
+      return this.options.pointFillColors[index % this.options.pointFillColors.length];
     };
 
     return Line;
