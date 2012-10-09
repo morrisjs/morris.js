@@ -29,3 +29,24 @@ describe 'Morris.Line', ->
         labels: ['dontcare']
       )
     fn.should.throw(/Graph placeholder not found./)
+
+  it 'should make point styles customizable', ->
+    my_data = [{x: 1, y: 1}, {x: 2, y: 2}]
+    red = '#ff0000'
+    blue = '#0000ff'
+    chart = Morris.Line
+      element: 'graph'
+      data: my_data
+      xkey: 'x'
+      ykeys: ['y']
+      labels: ['dontcare']
+      pointStrokeColors: [red, blue]
+      pointWidths: [1, 2]
+      pointFillColors: [null, red]
+    chart.strokeWidthForSeries(0).should.equal 1
+    chart.strokeForSeries(0).should.equal red
+    chart.strokeWidthForSeries(1).should.equal 2
+    chart.strokeForSeries(1).should.equal blue
+    (null == chart.pointFillColorForSeries(0)).should.be
+    (chart.pointFillColorForSeries(0) || chart.colorForSeries(0)).should.equal chart.colorForSeries(0)
+    chart.pointFillColorForSeries(1).should.equal red
