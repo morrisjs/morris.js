@@ -317,8 +317,6 @@ class Morris.Line
             .attr('stroke-width', @strokeWidthForSeries(i))
             .attr('stroke', @strokeForSeries(i))
         @seriesPoints[i].push(circle)
-        console.log @strokeWidthForSeries(i)
-        console.log @strokeForSeries(i)
 
   # create a path for a data series
   #
