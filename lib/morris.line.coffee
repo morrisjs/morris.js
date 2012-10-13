@@ -62,25 +62,9 @@ class Morris.Line
       '#cb4b4b'
       '#9440ed'
     ]
-    pointWidths: [
-      1
-      1
-      1
-      1
-      1
-      1
-    ]
-    pointStrokeColors: [
-      '#ffffff'
-      '#ffffff'
-      '#ffffff'
-      '#ffffff'
-      '#ffffff'
-      '#ffffff'
-      '#ffffff'
-    ]
-    pointFillColors: [
-    ]
+    pointWidths: [1]
+    pointStrokeColors: ['#ffffff']
+    pointFillColors: []
     ymax: 'auto'
     ymin: 'auto 0'
     marginTop: 25
