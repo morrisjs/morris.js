@@ -38,6 +38,15 @@ Once you're all set up, you can compile, minify and run the tests using `grunt`.
 
 ## Changelog
 
+### 0.3.1 - 13th October 2012
+
+- Add `formatter` option for customising value labels in donuts [#75](https://github.com/oesmith/morris.js/issues/75).
+- Cycle `lineColors` on line charts to avoid running out of colours [#78](https://github.com/oesmith/morris.js/issues/78).
+- Add method to select donut segments. [#79](https://github.com/oesmith/morris.js/issues/79).
+- Don't go negative on yMin when all y values are zero. [#80](https://github.com/oesmith/morris.js/issues/80).
+- Don't sort data when parseTime is false [#83](https://github.com/oesmith/morris.js/issues/83).
+- Customise styling for points. [#87](https://github.com/oesmith/morris.js/issues/87).
+
 ### 0.3.0 - 15th September 2012
 
 - Donut charts!
