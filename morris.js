@@ -292,6 +292,8 @@
 
       this.updateHover = __bind(this.updateHover, this);
 
+      this.shouldDrawSmooth = __bind(this.shouldDrawSmooth, this);
+
       this.transY = __bind(this.transY, this);
 
       this.transX = __bind(this.transX, this);
@@ -554,6 +556,16 @@
       return this.options.marginTop + this.height - (y - this.ymin) * this.dy;
     };
 
+    Line.prototype.shouldDrawSmooth = function(series) {
+      if (typeof this.options.smooth === 'boolean' && this.options.smooth) {
+        return true;
+      } else if (typeof this.options.smooth === 'object' && $.inArray(this.options.ykeys[series], this.options.smooth) > -1) {
+        return true;
+      } else {
+        return false;
+      }
+    };
+
     Line.prototype.redraw = function() {
       this.r.clear();
       this.calc();
@@ -616,7 +628,7 @@
           return c;
         });
         if (coords.length > 1) {
-          path = this.createPath(coords, this.options.marginTop, this.left, this.options.marginTop + this.height, this.left + this.width);
+          path = this.createPath(i, coords, this.options.marginTop, this.left, this.options.marginTop + this.height, this.left + this.width);
           this.r.path(path).attr('stroke', this.colorForSeries(i)).attr('stroke-width', this.options.lineWidth);
         }
       }
@@ -649,10 +661,10 @@
       return _results;
     };
 
-    Line.prototype.createPath = function(coords, top, left, bottom, right) {
+    Line.prototype.createPath = function(series, coords, top, left, bottom, right) {
       var c, g, grads, i, ix, lc, lg, path, x1, x2, y1, y2, _i, _ref;
       path = "";
-      if (this.options.smooth) {
+      if (this.shouldDrawSmooth(series)) {
         grads = this.gradients(coords);
         for (i = _i = 0, _ref = coords.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
           c = coords[i];
