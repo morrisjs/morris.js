@@ -559,7 +559,7 @@
     Line.prototype.shouldDrawSmooth = function(series) {
       if (typeof this.options.smooth === 'boolean' && this.options.smooth) {
         return true;
-      } else if (typeof this.options.smooth === 'object' && $.inArray(this.seriesLabels[series], this.options.smooth) > -1) {
+      } else if (typeof this.options.smooth === 'object' && $.inArray(this.options.ykeys[series], this.options.smooth) > -1) {
         return true;
       } else {
         return false;

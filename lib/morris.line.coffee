@@ -223,7 +223,7 @@ class Morris.Line
   shouldDrawSmooth: (series) =>
     if typeof @options.smooth is 'boolean' && @options.smooth
       true
-    else if typeof @options.smooth is 'object' and $.inArray(@seriesLabels[series], @options.smooth) > -1
+    else if typeof @options.smooth is 'object' and $.inArray(@options.ykeys[series], @options.smooth) > -1
       true
     else
       false
