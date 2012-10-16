@@ -43,7 +43,7 @@ class Morris.Pie
     @draw()
 
   setData: (data)->
-    
+
     @data = data
     @draw()
 
@@ -59,7 +59,7 @@ class Morris.Pie
 
     cx = @el.width() / 2
     cy = @el.height() / 2
-    r = (Math.min(cx, cy) - 10) / 3
+    r = (Math.min(cx, cy)) / 1.5
 
     for labelAndValue, index in @data
 
@@ -89,7 +89,7 @@ class Morris.PieSegment extends Morris.EventEmitter
 
     @rad = Math.PI / 180
 
-    @distanceFromEdge = 30
+    @distanceFromEdge = 40
 
     @labelAngle = @currentAngle + (@step / 2)
     @endAngle = @currentAngle + @step

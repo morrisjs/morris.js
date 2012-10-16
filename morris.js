@@ -1050,7 +1050,7 @@
       currentAngle = 0;
       cx = this.el.width() / 2;
       cy = this.el.height() / 2;
-      r = (Math.min(cx, cy) - 10) / 3;
+      r = (Math.min(cx, cy)) / 1.5;
       _ref1 = this.data;
       _results = [];
       for (index = _j = 0, _len1 = _ref1.length; _j < _len1; index = ++_j) {
@@ -1103,7 +1103,7 @@
       this.select = __bind(this.select, this);
 
       this.rad = Math.PI / 180;
-      this.distanceFromEdge = 30;
+      this.distanceFromEdge = 40;
       this.labelAngle = this.currentAngle + (this.step / 2);
       this.endAngle = this.currentAngle + this.step;
       this.x1 = this.cx + this.r * Math.cos(-this.currentAngle * this.rad);
