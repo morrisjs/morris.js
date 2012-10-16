@@ -1023,6 +1023,11 @@
       this.draw();
     }
 
+    Pie.prototype.setData = function(data) {
+      this.data = data;
+      return this.draw();
+    };
+
     Pie.prototype.draw = function() {
       var color, currentAngle, cx, cy, index, label, labelAndValue, max, pieSegment, r, step, total, value, x, _i, _j, _len, _len1, _ref, _ref1, _results;
       this.paper.clear();

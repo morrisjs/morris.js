@@ -42,6 +42,11 @@ class Morris.Pie
     
     @draw()
 
+  setData: (data)->
+    
+    @data = data
+    @draw()
+
   draw: ->
 
     @paper.clear()

@@ -1,0 +1,27 @@
+<!doctype html>
+<head>
+  <meta charset="utf-8">
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+  <script src="https://raw.github.com/DmitryBaranovskiy/raphael/300aa589f5a0ba7fce667cd62c7cdda0bd5ad904/raphael-min.js"></script>
+  <script src="../morris.js"></script>
+  <script src="lib/prettify.js"></script>
+  <script src="lib/example.js"></script>
+  <link rel="stylesheet" href="lib/example.css">
+  <link rel="stylesheet" href="lib/prettify.css">
+</head>
+<body>
+<h1>Pie chart</h1>
+<div id="pie"></div>
+<pre id="code" class="prettyprint linenums">
+
+  data = [
+    { label: "2010", value: 12 },
+    { label: "2011", value: 15 },
+    { label: "2012", value: 19 },
+    { label: "2013", value: 28 }
+  ]
+
+  Morris.Pie({ element: "pie", data: data, enhanceMax: true })
+
+</pre>
+</body>
