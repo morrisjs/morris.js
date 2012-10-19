@@ -90,22 +90,20 @@ class Morris.Line
     parseTime: true
     preUnits: ''
     postUnits: ''
-    dateFormat: (x) -> new Date(x).toString()
+    dateFormat: null
     xLabels: 'auto'
     xLabelFormat: null
 
   # Update the data series and redraw the chart.
   #
   setData: (data, redraw = true) ->
-    # shallow copy & sort data
+    # shallow copy & sort data (if required)
     @options.data = data.slice(0)
     if @options.parseTime
       @options.data.sort (a, b) =>
         (a[@options.xkey] < b[@options.xkey]) - (b[@options.xkey] < a[@options.xkey])
     else
       @options.data.reverse()
-    # extract labels
-    @columnLabels = $.map @options.data, (d) => d[@options.xkey]
 
     # extract series data
     @series = []
@@ -118,19 +116,25 @@ class Morris.Line
           else null
       @series.push(series_data)
 
+    # extract labels
+    @columnLabels = $.map @options.data, (d) => d[@options.xkey]
+
     # translate x labels into nominal dates
-    # note: currently using decimal years to specify dates
     if @options.parseTime
       @xvals = $.map @columnLabels, (x) -> Morris.parseDate x
     else
       @xvals = [(@columnLabels.length-1)..0]
-    # translate column labels, if they're timestamps
+
+    # format column labels
     if @options.parseTime
-      @columnLabels = $.map @columnLabels, (d) =>
-        if typeof d is 'number'
-          @options.dateFormat(d)
-        else
-          d
+      if @options.dateFormat
+        @columnLabels = $.map @xvals, (d) => @options.dateFormat(d)
+      else
+        @columnLabels = $.map @columnLabels, (d) =>
+          # default formatter for numeric timestamp labels
+          if typeof d is 'number' then new Date(d).toString() else d
+
+    # calculate horizontal range of the graph
     @xmin = Math.min.apply null, @xvals
     @xmax = Math.max.apply null, @xvals
     if @xmin is @xmax

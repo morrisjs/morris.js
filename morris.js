@@ -381,9 +381,7 @@
       parseTime: true,
       preUnits: '',
       postUnits: '',
-      dateFormat: function(x) {
-        return new Date(x).toString();
-      },
+      dateFormat: null,
       xLabels: 'auto',
       xLabelFormat: null
     };
@@ -402,9 +400,6 @@
       } else {
         this.options.data.reverse();
       }
-      this.columnLabels = $.map(this.options.data, function(d) {
-        return d[_this.options.xkey];
-      });
       this.series = [];
       _ref = this.options.ykeys;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -426,6 +421,9 @@
         }
         this.series.push(series_data);
       }
+      this.columnLabels = $.map(this.options.data, function(d) {
+        return d[_this.options.xkey];
+      });
       if (this.options.parseTime) {
         this.xvals = $.map(this.columnLabels, function(x) {
           return Morris.parseDate(x);
@@ -438,13 +436,19 @@
         }).apply(this);
       }
       if (this.options.parseTime) {
-        this.columnLabels = $.map(this.columnLabels, function(d) {
-          if (typeof d === 'number') {
+        if (this.options.dateFormat) {
+          this.columnLabels = $.map(this.xvals, function(d) {
             return _this.options.dateFormat(d);
-          } else {
-            return d;
-          }
-        });
+          });
+        } else {
+          this.columnLabels = $.map(this.columnLabels, function(d) {
+            if (typeof d === 'number') {
+              return new Date(d).toString();
+            } else {
+              return d;
+            }
+          });
+        }
       }
       this.xmin = Math.min.apply(null, this.xvals);
       this.xmax = Math.max.apply(null, this.xvals);
