@@ -1050,7 +1050,7 @@
       currentAngle = 0;
       cx = this.el.width() / 2;
       cy = this.el.height() / 2;
-      r = (Math.min(cx, cy)) / 1.5;
+      r = (Math.min(cx, cy)) / 2.5;
       _ref1 = this.data;
       _results = [];
       for (index = _j = 0, _len1 = _ref1.length; _j < _len1; index = ++_j) {
@@ -1103,9 +1103,15 @@
       this.select = __bind(this.select, this);
 
       this.rad = Math.PI / 180;
-      this.distanceFromEdge = 40;
+      this.distanceFromEdge = 30;
       this.labelAngle = this.currentAngle + (this.step / 2);
       this.endAngle = this.currentAngle + this.step;
+      if (this.endAngle - this.currentAngle === 360) {
+        this.initialPathMovement = "M";
+        this.endAngle -= 0.01;
+      } else {
+        this.initialPathMovement = "L";
+      }
       this.x1 = this.cx + this.r * Math.cos(-this.currentAngle * this.rad);
       this.x2 = this.cx + this.r * Math.cos(-this.endAngle * this.rad);
       this.y1 = this.cy + this.r * Math.sin(-this.currentAngle * this.rad);
@@ -1113,8 +1119,10 @@
     }
 
     PieSegment.prototype.render = function() {
-      var _this = this;
-      this.segment = this.paper.path(["M", this.cx, this.cy, "L", this.x1, this.y1, "A", this.r, this.r, 0, +(this.endAngle - this.currentAngle > 180), 0, this.x2, this.y2, "z"]).attr({
+      var path,
+        _this = this;
+      path = ["M", this.cx, this.cy, this.initialPathMovement, this.x1, this.y1, "A", this.r, this.r, 0, +(this.endAngle - this.currentAngle > 180), 0, this.x2, this.y2, "z"];
+      this.segment = this.paper.path(path).attr({
         fill: this.color,
         stroke: "#FFFFFF",
         "stroke-width": 2

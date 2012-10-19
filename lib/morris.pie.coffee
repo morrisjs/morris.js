@@ -59,7 +59,7 @@ class Morris.Pie
 
     cx = @el.width() / 2
     cy = @el.height() / 2
-    r = (Math.min(cx, cy)) / 1.5
+    r = (Math.min(cx, cy)) / 2.5
 
     for labelAndValue, index in @data
 
@@ -89,18 +89,27 @@ class Morris.PieSegment extends Morris.EventEmitter
 
     @rad = Math.PI / 180
 
-    @distanceFromEdge = 40
+    @distanceFromEdge = 30
 
     @labelAngle = @currentAngle + (@step / 2)
     @endAngle = @currentAngle + @step
 
-    @x1 = @cx + @r * Math.cos(-@currentAngle * @rad)
-    @x2 = @cx + @r * Math.cos(-@endAngle   * @rad)
-    @y1 = @cy + @r * Math.sin(-@currentAngle * @rad)
-    @y2 = @cy + @r * Math.sin(-@endAngle   * @rad)
+    if @endAngle - @currentAngle == 360
+      @initialPathMovement = "M" # move only, do not draw line
+      @endAngle -= 0.01
+    else
+      @initialPathMovement = "L"
+
+    @x1 = @cx + @r * Math.cos( -@currentAngle * @rad )
+    @x2 = @cx + @r * Math.cos( -@endAngle     * @rad )
+    @y1 = @cy + @r * Math.sin( -@currentAngle * @rad )
+    @y2 = @cy + @r * Math.sin( -@endAngle     * @rad )
 
   render: ()->
-    @segment = @paper.path(["M", @cx, @cy, "L", @x1, @y1, "A", @r, @r, 0, +(@endAngle - @currentAngle > 180), 0, @x2, @y2, "z"]).attr({ fill:  @color, stroke: "#FFFFFF", "stroke-width": 2} ).hover(=> @fire('hover', @))
+
+    path = [ "M", @cx, @cy, @initialPathMovement, @x1, @y1 , "A", @r, @r, 0, +(@endAngle - @currentAngle > 180), 0, @x2, @y2, "z" ]
+    @segment = @paper.path( path ).attr( { fill:  @color, stroke: "#FFFFFF", "stroke-width": 2} ).hover( => @fire('hover', @) )
+
     @label = @paper.text(@cx + (@r + @distanceFromEdge ) * Math.cos(-@labelAngle * @rad), @cy + (@r + @distanceFromEdge ) * Math.sin(-@labelAngle * @rad), @labelAndValue.label).attr({fill: "#000000", "font-weight": "bold", stroke: "none", opacity: 1, "font-size": 12})
     @value = @paper.text(@cx + (@r + @distanceFromEdge ) * Math.cos(-@labelAngle * @rad), @cy + (@r + @distanceFromEdge ) * Math.sin(-@labelAngle * @rad) + 14, @labelAndValue.value).attr({fill: @color, stroke: "none", opacity: 1, "font-size": 12})
 
