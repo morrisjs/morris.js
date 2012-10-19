@@ -23,6 +23,10 @@ module.exports = function (grunt) {
         runner: ['spec/spec_runner.html'],
         specs: ['build/spec/**/*.js']
       }
+    },
+    watch: {
+      files: ['lib/**/*.coffee', 'spec/lib/**/*.coffee'],
+      tasks: 'default'
     }
   });
 
