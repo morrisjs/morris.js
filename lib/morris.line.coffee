@@ -223,15 +223,6 @@ class Morris.Line
   transY: (y) =>
     return @options.marginTop + @height - (y - @ymin) * @dy
 
-  # @private
-  shouldDrawSmooth: (series) =>
-    if typeof @options.smooth is 'boolean' && @options.smooth
-      true
-    else if typeof @options.smooth is 'object' and $.inArray(@options.ykeys[series], @options.smooth) > -1
-      true
-    else
-      false
-
   # Clear and redraw the chart.
   #
   # If you need to re-size your charts, call this method after changing the
@@ -300,8 +291,10 @@ class Morris.Line
   drawSeries: ->
     for i in [@seriesCoords.length-1..0]
       coords = $.map(@seriesCoords[i], (c) -> c)
+      smooth = @options.smooth is true or
+        $.inArray(@options.ykeys[i], @options.smooth) > -1
       if coords.length > 1
-        path = @createPath i, coords, @options.marginTop, @left, @options.marginTop + @height, @left + @width
+        path = @createPath coords, @options.marginTop + @height, smooth
         @r.path(path)
           .attr('stroke', @colorForSeries(i))
           .attr('stroke-width', @options.lineWidth)
@@ -320,10 +313,9 @@ class Morris.Line
   # create a path for a data series
   #
   # @private
-  createPath: (series, coords, top, left, bottom, right) ->
+  createPath: (coords, bottom, smooth) ->
     path = ""
-    
-    if @shouldDrawSmooth(series)
+    if smooth
       grads = @gradients coords
       for i in [0..coords.length-1]
         c = coords[i]

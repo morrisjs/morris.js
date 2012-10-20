@@ -292,8 +292,6 @@
 
       this.updateHover = __bind(this.updateHover, this);
 
-      this.shouldDrawSmooth = __bind(this.shouldDrawSmooth, this);
-
       this.transY = __bind(this.transY, this);
 
       this.transX = __bind(this.transX, this);
@@ -560,16 +558,6 @@
       return this.options.marginTop + this.height - (y - this.ymin) * this.dy;
     };
 
-    Line.prototype.shouldDrawSmooth = function(series) {
-      if (typeof this.options.smooth === 'boolean' && this.options.smooth) {
-        return true;
-      } else if (typeof this.options.smooth === 'object' && $.inArray(this.options.ykeys[series], this.options.smooth) > -1) {
-        return true;
-      } else {
-        return false;
-      }
-    };
-
     Line.prototype.redraw = function() {
       this.r.clear();
       this.calc();
@@ -626,13 +614,14 @@
     };
 
     Line.prototype.drawSeries = function() {
-      var c, circle, coords, i, path, _i, _j, _ref, _ref1, _results;
+      var c, circle, coords, i, path, smooth, _i, _j, _ref, _ref1, _results;
       for (i = _i = _ref = this.seriesCoords.length - 1; _ref <= 0 ? _i <= 0 : _i >= 0; i = _ref <= 0 ? ++_i : --_i) {
         coords = $.map(this.seriesCoords[i], function(c) {
           return c;
         });
+        smooth = this.options.smooth === true || $.inArray(this.options.ykeys[i], this.options.smooth) > -1;
         if (coords.length > 1) {
-          path = this.createPath(i, coords, this.options.marginTop, this.left, this.options.marginTop + this.height, this.left + this.width);
+          path = this.createPath(coords, this.options.marginTop + this.height, smooth);
           this.r.path(path).attr('stroke', this.colorForSeries(i)).attr('stroke-width', this.options.lineWidth);
         }
       }
@@ -665,10 +654,10 @@
       return _results;
     };
 
-    Line.prototype.createPath = function(series, coords, top, left, bottom, right) {
+    Line.prototype.createPath = function(coords, bottom, smooth) {
       var c, g, grads, i, ix, lc, lg, path, x1, x2, y1, y2, _i, _ref;
       path = "";
-      if (this.shouldDrawSmooth(series)) {
+      if (smooth) {
         grads = this.gradients(coords);
         for (i = _i = 0, _ref = coords.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
           c = coords[i];
