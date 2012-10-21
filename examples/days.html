@@ -25,16 +25,12 @@ var day_data = [
   {"period": "2012-09-15", "licensed": 3201, "sorned": 656},
   {"period": "2012-09-10", "licensed": 3215, "sorned": 622}
 ];
-Morris.Line({
+line = Morris.Line({
   element: 'graph',
   data: day_data,
   xkey: 'period',
   ykeys: ['licensed', 'sorned'],
-  labels: ['Licensed', 'SORN'],
-  /* custom label formatting with `xLabelFormat` */
-  xLabelFormat: function(d) { return (d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear(); },
-  /* setting `xLabels` is recommended when using xLabelFormat */
-  xLabels: 'day'
+  labels: ['Licensed', 'SORN']
 });
 </pre>
 </body>

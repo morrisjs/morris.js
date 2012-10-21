@@ -1,35 +1,14 @@
-class Morris.Line
+class Morris.Line extends Morris.Grid
   # Initialise the graph.
   #
   constructor: (options) ->
-    if not (this instanceof Morris.Line)
-      return new Morris.Line(options)
-    if typeof options.element is 'string'
-      @el = $ document.getElementById(options.element)
-    else
-      @el = $ options.element
+    return new Morris.Line(options) unless (@ instanceof Morris.Line)
+    super(options)
 
-    if @el == null || @el.length == 0
-      throw new Error("Graph placeholder not found.")
-
-    @options = $.extend {}, @defaults, options
-    # backwards compatibility for units -> postUnits
-    if typeof @options.units is 'string'
-      @options.postUnits = options.units
-    # bail if there's no data
-    if @options.data is undefined or @options.data.length is 0
-      return
-    @el.addClass 'graph-initialised'
-
-    # the raphael drawing instance
-    @r = new Raphael(@el[0])
-
+  init: ->
     # Some instance variables for later
     @pointGrow = Raphael.animation r: @options.pointSize + 3, 25, 'linear'
     @pointShrink = Raphael.animation r: @options.pointSize, 25, 'linear'
-    @elementWidth = null
-    @elementHeight = null
-    @dirty = false
     # column hilight events
     @prevHilight = null
     @el.mousemove (evt) =>
@@ -44,9 +23,6 @@ class Morris.Line
     @el.bind 'touchstart', touchHandler
     @el.bind 'touchmove', touchHandler
     @el.bind 'touchend', touchHandler
-
-    @seriesLabels = @options.labels
-    @setData(@options.data)
 
   # Default configuration
   #
@@ -65,17 +41,6 @@ class Morris.Line
     pointWidths: [1]
     pointStrokeColors: ['#ffffff']
     pointFillColors: []
-    ymax: 'auto'
-    ymin: 'auto 0'
-    marginTop: 25
-    marginRight: 25
-    marginBottom: 30
-    marginLeft: 25
-    numLines: 5
-    gridLineColor: '#aaa'
-    gridTextColor: '#888'
-    gridTextSize: 12
-    gridStrokeWidth: 0.5
     hoverPaddingX: 10
     hoverPaddingY: 5
     hoverMargin: 10
@@ -87,176 +52,41 @@ class Morris.Line
     hoverFontSize: 12
     smooth: true
     hideHover: false
-    parseTime: true
-    preUnits: ''
-    postUnits: ''
-    dateFormat: null
     xLabels: 'auto'
     xLabelFormat: null
-
-  # Update the data series and redraw the chart.
-  #
-  setData: (data, redraw = true) ->
-    # shallow copy & sort data (if required)
-    @options.data = data.slice(0)
-    if @options.parseTime
-      @options.data.sort (a, b) =>
-        (a[@options.xkey] < b[@options.xkey]) - (b[@options.xkey] < a[@options.xkey])
-    else
-      @options.data.reverse()
-
-    # extract series data
-    @series = []
-    for ykey in @options.ykeys
-      series_data = []
-      for d in @options.data
-        series_data.push switch typeof d[ykey]
-          when 'number' then d[ykey]
-          when 'string' then parseFloat(d[ykey])
-          else null
-      @series.push(series_data)
-
-    # extract labels
-    @columnLabels = $.map @options.data, (d) => d[@options.xkey]
-
-    # translate x labels into nominal dates
-    if @options.parseTime
-      @xvals = $.map @columnLabels, (x) -> Morris.parseDate x
-    else
-      @xvals = [(@columnLabels.length-1)..0]
-
-    # format column labels
-    if @options.parseTime
-      if @options.dateFormat
-        @columnLabels = $.map @xvals, (d) => @options.dateFormat(d)
-      else
-        @columnLabels = $.map @columnLabels, (d) =>
-          # default formatter for numeric timestamp labels
-          if typeof d is 'number' then new Date(d).toString() else d
-
-    # calculate horizontal range of the graph
-    @xmin = Math.min.apply null, @xvals
-    @xmax = Math.max.apply null, @xvals
-    if @xmin is @xmax
-      @xmin -= 1
-      @xmax += 1
-
-    # Compute the vertical range of the graph if desired
-    if typeof @options.ymax is 'string' and @options.ymax[0..3] is 'auto'
-      # use Array.concat to flatten arrays and find the max y value
-      ymax = Math.max.apply null, Array.prototype.concat.apply([], @series)
-      if @options.ymax.length > 5
-        @ymax = Math.max parseInt(@options.ymax[5..], 10), ymax
-      else
-        @ymax = ymax
-    else if typeof @options.ymax is 'string'
-      @ymax = parseInt(@options.ymax, 10)
-    else
-      @ymax = @options.ymax
-    if typeof @options.ymin is 'string' and @options.ymin[0..3] is 'auto'
-      ymin = Math.min.apply null, Array.prototype.concat.apply([], @series)
-      if @options.ymin.length > 5
-        @ymin = Math.min parseInt(@options.ymin[5..], 10), ymin
-      else
-        @ymin = ymin
-    else if typeof @options.ymin is 'string'
-      @ymin = parseInt(@options.ymin, 10)
-    else
-      @ymin = @options.ymin
-    if @ymin is @ymax
-      if @ymin is not 0 then @ymin -= 1
-      @ymax += 1
-
-    @yInterval = (@ymax - @ymin) / (@options.numLines - 1)
-    if @yInterval > 0 and @yInterval < 1
-        @precision =  -Math.floor(Math.log(@yInterval) / Math.log(10))
-    else
-        @precision = 0
-
-    @dirty = true
-    @redraw() if redraw
 
   # Do any size-related calculations
   #
   # @private
   calc: ->
-    w = @el.width()
-    h = @el.height()
+    # calculate series data point coordinates
+    @columns = (@transX(x) for x in @xvals)
+    @seriesCoords = []
+    for s in @series
+      scoords = []
+      $.each s, (i, y) =>
+          if y == null
+            scoords.push(null)
+          else
+            scoords.push(x: @columns[i], y: @transY(y))
+      @seriesCoords.push(scoords)
+    # calculate hover margins
+    @hoverMargins = $.map @columns.slice(1), (x, i) => (x + @columns[i]) / 2
 
-    if @elementWidth != w or @elementHeight != h or @dirty
-      @elementWidth = w
-      @elementHeight = h
-      @dirty = false
-      # calculate grid dimensions
-      @maxYLabelWidth = Math.max(
-        @measureText(@yAxisFormat(@ymin), @options.gridTextSize).width,
-        @measureText(@yAxisFormat(@ymax), @options.gridTextSize).width)
-      @left = @maxYLabelWidth + @options.marginLeft
-      @width = @el.width() - @left - @options.marginRight
-      @height = @el.height() - @options.marginTop - @options.marginBottom
-      @dx = @width / (@xmax - @xmin)
-      @dy = @height / (@ymax - @ymin)
-      # calculate series data point coordinates
-      @columns = (@transX(x) for x in @xvals)
-      @seriesCoords = []
-      for s in @series
-        scoords = []
-        $.each s, (i, y) =>
-            if y == null
-              scoords.push(null)
-            else
-              scoords.push(x: @columns[i], y: @transY(y))
-        @seriesCoords.push(scoords)
-      # calculate hover margins
-      @hoverMargins = $.map @columns.slice(1), (x, i) => (x + @columns[i]) / 2
-
-  # quick translation helpers
+  # Draws the line chart.
   #
-  # @private
-  transX: (x) =>
-    if @xvals.length is 1
-      @left + @width / 2
-    else
-      @left + (x - @xmin) * @dx
-
-  # @private
-  transY: (y) =>
-    return @options.marginTop + @height - (y - @ymin) * @dy
-
-  # Clear and redraw the chart.
-  #
-  # If you need to re-size your charts, call this method after changing the
-  # size of the container element.
-  redraw: ->
-    @r.clear()
-    @calc()
-    @drawGrid()
+  draw: ->
+    @drawXAxis()
     @drawSeries()
     @drawHover()
     @hilight(if @options.hideHover then null else 0)
 
-  # draw the grid, and axes labels
+  # draw the x-axis labels
   #
   # @private
-  drawGrid: ->
-    # draw y axis labels, horizontal lines
-    firstY = @ymin
-    lastY = @ymax
-
-
-    for lineY in [firstY..lastY] by @yInterval
-      v = parseFloat(lineY.toFixed(@precision))
-      y = @transY(v)
-      @r.text(@left - @options.marginLeft/2, y, @yAxisFormat(v))
-        .attr('font-size', @options.gridTextSize)
-        .attr('fill', @options.gridTextColor)
-        .attr('text-anchor', 'end')
-      @r.path("M#{@left},#{y}H#{@left + @width}")
-        .attr('stroke', @options.gridLineColor)
-        .attr('stroke-width', @options.gridStrokeWidth)
-
-    ## draw x axis labels
-    ypos = @options.marginTop + @height + @options.marginBottom / 2
+  drawXAxis: ->
+    # draw x axis labels
+    ypos = @bottom + @options.gridTextSize * 1.25
     xLabelMargin = 50 # make this an option?
     prevLabelMargin = null
     drawLabel = (labelText, xpos) =>
@@ -290,11 +120,11 @@ class Morris.Line
   # @private
   drawSeries: ->
     for i in [@seriesCoords.length-1..0]
-      coords = $.map(@seriesCoords[i], (c) -> c)
+      coords = @seriesCoords[i]
       smooth = @options.smooth is true or
         $.inArray(@options.ykeys[i], @options.smooth) > -1
       if coords.length > 1
-        path = @createPath coords, @options.marginTop + @height, smooth
+        path = @createPath coords, @bottom, smooth
         @r.path(path)
           .attr('stroke', @colorForSeries(i))
           .attr('stroke-width', @options.lineWidth)
@@ -313,7 +143,7 @@ class Morris.Line
   # create a path for a data series
   #
   # @private
-  createPath: (coords, bottom, smooth) ->
+  createPath: (coords, smooth) ->
     path = ""
     if smooth
       grads = @gradients coords
@@ -327,9 +157,9 @@ class Morris.Line
           lg = grads[i - 1]
           ix = (c.x - lc.x) / 4
           x1 = lc.x + ix
-          y1 = Math.min(bottom, lc.y + ix * lg)
+          y1 = Math.min(@bottom, lc.y + ix * lg)
           x2 = c.x - ix
-          y2 = Math.min(bottom, c.y - ix * g)
+          y2 = Math.min(@bottom, c.y - ix * g)
           path += "C#{x1},#{y1},#{x2},#{y2},#{c.x},#{c.y}"
     else
       path = "M" + $.map(coords, (c) -> "#{c.x},#{c.y}").join("L")
@@ -378,7 +208,7 @@ class Morris.Line
     @hoverSet.show()
     @xLabel.attr('text', @columnLabels[index])
     for i in [0..@series.length-1]
-      @yLabels[i].attr('text', "#{@seriesLabels[i]}: #{@yLabelFormat(@series[i][index])}")
+      @yLabels[i].attr('text', "#{@options.labels[i]}: #{@yLabelFormat(@series[i][index])}")
     # recalculate hover box width
     maxLabelWidth = Math.max.apply null, $.map @yLabels, (l) ->
       l.getBBox().width
@@ -388,13 +218,13 @@ class Morris.Line
     # move to y pos
     yloc = Math.min.apply null, $.map @series, (s) =>
       @transY s[index]
-    if yloc > @hoverHeight + @options.hoverPaddingY * 2 + @options.hoverMargin + @options.marginTop
+    if yloc > @hoverHeight + @options.hoverPaddingY * 2 + @options.hoverMargin + @top
       yloc = yloc - @hoverHeight / 2 - @options.hoverPaddingY - @options.hoverMargin
     else
       yloc = yloc + @hoverHeight / 2 + @options.hoverPaddingY + @options.hoverMargin
-    yloc = Math.max @options.marginTop + @hoverHeight / 2 + @options.hoverPaddingY, yloc
-    yloc = Math.min @options.marginTop + @height - @hoverHeight / 2 - @options.hoverPaddingY, yloc
-    xloc = Math.min @left + @width - maxLabelWidth / 2 - @options.hoverPaddingX, @columns[index]
+    yloc = Math.max @top + @hoverHeight / 2 + @options.hoverPaddingY, yloc
+    yloc = Math.min @bottom - @hoverHeight / 2 - @options.hoverPaddingY, yloc
+    xloc = Math.min @right - maxLabelWidth / 2 - @options.hoverPaddingX, @columns[index]
     xloc = Math.max @left + maxLabelWidth / 2 + @options.hoverPaddingX, xloc
     @hoverSet.attr 'transform', "t#{xloc},#{yloc}"
 
@@ -426,21 +256,6 @@ class Morris.Line
         break
 
   # @private
-  measureText: (text, fontSize = 12) ->
-    tt = @r.text(100, 100, text).attr('font-size', fontSize)
-    ret = tt.getBBox()
-    tt.remove()
-    return ret
-
-  # @private
-  yAxisFormat: (label) ->
-    @yLabelFormat(label)
-
-  # @private
-  yLabelFormat: (label) ->
-    "#{@options.preUnits}#{Morris.commas(label)}#{@options.postUnits}"
-
-  # @private
   colorForSeries: (index) ->
     @options.lineColors[index % @options.lineColors.length]
 
@@ -456,93 +271,6 @@ class Morris.Line
   pointFillColorForSeries: (index) ->
     @options.pointFillColors[index % @options.pointFillColors.length]
 
-
-# Parse a date into a javascript timestamp
-#
-#
-Morris.parseDate = (date) ->
-  if typeof date is 'number'
-    return date
-  m = date.match /^(\d+) Q(\d)$/
-  n = date.match /^(\d+)-(\d+)$/
-  o = date.match /^(\d+)-(\d+)-(\d+)$/
-  p = date.match /^(\d+) W(\d+)$/
-  q = date.match /^(\d+)-(\d+)-(\d+)[ T](\d+):(\d+)(Z|([+-])(\d\d):?(\d\d))?$/
-  r = date.match /^(\d+)-(\d+)-(\d+)[ T](\d+):(\d+):(\d+(\.\d+)?)(Z|([+-])(\d\d):?(\d\d))?$/
-  if m
-    new Date(
-      parseInt(m[1], 10),
-      parseInt(m[2], 10) * 3 - 1,
-      1).getTime()
-  else if n
-    new Date(
-      parseInt(n[1], 10),
-      parseInt(n[2], 10) - 1,
-      1).getTime()
-  else if o
-    new Date(
-      parseInt(o[1], 10),
-      parseInt(o[2], 10) - 1,
-      parseInt(o[3], 10)).getTime()
-  else if p
-    # calculate number of weeks in year given
-    ret = new Date(parseInt(p[1], 10), 0, 1);
-    # first thursday in year (ISO 8601 standard)
-    if ret.getDay() isnt 4
-      ret.setMonth(0, 1 + ((4 - ret.getDay()) + 7) % 7);
-    # add weeks
-    ret.getTime() + parseInt(p[2], 10) * 604800000
-  else if q
-    if not q[6]
-      # no timezone info, use local
-      new Date(
-        parseInt(q[1], 10),
-        parseInt(q[2], 10) - 1,
-        parseInt(q[3], 10),
-        parseInt(q[4], 10),
-        parseInt(q[5], 10)).getTime()
-    else
-      # timezone info supplied, use UTC
-      offsetmins = 0
-      if q[6] != 'Z'
-        offsetmins = parseInt(q[8], 10) * 60 + parseInt(q[9], 10)
-        offsetmins = 0 - offsetmins if q[7] == '+'
-      Date.UTC(
-        parseInt(q[1], 10),
-        parseInt(q[2], 10) - 1,
-        parseInt(q[3], 10),
-        parseInt(q[4], 10),
-        parseInt(q[5], 10) + offsetmins)
-  else if r
-    secs = parseFloat(r[6])
-    isecs = Math.floor(secs)
-    msecs = Math.round((secs - isecs) * 1000)
-    if not r[8]
-      # no timezone info, use local
-      new Date(
-        parseInt(r[1], 10),
-        parseInt(r[2], 10) - 1,
-        parseInt(r[3], 10),
-        parseInt(r[4], 10),
-        parseInt(r[5], 10),
-        isecs,
-        msecs).getTime()
-    else
-      # timezone info supplied, use UTC
-      offsetmins = 0
-      if r[8] != 'Z'
-        offsetmins = parseInt(r[10], 10) * 60 + parseInt(r[11], 10)
-        offsetmins = 0 - offsetmins if r[9] == '+'
-      Date.UTC(
-        parseInt(r[1], 10),
-        parseInt(r[2], 10) - 1,
-        parseInt(r[3], 10),
-        parseInt(r[4], 10),
-        parseInt(r[5], 10) + offsetmins,
-        isecs,
-        msecs)
-  else
-    new Date(parseInt(date, 10), 0, 1).getTime()
 
 # generate a series of label, timestamp pairs for x-axis labels
 #
