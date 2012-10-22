@@ -79,7 +79,7 @@ class Morris.Line extends Morris.Grid
     @drawXAxis()
     @drawSeries()
     @drawHover()
-    @hilight(if @options.hideHover then null else 0)
+    @hilight(if @options.hideHover then null else @options.data.length - 1)
 
   # draw the x-axis labels
   #
@@ -111,8 +111,8 @@ class Morris.Line extends Morris.Grid
         for l in Morris.labelSeries(@xmin, @xmax, @width, @options.xLabels, @options.xLabelFormat)
           drawLabel(l[0], l[1])
     else
-      for i in [0..@columnLabels.length]
-        labelText = @columnLabels[@columnLabels.length - i - 1]
+      for i in [0...@columnLabels.length]
+        labelText = @columnLabels[i]
         drawLabel(labelText, i)
 
   # draw the data series
@@ -120,7 +120,7 @@ class Morris.Line extends Morris.Grid
   # @private
   drawSeries: ->
     for i in [@seriesCoords.length-1..0]
-      coords = @seriesCoords[i]
+      coords = $.map @seriesCoords[i], (c) -> c
       smooth = @options.smooth is true or
         $.inArray(@options.ykeys[i], @options.smooth) > -1
       if coords.length > 1
@@ -250,10 +250,9 @@ class Morris.Line extends Morris.Grid
   # @private
   updateHilight: (x) =>
     x -= @el.offset().left
-    for hoverIndex in [@hoverMargins.length..0]
-      if hoverIndex == 0 || @hoverMargins[hoverIndex - 1] > x
-        @hilight hoverIndex
-        break
+    for hoverIndex in [0...@hoverMargins.length]
+      break if @hoverMargins[hoverIndex] > x
+    @hilight hoverIndex
 
   # @private
   colorForSeries: (index) ->

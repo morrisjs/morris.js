@@ -56,10 +56,14 @@ class Morris.Grid extends Morris.EventEmitter
   #
   setData: (data, redraw = true) ->
     # shallow copy data
-    @options.data = data.slice()
-    if @parseTime
+    @options.data = $.map data, (row) =>
+      if @options.parseTime
+        $.extend {'__T': Morris.parseDate(row[@options.xkey])}, row
+      else
+        $.extend {}, row
+    if @options.parseTime
       @options.data = @options.data.sort (a, b) =>
-        (a[@options.xkey] < b[@options.xkey]) - (b[@options.xkey] < a[@options.xkey])
+        (a['__T'] > b['__T']) - (b['__T'] > a['__T'])
 
     # extract series data
     @series = []
@@ -74,9 +78,9 @@ class Morris.Grid extends Morris.EventEmitter
       @series.push seriesData
 
     # extract labels / x values
-    @columnLabels = $.map @options.data, (d) => d[@options.xkey]
+    @columnLabels = $.map @options.data, (row) => row[@options.xkey]
     if @options.parseTime
-      @xvals = $.map @columnLabels, (x) -> Morris.parseDate x
+      @xvals = $.map @options.data, (row) -> row['__T']
       if @options.dateFormat
         @columnLabels = $.map @xvals, (d) => @options.dateFormat d
       else

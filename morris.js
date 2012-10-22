@@ -334,10 +334,18 @@
       if (redraw == null) {
         redraw = true;
       }
-      this.options.data = data.slice();
-      if (this.parseTime) {
+      this.options.data = $.map(data, function(row) {
+        if (_this.options.parseTime) {
+          return $.extend({
+            '__T': Morris.parseDate(row[_this.options.xkey])
+          }, row);
+        } else {
+          return $.extend({}, row);
+        }
+      });
+      if (this.options.parseTime) {
         this.options.data = this.options.data.sort(function(a, b) {
-          return (a[_this.options.xkey] < b[_this.options.xkey]) - (b[_this.options.xkey] < a[_this.options.xkey]);
+          return (a['__T'] > b['__T']) - (b['__T'] > a['__T']);
         });
       }
       this.series = [];
@@ -362,12 +370,12 @@
         }
         this.series.push(seriesData);
       }
-      this.columnLabels = $.map(this.options.data, function(d) {
-        return d[_this.options.xkey];
+      this.columnLabels = $.map(this.options.data, function(row) {
+        return row[_this.options.xkey];
       });
       if (this.options.parseTime) {
-        this.xvals = $.map(this.columnLabels, function(x) {
-          return Morris.parseDate(x);
+        this.xvals = $.map(this.options.data, function(row) {
+          return row['__T'];
         });
         if (this.options.dateFormat) {
           this.columnLabels = $.map(this.xvals, function(d) {
@@ -681,7 +689,7 @@
       this.drawXAxis();
       this.drawSeries();
       this.drawHover();
-      return this.hilight(this.options.hideHover ? null : 0);
+      return this.hilight(this.options.hideHover ? null : this.options.data.length - 1);
     };
 
     Line.prototype.drawXAxis = function() {
@@ -714,8 +722,8 @@
         }
       } else {
         _results1 = [];
-        for (i = _j = 0, _ref1 = this.columnLabels.length; 0 <= _ref1 ? _j <= _ref1 : _j >= _ref1; i = 0 <= _ref1 ? ++_j : --_j) {
-          labelText = this.columnLabels[this.columnLabels.length - i - 1];
+        for (i = _j = 0, _ref1 = this.columnLabels.length; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; i = 0 <= _ref1 ? ++_j : --_j) {
+          labelText = this.columnLabels[i];
           _results1.push(drawLabel(labelText, i));
         }
         return _results1;
@@ -725,7 +733,9 @@
     Line.prototype.drawSeries = function() {
       var c, circle, coords, i, path, smooth, _i, _j, _ref, _ref1, _results;
       for (i = _i = _ref = this.seriesCoords.length - 1; _ref <= 0 ? _i <= 0 : _i >= 0; i = _ref <= 0 ? ++_i : --_i) {
-        coords = this.seriesCoords[i];
+        coords = $.map(this.seriesCoords[i], function(c) {
+          return c;
+        });
         smooth = this.options.smooth === true || $.inArray(this.options.ykeys[i], this.options.smooth) > -1;
         if (coords.length > 1) {
           path = this.createPath(coords, this.bottom, smooth);
@@ -877,18 +887,14 @@
     };
 
     Line.prototype.updateHilight = function(x) {
-      var hoverIndex, _i, _ref, _results;
+      var hoverIndex, _i, _ref;
       x -= this.el.offset().left;
-      _results = [];
-      for (hoverIndex = _i = _ref = this.hoverMargins.length; _ref <= 0 ? _i <= 0 : _i >= 0; hoverIndex = _ref <= 0 ? ++_i : --_i) {
-        if (hoverIndex === 0 || this.hoverMargins[hoverIndex - 1] > x) {
-          this.hilight(hoverIndex);
+      for (hoverIndex = _i = 0, _ref = this.hoverMargins.length; 0 <= _ref ? _i < _ref : _i > _ref; hoverIndex = 0 <= _ref ? ++_i : --_i) {
+        if (this.hoverMargins[hoverIndex] > x) {
           break;
-        } else {
-          _results.push(void 0);
         }
       }
-      return _results;
+      return this.hilight(hoverIndex);
     };
 
     Line.prototype.colorForSeries = function(index) {
