@@ -28,7 +28,7 @@ describe 'Morris.Line', ->
         ykeys: ['y']
         labels: ['dontcare']
       )
-    fn.should.throw(/Graph placeholder not found./)
+    fn.should.throw(/Graph container element not found/)
 
   it 'should make point styles customizable', ->
     my_data = [{x: 1, y: 1}, {x: 2, y: 2}]
