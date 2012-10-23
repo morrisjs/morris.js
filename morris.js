@@ -62,6 +62,16 @@
     return (number < 10 ? '0' : '') + number;
   };
 
+  Morris.Data = (function() {
+
+    function Data() {}
+
+    Data.prototype.initialize = function(options) {};
+
+    return Data;
+
+  })();
+
   Morris.Donut = (function() {
 
     Donut.prototype.defaults = {
@@ -329,94 +339,79 @@
     };
 
     Grid.prototype.setData = function(data, redraw) {
-      var d, seriesData, y, ykey, ymax, ymin, _i, _j, _k, _len, _len1, _ref, _ref1, _ref2, _results,
+      var ymax, ymin,
         _this = this;
       if (redraw == null) {
         redraw = true;
       }
-      this.options.data = $.map(data, function(row) {
+      ymax = null;
+      ymin = null;
+      this.data = $.map(data, function(row, index) {
+        var ret, ykey, yval;
+        ret = {};
+        ret.label = row[_this.options.xkey];
         if (_this.options.parseTime) {
-          return $.extend({
-            '__T': Morris.parseDate(row[_this.options.xkey])
-          }, row);
+          ret.x = Morris.parseDate(ret.label);
+          if (_this.options.dateFormat) {
+            ret.label = _this.options.dateFormat(ret.x);
+          } else if (typeof ret.label === 'number') {
+            ret.label = new Date(ret.label).toString();
+          }
         } else {
-          return $.extend({}, row);
+          ret.x = index;
         }
-      });
-      if (this.options.parseTime) {
-        this.options.data = this.options.data.sort(function(a, b) {
-          return (a['__T'] > b['__T']) - (b['__T'] > a['__T']);
-        });
-      }
-      this.series = [];
-      _ref = this.options.ykeys;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        ykey = _ref[_i];
-        seriesData = [];
-        _ref1 = this.options.data;
-        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-          d = _ref1[_j];
-          y = d[ykey];
-          seriesData.push((function() {
-            switch (typeof y) {
-              case 'number':
-                return y;
-              case 'string':
-                return parseFloat(y);
-              default:
-                return null;
-            }
-          })());
-        }
-        this.series.push(seriesData);
-      }
-      this.columnLabels = $.map(this.options.data, function(row) {
-        return row[_this.options.xkey];
-      });
-      if (this.options.parseTime) {
-        this.xvals = $.map(this.options.data, function(row) {
-          return row['__T'];
-        });
-        if (this.options.dateFormat) {
-          this.columnLabels = $.map(this.xvals, function(d) {
-            return _this.options.dateFormat(d);
-          });
-        } else {
-          this.columnLabels = $.map(this.columnLabels, function(d) {
-            if (typeof d === 'number') {
-              return new Date(d).toString();
-            } else {
-              return d;
-            }
-          });
-        }
-      } else {
-        this.xvals = (function() {
+        ret.y = (function() {
+          var _i, _len, _ref, _results;
+          _ref = this.options.ykeys;
           _results = [];
-          for (var _k = 0, _ref2 = this.columnLabels.length; 0 <= _ref2 ? _k < _ref2 : _k > _ref2; 0 <= _ref2 ? _k++ : _k--){ _results.push(_k); }
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            ykey = _ref[_i];
+            yval = row[ykey];
+            if (typeof yval === 'string') {
+              yval = parseFloat(yval);
+            }
+            if (typeof yval !== 'number') {
+              yval = null;
+            }
+            if (yval !== null) {
+              if (ymax === null) {
+                ymax = ymin = yval;
+              } else {
+                ymax = Math.max(yval, ymax);
+                ymin = Math.min(yval, ymin);
+              }
+            }
+            _results.push(yval);
+          }
           return _results;
-        }).apply(this);
+        }).call(_this);
+        return ret;
+      });
+      if (this.options.parseTime) {
+        this.data = this.data.sort(function(a, b) {
+          return (a.x > b.x) - (b.x > a.x);
+        });
       }
-      this.xmin = Math.min.apply(null, this.xvals);
-      this.xmax = Math.max.apply(null, this.xvals);
+      this.xmin = this.data[0].x;
+      this.xmax = this.data[this.data.length - 1].x;
       if (this.xmin === this.xmax) {
         this.xmin -= 1;
         this.xmax += 1;
       }
-      if (typeof this.options.ymax === 'string' && this.options.ymax.slice(0, 4) === 'auto') {
-        ymax = Math.max.apply(null, Array.prototype.concat.apply([], this.series));
-        if (this.options.ymax.length > 5) {
-          this.ymax = Math.max(parseInt(this.options.ymax.slice(5), 10), ymax);
+      if (typeof this.options.ymax === 'string') {
+        if (this.options.ymax.slice(0, 4) === 'auto') {
+          if (this.options.ymax.length > 5) {
+            this.ymax = Math.max(parseInt(this.options.ymax.slice(5), 10), ymax);
+          } else {
+            this.ymax = ymax;
+          }
         } else {
-          this.ymax = ymax;
+          this.ymax = parseInt(this.options.ymax, 10);
         }
-      } else if (typeof this.options.ymax === 'string') {
-        this.ymax = parseInt(this.options.ymax, 10);
       } else {
         this.ymax = this.options.ymax;
       }
       if (typeof this.options.ymin === 'string' && this.options.ymin.slice(0, 4) === 'auto') {
-        ymin = Math.min.apply(null, Array.prototype.concat.apply([], this.series));
         if (this.options.ymin.length > 5) {
           this.ymin = Math.min(parseInt(this.options.ymin.slice(5), 10), ymin);
         } else {
@@ -428,7 +423,7 @@
         this.ymin = this.options.ymin;
       }
       if (this.ymin === this.ymax) {
-        if (this.ymin === !0) {
+        if (this.ymin !== 0) {
           this.ymin -= 1;
         }
         this.ymax += 1;
@@ -473,7 +468,7 @@
     };
 
     Grid.prototype.transX = function(x) {
-      if (this.xvals.length === 1) {
+      if (this.data.length === 1) {
         return (this.left + this.right) / 2;
       } else {
         return this.left + (x - this.xmin) * this.dx;
@@ -651,37 +646,29 @@
     };
 
     Line.prototype.calc = function() {
-      var s, scoords, x, _i, _len, _ref,
+      var row, y, _i, _len, _ref,
         _this = this;
-      this.columns = (function() {
-        var _i, _len, _ref, _results;
-        _ref = this.xvals;
-        _results = [];
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          x = _ref[_i];
-          _results.push(this.transX(x));
-        }
-        return _results;
-      }).call(this);
-      this.seriesCoords = [];
-      _ref = this.series;
+      _ref = this.data;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        s = _ref[_i];
-        scoords = [];
-        $.each(s, function(i, y) {
-          if (y === null) {
-            return scoords.push(null);
-          } else {
-            return scoords.push({
-              x: _this.columns[i],
-              y: _this.transY(y)
-            });
+        row = _ref[_i];
+        row._x = this.transX(row.x);
+        row._y = (function() {
+          var _j, _len1, _ref1, _results;
+          _ref1 = row.y;
+          _results = [];
+          for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+            y = _ref1[_j];
+            if (y === null) {
+              _results.push(null);
+            } else {
+              _results.push(this.transY(y));
+            }
           }
-        });
-        this.seriesCoords.push(scoords);
+          return _results;
+        }).call(this);
       }
-      return this.hoverMargins = $.map(this.columns.slice(1), function(x, i) {
-        return (x + _this.columns[i]) / 2;
+      return this.hoverMargins = $.map(this.data.slice(1), function(r, i) {
+        return (r._x + _this.data[i]._x) / 2;
       });
     };
 
@@ -689,11 +676,11 @@
       this.drawXAxis();
       this.drawSeries();
       this.drawHover();
-      return this.hilight(this.options.hideHover ? null : this.options.data.length - 1);
+      return this.hilight(this.options.hideHover ? null : this.data.length - 1);
     };
 
     Line.prototype.drawXAxis = function() {
-      var drawLabel, i, l, labelText, prevLabelMargin, xLabelMargin, ypos, _i, _j, _len, _ref, _ref1, _results, _results1,
+      var drawLabel, l, prevLabelMargin, row, xLabelMargin, ypos, _i, _j, _len, _len1, _ref, _ref1, _results, _results1,
         _this = this;
       ypos = this.bottom + this.options.gridTextSize * 1.25;
       xLabelMargin = 50;
@@ -709,8 +696,8 @@
         }
       };
       if (this.options.parseTime) {
-        if (this.columnLabels.length === 1 && this.options.xLabels === 'auto') {
-          return drawLabel(this.columnLabels[0], this.xvals[0]);
+        if (this.data.length === 1 && this.options.xLabels === 'auto') {
+          return drawLabel(this.data[0].label, this.data[0].x);
         } else {
           _ref = Morris.labelSeries(this.xmin, this.xmax, this.width, this.options.xLabels, this.options.xLabelFormat);
           _results = [];
@@ -721,21 +708,34 @@
           return _results;
         }
       } else {
+        _ref1 = this.data;
         _results1 = [];
-        for (i = _j = 0, _ref1 = this.columnLabels.length; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; i = 0 <= _ref1 ? ++_j : --_j) {
-          labelText = this.columnLabels[i];
-          _results1.push(drawLabel(labelText, i));
+        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+          row = _ref1[_j];
+          _results1.push(drawLabel(row.label, row.x));
         }
         return _results1;
       }
     };
 
     Line.prototype.drawSeries = function() {
-      var c, circle, coords, i, path, smooth, _i, _j, _ref, _ref1, _results;
-      for (i = _i = _ref = this.seriesCoords.length - 1; _ref <= 0 ? _i <= 0 : _i >= 0; i = _ref <= 0 ? ++_i : --_i) {
-        coords = $.map(this.seriesCoords[i], function(c) {
-          return c;
-        });
+      var circle, coords, i, path, r, row, smooth, _i, _j, _ref, _ref1, _results;
+      for (i = _i = _ref = this.options.ykeys.length - 1; _ref <= 0 ? _i <= 0 : _i >= 0; i = _ref <= 0 ? ++_i : --_i) {
+        coords = (function() {
+          var _j, _len, _ref1, _results;
+          _ref1 = this.data;
+          _results = [];
+          for (_j = 0, _len = _ref1.length; _j < _len; _j++) {
+            r = _ref1[_j];
+            if (r._y[i] !== null) {
+              _results.push({
+                x: r._x,
+                y: r._y[i]
+              });
+            }
+          }
+          return _results;
+        }).call(this);
         smooth = this.options.smooth === true || $.inArray(this.options.ykeys[i], this.options.smooth) > -1;
         if (coords.length > 1) {
           path = this.createPath(coords, this.bottom, smooth);
@@ -745,23 +745,23 @@
       this.seriesPoints = (function() {
         var _j, _ref1, _results;
         _results = [];
-        for (i = _j = 0, _ref1 = this.seriesCoords.length - 1; 0 <= _ref1 ? _j <= _ref1 : _j >= _ref1; i = 0 <= _ref1 ? ++_j : --_j) {
+        for (i = _j = 0, _ref1 = this.options.ykeys.length; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; i = 0 <= _ref1 ? ++_j : --_j) {
           _results.push([]);
         }
         return _results;
       }).call(this);
       _results = [];
-      for (i = _j = _ref1 = this.seriesCoords.length - 1; _ref1 <= 0 ? _j <= 0 : _j >= 0; i = _ref1 <= 0 ? ++_j : --_j) {
+      for (i = _j = _ref1 = this.options.ykeys.length - 1; _ref1 <= 0 ? _j <= 0 : _j >= 0; i = _ref1 <= 0 ? ++_j : --_j) {
         _results.push((function() {
           var _k, _len, _ref2, _results1;
-          _ref2 = this.seriesCoords[i];
+          _ref2 = this.data;
           _results1 = [];
           for (_k = 0, _len = _ref2.length; _k < _len; _k++) {
-            c = _ref2[_k];
-            if (c === null) {
+            row = _ref2[_k];
+            if (row._y[i] === null) {
               circle = null;
             } else {
-              circle = this.r.circle(c.x, c.y, this.options.pointSize).attr('fill', this.pointFillColorForSeries(i) || this.colorForSeries(i)).attr('stroke-width', this.strokeWidthForSeries(i)).attr('stroke', this.strokeForSeries(i));
+              circle = this.r.circle(row._x, row._y[i], this.options.pointSize).attr('fill', this.pointFillColorForSeries(i) || this.colorForSeries(i)).attr('stroke-width', this.strokeWidthForSeries(i)).attr('stroke', this.strokeForSeries(i));
             }
             _results1.push(this.seriesPoints[i].push(circle));
           }
@@ -814,7 +814,7 @@
 
     Line.prototype.drawHover = function() {
       var i, yLabel, _i, _ref, _results;
-      this.hoverHeight = this.options.hoverFontSize * 1.5 * (this.series.length + 1);
+      this.hoverHeight = this.options.hoverFontSize * 1.5 * (this.options.ykeys.length + 1);
       this.hover = this.r.rect(-10, -this.hoverHeight / 2 - this.options.hoverPaddingY, 20, this.hoverHeight + this.options.hoverPaddingY * 2, 10).attr('fill', this.options.hoverFillColor).attr('stroke', this.options.hoverBorderColor).attr('stroke-width', this.options.hoverBorderWidth).attr('opacity', this.options.hoverOpacity);
       this.xLabel = this.r.text(0, (this.options.hoverFontSize * 0.75) - this.hoverHeight / 2, '').attr('fill', this.options.hoverLabelColor).attr('font-weight', 'bold').attr('font-size', this.options.hoverFontSize);
       this.hoverSet = this.r.set();
@@ -822,7 +822,7 @@
       this.hoverSet.push(this.xLabel);
       this.yLabels = [];
       _results = [];
-      for (i = _i = 0, _ref = this.series.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
+      for (i = _i = 0, _ref = this.data.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
         yLabel = this.r.text(0, this.options.hoverFontSize * 1.5 * (i + 1.5) - this.hoverHeight / 2, '').attr('fill', this.colorForSeries(i)).attr('font-size', this.options.hoverFontSize);
         this.yLabels.push(yLabel);
         _results.push(this.hoverSet.push(yLabel));
@@ -831,12 +831,14 @@
     };
 
     Line.prototype.updateHover = function(index) {
-      var i, maxLabelWidth, xloc, yloc, _i, _ref,
-        _this = this;
+      var i, maxLabelWidth, row, xloc, y, yloc, _i, _len, _ref;
       this.hoverSet.show();
-      this.xLabel.attr('text', this.columnLabels[index]);
-      for (i = _i = 0, _ref = this.series.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
-        this.yLabels[i].attr('text', "" + this.options.labels[i] + ": " + (this.yLabelFormat(this.series[i][index])));
+      row = this.data[index];
+      this.xLabel.attr('text', row.label);
+      _ref = row.y;
+      for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
+        y = _ref[i];
+        this.yLabels[i].attr('text', "" + this.options.labels[i] + ": " + (this.yLabelFormat(y)));
       }
       maxLabelWidth = Math.max.apply(null, $.map(this.yLabels, function(l) {
         return l.getBBox().width;
@@ -844,9 +846,7 @@
       maxLabelWidth = Math.max(maxLabelWidth, this.xLabel.getBBox().width);
       this.hover.attr('width', maxLabelWidth + this.options.hoverPaddingX * 2);
       this.hover.attr('x', -this.options.hoverPaddingX - maxLabelWidth / 2);
-      yloc = Math.min.apply(null, $.map(this.series, function(s) {
-        return _this.transY(s[index]);
-      }));
+      yloc = Math.min.apply(null, row.y);
       if (yloc > this.hoverHeight + this.options.hoverPaddingY * 2 + this.options.hoverMargin + this.top) {
         yloc = yloc - this.hoverHeight / 2 - this.options.hoverPaddingY - this.options.hoverMargin;
       } else {
@@ -854,7 +854,7 @@
       }
       yloc = Math.max(this.top + this.hoverHeight / 2 + this.options.hoverPaddingY, yloc);
       yloc = Math.min(this.bottom - this.hoverHeight / 2 - this.options.hoverPaddingY, yloc);
-      xloc = Math.min(this.right - maxLabelWidth / 2 - this.options.hoverPaddingX, this.columns[index]);
+      xloc = Math.min(this.right - maxLabelWidth / 2 - this.options.hoverPaddingX, this.data[index]._x);
       xloc = Math.max(this.left + maxLabelWidth / 2 + this.options.hoverPaddingX, xloc);
       return this.hoverSet.attr('transform', "t" + xloc + "," + yloc);
     };

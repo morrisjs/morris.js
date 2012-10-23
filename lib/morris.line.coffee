@@ -60,18 +60,15 @@ class Morris.Line extends Morris.Grid
   # @private
   calc: ->
     # calculate series data point coordinates
-    @columns = (@transX(x) for x in @xvals)
-    @seriesCoords = []
-    for s in @series
-      scoords = []
-      $.each s, (i, y) =>
-          if y == null
-            scoords.push(null)
-          else
-            scoords.push(x: @columns[i], y: @transY(y))
-      @seriesCoords.push(scoords)
+    for row in @data
+      row._x = @transX(row.x)
+      row._y = for y in row.y
+        if y is null
+          null
+        else
+          @transY(y)
     # calculate hover margins
-    @hoverMargins = $.map @columns.slice(1), (x, i) => (x + @columns[i]) / 2
+    @hoverMargins = $.map @data.slice(1), (r, i) => (r._x + @data[i]._x) / 2
 
   # Draws the line chart.
   #
@@ -79,7 +76,7 @@ class Morris.Line extends Morris.Grid
     @drawXAxis()
     @drawSeries()
     @drawHover()
-    @hilight(if @options.hideHover then null else @options.data.length - 1)
+    @hilight(if @options.hideHover then null else @data.length - 1)
 
   # draw the x-axis labels
   #
@@ -102,25 +99,24 @@ class Morris.Line extends Morris.Grid
       else
         label.remove()
     if @options.parseTime
-      if @columnLabels.length == 1 and @options.xLabels == 'auto'
+      if @data.length == 1 and @options.xLabels == 'auto'
         # where there's only one value in the series, we can't make a
         # sensible guess for an x labelling scheme, so just use the original
         # column label
-        drawLabel(@columnLabels[0], @xvals[0])
+        drawLabel(@data[0].label, @data[0].x)
       else
         for l in Morris.labelSeries(@xmin, @xmax, @width, @options.xLabels, @options.xLabelFormat)
           drawLabel(l[0], l[1])
     else
-      for i in [0...@columnLabels.length]
-        labelText = @columnLabels[i]
-        drawLabel(labelText, i)
+      for row in @data
+        drawLabel(row.label, row.x)
 
   # draw the data series
   #
   # @private
   drawSeries: ->
-    for i in [@seriesCoords.length-1..0]
-      coords = $.map @seriesCoords[i], (c) -> c
+    for i in [@options.ykeys.length-1..0]
+      coords = ({x: r._x, y: r._y[i]} for r in @data when r._y[i] isnt null)
       smooth = @options.smooth is true or
         $.inArray(@options.ykeys[i], @options.smooth) > -1
       if coords.length > 1
@@ -128,13 +124,13 @@ class Morris.Line extends Morris.Grid
         @r.path(path)
           .attr('stroke', @colorForSeries(i))
           .attr('stroke-width', @options.lineWidth)
-    @seriesPoints = ([] for i in [0..@seriesCoords.length-1])
-    for i in [@seriesCoords.length-1..0]
-      for c in @seriesCoords[i]
-        if c == null
+    @seriesPoints = ([] for i in [0...@options.ykeys.length])
+    for i in [@options.ykeys.length-1..0]
+      for row in @data
+        if row._y[i] == null
           circle = null
         else
-          circle = @r.circle(c.x, c.y, @options.pointSize)
+          circle = @r.circle(row._x, row._y[i], @options.pointSize)
             .attr('fill', @pointFillColorForSeries(i) || @colorForSeries(i))
             .attr('stroke-width', @strokeWidthForSeries(i))
             .attr('stroke', @strokeForSeries(i))
@@ -182,7 +178,7 @@ class Morris.Line extends Morris.Grid
   # @private
   drawHover: ->
     # hover labels
-    @hoverHeight = @options.hoverFontSize * 1.5 * (@series.length + 1)
+    @hoverHeight = @options.hoverFontSize * 1.5 * (@options.ykeys.length + 1)
     @hover = @r.rect(-10, -@hoverHeight / 2 - @options.hoverPaddingY, 20, @hoverHeight + @options.hoverPaddingY * 2, 10)
       .attr('fill', @options.hoverFillColor)
       .attr('stroke', @options.hoverBorderColor)
@@ -196,7 +192,7 @@ class Morris.Line extends Morris.Grid
     @hoverSet.push(@hover)
     @hoverSet.push(@xLabel)
     @yLabels = []
-    for i in [0..@series.length-1]
+    for i in [0...@data.length]
       yLabel = @r.text(0, @options.hoverFontSize * 1.5 * (i + 1.5) - @hoverHeight / 2, '')
         .attr('fill', @colorForSeries(i))
         .attr('font-size', @options.hoverFontSize)
@@ -206,9 +202,10 @@ class Morris.Line extends Morris.Grid
   # @private
   updateHover: (index) =>
     @hoverSet.show()
-    @xLabel.attr('text', @columnLabels[index])
-    for i in [0..@series.length-1]
-      @yLabels[i].attr('text', "#{@options.labels[i]}: #{@yLabelFormat(@series[i][index])}")
+    row = @data[index]
+    @xLabel.attr('text', row.label)
+    for y, i in row.y
+      @yLabels[i].attr('text', "#{@options.labels[i]}: #{@yLabelFormat(y)}")
     # recalculate hover box width
     maxLabelWidth = Math.max.apply null, $.map @yLabels, (l) ->
       l.getBBox().width
@@ -216,15 +213,14 @@ class Morris.Line extends Morris.Grid
     @hover.attr 'width', maxLabelWidth + @options.hoverPaddingX * 2
     @hover.attr 'x', -@options.hoverPaddingX - maxLabelWidth / 2
     # move to y pos
-    yloc = Math.min.apply null, $.map @series, (s) =>
-      @transY s[index]
+    yloc = Math.min.apply null, row.y
     if yloc > @hoverHeight + @options.hoverPaddingY * 2 + @options.hoverMargin + @top
       yloc = yloc - @hoverHeight / 2 - @options.hoverPaddingY - @options.hoverMargin
     else
       yloc = yloc + @hoverHeight / 2 + @options.hoverPaddingY + @options.hoverMargin
     yloc = Math.max @top + @hoverHeight / 2 + @options.hoverPaddingY, yloc
     yloc = Math.min @bottom - @hoverHeight / 2 - @options.hoverPaddingY, yloc
-    xloc = Math.min @right - maxLabelWidth / 2 - @options.hoverPaddingX, @columns[index]
+    xloc = Math.min @right - maxLabelWidth / 2 - @options.hoverPaddingX, @data[index]._x
     xloc = Math.max @left + maxLabelWidth / 2 + @options.hoverPaddingX, xloc
     @hoverSet.attr 'transform', "t#{xloc},#{yloc}"
 

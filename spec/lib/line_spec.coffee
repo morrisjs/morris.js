@@ -60,7 +60,7 @@ describe 'Morris.Line', ->
         xkey: 'x'
         ykeys: ['y']
         labels: ['dontcare']
-      chart.columnLabels.should == ['2012 Q1', '2012 Q2']
+      chart.data.map((x) -> x.label).should == ['2012 Q1', '2012 Q2']
 
     it 'should use a default format for timestamp x-values', ->
       d1 = new Date(2012, 0, 1)
@@ -71,7 +71,7 @@ describe 'Morris.Line', ->
         xkey: 'x'
         ykeys: ['y']
         labels: ['dontcare']
-      chart.columnLabels.should == [d2.toString(), d1.toString()]
+      chart.data.map((x) -> x.label).should == [d2.toString(), d1.toString()]
 
     it 'should use user-defined formatters', ->
       d = new Date(2012, 0, 1)
@@ -84,4 +84,4 @@ describe 'Morris.Line', ->
         dateFormat: (d) ->
           x = new Date(d)
           "#{x.getYear()}/#{x.getMonth()+1}/#{x.getDay()}"
-      chart.columnLabels.should == ['2012/1/1', '2012/1/2']
+      chart.data.map((x) -> x.label).should == ['2012/1/1', '2012/1/2']

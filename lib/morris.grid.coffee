@@ -34,7 +34,7 @@ class Morris.Grid extends Morris.EventEmitter
     @init() if @init
 
     # load data
-    @setData(@options.data)
+    @setData @options.data
 
   # Default options
   #
@@ -55,62 +55,55 @@ class Morris.Grid extends Morris.EventEmitter
   # Update the data series and redraw the chart.
   #
   setData: (data, redraw = true) ->
-    # shallow copy data
-    @options.data = $.map data, (row) =>
+    ymax = null
+    ymin = null
+    @data = $.map data, (row, index) =>
+      ret = {}
+      ret.label = row[@options.xkey]
       if @options.parseTime
-        $.extend {'__T': Morris.parseDate(row[@options.xkey])}, row
+        ret.x = Morris.parseDate(ret.label)
+        if @options.dateFormat
+          ret.label = @options.dateFormat ret.x
+        else if typeof ret.label is 'number'
+          ret.label = new Date(ret.label).toString()
       else
-        $.extend {}, row
-    if @options.parseTime
-      @options.data = @options.data.sort (a, b) =>
-        (a['__T'] > b['__T']) - (b['__T'] > a['__T'])
+        ret.x = index
+      ret.y = for ykey in @options.ykeys
+        yval = row[ykey]
+        yval = parseFloat(yval) if typeof yval is 'string'
+        yval = null unless typeof yval is 'number'
+        unless yval is null
+          if ymax is null
+            ymax = ymin = yval
+          else
+            ymax = Math.max(yval, ymax)
+            ymin = Math.min(yval, ymin)
+        yval
+      ret
 
-    # extract series data
-    @series = []
-    for ykey in @options.ykeys
-      seriesData = []
-      for d in @options.data
-        y = d[ykey]
-        seriesData.push switch typeof y
-          when 'number' then y
-          when 'string' then parseFloat y
-          else null
-      @series.push seriesData
-
-    # extract labels / x values
-    @columnLabels = $.map @options.data, (row) => row[@options.xkey]
     if @options.parseTime
-      @xvals = $.map @options.data, (row) -> row['__T']
-      if @options.dateFormat
-        @columnLabels = $.map @xvals, (d) => @options.dateFormat d
-      else
-        @columnLabels = $.map @columnLabels, (d) =>
-          # default formatter for numeric timestamp labels
-          if typeof d is 'number' then new Date(d).toString() else d
-    else
-      @xvals = [0...@columnLabels.length]
+      @data = @data.sort (a, b) -> (a.x > b.x) - (b.x > a.x)
 
     # calculate horizontal range of the graph
-    @xmin = Math.min.apply null, @xvals
-    @xmax = Math.max.apply null, @xvals
+    @xmin = @data[0].x
+    @xmax = @data[@data.length - 1].x
     if @xmin is @xmax
       @xmin -= 1
       @xmax += 1
 
     # Compute the vertical range of the graph if desired
-    if typeof @options.ymax is 'string' and @options.ymax[0..3] is 'auto'
-      # use Array.concat to flatten arrays and find the max y value
-      ymax = Math.max.apply null, Array.prototype.concat.apply([], @series)
-      if @options.ymax.length > 5
-        @ymax = Math.max parseInt(@options.ymax[5..], 10), ymax
+    if typeof @options.ymax is 'string'
+      if @options.ymax[0..3] is 'auto'
+        # use Array.concat to flatten arrays and find the max y value
+        if @options.ymax.length > 5
+          @ymax = Math.max parseInt(@options.ymax[5..], 10), ymax
+        else
+          @ymax = ymax
       else
-        @ymax = ymax
-    else if typeof @options.ymax is 'string'
-      @ymax = parseInt(@options.ymax, 10)
+        @ymax = parseInt(@options.ymax, 10)
     else
       @ymax = @options.ymax
     if typeof @options.ymin is 'string' and @options.ymin[0..3] is 'auto'
-      ymin = Math.min.apply null, Array.prototype.concat.apply([], @series)
       if @options.ymin.length > 5
         @ymin = Math.min parseInt(@options.ymin[5..], 10), ymin
       else
@@ -120,7 +113,7 @@ class Morris.Grid extends Morris.EventEmitter
     else
       @ymin = @options.ymin
     if @ymin is @ymax
-      if @ymin is not 0 then @ymin -= 1
+      if @ymin isnt 0 then @ymin -= 1
       @ymax += 1
 
     @yInterval = (@ymax - @ymin) / (@options.numLines - 1)
@@ -158,7 +151,7 @@ class Morris.Grid extends Morris.EventEmitter
   #
   transY: (y) -> @bottom - (y - @ymin) * @dy
   transX: (x) ->
-    if @xvals.length == 1
+    if @data.length == 1
       (@left + @right) / 2
     else
       @left + (x - @xmin) * @dx
