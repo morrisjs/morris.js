@@ -192,7 +192,7 @@ class Morris.Line extends Morris.Grid
     @hoverSet.push(@hover)
     @hoverSet.push(@xLabel)
     @yLabels = []
-    for i in [0...@data.length]
+    for i in [0...@options.ykeys.length]
       yLabel = @r.text(0, @options.hoverFontSize * 1.5 * (i + 1.5) - @hoverHeight / 2, '')
         .attr('fill', @colorForSeries(i))
         .attr('font-size', @options.hoverFontSize)
