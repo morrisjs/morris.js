@@ -7,25 +7,26 @@ module.exports = function (grunt) {
         options: { bare: false }
       },
       spec: {
-        src: ['spec/lib/*.coffee'],
-        dest: 'build/spec/lib',
-        options: { bare: false }
+        src: ['build/spec.coffee'],
+        dest: 'build',
+        options: { bare: true }
       }
     },
     concat: {
-      'build/morris.coffee': ['lib/**/*.coffee']
+      'build/morris.coffee': ['lib/**/*.coffee'],
+      'build/spec.coffee': ['spec/support/**/*.coffee', 'spec/lib/**/*.coffee']
     },
     min: {
       'morris.min.js': 'morris.js'
     },
     mocha: {
       spec: {
-        runner: ['spec/spec_runner.html'],
-        specs: ['build/spec/**/*.js']
+        src: 'spec/specs.html',
+        run: true
       }
     },
     watch: {
-      files: ['lib/**/*.coffee', 'spec/lib/**/*.coffee'],
+      files: ['lib/**/*.coffee', 'spec/lib/**/*.coffee', 'spec/support/**/*.coffee'],
       tasks: 'default'
     }
   });

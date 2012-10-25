@@ -62,16 +62,6 @@
     return (number < 10 ? '0' : '') + number;
   };
 
-  Morris.Data = (function() {
-
-    function Data() {}
-
-    Data.prototype.initialize = function(options) {};
-
-    return Data;
-
-  })();
-
   Morris.Donut = (function() {
 
     Donut.prototype.defaults = {

@@ -15,7 +15,7 @@
     "url": "https://github.com/oesmith/morris.js/issues"
   },
   "devDependencies": {
-    "grunt-coffee": "0.0.x",
-    "grunt-mocha": "git+https://github.com/oesmith/grunt-mocha.git#0e67fc4"
+    "grunt-coffee": "~> 0.0.6",
+    "grunt-mocha": "~> 0.1.7"
   }
 }
