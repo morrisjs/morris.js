@@ -96,24 +96,27 @@ class Morris.Grid extends Morris.EventEmitter
       if @options.ymax[0..3] is 'auto'
         # use Array.concat to flatten arrays and find the max y value
         if @options.ymax.length > 5
-          @ymax = Math.max parseInt(@options.ymax[5..], 10), ymax
+          @ymax = parseInt(@options.ymax[5..], 10)
+          @ymax = Math.max(ymax, @ymax) unless ymax is null
         else
-          @ymax = ymax
+          @ymax = if ymax isnt null then ymax else 0
       else
         @ymax = parseInt(@options.ymax, 10)
     else
       @ymax = @options.ymax
-    if typeof @options.ymin is 'string' and @options.ymin[0..3] is 'auto'
-      if @options.ymin.length > 5
-        @ymin = Math.min parseInt(@options.ymin[5..], 10), ymin
+    if typeof @options.ymin is 'string'
+      if @options.ymin[0..3] is 'auto'
+        if @options.ymin.length > 5
+          @ymin = parseInt(@options.ymin[5..], 10)
+          @ymin = Math.min(ymin, @ymin) unless ymin is null
+        else
+          @ymin = if ymin isnt null then ymin else 0
       else
-        @ymin = ymin
-    else if typeof @options.ymin is 'string'
-      @ymin = parseInt(@options.ymin, 10)
+        @ymin = parseInt(@options.ymin, 10)
     else
       @ymin = @options.ymin
     if @ymin is @ymax
-      if @ymin isnt 0 then @ymin -= 1
+      @ymin -= 1 if ymin
       @ymax += 1
 
     @yInterval = (@ymax - @ymin) / (@options.numLines - 1)

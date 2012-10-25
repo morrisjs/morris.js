@@ -391,9 +391,12 @@
       if (typeof this.options.ymax === 'string') {
         if (this.options.ymax.slice(0, 4) === 'auto') {
           if (this.options.ymax.length > 5) {
-            this.ymax = Math.max(parseInt(this.options.ymax.slice(5), 10), ymax);
+            this.ymax = parseInt(this.options.ymax.slice(5), 10);
+            if (ymax !== null) {
+              this.ymax = Math.max(ymax, this.ymax);
+            }
           } else {
-            this.ymax = ymax;
+            this.ymax = ymax !== null ? ymax : 0;
           }
         } else {
           this.ymax = parseInt(this.options.ymax, 10);
@@ -401,19 +404,24 @@
       } else {
         this.ymax = this.options.ymax;
       }
-      if (typeof this.options.ymin === 'string' && this.options.ymin.slice(0, 4) === 'auto') {
-        if (this.options.ymin.length > 5) {
-          this.ymin = Math.min(parseInt(this.options.ymin.slice(5), 10), ymin);
+      if (typeof this.options.ymin === 'string') {
+        if (this.options.ymin.slice(0, 4) === 'auto') {
+          if (this.options.ymin.length > 5) {
+            this.ymin = parseInt(this.options.ymin.slice(5), 10);
+            if (ymin !== null) {
+              this.ymin = Math.min(ymin, this.ymin);
+            }
+          } else {
+            this.ymin = ymin !== null ? ymin : 0;
+          }
         } else {
-          this.ymin = ymin;
+          this.ymin = parseInt(this.options.ymin, 10);
         }
-      } else if (typeof this.options.ymin === 'string') {
-        this.ymin = parseInt(this.options.ymin, 10);
       } else {
         this.ymin = this.options.ymin;
       }
       if (this.ymin === this.ymax) {
-        if (this.ymin !== 0) {
+        if (ymin) {
           this.ymin -= 1;
         }
         this.ymax += 1;
