@@ -44,7 +44,7 @@
   Morris.commas = function(num) {
     var absnum, intnum, ret, strabsnum;
     if (num === null) {
-      return "n/a";
+      return "-";
     } else {
       ret = num < 0 ? "-" : "";
       absnum = Math.abs(num);

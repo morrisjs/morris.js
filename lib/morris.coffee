@@ -24,7 +24,7 @@ class Morris.EventEmitter
 #   Morris.commas(1234567) -> '1,234,567'
 Morris.commas = (num) ->
   if num is null
-    "n/a"
+    "-"
   else
     ret = if num < 0 then "-" else ""
     absnum = Math.abs(num)
