@@ -510,7 +510,7 @@
     };
 
     Line.prototype.drawXAxis = function() {
-      var drawLabel, l, prevLabelMargin, row, xLabelMargin, ypos, _i, _j, _len, _len1, _ref, _ref1, _results, _results1,
+      var drawLabel, l, labels, prevLabelMargin, row, xLabelMargin, ypos, _i, _len, _results,
         _this = this;
       ypos = this.bottom + this.options.gridTextSize * 1.25;
       xLabelMargin = 50;
@@ -519,33 +519,37 @@
         var label, labelBox;
         label = _this.r.text(_this.transX(xpos), ypos, labelText).attr('font-size', _this.options.gridTextSize).attr('fill', _this.options.gridTextColor);
         labelBox = label.getBBox();
-        if ((prevLabelMargin === null || prevLabelMargin <= labelBox.x) && labelBox.x >= 0 && (labelBox.x + labelBox.width) < _this.el.width()) {
-          return prevLabelMargin = labelBox.x + labelBox.width + xLabelMargin;
+        if ((prevLabelMargin === null || prevLabelMargin >= labelBox.x + labelBox.width) && labelBox.x >= 0 && (labelBox.x + labelBox.width) < _this.el.width()) {
+          return prevLabelMargin = labelBox.x - xLabelMargin;
         } else {
           return label.remove();
         }
       };
       if (this.options.parseTime) {
         if (this.data.length === 1 && this.options.xLabels === 'auto') {
-          return drawLabel(this.data[0].label, this.data[0].x);
+          labels = [[this.data[0].label, this.data[0].x]];
         } else {
-          _ref = Morris.labelSeries(this.xmin, this.xmax, this.width, this.options.xLabels, this.options.xLabelFormat);
-          _results = [];
-          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-            l = _ref[_i];
-            _results.push(drawLabel(l[0], l[1]));
-          }
-          return _results;
+          labels = Morris.labelSeries(this.xmin, this.xmax, this.width, this.options.xLabels, this.options.xLabelFormat);
         }
       } else {
-        _ref1 = this.data;
-        _results1 = [];
-        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-          row = _ref1[_j];
-          _results1.push(drawLabel(row.label, row.x));
-        }
-        return _results1;
+        labels = (function() {
+          var _i, _len, _ref, _results;
+          _ref = this.data;
+          _results = [];
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            row = _ref[_i];
+            _results.push([row.label, row.x]);
+          }
+          return _results;
+        }).call(this);
       }
+      labels.reverse();
+      _results = [];
+      for (_i = 0, _len = labels.length; _i < _len; _i++) {
+        l = labels[_i];
+        _results.push(drawLabel(l[0], l[1]));
+      }
+      return _results;
     };
 
     Line.prototype.drawSeries = function() {

@@ -116,9 +116,9 @@ class Morris.Line extends Morris.Grid
       labelBox = label.getBBox()
       # ensure a minimum of `xLabelMargin` pixels between labels, and ensure
       # labels don't overflow the container
-      if (prevLabelMargin is null or prevLabelMargin <= labelBox.x) and
+      if (prevLabelMargin is null or prevLabelMargin >= labelBox.x + labelBox.width) and
           labelBox.x >= 0 and (labelBox.x + labelBox.width) < @el.width()
-        prevLabelMargin = labelBox.x + labelBox.width + xLabelMargin
+        prevLabelMargin = labelBox.x - xLabelMargin
       else
         label.remove()
     if @options.parseTime
@@ -126,13 +126,14 @@ class Morris.Line extends Morris.Grid
         # where there's only one value in the series, we can't make a
         # sensible guess for an x labelling scheme, so just use the original
         # column label
-        drawLabel(@data[0].label, @data[0].x)
+        labels = [[@data[0].label, @data[0].x]]
       else
-        for l in Morris.labelSeries(@xmin, @xmax, @width, @options.xLabels, @options.xLabelFormat)
-          drawLabel(l[0], l[1])
+        labels = Morris.labelSeries(@xmin, @xmax, @width, @options.xLabels, @options.xLabelFormat)
     else
-      for row in @data
-        drawLabel(row.label, row.x)
+      labels = ([row.label, row.x] for row in @data)
+    labels.reverse()
+    for l in labels
+      drawLabel(l[0], l[1])
 
   # draw the data series
   #
