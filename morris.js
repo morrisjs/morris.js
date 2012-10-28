@@ -665,7 +665,18 @@
       maxLabelWidth = Math.max(maxLabelWidth, this.xLabel.getBBox().width);
       this.hover.attr('width', maxLabelWidth + this.options.hoverPaddingX * 2);
       this.hover.attr('x', -this.options.hoverPaddingX - maxLabelWidth / 2);
-      yloc = Math.min.apply(null, row._y);
+      yloc = Math.min.apply(null, ((function() {
+        var _j, _len1, _ref1, _results;
+        _ref1 = row._y;
+        _results = [];
+        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+          y = _ref1[_j];
+          if (y === !null) {
+            _results.push(y);
+          }
+        }
+        return _results;
+      })()).concat(this.top));
       if (yloc > this.hoverHeight + this.options.hoverPaddingY * 2 + this.options.hoverMargin + this.top) {
         yloc = yloc - this.hoverHeight / 2 - this.options.hoverPaddingY - this.options.hoverMargin;
       } else {

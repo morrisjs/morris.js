@@ -235,7 +235,7 @@ class Morris.Line extends Morris.Grid
     @hover.attr 'width', maxLabelWidth + @options.hoverPaddingX * 2
     @hover.attr 'x', -@options.hoverPaddingX - maxLabelWidth / 2
     # move to y pos
-    yloc = Math.min.apply null, row._y
+    yloc = Math.min.apply null, (y for y in row._y when y is not null).concat(@top)
     if yloc > @hoverHeight + @options.hoverPaddingY * 2 + @options.hoverMargin + @top
       yloc = yloc - @hoverHeight / 2 - @options.hoverPaddingY - @options.hoverMargin
     else
