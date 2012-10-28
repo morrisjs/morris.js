@@ -627,7 +627,7 @@
     };
 
     Line.prototype.drawHover = function() {
-      var i, yLabel, _i, _ref, _results;
+      var i, idx, yLabel, _i, _ref, _results;
       this.hoverHeight = this.options.hoverFontSize * 1.5 * (this.options.ykeys.length + 1);
       this.hover = this.r.rect(-10, -this.hoverHeight / 2 - this.options.hoverPaddingY, 20, this.hoverHeight + this.options.hoverPaddingY * 2, 10).attr('fill', this.options.hoverFillColor).attr('stroke', this.options.hoverBorderColor).attr('stroke-width', this.options.hoverBorderWidth).attr('opacity', this.options.hoverOpacity);
       this.xLabel = this.r.text(0, (this.options.hoverFontSize * 0.75) - this.hoverHeight / 2, '').attr('fill', this.options.hoverLabelColor).attr('font-weight', 'bold').attr('font-size', this.options.hoverFontSize);
@@ -637,7 +637,8 @@
       this.yLabels = [];
       _results = [];
       for (i = _i = 0, _ref = this.options.ykeys.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        yLabel = this.r.text(0, this.options.hoverFontSize * 1.5 * (i + 1.5) - this.hoverHeight / 2, '').attr('fill', this.colorForSeries(i)).attr('font-size', this.options.hoverFontSize);
+        idx = this.cumulative ? this.options.ykeys.length - i - 1 : i;
+        yLabel = this.r.text(0, this.options.hoverFontSize * 1.5 * (idx + 1.5) - this.hoverHeight / 2, '').attr('fill', this.colorForSeries(i)).attr('font-size', this.options.hoverFontSize);
         this.yLabels.push(yLabel);
         _results.push(this.hoverSet.push(yLabel));
       }
