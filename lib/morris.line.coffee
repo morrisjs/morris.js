@@ -59,7 +59,14 @@ class Morris.Line extends Morris.Grid
   #
   # @private
   calc: ->
-    # calculate series data point coordinates
+    @calcPoints()
+    @generatePaths()
+    @calcHoverMargins()
+
+  # calculate series data point coordinates
+  #
+  # @private
+  calcPoints: ->
     for row in @data
       row._x = @transX(row.x)
       row._y = for y in row.y
@@ -67,8 +74,24 @@ class Morris.Line extends Morris.Grid
           null
         else
           @transY(y)
-    # calculate hover margins
+
+  # calculate hover margins
+  #
+  # @private
+  calcHoverMargins: ->
     @hoverMargins = $.map @data.slice(1), (r, i) => (r._x + @data[i]._x) / 2
+
+  # generate paths for series lines
+  #
+  # @private
+  generatePaths: ->
+    @paths = for i in [0...@options.ykeys.length]
+      smooth = @options.smooth is true or @options.ykeys[i] in @options.smooth
+      coords = ({x: r._x, y: r._y[i]} for r in @data when r._y[i] isnt null)
+      if coords.length > 1
+        @createPath coords, smooth
+      else
+        null
 
   # Draws the line chart.
   #
@@ -116,11 +139,8 @@ class Morris.Line extends Morris.Grid
   # @private
   drawSeries: ->
     for i in [@options.ykeys.length-1..0]
-      coords = ({x: r._x, y: r._y[i]} for r in @data when r._y[i] isnt null)
-      smooth = @options.smooth is true or
-        $.inArray(@options.ykeys[i], @options.smooth) > -1
-      if coords.length > 1
-        path = @createPath coords, @bottom, smooth
+      path = @paths[i]
+      if path isnt null
         @r.path(path)
           .attr('stroke', @colorForSeries(i))
           .attr('stroke-width', @options.lineWidth)
@@ -213,7 +233,7 @@ class Morris.Line extends Morris.Grid
     @hover.attr 'width', maxLabelWidth + @options.hoverPaddingX * 2
     @hover.attr 'x', -@options.hoverPaddingX - maxLabelWidth / 2
     # move to y pos
-    yloc = Math.min.apply null, row.y
+    yloc = Math.min.apply null, row._y
     if yloc > @hoverHeight + @options.hoverPaddingY * 2 + @options.hoverMargin + @top
       yloc = yloc - @hoverHeight / 2 - @options.hoverPaddingY - @options.hoverMargin
     else

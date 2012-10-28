@@ -55,8 +55,8 @@ class Morris.Grid extends Morris.EventEmitter
   # Update the data series and redraw the chart.
   #
   setData: (data, redraw = true) ->
-    ymax = null
-    ymin = null
+    ymax = if @cumulative then 0 else null
+    ymin = if @cumulative then 0 else null
     @data = $.map data, (row, index) =>
       ret = {}
       ret.label = row[@options.xkey]
@@ -68,16 +68,23 @@ class Morris.Grid extends Morris.EventEmitter
           ret.label = new Date(ret.label).toString()
       else
         ret.x = index
-      ret.y = for ykey in @options.ykeys
+      total = 0
+      ret.y = for ykey, idx in @options.ykeys
         yval = row[ykey]
         yval = parseFloat(yval) if typeof yval is 'string'
         yval = null unless typeof yval is 'number'
         unless yval is null
-          if ymax is null
-            ymax = ymin = yval
+          if @cumulative
+            total += yval
           else
-            ymax = Math.max(yval, ymax)
-            ymin = Math.min(yval, ymin)
+            if ymax is null
+              ymax = ymin = yval
+            else
+              ymax = Math.max(yval, ymax)
+              ymin = Math.min(yval, ymin)
+        if @cumulative and total isnt null
+          ymax = Math.max(total, ymax)
+          ymin = Math.min(total, ymin)
         yval
       ret
 

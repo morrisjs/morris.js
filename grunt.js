@@ -13,7 +13,13 @@ module.exports = function (grunt) {
       }
     },
     concat: {
-      'build/morris.coffee': ['lib/**/*.coffee'],
+      'build/morris.coffee': [
+        'lib/morris.coffee',
+        'lib/morris.grid.coffee',
+        'lib/morris.line.coffee',
+        'lib/morris.area.coffee',
+        'lib/morris.donut.coffee'
+      ],
       'build/spec.coffee': ['spec/support/**/*.coffee', 'spec/lib/**/*.coffee']
     },
     min: {
