@@ -18,6 +18,7 @@ module.exports = function (grunt) {
         'lib/morris.grid.coffee',
         'lib/morris.line.coffee',
         'lib/morris.area.coffee',
+        'lib/morris.bar.coffee',
         'lib/morris.donut.coffee'
       ],
       'build/spec.coffee': ['spec/support/**/*.coffee', 'spec/lib/**/*.coffee']

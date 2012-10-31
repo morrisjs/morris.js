@@ -147,11 +147,35 @@ class Morris.Grid extends Morris.EventEmitter
       maxYLabelWidth = Math.max(
         @measureText(@yAxisFormat(@ymin), @options.gridTextSize).width,
         @measureText(@yAxisFormat(@ymax), @options.gridTextSize).width)
-      @left = maxYLabelWidth + @options.padding
-      @right = @elementWidth - @options.padding
-      @top = @options.padding
-      @bottom = @elementHeight - @options.padding - 1.5 * @options.gridTextSize
+      # calculate paddings
+      if typeof @options.padding is 'string'
+        padding = @options.padding.split(/\s+/)
+        if padding.length == 2
+          @paddingLeft = @paddingRight = padding[1]
+          @paddingTop = @paddingBottom = padding[0]
+        else if padding.length == 3
+          @paddingLeft = @paddingRight = padding[1]
+          @paddingTop = padding[0]
+          @paddingBottom = padding[2]
+        else if padding.length == 4
+          @paddingTop = padding[0]
+          @paddingRight = padding[1]
+          @paddingBottom = padding[2]
+          @paddingLeft = padding[3]
+      else
+        @paddingTop = @paddingBottom = @options.padding
+        @paddingLeft = @paddingRight = @options.padding
+      @gridPaddingRight = @paddingRight
+      @gridPaddingLeft = @paddingLeft
+      @overridePadding() if @overridePadding
+      @left = maxYLabelWidth + @paddingLeft
+      @gridLeft = maxYLabelWidth + @gridPaddingLeft
+      @right = @elementWidth - @paddingRight
+      @gridRight = @elementWidth - @gridPaddingRight
+      @top = @paddingTop
+      @bottom = @elementHeight - @paddingBottom - 1.5 * @options.gridTextSize
       @width = @right - @left
+      @gridWidth = @gridRight - @gridLeft
       @height = @bottom - @top
       @dx = @width / (@xmax - @xmin)
       @dy = @height / (@ymax - @ymin)
@@ -184,11 +208,11 @@ class Morris.Grid extends Morris.EventEmitter
     for lineY in [firstY..lastY] by @yInterval
       v = parseFloat(lineY.toFixed(@precision))
       y = @transY(v)
-      @r.text(@left - @options.padding / 2, y, @yAxisFormat(v))
+      @r.text(@gridLeft - @gridPaddingLeft / 2, y, @yAxisFormat(v))
         .attr('font-size', @options.gridTextSize)
         .attr('fill', @options.gridTextColor)
         .attr('text-anchor', 'end')
-      @r.path("M#{@left},#{y}H#{@left + @width}")
+      @r.path("M#{@gridLeft},#{y}H#{@gridLeft + @gridWidth}")
         .attr('stroke', @options.gridLineColor)
         .attr('stroke-width', @options.gridStrokeWidth)
 
