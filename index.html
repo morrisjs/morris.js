@@ -29,6 +29,7 @@
           <div class="nav-collapse">
             <ul class="nav">
               <li><a href="#lines">Lines</a></li>
+              <li><a href="#bars">Bars</a></li>
               <li><a href="#areas">Areas</a></li>
               <li><a href="#donuts">Donuts</a></li>
               <li><a href="#examples">Examples</a></li>
@@ -53,28 +54,38 @@
             simple charts easy.
           </p>
           <div class="row">
-            <div class="span4">
+            <div class="span6">
               <div class="graph-container">
                 <div class="caption">
-                  <b>Example</b> Jaguar 'E' Type vehicles in the UK
+                  <a href="#lines">Line Chart</a> Jaguar 'E' Type vehicles in the UK
                 </div>
                 <div id="hero-graph" class="graph"></div>
               </div>
             </div>
-            <div class="span4">
+            <div class="span6">
               <div class="graph-container">
                 <div class="caption">
-                  <b>Example</b> Donut flavours
+                  <a href="#bars">Bar Chart</a> iPhone CPU benchmarks
                 </div>
-                <div id="hero-donut" class="graph"></div>
+                <div id="hero-bar" class="graph"></div>
               </div>
             </div>
-            <div class="span4">
+          </div>
+          <div class="row">
+            <div class="span6">
               <div class="graph-container">
                 <div class="caption">
-                  <b>Example</b> Quarterly Apple iOS device unit sales
+                  <a href="#areas">Area Chart</a> Quarterly Apple iOS device unit sales
                 </div>
                 <div id="hero-area" class="graph"></div>
+              </div>
+            </div>
+            <div class="span6">
+              <div class="graph-container">
+                <div class="caption">
+                  <a href="#donuts">Donut Chart</a> Donut flavours
+                </div>
+                <div id="hero-donut" class="graph"></div>
               </div>
             </div>
           </div>
@@ -101,7 +112,7 @@
           <h2 id="download">Download</h2>
           <p>Get the latest version.</p>
           <p>
-            <a href="https://raw.github.com/oesmith/morris.js/0.3.2/morris.min.js" class="btn-large btn-primary">v0.3.2 (compressed js)</a>
+            <a href="https://raw.github.com/oesmith/morris.js/0.3.3/morris.min.js" class="btn-large btn-primary">v0.3.3 (compressed js)</a>
           </p>
           <p>
             <small>
@@ -367,6 +378,85 @@
               </tr>
             </tbody>
           </table>
+          <div>
+            <h3>Live Example</h3>
+            <a class="jsbin-embed" href="http://jsbin.com/uqawig/3/embed?javascript,live">Morris.js Line Chart Example</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="row docrow">
+        <div class="span12">
+          <h2 id="bars">Bar Charts</h2>
+          <p>
+            Create bar charts using <code>Morris.Bar(<em>options</em>)</code>,
+            where options is an object containing the following configuration
+            options.
+          </p>
+          <table class="table table-striped table-bordered">
+            <tbody>
+              <tr>
+                <td><code>element</code><br><b>required</b></td>
+                <td>
+                  The ID of (or a reference to) the element into which to insert the graph.
+                  <br>
+                  <em>Note: this element must have a width and height defined in its styling.</em>
+                </td>
+              </tr>
+              <tr>
+                <td><code>data</code><br><b>required</b></td>
+                <td>
+                  The data to plot.  This is an array of objects, containing
+                  x and y attributes as described by the <code>xkey</code>
+                  and <code>ykeys</code> options.
+                  <br>
+                  <em>
+                    Note: ordering doesn't matter here - you can supply the data
+                    in whatever order works best for you.
+                  </em>
+                  <br>
+                  <em>
+                    Note 2: if you need to update the plot, use the <code>setData</code>
+                    method on the object that <code>Morris.Bar</code> returns (the
+                    same as with line charts).
+                  </em>
+                </td>
+              </tr>
+              <tr>
+                <td><code>xkey</code><br><b>required</b></td>
+                <td>
+                  A string containing the name of the attribute that contains
+                  X labels.
+                </td>
+              </tr>
+              <tr>
+                <td><code>ykeys</code><br><b>required</b></td>
+                <td>
+                  A list of strings containing names of attributes that
+                  contain Y values (one for each series of data to be
+                  plotted).
+                </td>
+              </tr>
+              <tr>
+                <td><code>labels</code><br><b>required</b></td>
+                <td>
+                  A list of strings containing labels for the data series
+                  to be plotted (corresponding to the values in the
+                  <code>ykeys</code> option).
+                </td>
+              </tr>
+              <tr>
+                <td><code>barColors</code></td>
+                <td>
+                  Array containing colors for the series bars.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div>
+            <h3>Live Example</h3>
+            <a class="jsbin-embed" href="http://jsbin.com/uzosiq/2/embed?javascript,live">Morris.js Bar Chart Example</a>
+          </div>
         </div>
       </div>
 
@@ -377,6 +467,10 @@
             Create an area chart using <code>Morris.Area(<em>options</em>)</code>.
             Area charts take all the same options as line charts.
           </p>
+          <div>
+            <h3>Live Example</h3>
+            <a class="jsbin-embed" href="http://jsbin.com/otaxef/1/embed?javascript,live">Morris.js Area Chart Example</a>
+          </div>
         </div>
       </div>
 
@@ -436,6 +530,10 @@
               </tr>
             </tbody>
           </table>
+          <div>
+            <h3>Live Example</h3>
+            <a class="jsbin-embed" href="http://jsbin.com/ukaxod/1/embed?javascript,live">Morris.js Donut Chart Example</a>
+          </div>
         </div>
       </div>
 
@@ -572,6 +670,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 <script src="js/libs/raphael-2.0.2.min.js"></script>
 <script src="js/morris.js"></script>
+<script src="http://static.jsbin.com/js/embed.js"></script>
 
 <script src="js/plugins.js"></script>
 <script src="js/script.js"></script>

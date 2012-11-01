@@ -921,6 +921,241 @@
 
   })(Morris.Line);
 
+  Morris.Bar = (function(_super) {
+
+    __extends(Bar, _super);
+
+    function Bar(options) {
+      this.updateHilight = __bind(this.updateHilight, this);
+
+      this.hilight = __bind(this.hilight, this);
+
+      this.updateHover = __bind(this.updateHover, this);
+      if (!(this instanceof Morris.Bar)) {
+        return new Morris.Bar(options);
+      }
+      Bar.__super__.constructor.call(this, $.extend({}, options, {
+        parseTime: false
+      }));
+    }
+
+    Bar.prototype.init = function() {
+      var touchHandler,
+        _this = this;
+      this.prevHilight = null;
+      this.el.mousemove(function(evt) {
+        return _this.updateHilight(evt.pageX);
+      });
+      if (this.options.hideHover) {
+        this.el.mouseout(function(evt) {
+          return _this.hilight(null);
+        });
+      }
+      touchHandler = function(evt) {
+        var touch;
+        touch = evt.originalEvent.touches[0] || evt.originalEvent.changedTouches[0];
+        _this.updateHilight(touch.pageX);
+        return touch;
+      };
+      this.el.bind('touchstart', touchHandler);
+      this.el.bind('touchmove', touchHandler);
+      return this.el.bind('touchend', touchHandler);
+    };
+
+    Bar.prototype.defaults = {
+      barSizeRatio: 0.75,
+      barGap: 3,
+      barColors: ['#0b62a4', '#7a92a3', '#4da74d', '#afd8f8', '#edc240', '#cb4b4b', '#9440ed'],
+      hoverPaddingX: 10,
+      hoverPaddingY: 5,
+      hoverMargin: 10,
+      hoverFillColor: '#fff',
+      hoverBorderColor: '#ccc',
+      hoverBorderWidth: 2,
+      hoverOpacity: 0.95,
+      hoverLabelColor: '#444',
+      hoverFontSize: 12,
+      hideHover: false
+    };
+
+    Bar.prototype.calc = function() {
+      this.calcBars();
+      return this.calcHoverMargins();
+    };
+
+    Bar.prototype.calcBars = function() {
+      var idx, row, y, _i, _len, _ref, _results;
+      _ref = this.data;
+      _results = [];
+      for (idx = _i = 0, _len = _ref.length; _i < _len; idx = ++_i) {
+        row = _ref[idx];
+        row._x = this.left + this.width * (idx + 0.5) / this.data.length;
+        _results.push(row._y = (function() {
+          var _j, _len1, _ref1, _results1;
+          _ref1 = row.y;
+          _results1 = [];
+          for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+            y = _ref1[_j];
+            if (y === null) {
+              _results1.push(null);
+            } else {
+              _results1.push(this.transY(y));
+            }
+          }
+          return _results1;
+        }).call(this));
+      }
+      return _results;
+    };
+
+    Bar.prototype.calcHoverMargins = function() {
+      var i;
+      return this.hoverMargins = (function() {
+        var _i, _ref, _results;
+        _results = [];
+        for (i = _i = 1, _ref = this.data.length; 1 <= _ref ? _i < _ref : _i > _ref; i = 1 <= _ref ? ++_i : --_i) {
+          _results.push(this.left + i * this.width / this.data.length);
+        }
+        return _results;
+      }).call(this);
+    };
+
+    Bar.prototype.draw = function() {
+      this.drawXAxis();
+      this.drawSeries();
+      this.drawHover();
+      return this.hilight(this.options.hideHover ? null : this.data.length - 1);
+    };
+
+    Bar.prototype.drawXAxis = function() {
+      var i, label, labelBox, prevLabelMargin, row, xLabelMargin, ypos, _i, _ref, _results;
+      ypos = this.bottom + this.options.gridTextSize * 1.25;
+      xLabelMargin = 50;
+      prevLabelMargin = null;
+      _results = [];
+      for (i = _i = 0, _ref = this.data.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        row = this.data[this.data.length - 1 - i];
+        label = this.r.text(row._x, ypos, row.label).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor);
+        labelBox = label.getBBox();
+        if ((prevLabelMargin === null || prevLabelMargin >= labelBox.x + labelBox.width) && labelBox.x >= 0 && (labelBox.x + labelBox.width) < this.el.width()) {
+          _results.push(prevLabelMargin = labelBox.x - xLabelMargin);
+        } else {
+          _results.push(label.remove());
+        }
+      }
+      return _results;
+    };
+
+    Bar.prototype.drawSeries = function() {
+      var barWidth, bottom, groupWidth, idx, left, leftPadding, numBars, row, sidx, top, ypos, zeroPos;
+      groupWidth = this.width / this.options.data.length;
+      numBars = this.options.ykeys.length;
+      barWidth = (groupWidth * this.options.barSizeRatio - this.options.barGap * (numBars - 1)) / numBars;
+      leftPadding = groupWidth * (1 - this.options.barSizeRatio) / 2;
+      zeroPos = this.ymin <= 0 && this.ymax >= 0 ? this.transY(0) : null;
+      return this.bars = (function() {
+        var _i, _len, _ref, _results;
+        _ref = this.data;
+        _results = [];
+        for (idx = _i = 0, _len = _ref.length; _i < _len; idx = ++_i) {
+          row = _ref[idx];
+          _results.push((function() {
+            var _j, _len1, _ref1, _results1;
+            _ref1 = row._y;
+            _results1 = [];
+            for (sidx = _j = 0, _len1 = _ref1.length; _j < _len1; sidx = ++_j) {
+              ypos = _ref1[sidx];
+              if (ypos !== null) {
+                if (zeroPos) {
+                  top = Math.min(ypos, zeroPos);
+                  bottom = Math.max(ypos, zeroPos);
+                } else {
+                  top = ypos;
+                  bottom = this.bottom;
+                }
+                left = this.left + idx * groupWidth + leftPadding + sidx * (barWidth + this.options.barGap);
+                _results1.push(this.r.rect(left, top, barWidth, bottom - top).attr('fill', this.options.barColors[sidx % this.options.barColors.length]).attr('stroke-width', 0));
+              } else {
+                _results1.push(null);
+              }
+            }
+            return _results1;
+          }).call(this));
+        }
+        return _results;
+      }).call(this);
+    };
+
+    Bar.prototype.drawHover = function() {
+      var i, yLabel, _i, _ref, _results;
+      this.hoverHeight = this.options.hoverFontSize * 1.5 * (this.options.ykeys.length + 1);
+      this.hover = this.r.rect(-10, -this.hoverHeight / 2 - this.options.hoverPaddingY, 20, this.hoverHeight + this.options.hoverPaddingY * 2, 10).attr('fill', this.options.hoverFillColor).attr('stroke', this.options.hoverBorderColor).attr('stroke-width', this.options.hoverBorderWidth).attr('opacity', this.options.hoverOpacity);
+      this.xLabel = this.r.text(0, (this.options.hoverFontSize * 0.75) - this.hoverHeight / 2, '').attr('fill', this.options.hoverLabelColor).attr('font-weight', 'bold').attr('font-size', this.options.hoverFontSize);
+      this.hoverSet = this.r.set();
+      this.hoverSet.push(this.hover);
+      this.hoverSet.push(this.xLabel);
+      this.yLabels = [];
+      _results = [];
+      for (i = _i = 0, _ref = this.options.ykeys.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        yLabel = this.r.text(0, this.options.hoverFontSize * 1.5 * (i + 1.5) - this.hoverHeight / 2, '').attr('font-size', this.options.hoverFontSize);
+        this.yLabels.push(yLabel);
+        _results.push(this.hoverSet.push(yLabel));
+      }
+      return _results;
+    };
+
+    Bar.prototype.updateHover = function(index) {
+      var i, maxLabelWidth, row, xloc, y, yloc, _i, _len, _ref;
+      this.hoverSet.show();
+      row = this.data[index];
+      this.xLabel.attr('text', row.label);
+      _ref = row.y;
+      for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
+        y = _ref[i];
+        this.yLabels[i].attr('fill', this.options.barColors[i % this.options.barColors.length]);
+        this.yLabels[i].attr('text', "" + this.options.labels[i] + ": " + (this.yLabelFormat(y)));
+      }
+      maxLabelWidth = Math.max.apply(null, $.map(this.yLabels, function(l) {
+        return l.getBBox().width;
+      }));
+      maxLabelWidth = Math.max(maxLabelWidth, this.xLabel.getBBox().width);
+      this.hover.attr('width', maxLabelWidth + this.options.hoverPaddingX * 2);
+      this.hover.attr('x', -this.options.hoverPaddingX - maxLabelWidth / 2);
+      yloc = (this.bottom + this.top) / 2;
+      xloc = Math.min(this.right - maxLabelWidth / 2 - this.options.hoverPaddingX, this.data[index]._x);
+      xloc = Math.max(this.left + maxLabelWidth / 2 + this.options.hoverPaddingX, xloc);
+      return this.hoverSet.attr('transform', "t" + xloc + "," + yloc);
+    };
+
+    Bar.prototype.hideHover = function() {
+      return this.hoverSet.hide();
+    };
+
+    Bar.prototype.hilight = function(index) {
+      if (index !== null && this.prevHilight !== index) {
+        this.updateHover(index);
+      }
+      this.prevHilight = index;
+      if (index === null) {
+        return this.hideHover();
+      }
+    };
+
+    Bar.prototype.updateHilight = function(x) {
+      var hoverIndex, _i, _ref;
+      x -= this.el.offset().left;
+      for (hoverIndex = _i = 0, _ref = this.hoverMargins.length; 0 <= _ref ? _i < _ref : _i > _ref; hoverIndex = 0 <= _ref ? ++_i : --_i) {
+        if (this.hoverMargins[hoverIndex] > x) {
+          break;
+        }
+      }
+      return this.hilight(hoverIndex);
+    };
+
+    return Bar;
+
+  })(Morris.Grid);
+
   Morris.Donut = (function() {
 
     Donut.prototype.defaults = {
