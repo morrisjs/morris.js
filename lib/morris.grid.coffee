@@ -51,12 +51,33 @@ class Morris.Grid extends Morris.EventEmitter
     preUnits: ''
     ymax: 'auto'
     ymin: 'auto 0'
+    goals: []
+    goalStrokeWidth: 1.0
+    goalLineColors: [
+      '#666633'
+      '#999966'
+      '#cc6666'
+      '#663333'
+    ]
+    events: []
+    eventStrokeWidth: 1.0
+    eventLineColors: [
+      '#005a04'
+      '#ccffbb'
+      '#3a5f0b'
+      '#005502'
+    ]
 
   # Update the data series and redraw the chart.
   #
   setData: (data, redraw = true) ->
     ymax = if @cumulative then 0 else null
     ymin = if @cumulative then 0 else null
+    
+    if @options.goals.length > 0
+      ymax = Math.max(ymax, Math.max.apply(null,@options.goals))
+      ymin = Math.min(ymin, Math.min.apply(null,@options.goals))
+    
     @data = $.map data, (row, index) =>
       ret = {}
       ret.label = row[@options.xkey]
@@ -94,6 +115,13 @@ class Morris.Grid extends Morris.EventEmitter
     # calculate horizontal range of the graph
     @xmin = @data[0].x
     @xmax = @data[@data.length - 1].x
+
+    @events = []
+    if @options.parseTime and @options.events.length > 0
+      @events = $.map @options.events, (event, index) => Morris.parseDate(event)
+      @xmax = Math.max(@xmax, Math.max.apply(null,@events))
+      @xmin = Math.min(@xmin, Math.min.apply(null,@events))
+
     if @xmin is @xmax
       @xmin -= 1
       @xmax += 1
@@ -174,7 +202,24 @@ class Morris.Grid extends Morris.EventEmitter
     @r.clear()
     @_calc()
     @drawGrid()
+    @drawGoals()
+    @drawEvents()
     @draw() if @draw
+
+  # draw goals horizontal lines
+  #
+  drawGoals: ->
+    for goal, i in @options.goals
+      @r.path("M#{@left},#{@transY(goal)}H#{@left + @width}")
+        .attr('stroke', @options.goalLineColors[i % @options.goalLineColors.length])
+        .attr('stroke-width', @options.goalStrokeWidth)
+
+  # draw events vertical lines
+  drawEvents: ->
+    for event, i in @events
+      @r.path("M#{@transX(event)},#{@bottom}V#{@top}")
+        .attr('stroke', @options.eventLineColors[i % @options.eventLineColors.length])
+        .attr('stroke-width', @options.eventStrokeWidth)
 
   # draw y axis labels, horizontal lines
   #

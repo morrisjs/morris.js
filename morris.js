@@ -105,7 +105,13 @@
       postUnits: '',
       preUnits: '',
       ymax: 'auto',
-      ymin: 'auto 0'
+      ymin: 'auto 0',
+      goals: [],
+      goalStrokeWidth: 1.0,
+      goalLineColors: ['#666633', '#999966', '#cc6666', '#663333'],
+      events: [],
+      eventStrokeWidth: 1.0,
+      eventLineColors: ['#005a04', '#ccffbb', '#3a5f0b', '#005502']
     };
 
     Grid.prototype.setData = function(data, redraw) {
@@ -116,6 +122,10 @@
       }
       ymax = this.cumulative ? 0 : null;
       ymin = this.cumulative ? 0 : null;
+      if (this.options.goals.length > 0) {
+        ymax = Math.max(ymax, Math.max.apply(null, this.options.goals));
+        ymin = Math.min(ymin, Math.min.apply(null, this.options.goals));
+      }
       this.data = $.map(data, function(row, index) {
         var idx, ret, total, ykey, yval;
         ret = {};
@@ -173,6 +183,14 @@
       }
       this.xmin = this.data[0].x;
       this.xmax = this.data[this.data.length - 1].x;
+      this.events = [];
+      if (this.options.parseTime && this.options.events.length > 0) {
+        this.events = $.map(this.options.events, function(event, index) {
+          return Morris.parseDate(event);
+        });
+        this.xmax = Math.max(this.xmax, Math.max.apply(null, this.events));
+        this.xmin = Math.min(this.xmin, Math.min.apply(null, this.events));
+      }
       if (this.xmin === this.xmax) {
         this.xmin -= 1;
         this.xmax += 1;
@@ -266,9 +284,33 @@
       this.r.clear();
       this._calc();
       this.drawGrid();
+      this.drawGoals();
+      this.drawEvents();
       if (this.draw) {
         return this.draw();
       }
+    };
+
+    Grid.prototype.drawGoals = function() {
+      var goal, i, _i, _len, _ref, _results;
+      _ref = this.options.goals;
+      _results = [];
+      for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
+        goal = _ref[i];
+        _results.push(this.r.path("M" + this.left + "," + (this.transY(goal)) + "H" + (this.left + this.width)).attr('stroke', this.options.goalLineColors[i % this.options.goalLineColors.length]).attr('stroke-width', this.options.goalStrokeWidth));
+      }
+      return _results;
+    };
+
+    Grid.prototype.drawEvents = function() {
+      var event, i, _i, _len, _ref, _results;
+      _ref = this.events;
+      _results = [];
+      for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
+        event = _ref[i];
+        _results.push(this.r.path("M" + (this.transX(event)) + "," + this.bottom + "V" + this.top).attr('stroke', this.options.eventLineColors[i % this.options.eventLineColors.length]).attr('stroke-width', this.options.eventStrokeWidth));
+      }
+      return _results;
     };
 
     Grid.prototype.drawGrid = function() {
