@@ -3,7 +3,7 @@
 [![Build Status](https://secure.travis-ci.org/oesmith/morris.js.png?branch=master)](http://travis-ci.org/oesmith/morris.js)
 
 Morris.js is the library that powers the graphs on http://howmanyleft.co.uk/.
-It's a very simple API for drawing line, area and donut charts.
+It's a very simple API for drawing line, bar, area and donut charts.
 
 Cheers!
 
@@ -37,6 +37,10 @@ with `npm install` in the morris.js project folder.
 Once you're all set up, you can compile, minify and run the tests using `grunt`.
 
 ## Changelog
+
+### 0.3.3 - 1st November 2012
+
+- **Bar charts!** [#101](https://github.com/oesmith/morris.js/issues/101).
 
 ### 0.3.2 - 28th October 2012
 
