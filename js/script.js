@@ -58,12 +58,12 @@ $(function () {
   Morris.Bar({
     element: 'hero-bar',
     data: [
-      {device: '5', geekbench: 1571},
-      {device: '4S', geekbench: 655},
+      {device: '1', geekbench: 136},
+      {device: '3G', geekbench: 137},
       {device: '4', geekbench: 380},
       {device: '3GS', geekbench: 275},
-      {device: '3G', geekbench: 137},
-      {device: '1', geekbench: 136}
+      {device: '4S', geekbench: 655},
+      {device: '5', geekbench: 1571}
     ],
     xkey: 'device',
     ykeys: ['geekbench'],
