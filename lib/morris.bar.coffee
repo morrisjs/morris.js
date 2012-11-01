@@ -120,10 +120,59 @@ class Morris.Bar extends Morris.Grid
             bottom = @bottom
           left = @left + idx * groupWidth + leftPadding + sidx * (barWidth + @options.barGap)
           @r.rect(left, top, barWidth, bottom - top)
-            .attr('fill', @options.barColors[sidx % @options.barColors.length])
+            .attr('fill', @barColorForSeries(sidx, idx))
             .attr('stroke-width', 0)
         else
           null
+
+  # calculate series hover color
+  #
+  # @private
+  hoverColorForSeries: (sidx, idx) ->
+    @barColorForSeries(sidx, idx).split('-').pop()
+
+  # calculate bar color
+  #
+  # @private
+  barColorForSeries: (sidx, idx) ->
+    color = @options.barColors[sidx % @options.barColors.length]
+    barColor = if color.indexOf(';') isnt -1 then error: true else Raphael.color color
+    if barColor.error and color.match(/^(rgb)|(hsb)|(hsl)a?/)
+      color
+    else if barColor.error
+      @generateGradient(color, @data[idx].y[sidx])
+    else
+      barColor.hex
+
+  # calculate gradient for serie and y
+  generateGradient: (color, value) ->
+    color = color.split(';')
+    
+    colorAt = (top, bottom, relPos) ->
+      chan = (a, b) -> a + Math.round((b-a)*relPos)
+      newColor =
+        r: chan(top.r, bottom.r)
+        g: chan(top.g, bottom.g)
+        b: chan(top.b, bottom.b)
+      return Raphael.color("rgb(#{newColor.r},#{newColor.g},#{newColor.b})")
+    
+    position = 1.0 - (value - @ymin) / (@ymax - @ymin)
+    top = Raphael.color(color[0])
+    bottom = Raphael.color(color[1])
+    
+    if color.length is 3
+      bottom = Raphael.color(color[2])
+      middle = Raphael.color(color[1])
+      if position > 0.5
+        start = colorAt(middle, bottom, 2 * (position - 0.5))
+        return "90-#{bottom.hex}-#{start.hex}"
+      else
+        start = colorAt(top, middle, position * 2)
+        middlepos = 100 - Math.round(100 * (0.5 - position) / (1.0 - position))
+        return "90-#{bottom.hex}-#{middle.hex}:#{middlepos}-#{start.hex}"
+    
+    start = colorAt(top, bottom, position)
+    return "90-#{bottom.hex}-#{start.hex}"
 
   # draw the hover tooltip
   #
@@ -156,7 +205,7 @@ class Morris.Bar extends Morris.Grid
     row = @data[index]
     @xLabel.attr('text', row.label)
     for y, i in row.y
-      @yLabels[i].attr('fill', @options.barColors[i % @options.barColors.length])
+      @yLabels[i].attr('fill', @hoverColorForSeries(i, index))
       @yLabels[i].attr('text', "#{@options.labels[i]}: #{@yLabelFormat(y)}")
     # recalculate hover box width
     maxLabelWidth = Math.max.apply null, $.map @yLabels, (l) ->
