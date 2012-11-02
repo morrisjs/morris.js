@@ -1377,4 +1377,315 @@
 
   })(Morris.EventEmitter);
 
+  Morris.Pie = (function() {
+
+    Pie.prototype.defaults = {
+      colors: ['#0B62A4', '#3980B5', '#679DC6', '#95BBD7', '#B0CCE1', '#095791', '#095085', '#083E67', '#052C48', '#042135'],
+      sortData: false,
+      formatter: Morris.commas,
+      hideHover: false
+    };
+
+    function Pie(options) {
+      this.select = __bind(this.select, this);
+
+      var _this = this;
+      if (!(this instanceof Morris.Pie)) {
+        return new Morris.Pie(options);
+      }
+      if (typeof options.element === 'string') {
+        this.el = $(document.getElementById(options.element));
+      } else {
+        this.el = $(options.element);
+      }
+      this.options = $.extend({}, this.defaults, options);
+      if (this.el === null || this.el.length === 0) {
+        throw new Error("Graph placeholder not found.");
+      }
+      if (options.data === void 0 || options.data.length === 0) {
+        return;
+      }
+      this.setData(options.data);
+      this.el.addClass('graph-initialised');
+      if (this.options.hideHover) {
+        this.el.mouseout(function(evt) {
+          return _this.hideHover();
+        });
+      }
+      this.redraw();
+    }
+
+    Pie.prototype.setData = function(data) {
+      var total, _ref,
+        _this = this;
+      total = data.reduce(function(x, y) {
+        return {
+          value: x.value + y.value
+        };
+      });
+      this.data = $.map(data, function(row, index) {
+        var ret;
+        ret = {};
+        ret.label = row.label;
+        ret.value = row.value;
+        ret.segment = 100.0 * row.value / total.value;
+        return ret;
+      });
+      if ((_ref = this.options.sortData) === true || _ref === 'asc') {
+        return this.data = this.data.sort(function(a, b) {
+          return a.segment > b.segment;
+        });
+      } else if (this.options.sortData === 'desc') {
+        return this.data = this.data.sort(function(a, b) {
+          return a.segment < b.segment;
+        });
+      }
+    };
+
+    Pie.prototype.redraw = function() {
+      this.clear();
+      this.calc();
+      return this.drawPie();
+    };
+
+    Pie.prototype.clear = function() {
+      this.text = null;
+      this.middles = [];
+      this.segments = [];
+      this.el.empty();
+      return this.r = new Raphael(this.el[0]);
+    };
+
+    Pie.prototype.calc = function() {
+      this.width = this.el.width();
+      this.height = this.el.height() - 30;
+      this.cx = this.width / 2.0;
+      this.cy = 30 + this.height / 2.0;
+      return this.radius = 0.8 * Math.min(this.width / 2.0, this.height / 2.0);
+    };
+
+    Pie.prototype.drawCircle = function() {
+      return this.r.circle(this.cx, this.cy, this.radius).attr('fill', this.options.colors[0]).attr('stroke', 'white').attr('stroke-width', 3).attr('stroke-linejoin', 'round');
+    };
+
+    Pie.prototype.drawPie = function() {
+      var angle, from, idx, mangle, max_value, row, segment, sidx, to, _i, _j, _len, _len1, _ref, _ref1, _ref2, _results;
+      if (this.data.length === 1) {
+        segment = new Morris.PieCircle(this.cx, this.cy, this.radius, this.options.colors[0], this.data[0]);
+        segment.render(this.r);
+        segment.on('hover', this.select);
+        this.segments.push(segment);
+        if (!this.options.hideHover) {
+          this.select(segment);
+        }
+        return;
+      }
+      angle = 0;
+      _ref = this.data;
+      for (sidx = _i = 0, _len = _ref.length; _i < _len; sidx = ++_i) {
+        row = _ref[sidx];
+        mangle = angle - 360.0 * row.segment / 200.0;
+        if (!sidx) {
+          angle = 90 - mangle;
+          mangle = angle - 360.0 * row.segment / 200.0;
+        }
+        _ref1 = [angle, angle - 3.6 * row.segment], from = _ref1[0], to = _ref1[1];
+        segment = new Morris.PieSegment(this.cx, this.cy, this.radius, from, to, this.options.colors[sidx % this.options.colors.length], row);
+        segment.render(this.r);
+        segment.on('hover', this.select);
+        this.segments.push(segment);
+        angle = to;
+      }
+      if (!this.options.hideHover) {
+        max_value = Math.max.apply(null, (function() {
+          var _j, _len1, _ref2, _results;
+          _ref2 = this.data;
+          _results = [];
+          for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
+            row = _ref2[_j];
+            _results.push(row.value);
+          }
+          return _results;
+        }).call(this));
+        _ref2 = this.data;
+        _results = [];
+        for (idx = _j = 0, _len1 = _ref2.length; _j < _len1; idx = ++_j) {
+          row = _ref2[idx];
+          if (row.value === max_value) {
+            this.select(idx);
+            break;
+          } else {
+            _results.push(void 0);
+          }
+        }
+        return _results;
+      }
+    };
+
+    Pie.prototype.select = function(idx) {
+      var s, segment, _i, _len, _ref;
+      _ref = this.segments;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        s = _ref[_i];
+        s.deselect();
+      }
+      if (typeof idx === 'number') {
+        segment = this.segments[idx];
+      } else {
+        segment = idx;
+      }
+      segment.select();
+      return this.showLabel(segment.data.label, this.options.formatter(segment.data.value), segment.color);
+    };
+
+    Pie.prototype.showLabel = function(label, value, color) {
+      if (this.text === null) {
+        this.text = this.r.text(this.cx, 30, "" + label + ": " + value).attr('font-size', 15).attr('font-weight', 800);
+      }
+      return this.text.attr({
+        'fill': color,
+        'text': "" + label + ": " + value
+      });
+    };
+
+    Pie.prototype.hideHover = function() {
+      var s, _i, _len, _ref;
+      _ref = this.segments;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        s = _ref[_i];
+        s.deselect();
+      }
+      if (this.text) {
+        return this.text.attr('text', '');
+      }
+    };
+
+    return Pie;
+
+  })();
+
+  Morris.PieCircle = (function(_super) {
+
+    __extends(PieCircle, _super);
+
+    function PieCircle(cx, cy, radius, color, data) {
+      this.cx = cx;
+      this.cy = cy;
+      this.radius = radius;
+      this.color = color;
+      this.data = data;
+      this.deselect = __bind(this.deselect, this);
+
+      this.select = __bind(this.select, this);
+
+    }
+
+    PieCircle.prototype.render = function(r) {
+      var _this = this;
+      return this.circle = r.circle(this.cx, this.cy, this.radius - 5).attr({
+        fill: this.color,
+        stroke: 'white',
+        'stroke-width': 3,
+        'stroke-linejoin': 'round'
+      }).hover(function() {
+        return _this.fire('hover', _this);
+      });
+    };
+
+    PieCircle.prototype.select = function() {
+      if (!this.selected) {
+        this.circle.animate({
+          r: this.radius
+        }, 150, '<>');
+        return this.selected = true;
+      }
+    };
+
+    PieCircle.prototype.deselect = function() {
+      if (this.selected) {
+        this.circle.animate({
+          r: this.radius - 5
+        }, 150, '<>');
+        return this.selected = false;
+      }
+    };
+
+    return PieCircle;
+
+  })(Morris.EventEmitter);
+
+  Morris.PieSegment = (function(_super) {
+
+    __extends(PieSegment, _super);
+
+    function PieSegment(cx, cy, radius, from, to, color, data) {
+      var rad;
+      this.cx = cx;
+      this.cy = cy;
+      this.radius = radius;
+      this.color = color;
+      this.data = data;
+      this.deselect = __bind(this.deselect, this);
+
+      this.select = __bind(this.select, this);
+
+      rad = Math.PI / 180;
+      this.diff = Math.abs(to - from);
+      this.cos = Math.cos(-(from + (to - from) / 2) * rad);
+      this.sin = Math.sin(-(from + (to - from) / 2) * rad);
+      this.sin_from = Math.sin(-from * rad);
+      this.cos_from = Math.cos(-from * rad);
+      this.sin_to = Math.sin(-to * rad);
+      this.cos_to = Math.cos(-to * rad);
+      this.long = +(this.diff > 180);
+      this.path = this.calcSegment(this.radius - 5);
+      this.selectedPath = this.calcSegment(this.radius);
+      this.mx = this.cx + this.radius / 2 * this.cos;
+      this.my = this.cy + this.radius / 2 * this.sin;
+    }
+
+    PieSegment.prototype.calcArcPoints = function(r) {
+      return [this.cx + r * this.cos_from, this.cy + r * this.sin_from, this.cx + r * this.cos_to, this.cy + r * this.sin_to];
+    };
+
+    PieSegment.prototype.calcSegment = function(r) {
+      var x1, x2, y1, y2, _ref;
+      _ref = this.calcArcPoints(r), x1 = _ref[0], y1 = _ref[1], x2 = _ref[2], y2 = _ref[3];
+      return "M" + this.cx + "," + this.cy + "L" + x1 + "," + y1 + "A" + r + "," + r + ",0," + this.long + ",1," + x2 + "," + y2 + "Z";
+    };
+
+    PieSegment.prototype.render = function(r) {
+      var _this = this;
+      return this.seg = r.path(this.path).attr({
+        fill: this.color,
+        stroke: 'white',
+        'stroke-width': 3,
+        'stroke-linejoin': 'round'
+      }).hover(function() {
+        return _this.fire('hover', _this);
+      });
+    };
+
+    PieSegment.prototype.select = function() {
+      if (!this.selected) {
+        this.seg.animate({
+          path: this.selectedPath
+        }, 150, '<>');
+        return this.selected = true;
+      }
+    };
+
+    PieSegment.prototype.deselect = function() {
+      if (this.selected) {
+        this.seg.animate({
+          path: this.path
+        }, 150, '<>');
+        return this.selected = false;
+      }
+    };
+
+    return PieSegment;
+
+  })(Morris.EventEmitter);
+
 }).call(this);
