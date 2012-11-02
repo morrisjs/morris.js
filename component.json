@@ -1,0 +1,9 @@
+{
+  "name": "morris.js",
+  "version": "0.3.3",
+  "main": "./morris.js",
+  "dependencies": {
+    "jquery": ">= 1.7.2",
+    "raphael": ">= 2.0"
+  }
+}

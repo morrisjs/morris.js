@@ -1,8 +1,8 @@
 {
   "name": "Morris.js",
-  "version": "0.2.10",
+  "version": "0.3.3",
   "homepage": "http://oesmith.github.com/morris.js",
-  "description": "Pretty time-series line graphs",
+  "description": "Easy, pretty charts",
   "author": {
     "name": "Olly Smith",
     "email": "olly@oesmith.co.uk"
