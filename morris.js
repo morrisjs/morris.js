@@ -1048,7 +1048,7 @@
 
     Bar.prototype.drawSeries = function() {
       var barWidth, bottom, groupWidth, idx, left, leftPadding, numBars, row, sidx, top, ypos, zeroPos;
-      groupWidth = this.width / this.options.data.length;
+      groupWidth = this.width / this.data.length;
       numBars = this.options.ykeys.length;
       barWidth = (groupWidth * this.options.barSizeRatio - this.options.barGap * (numBars - 1)) / numBars;
       leftPadding = groupWidth * (1 - this.options.barSizeRatio) / 2;
@@ -1088,6 +1088,7 @@
 
     Bar.prototype.drawHover = function() {
       var i, yLabel, _i, _ref, _results;
+      this.prevHilight = null;
       this.hoverHeight = this.options.hoverFontSize * 1.5 * (this.options.ykeys.length + 1);
       this.hover = this.r.rect(-10, -this.hoverHeight / 2 - this.options.hoverPaddingY, 20, this.hoverHeight + this.options.hoverPaddingY * 2, 10).attr('fill', this.options.hoverFillColor).attr('stroke', this.options.hoverBorderColor).attr('stroke-width', this.options.hoverBorderWidth).attr('opacity', this.options.hoverOpacity);
       this.xLabel = this.r.text(0, (this.options.hoverFontSize * 0.75) - this.hoverHeight / 2, '').attr('fill', this.options.hoverLabelColor).attr('font-weight', 'bold').attr('font-size', this.options.hoverFontSize);
