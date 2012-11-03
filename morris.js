@@ -1074,7 +1074,7 @@
                   bottom = this.bottom;
                 }
                 left = this.left + idx * groupWidth + leftPadding + sidx * (barWidth + this.options.barGap);
-                _results1.push(this.r.rect(left, top, barWidth, bottom - top).attr('fill', this.options.barColors[sidx % this.options.barColors.length]).attr('stroke-width', 0));
+                _results1.push(this.r.rect(left, top, barWidth, bottom - top).attr('fill', this.barColorForSeries(sidx, idx)).attr('stroke-width', 0));
               } else {
                 _results1.push(null);
               }
@@ -1084,6 +1084,59 @@
         }
         return _results;
       }).call(this);
+    };
+
+    Bar.prototype.hoverColorForSeries = function(sidx, idx) {
+      return this.barColorForSeries(sidx, idx).split('-').pop();
+    };
+
+    Bar.prototype.barColorForSeries = function(sidx, idx) {
+      var barColor, color;
+      color = this.options.barColors[sidx % this.options.barColors.length];
+      barColor = color.indexOf(';') !== -1 ? {
+        error: true
+      } : Raphael.color(color);
+      if (barColor.error && color.match(/^(rgb)|(hsb)|(hsl)a?/)) {
+        return color;
+      } else if (barColor.error) {
+        return this.generateGradient(color, this.data[idx].y[sidx]);
+      } else {
+        return barColor.hex;
+      }
+    };
+
+    Bar.prototype.generateGradient = function(color, value) {
+      var bottom, colorAt, middle, middlepos, position, start, top;
+      color = color.split(';');
+      colorAt = function(top, bottom, relPos) {
+        var chan, newColor;
+        chan = function(a, b) {
+          return a + Math.round((b - a) * relPos);
+        };
+        newColor = {
+          r: chan(top.r, bottom.r),
+          g: chan(top.g, bottom.g),
+          b: chan(top.b, bottom.b)
+        };
+        return Raphael.color("rgb(" + newColor.r + "," + newColor.g + "," + newColor.b + ")");
+      };
+      position = 1.0 - (value - this.ymin) / (this.ymax - this.ymin);
+      top = Raphael.color(color[0]);
+      bottom = Raphael.color(color[1]);
+      if (color.length === 3) {
+        bottom = Raphael.color(color[2]);
+        middle = Raphael.color(color[1]);
+        if (position > 0.5) {
+          start = colorAt(middle, bottom, 2 * (position - 0.5));
+          return "90-" + bottom.hex + "-" + start.hex;
+        } else {
+          start = colorAt(top, middle, position * 2);
+          middlepos = 100 - Math.round(100 * (0.5 - position) / (1.0 - position));
+          return "90-" + bottom.hex + "-" + middle.hex + ":" + middlepos + "-" + start.hex;
+        }
+      }
+      start = colorAt(top, bottom, position);
+      return "90-" + bottom.hex + "-" + start.hex;
     };
 
     Bar.prototype.drawHover = function() {
@@ -1112,7 +1165,7 @@
       _ref = row.y;
       for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
         y = _ref[i];
-        this.yLabels[i].attr('fill', this.options.barColors[i % this.options.barColors.length]);
+        this.yLabels[i].attr('fill', this.hoverColorForSeries(i, index));
         this.yLabels[i].attr('text', "" + this.options.labels[i] + ": " + (this.yLabelFormat(y)));
       }
       maxLabelWidth = Math.max.apply(null, $.map(this.yLabels, function(l) {
