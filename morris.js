@@ -115,7 +115,7 @@
     };
 
     Grid.prototype.setData = function(data, redraw) {
-      var ymax, ymin,
+      var e, maxGoal, minGoal, ymax, ymin,
         _this = this;
       if (redraw == null) {
         redraw = true;
@@ -123,8 +123,10 @@
       ymax = this.cumulative ? 0 : null;
       ymin = this.cumulative ? 0 : null;
       if (this.options.goals.length > 0) {
-        ymax = Math.max(ymax, Math.max.apply(null, this.options.goals));
-        ymin = Math.min(ymin, Math.min.apply(null, this.options.goals));
+        minGoal = Math.min.apply(null, this.options.goals);
+        maxGoal = Math.max.apply(null, this.options.goals);
+        ymin = ymin === null ? minGoal : Math.min(ymin, minGoal);
+        ymax = ymax === null ? maxGoal : Math.max(ymax, maxGoal);
       }
       this.data = $.map(data, function(row, index) {
         var idx, ret, total, ykey, yval;
@@ -185,9 +187,16 @@
       this.xmax = this.data[this.data.length - 1].x;
       this.events = [];
       if (this.options.parseTime && this.options.events.length > 0) {
-        this.events = $.map(this.options.events, function(event, index) {
-          return Morris.parseDate(event);
-        });
+        this.events = (function() {
+          var _i, _len, _ref, _results;
+          _ref = this.options.events;
+          _results = [];
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            e = _ref[_i];
+            _results.push(Morris.parseDate(e));
+          }
+          return _results;
+        }).call(this);
         this.xmax = Math.max(this.xmax, Math.max.apply(null, this.events));
         this.xmin = Math.min(this.xmin, Math.min.apply(null, this.events));
       }

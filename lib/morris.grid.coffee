@@ -73,11 +73,13 @@ class Morris.Grid extends Morris.EventEmitter
   setData: (data, redraw = true) ->
     ymax = if @cumulative then 0 else null
     ymin = if @cumulative then 0 else null
-    
+
     if @options.goals.length > 0
-      ymax = Math.max(ymax, Math.max.apply(null,@options.goals))
-      ymin = Math.min(ymin, Math.min.apply(null,@options.goals))
-    
+      minGoal = Math.min.apply(null, @options.goals)
+      maxGoal = Math.max.apply(null, @options.goals)
+      ymin = if ymin is null then minGoal else Math.min(ymin, minGoal)
+      ymax = if ymax is null then maxGoal else Math.max(ymax, maxGoal)
+
     @data = $.map data, (row, index) =>
       ret = {}
       ret.label = row[@options.xkey]
@@ -118,9 +120,9 @@ class Morris.Grid extends Morris.EventEmitter
 
     @events = []
     if @options.parseTime and @options.events.length > 0
-      @events = $.map @options.events, (event, index) => Morris.parseDate(event)
-      @xmax = Math.max(@xmax, Math.max.apply(null,@events))
-      @xmin = Math.min(@xmin, Math.min.apply(null,@events))
+      @events = (Morris.parseDate(e) for e in @options.events)
+      @xmax = Math.max(@xmax, Math.max.apply(null, @events))
+      @xmin = Math.min(@xmin, Math.min.apply(null, @events))
 
     if @xmin is @xmax
       @xmin -= 1
