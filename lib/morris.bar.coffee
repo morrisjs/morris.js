@@ -104,7 +104,7 @@ class Morris.Bar extends Morris.Grid
   #
   # @private
   drawSeries: ->
-    groupWidth = @width / @options.data.length
+    groupWidth = @width / @data.length
     numBars = @options.ykeys.length
     barWidth = (groupWidth * @options.barSizeRatio - @options.barGap * (numBars - 1)) / numBars
     leftPadding = groupWidth * (1 - @options.barSizeRatio) / 2
@@ -130,6 +130,7 @@ class Morris.Bar extends Morris.Grid
   # @private
   drawHover: ->
     # hover labels
+    @prevHilight = null
     @hoverHeight = @options.hoverFontSize * 1.5 * (@options.ykeys.length + 1)
     @hover = @r.rect(-10, -@hoverHeight / 2 - @options.hoverPaddingY, 20, @hoverHeight + @options.hoverPaddingY * 2, 10)
       .attr('fill', @options.hoverFillColor)
