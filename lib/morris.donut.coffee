@@ -94,7 +94,7 @@ class Morris.Donut
     s.deselect() for s in @segments
     if typeof idx is 'number' then segment = @segments[idx] else segment = idx
     segment.select()
-    @setLabels segment.data.label, @options.formatter(segment.data.value)
+    @setLabels segment.data.label, @options.formatter(segment.data.value, segment.data)
 
   # @private
   setLabels: (label1, label2) ->

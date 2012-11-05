@@ -1309,7 +1309,7 @@
         segment = idx;
       }
       segment.select();
-      return this.setLabels(segment.data.label, this.options.formatter(segment.data.value));
+      return this.setLabels(segment.data.label, this.options.formatter(segment.data.value, segment.data));
     };
 
     Donut.prototype.setLabels = function(label1, label2) {
