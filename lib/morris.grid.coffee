@@ -80,7 +80,7 @@ class Morris.Grid extends Morris.EventEmitter
       ymin = if ymin is null then minGoal else Math.min(ymin, minGoal)
       ymax = if ymax is null then maxGoal else Math.max(ymax, maxGoal)
 
-    @data = $.map data, (row, index) =>
+    @data = for row, index in data
       ret = {}
       ret.label = row[@options.xkey]
       if @options.parseTime

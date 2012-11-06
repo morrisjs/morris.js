@@ -45,8 +45,6 @@ class Morris.Donut
       return
     @data = options.data
 
-    @el.addClass 'graph-initialised'
-
     @redraw()
 
   # Clear and redraw the chart.

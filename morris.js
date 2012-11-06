@@ -115,8 +115,7 @@
     };
 
     Grid.prototype.setData = function(data, redraw) {
-      var e, maxGoal, minGoal, ymax, ymin,
-        _this = this;
+      var e, idx, index, maxGoal, minGoal, ret, row, total, ykey, ymax, ymin, yval;
       if (redraw == null) {
         redraw = true;
       }
@@ -128,56 +127,61 @@
         ymin = ymin === null ? minGoal : Math.min(ymin, minGoal);
         ymax = ymax === null ? maxGoal : Math.max(ymax, maxGoal);
       }
-      this.data = $.map(data, function(row, index) {
-        var idx, ret, total, ykey, yval;
-        ret = {};
-        ret.label = row[_this.options.xkey];
-        if (_this.options.parseTime) {
-          ret.x = Morris.parseDate(ret.label);
-          if (_this.options.dateFormat) {
-            ret.label = _this.options.dateFormat(ret.x);
-          } else if (typeof ret.label === 'number') {
-            ret.label = new Date(ret.label).toString();
+      this.data = (function() {
+        var _i, _len, _results;
+        _results = [];
+        for (index = _i = 0, _len = data.length; _i < _len; index = ++_i) {
+          row = data[index];
+          ret = {};
+          ret.label = row[this.options.xkey];
+          if (this.options.parseTime) {
+            ret.x = Morris.parseDate(ret.label);
+            if (this.options.dateFormat) {
+              ret.label = this.options.dateFormat(ret.x);
+            } else if (typeof ret.label === 'number') {
+              ret.label = new Date(ret.label).toString();
+            }
+          } else {
+            ret.x = index;
           }
-        } else {
-          ret.x = index;
-        }
-        total = 0;
-        ret.y = (function() {
-          var _i, _len, _ref, _results;
-          _ref = this.options.ykeys;
-          _results = [];
-          for (idx = _i = 0, _len = _ref.length; _i < _len; idx = ++_i) {
-            ykey = _ref[idx];
-            yval = row[ykey];
-            if (typeof yval === 'string') {
-              yval = parseFloat(yval);
-            }
-            if (typeof yval !== 'number') {
-              yval = null;
-            }
-            if (yval !== null) {
-              if (this.cumulative) {
-                total += yval;
-              } else {
-                if (ymax === null) {
-                  ymax = ymin = yval;
+          total = 0;
+          ret.y = (function() {
+            var _j, _len1, _ref, _results1;
+            _ref = this.options.ykeys;
+            _results1 = [];
+            for (idx = _j = 0, _len1 = _ref.length; _j < _len1; idx = ++_j) {
+              ykey = _ref[idx];
+              yval = row[ykey];
+              if (typeof yval === 'string') {
+                yval = parseFloat(yval);
+              }
+              if (typeof yval !== 'number') {
+                yval = null;
+              }
+              if (yval !== null) {
+                if (this.cumulative) {
+                  total += yval;
                 } else {
-                  ymax = Math.max(yval, ymax);
-                  ymin = Math.min(yval, ymin);
+                  if (ymax === null) {
+                    ymax = ymin = yval;
+                  } else {
+                    ymax = Math.max(yval, ymax);
+                    ymin = Math.min(yval, ymin);
+                  }
                 }
               }
+              if (this.cumulative && total !== null) {
+                ymax = Math.max(total, ymax);
+                ymin = Math.min(total, ymin);
+              }
+              _results1.push(yval);
             }
-            if (this.cumulative && total !== null) {
-              ymax = Math.max(total, ymax);
-              ymin = Math.min(total, ymin);
-            }
-            _results.push(yval);
-          }
-          return _results;
-        }).call(_this);
-        return ret;
-      });
+            return _results1;
+          }).call(this);
+          _results.push(ret);
+        }
+        return _results;
+      }).call(this);
       if (this.options.parseTime) {
         this.data = this.data.sort(function(a, b) {
           return (a.x > b.x) - (b.x > a.x);
@@ -515,10 +519,17 @@
     };
 
     Line.prototype.calcHoverMargins = function() {
-      var _this = this;
-      return this.hoverMargins = $.map(this.data.slice(1), function(r, i) {
-        return (r._x + _this.data[i]._x) / 2;
-      });
+      var i, r;
+      return this.hoverMargins = (function() {
+        var _i, _len, _ref, _results;
+        _ref = this.data.slice(1);
+        _results = [];
+        for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
+          r = _ref[i];
+          _results.push((r._x + this.data[i]._x) / 2);
+        }
+        return _results;
+      }).call(this);
     };
 
     Line.prototype.generatePaths = function() {
@@ -670,15 +681,19 @@
     };
 
     Line.prototype.gradients = function(coords) {
-      return $.map(coords, function(c, i) {
+      var c, i, _i, _len, _results;
+      _results = [];
+      for (i = _i = 0, _len = coords.length; _i < _len; i = ++_i) {
+        c = coords[i];
         if (i === 0) {
-          return (coords[1].y - c.y) / (coords[1].x - c.x);
+          _results.push((coords[1].y - c.y) / (coords[1].x - c.x));
         } else if (i === (coords.length - 1)) {
-          return (c.y - coords[i - 1].y) / (c.x - coords[i - 1].x);
+          _results.push((c.y - coords[i - 1].y) / (c.x - coords[i - 1].x));
         } else {
-          return (coords[i + 1].y - coords[i - 1].y) / (coords[i + 1].x - coords[i - 1].x);
+          _results.push((coords[i + 1].y - coords[i - 1].y) / (coords[i + 1].x - coords[i - 1].x));
         }
-      });
+      }
+      return _results;
     };
 
     Line.prototype.drawHover = function() {
@@ -701,7 +716,7 @@
     };
 
     Line.prototype.updateHover = function(index) {
-      var i, maxLabelWidth, row, xloc, y, yloc, _i, _len, _ref;
+      var i, l, maxLabelWidth, row, xloc, y, yloc, _i, _len, _ref;
       this.hoverSet.show();
       row = this.data[index];
       this.xLabel.attr('text', row.label);
@@ -710,9 +725,16 @@
         y = _ref[i];
         this.yLabels[i].attr('text', "" + this.options.labels[i] + ": " + (this.yLabelFormat(y)));
       }
-      maxLabelWidth = Math.max.apply(null, $.map(this.yLabels, function(l) {
-        return l.getBBox().width;
-      }));
+      maxLabelWidth = Math.max.apply(null, (function() {
+        var _j, _len1, _ref1, _results;
+        _ref1 = this.yLabels;
+        _results = [];
+        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+          l = _ref1[_j];
+          _results.push(l.getBBox().width);
+        }
+        return _results;
+      }).call(this));
       maxLabelWidth = Math.max(maxLabelWidth, this.xLabel.getBBox().width);
       this.hover.attr('width', maxLabelWidth + this.options.hoverPaddingX * 2);
       this.hover.attr('x', -this.options.hoverPaddingX - maxLabelWidth / 2);
@@ -1156,7 +1178,7 @@
     };
 
     Bar.prototype.updateHover = function(index) {
-      var i, maxLabelWidth, row, xloc, y, yloc, _i, _len, _ref;
+      var i, l, maxLabelWidth, row, xloc, y, yloc, _i, _len, _ref;
       this.hoverSet.show();
       row = this.data[index];
       this.xLabel.attr('text', row.label);
@@ -1166,9 +1188,16 @@
         this.yLabels[i].attr('fill', this.options.barColors[i % this.options.barColors.length]);
         this.yLabels[i].attr('text', "" + this.options.labels[i] + ": " + (this.yLabelFormat(y)));
       }
-      maxLabelWidth = Math.max.apply(null, $.map(this.yLabels, function(l) {
-        return l.getBBox().width;
-      }));
+      maxLabelWidth = Math.max.apply(null, (function() {
+        var _j, _len1, _ref1, _results;
+        _ref1 = this.yLabels;
+        _results = [];
+        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+          l = _ref1[_j];
+          _results.push(l.getBBox().width);
+        }
+        return _results;
+      }).call(this));
       maxLabelWidth = Math.max(maxLabelWidth, this.xLabel.getBBox().width);
       this.hover.attr('width', maxLabelWidth + this.options.hoverPaddingX * 2);
       this.hover.attr('x', -this.options.hoverPaddingX - maxLabelWidth / 2);
@@ -1232,7 +1261,6 @@
         return;
       }
       this.data = options.data;
-      this.el.addClass('graph-initialised');
       this.redraw();
     }
 

@@ -79,7 +79,7 @@ class Morris.Line extends Morris.Grid
   #
   # @private
   calcHoverMargins: ->
-    @hoverMargins = $.map @data.slice(1), (r, i) => (r._x + @data[i]._x) / 2
+    @hoverMargins = ((r._x + @data[i]._x) / 2 for r, i in @data.slice(1))
 
   # generate paths for series lines
   #
@@ -186,7 +186,7 @@ class Morris.Line extends Morris.Grid
   #
   # @private
   gradients: (coords) ->
-    $.map coords, (c, i) ->
+    for c, i in coords
       if i is 0
         (coords[1].y - c.y) / (coords[1].x - c.x)
       else if i is (coords.length - 1)
@@ -229,8 +229,7 @@ class Morris.Line extends Morris.Grid
     for y, i in row.y
       @yLabels[i].attr('text', "#{@options.labels[i]}: #{@yLabelFormat(y)}")
     # recalculate hover box width
-    maxLabelWidth = Math.max.apply null, $.map @yLabels, (l) ->
-      l.getBBox().width
+    maxLabelWidth = Math.max.apply null, (l.getBBox().width for l in @yLabels)
     maxLabelWidth = Math.max maxLabelWidth, @xLabel.getBBox().width
     @hover.attr 'width', maxLabelWidth + @options.hoverPaddingX * 2
     @hover.attr 'x', -@options.hoverPaddingX - maxLabelWidth / 2

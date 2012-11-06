@@ -159,8 +159,7 @@ class Morris.Bar extends Morris.Grid
       @yLabels[i].attr('fill', @options.barColors[i % @options.barColors.length])
       @yLabels[i].attr('text', "#{@options.labels[i]}: #{@yLabelFormat(y)}")
     # recalculate hover box width
-    maxLabelWidth = Math.max.apply null, $.map @yLabels, (l) ->
-      l.getBBox().width
+    maxLabelWidth = Math.max.apply null, (l.getBBox().width for l in @yLabels)
     maxLabelWidth = Math.max maxLabelWidth, @xLabel.getBBox().width
     @hover.attr 'width', maxLabelWidth + @options.hoverPaddingX * 2
     @hover.attr 'x', -@options.hoverPaddingX - maxLabelWidth / 2
