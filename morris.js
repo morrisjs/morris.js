@@ -44,9 +44,7 @@
 
   Morris.commas = function(num) {
     var absnum, intnum, ret, strabsnum;
-    if (num === null) {
-      return "-";
-    } else {
+    if (num != null) {
       ret = num < 0 ? "-" : "";
       absnum = Math.abs(num);
       intnum = Math.floor(absnum).toFixed(0);
@@ -56,6 +54,8 @@
         ret += strabsnum.slice(intnum.length);
       }
       return ret;
+    } else {
+      return '-';
     }
   };
 
@@ -73,7 +73,7 @@
       } else {
         this.el = $(options.element);
       }
-      if (this.el === null || this.el.length === 0) {
+      if (!(this.el != null) || this.el.length === 0) {
         throw new Error("Graph container element not found");
       }
       this.options = $.extend({}, this.gridDefaults, this.defaults || {}, options);
@@ -124,8 +124,8 @@
       if (this.options.goals.length > 0) {
         minGoal = Math.min.apply(null, this.options.goals);
         maxGoal = Math.max.apply(null, this.options.goals);
-        ymin = ymin === null ? minGoal : Math.min(ymin, minGoal);
-        ymax = ymax === null ? maxGoal : Math.max(ymax, maxGoal);
+        ymin = ymin != null ? Math.min(ymin, minGoal) : minGoal;
+        ymax = ymax != null ? Math.max(ymax, maxGoal) : maxGoal;
       }
       this.data = (function() {
         var _i, _len, _results;
@@ -158,19 +158,19 @@
               if (typeof yval !== 'number') {
                 yval = null;
               }
-              if (yval !== null) {
+              if (yval != null) {
                 if (this.cumulative) {
                   total += yval;
                 } else {
-                  if (ymax === null) {
-                    ymax = ymin = yval;
-                  } else {
+                  if (ymax != null) {
                     ymax = Math.max(yval, ymax);
                     ymin = Math.min(yval, ymin);
+                  } else {
+                    ymax = ymin = yval;
                   }
                 }
               }
-              if (this.cumulative && total !== null) {
+              if (this.cumulative && (total != null)) {
                 ymax = Math.max(total, ymax);
                 ymin = Math.min(total, ymin);
               }
@@ -212,11 +212,11 @@
         if (this.options.ymax.slice(0, 4) === 'auto') {
           if (this.options.ymax.length > 5) {
             this.ymax = parseInt(this.options.ymax.slice(5), 10);
-            if (ymax !== null) {
+            if (ymax != null) {
               this.ymax = Math.max(ymax, this.ymax);
             }
           } else {
-            this.ymax = ymax !== null ? ymax : 0;
+            this.ymax = ymax != null ? ymax : 0;
           }
         } else {
           this.ymax = parseInt(this.options.ymax, 10);
@@ -228,7 +228,7 @@
         if (this.options.ymin.slice(0, 4) === 'auto') {
           if (this.options.ymin.length > 5) {
             this.ymin = parseInt(this.options.ymin.slice(5), 10);
-            if (ymin !== null) {
+            if (ymin != null) {
               this.ymin = Math.min(ymin, this.ymin);
             }
           } else {
@@ -506,10 +506,10 @@
           _results1 = [];
           for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
             y = _ref1[_j];
-            if (y === null) {
-              _results1.push(null);
-            } else {
+            if (y != null) {
               _results1.push(this.transY(y));
+            } else {
+              _results1.push(null);
             }
           }
           return _results1;
@@ -581,7 +581,7 @@
         var label, labelBox;
         label = _this.r.text(_this.transX(xpos), ypos, labelText).attr('font-size', _this.options.gridTextSize).attr('fill', _this.options.gridTextColor);
         labelBox = label.getBBox();
-        if ((prevLabelMargin === null || prevLabelMargin >= labelBox.x + labelBox.width) && labelBox.x >= 0 && (labelBox.x + labelBox.width) < _this.el.width()) {
+        if ((!(prevLabelMargin != null) || prevLabelMargin >= labelBox.x + labelBox.width) && labelBox.x >= 0 && (labelBox.x + labelBox.width) < _this.el.width()) {
           return prevLabelMargin = labelBox.x - xLabelMargin;
         } else {
           return label.remove();
@@ -673,9 +673,15 @@
           }
         }
       } else {
-        path = "M" + $.map(coords, function(c) {
-          return "" + c.x + "," + c.y;
-        }).join("L");
+        path = "M" + ((function() {
+          var _j, _len, _results;
+          _results = [];
+          for (_j = 0, _len = coords.length; _j < _len; _j++) {
+            c = coords[_j];
+            _results.push("" + c.x + "," + c.y);
+          }
+          return _results;
+        })()).join("L");
       }
       return path;
     };
@@ -784,7 +790,7 @@
         this.updateHover(index);
       }
       this.prevHilight = index;
-      if (index === null) {
+      if (!(index != null)) {
         return this.hideHover();
       }
     };
@@ -1069,10 +1075,10 @@
           _results1 = [];
           for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
             y = _ref1[_j];
-            if (y === null) {
-              _results1.push(null);
-            } else {
+            if (y != null) {
               _results1.push(this.transY(y));
+            } else {
+              _results1.push(null);
             }
           }
           return _results1;
@@ -1110,7 +1116,7 @@
         row = this.data[this.data.length - 1 - i];
         label = this.r.text(row._x, ypos, row.label).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor);
         labelBox = label.getBBox();
-        if ((prevLabelMargin === null || prevLabelMargin >= labelBox.x + labelBox.width) && labelBox.x >= 0 && (labelBox.x + labelBox.width) < this.el.width()) {
+        if ((!(prevLabelMargin != null) || prevLabelMargin >= labelBox.x + labelBox.width) && labelBox.x >= 0 && (labelBox.x + labelBox.width) < this.el.width()) {
           _results.push(prevLabelMargin = labelBox.x - xLabelMargin);
         } else {
           _results.push(label.remove());
@@ -1216,7 +1222,7 @@
         this.updateHover(index);
       }
       this.prevHilight = index;
-      if (index === null) {
+      if (!(index != null)) {
         return this.hideHover();
       }
     };

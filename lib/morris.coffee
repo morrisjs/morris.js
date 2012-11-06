@@ -23,9 +23,7 @@ class Morris.EventEmitter
 # @example
 #   Morris.commas(1234567) -> '1,234,567'
 Morris.commas = (num) ->
-  if num is null
-    "-"
-  else
+  if num?
     ret = if num < 0 then "-" else ""
     absnum = Math.abs(num)
     intnum = Math.floor(absnum).toFixed(0)
@@ -34,6 +32,8 @@ Morris.commas = (num) ->
     if strabsnum.length > intnum.length
       ret += strabsnum.slice(intnum.length)
     ret
+  else
+    '-'
 
 # Zero-pad numbers to two characters wide.
 #

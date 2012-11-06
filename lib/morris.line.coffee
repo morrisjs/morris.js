@@ -70,10 +70,7 @@ class Morris.Line extends Morris.Grid
     for row in @data
       row._x = @transX(row.x)
       row._y = for y in row.y
-        if y is null
-          null
-        else
-          @transY(y)
+        if y? then @transY(y) else null
 
   # calculate hover margins
   #
@@ -116,7 +113,7 @@ class Morris.Line extends Morris.Grid
       labelBox = label.getBBox()
       # ensure a minimum of `xLabelMargin` pixels between labels, and ensure
       # labels don't overflow the container
-      if (prevLabelMargin is null or prevLabelMargin >= labelBox.x + labelBox.width) and
+      if (not prevLabelMargin? or prevLabelMargin >= labelBox.x + labelBox.width) and
           labelBox.x >= 0 and (labelBox.x + labelBox.width) < @el.width()
         prevLabelMargin = labelBox.x - xLabelMargin
       else
@@ -179,7 +176,7 @@ class Morris.Line extends Morris.Grid
           y2 = Math.min(@bottom, c.y - ix * g)
           path += "C#{x1},#{y1},#{x2},#{y2},#{c.x},#{c.y}"
     else
-      path = "M" + $.map(coords, (c) -> "#{c.x},#{c.y}").join("L")
+      path = "M" + ("#{c.x},#{c.y}" for c in coords).join("L")
     return path
 
   # calculate a gradient at each point for a series of points
@@ -261,7 +258,7 @@ class Morris.Line extends Morris.Grid
           @seriesPoints[i][index].animate @pointGrow
       @updateHover index
     @prevHilight = index
-    if index is null
+    if not index?
       @hideHover()
 
   # @private

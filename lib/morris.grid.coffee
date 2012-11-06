@@ -9,7 +9,7 @@ class Morris.Grid extends Morris.EventEmitter
       @el = $ document.getElementById(options.element)
     else
       @el = $ options.element
-    if @el is null or @el.length == 0
+    if not @el? or @el.length == 0
       throw new Error("Graph container element not found")
 
     @options = $.extend {}, @gridDefaults, (@defaults || {}), options
@@ -77,8 +77,8 @@ class Morris.Grid extends Morris.EventEmitter
     if @options.goals.length > 0
       minGoal = Math.min.apply(null, @options.goals)
       maxGoal = Math.max.apply(null, @options.goals)
-      ymin = if ymin is null then minGoal else Math.min(ymin, minGoal)
-      ymax = if ymax is null then maxGoal else Math.max(ymax, maxGoal)
+      ymin = if ymin? then Math.min(ymin, minGoal) else minGoal
+      ymax = if ymax? then Math.max(ymax, maxGoal) else maxGoal
 
     @data = for row, index in data
       ret = {}
@@ -96,16 +96,16 @@ class Morris.Grid extends Morris.EventEmitter
         yval = row[ykey]
         yval = parseFloat(yval) if typeof yval is 'string'
         yval = null unless typeof yval is 'number'
-        unless yval is null
+        if yval?
           if @cumulative
             total += yval
           else
-            if ymax is null
-              ymax = ymin = yval
-            else
+            if ymax?
               ymax = Math.max(yval, ymax)
               ymin = Math.min(yval, ymin)
-        if @cumulative and total isnt null
+            else
+              ymax = ymin = yval
+        if @cumulative and total?
           ymax = Math.max(total, ymax)
           ymin = Math.min(total, ymin)
         yval
@@ -134,9 +134,9 @@ class Morris.Grid extends Morris.EventEmitter
         # use Array.concat to flatten arrays and find the max y value
         if @options.ymax.length > 5
           @ymax = parseInt(@options.ymax[5..], 10)
-          @ymax = Math.max(ymax, @ymax) unless ymax is null
+          @ymax = Math.max(ymax, @ymax) if ymax?
         else
-          @ymax = if ymax isnt null then ymax else 0
+          @ymax = if ymax? then ymax else 0
       else
         @ymax = parseInt(@options.ymax, 10)
     else
@@ -145,7 +145,7 @@ class Morris.Grid extends Morris.EventEmitter
       if @options.ymin[0..3] is 'auto'
         if @options.ymin.length > 5
           @ymin = parseInt(@options.ymin[5..], 10)
-          @ymin = Math.min(ymin, @ymin) unless ymin is null
+          @ymin = Math.min(ymin, @ymin) if ymin?
         else
           @ymin = if ymin isnt null then ymin else 0
       else

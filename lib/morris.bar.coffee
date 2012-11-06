@@ -61,7 +61,7 @@ class Morris.Bar extends Morris.Grid
     for row, idx in @data
       row._x = @left + @width * (idx + 0.5) / @data.length
       row._y = for y in row.y
-        if y is null then null else @transY(y)
+        if y? then @transY(y) else null
 
   # calculate hover margins
   #
@@ -94,7 +94,7 @@ class Morris.Bar extends Morris.Grid
       labelBox = label.getBBox()
       # ensure a minimum of `xLabelMargin` pixels between labels, and ensure
       # labels don't overflow the container
-      if (prevLabelMargin is null or prevLabelMargin >= labelBox.x + labelBox.width) and
+      if (not prevLabelMargin? or prevLabelMargin >= labelBox.x + labelBox.width) and
           labelBox.x >= 0 and (labelBox.x + labelBox.width) < @el.width()
         prevLabelMargin = labelBox.x - xLabelMargin
       else
@@ -178,7 +178,7 @@ class Morris.Bar extends Morris.Grid
     if index isnt null and @prevHilight isnt index
       @updateHover index
     @prevHilight = index
-    if index is null
+    if not index?
       @hideHover()
 
   # @private
