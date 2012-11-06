@@ -120,7 +120,7 @@ class Morris.Bar extends Morris.Grid
             bottom = @bottom
           left = @left + idx * groupWidth + leftPadding + sidx * (barWidth + @options.barGap)
           @r.rect(left, top, barWidth, bottom - top)
-            .attr('fill', @options.barColors[sidx % @options.barColors.length])
+            .attr('fill', @colorFor(row, sidx, 'bar'))
             .attr('stroke-width', 0)
         else
           null
@@ -156,7 +156,7 @@ class Morris.Bar extends Morris.Grid
     row = @data[index]
     @xLabel.attr('text', row.label)
     for y, i in row.y
-      @yLabels[i].attr('fill', @options.barColors[i % @options.barColors.length])
+      @yLabels[i].attr('fill', @colorFor(row, i, 'hover'))
       @yLabels[i].attr('text', "#{@options.labels[i]}: #{@yLabelFormat(y)}")
     # recalculate hover box width
     maxLabelWidth = Math.max.apply null, (l.getBBox().width for l in @yLabels)
@@ -187,3 +187,16 @@ class Morris.Bar extends Morris.Grid
     for hoverIndex in [0...@hoverMargins.length]
       break if @hoverMargins[hoverIndex] > x
     @hilight hoverIndex
+
+  # @private
+  #
+  # @param row  [Object] row data
+  # @param sidx [Number] series index
+  # @param type [String] "bar" or "hover"
+  colorFor: (row, sidx, type) ->
+    if typeof @options.barColors is 'function'
+      r = { x: row.x, y: row.y[sidx], label: row.label }
+      s = { index: sidx, key: @options.ykeys[sidx], label: @options.labels[sidx] }
+      @options.barColors.call(@, r, s, type)
+    else
+      @options.barColors[sidx % @options.barColors.length]

@@ -1153,7 +1153,7 @@
                   bottom = this.bottom;
                 }
                 left = this.left + idx * groupWidth + leftPadding + sidx * (barWidth + this.options.barGap);
-                _results1.push(this.r.rect(left, top, barWidth, bottom - top).attr('fill', this.options.barColors[sidx % this.options.barColors.length]).attr('stroke-width', 0));
+                _results1.push(this.r.rect(left, top, barWidth, bottom - top).attr('fill', this.colorFor(row, sidx, 'bar')).attr('stroke-width', 0));
               } else {
                 _results1.push(null);
               }
@@ -1191,7 +1191,7 @@
       _ref = row.y;
       for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
         y = _ref[i];
-        this.yLabels[i].attr('fill', this.options.barColors[i % this.options.barColors.length]);
+        this.yLabels[i].attr('fill', this.colorFor(row, i, 'hover'));
         this.yLabels[i].attr('text', "" + this.options.labels[i] + ": " + (this.yLabelFormat(y)));
       }
       maxLabelWidth = Math.max.apply(null, (function() {
@@ -1236,6 +1236,25 @@
         }
       }
       return this.hilight(hoverIndex);
+    };
+
+    Bar.prototype.colorFor = function(row, sidx, type) {
+      var r, s;
+      if (typeof this.options.barColors === 'function') {
+        r = {
+          x: row.x,
+          y: row.y[sidx],
+          label: row.label
+        };
+        s = {
+          index: sidx,
+          key: this.options.ykeys[sidx],
+          label: this.options.labels[sidx]
+        };
+        return this.options.barColors.call(this, r, s, type);
+      } else {
+        return this.options.barColors[sidx % this.options.barColors.length];
+      }
     };
 
     return Bar;
