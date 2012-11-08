@@ -1,5 +1,31 @@
 describe '#labelSeries', ->
 
+  it 'should generate decade intervals', ->
+    Morris.labelSeries(
+      new Date(1952, 0, 1).getTime(),
+      new Date(2012, 0, 1).getTime(),
+      1000
+    ).should.deep.equal([
+      ["1960", new Date(1960, 0, 1).getTime()],
+      ["1970", new Date(1970, 0, 1).getTime()],
+      ["1980", new Date(1980, 0, 1).getTime()],
+      ["1990", new Date(1990, 0, 1).getTime()],
+      ["2000", new Date(2000, 0, 1).getTime()],
+      ["2010", new Date(2010, 0, 1).getTime()]
+    ])
+    Morris.labelSeries(
+      new Date(1952, 3, 1).getTime(),
+      new Date(2012, 3, 1).getTime(),
+      1000
+    ).should.deep.equal([
+      ["1960", new Date(1960, 0, 1).getTime()],
+      ["1970", new Date(1970, 0, 1).getTime()],
+      ["1980", new Date(1980, 0, 1).getTime()],
+      ["1990", new Date(1990, 0, 1).getTime()],
+      ["2000", new Date(2000, 0, 1).getTime()],
+      ["2010", new Date(2010, 0, 1).getTime()]
+    ])
+
   it 'should generate year intervals', ->
     Morris.labelSeries(
       new Date(2007, 0, 1).getTime(),
