@@ -54,6 +54,7 @@ class Morris.Line extends Morris.Grid
     hideHover: false
     xLabels: 'auto'
     xLabelFormat: null
+    continuousLine: false
 
   # Do any size-related calculations
   #
@@ -84,7 +85,8 @@ class Morris.Line extends Morris.Grid
   generatePaths: ->
     @paths = for i in [0...@options.ykeys.length]
       smooth = @options.smooth is true or @options.ykeys[i] in @options.smooth
-      coords = ({x: r._x, y: r._y[i]} for r in @data when r._y[i] isnt null)
+      coords = ({x: r._x, y: r._y[i]} for r in @data )
+      coords = coords.filter((c)-> c.y != null ) if @options.continuousLine
       if coords.length > 1
         @createPath coords, smooth
       else
@@ -161,10 +163,16 @@ class Morris.Line extends Morris.Grid
     path = ""
     if smooth
       grads = @gradients coords
+      nextPathType = "M"
       for i in [0..coords.length-1]
         c = coords[i]
-        if i is 0
+        if c.y == null
+          nextPathType = "M"
+          continue
+
+        if nextPathType == "M"
           path += "M#{c.x},#{c.y}"
+          nextPathType = "C"
         else
           g = grads[i]
           lc = coords[i - 1]
@@ -183,13 +191,23 @@ class Morris.Line extends Morris.Grid
   #
   # @private
   gradients: (coords) ->
+    coordA = null
+    coordB = null
     for c, i in coords
       if i is 0
-        (coords[1].y - c.y) / (coords[1].x - c.x)
+        coordA = coords[1]
+        coordB = c
       else if i is (coords.length - 1)
-        (c.y - coords[i - 1].y) / (c.x - coords[i - 1].x)
+        coordA = c
+        coordB = coords[i - 1]
       else
-        (coords[i + 1].y - coords[i - 1].y) / (coords[i + 1].x - coords[i - 1].x)
+        coordA = coords[i + 1]
+        coordB = coords[i - 1]
+
+      if coordA.y != null and coordB.y != null and coordA.x != null and coordB.x != null
+        (coordA.y - coordB.y) / (coordA.x - coordB.x)
+      else
+        null
 
   # draw the hover tooltip
   #
