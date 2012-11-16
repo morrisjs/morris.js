@@ -54,6 +54,7 @@ class Morris.Line extends Morris.Grid
     hideHover: false
     xLabels: 'auto'
     xLabelFormat: null
+    hoverLabelFormat: (label, originalData) -> label
 
   # Do any size-related calculations
   #
@@ -222,7 +223,7 @@ class Morris.Line extends Morris.Grid
   updateHover: (index) =>
     @hoverSet.show()
     row = @data[index]
-    @xLabel.attr('text', row.label)
+    @xLabel.attr('text', @options.hoverLabelFormat(row.label, row.originalData))
     for y, i in row.y
       @yLabels[i].attr('text', "#{@options.labels[i]}: #{@yLabelFormat(y)}")
     # recalculate hover box width

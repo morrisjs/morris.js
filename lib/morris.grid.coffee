@@ -83,6 +83,7 @@ class Morris.Grid extends Morris.EventEmitter
     @data = for row, index in data
       ret = {}
       ret.label = row[@options.xkey]
+      ret.originalData = row
       if @options.parseTime
         ret.x = Morris.parseDate(ret.label)
         if @options.dateFormat
