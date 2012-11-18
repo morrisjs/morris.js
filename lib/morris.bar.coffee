@@ -1,29 +1,22 @@
 class Morris.Bar extends Morris.Grid
-  # Initialise the graph.
-  #
+  @include Morris.Hover
+  
+  # override hoverCalculatePosition
+  hoverGetPosition: (index) ->
+    [x, y] = Morris.Hover.hoverGetPosition.call(this, index)
+    
+    [x, (@top + @bottom)/2 - @hoverHeight/2]
+  
   constructor: (options) ->
     return new Morris.Bar(options) unless (@ instanceof Morris.Bar)
     super($.extend {}, options, parseTime: false)
 
-  # setup event handlers
-  #
   init: ->
-    @prevHilight = null
-    @el.mousemove (evt) =>
-      @updateHilight evt.pageX
-    if @options.hideHover
-      @el.mouseout (evt) =>
-        @hilight null
-    touchHandler = (evt) =>
-      touch = evt.originalEvent.touches[0] or evt.originalEvent.changedTouches[0]
-      @updateHilight touch.pageX
-      return touch
-    @el.bind 'touchstart', touchHandler
-    @el.bind 'touchmove', touchHandler
-    @el.bind 'touchend', touchHandler
-
-  # Default configuration
-  #
+    @hoverConfigure @options.hoverOptions
+  
+  postInit: ->
+    @hoverInit()
+    
   defaults:
     barSizeRatio: 0.75
     barGap: 3
@@ -36,23 +29,13 @@ class Morris.Bar extends Morris.Grid
       '#cb4b4b'
       '#9440ed'
     ]
-    hoverPaddingX: 10
-    hoverPaddingY: 5
-    hoverMargin: 10
-    hoverFillColor: '#fff'
-    hoverBorderColor: '#ccc'
-    hoverBorderWidth: 2
-    hoverOpacity: 0.95
-    hoverLabelColor: '#444'
-    hoverFontSize: 12
-    hideHover: false
 
   # Do any size-related calculations
   #
   # @private
   calc: ->
     @calcBars()
-    @calcHoverMargins()
+    @hoverCalculateMargins()
 
   # calculate series data bars coordinates and sizes
   #
@@ -63,21 +46,12 @@ class Morris.Bar extends Morris.Grid
       row._y = for y in row.y
         if y? then @transY(y) else null
 
-  # calculate hover margins
-  #
-  # @private
-  calcHoverMargins: ->
-    @hoverMargins = for i in [1...@data.length]
-      @left + i * @width / @data.length
-
   # Draws the bar chart.
   #
   draw: ->
     @drawXAxis()
     @drawSeries()
-    @drawHover()
-    @hilight(if @options.hideHover then null else @data.length - 1)
-
+    
   # draw the x-axis labels
   #
   # @private
@@ -124,69 +98,6 @@ class Morris.Bar extends Morris.Grid
             .attr('stroke-width', 0)
         else
           null
-
-  # draw the hover tooltip
-  #
-  # @private
-  drawHover: ->
-    # hover labels
-    @hoverHeight = @options.hoverFontSize * 1.5 * (@options.ykeys.length + 1)
-    @hover = @r.rect(-10, -@hoverHeight / 2 - @options.hoverPaddingY, 20, @hoverHeight + @options.hoverPaddingY * 2, 10)
-      .attr('fill', @options.hoverFillColor)
-      .attr('stroke', @options.hoverBorderColor)
-      .attr('stroke-width', @options.hoverBorderWidth)
-      .attr('opacity', @options.hoverOpacity)
-    @xLabel = @r.text(0, (@options.hoverFontSize * 0.75) - @hoverHeight / 2, '')
-      .attr('fill', @options.hoverLabelColor)
-      .attr('font-weight', 'bold')
-      .attr('font-size', @options.hoverFontSize)
-    @hoverSet = @r.set()
-    @hoverSet.push(@hover)
-    @hoverSet.push(@xLabel)
-    @yLabels = []
-    for i in [0...@options.ykeys.length]
-      yLabel = @r.text(0, @options.hoverFontSize * 1.5 * (i + 1.5) - @hoverHeight / 2, '')
-        .attr('font-size', @options.hoverFontSize)
-      @yLabels.push(yLabel)
-      @hoverSet.push(yLabel)
-
-  # @private
-  updateHover: (index) =>
-    @hoverSet.show()
-    row = @data[index]
-    @xLabel.attr('text', row.label)
-    for y, i in row.y
-      @yLabels[i].attr('fill', @colorFor(row, i, 'hover'))
-      @yLabels[i].attr('text', "#{@options.labels[i]}: #{@yLabelFormat(y)}")
-    # recalculate hover box width
-    maxLabelWidth = Math.max.apply null, (l.getBBox().width for l in @yLabels)
-    maxLabelWidth = Math.max maxLabelWidth, @xLabel.getBBox().width
-    @hover.attr 'width', maxLabelWidth + @options.hoverPaddingX * 2
-    @hover.attr 'x', -@options.hoverPaddingX - maxLabelWidth / 2
-    # move to y pos
-    yloc = (@bottom + @top) / 2
-    xloc = Math.min @right - maxLabelWidth / 2 - @options.hoverPaddingX, @data[index]._x
-    xloc = Math.max @left + maxLabelWidth / 2 + @options.hoverPaddingX, xloc
-    @hoverSet.attr 'transform', "t#{xloc},#{yloc}"
-
-  # @private
-  hideHover: ->
-    @hoverSet.hide()
-
-  # @private
-  hilight: (index) =>
-    if index isnt null and @prevHilight isnt index
-      @updateHover index
-    @prevHilight = index
-    if not index?
-      @hideHover()
-
-  # @private
-  updateHilight: (x) =>
-    x -= @el.offset().left
-    for hoverIndex in [0...@hoverMargins.length]
-      break if @hoverMargins[hoverIndex] > x
-    @hilight hoverIndex
 
   # @private
   #
