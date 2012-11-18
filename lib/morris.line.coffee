@@ -1,4 +1,6 @@
 class Morris.Line extends Morris.Grid
+  @include Morris.Hover
+  
   # Initialise the graph.
   #
   constructor: (options) ->
@@ -9,20 +11,27 @@ class Morris.Line extends Morris.Grid
     # Some instance variables for later
     @pointGrow = Raphael.animation r: @options.pointSize + 3, 25, 'linear'
     @pointShrink = Raphael.animation r: @options.pointSize, 25, 'linear'
+    
+    @hoverConfigure @options.hoverOptions
+    
     # column hilight events
-    @prevHilight = null
-    @el.mousemove (evt) =>
-      @updateHilight evt.pageX
-    if @options.hideHover
-      @el.mouseout (evt) =>
-        @hilight null
-    touchHandler = (evt) =>
-      touch = evt.originalEvent.touches[0] or evt.originalEvent.changedTouches[0]
-      @updateHilight touch.pageX
-      return touch
-    @el.bind 'touchstart', touchHandler
-    @el.bind 'touchmove', touchHandler
-    @el.bind 'touchend', touchHandler
+    if @options.hilight
+      @prevHilight = null
+      @el.mousemove (evt) =>
+        @updateHilight evt.pageX
+      if @options.hilightAutoHide
+        @el.mouseout (evt) =>
+          @hilight null
+      touchHandler = (evt) =>
+        touch = evt.originalEvent.touches[0] or evt.originalEvent.changedTouches[0]
+        @updateHilight touch.pageX
+        return touch
+      @el.bind 'touchstart', touchHandler
+      @el.bind 'touchmove', touchHandler
+      @el.bind 'touchend', touchHandler
+
+  postInit: ->
+    @hoverInit()
 
   # Default configuration
   #
@@ -41,17 +50,9 @@ class Morris.Line extends Morris.Grid
     pointWidths: [1]
     pointStrokeColors: ['#ffffff']
     pointFillColors: []
-    hoverPaddingX: 10
-    hoverPaddingY: 5
-    hoverMargin: 10
-    hoverFillColor: '#fff'
-    hoverBorderColor: '#ccc'
-    hoverBorderWidth: 2
-    hoverOpacity: 0.95
-    hoverLabelColor: '#444'
-    hoverFontSize: 12
     smooth: true
-    hideHover: false
+    hilight: true
+    hilightAutoHide: false
     xLabels: 'auto'
     xLabelFormat: null
 
@@ -60,8 +61,9 @@ class Morris.Line extends Morris.Grid
   # @private
   calc: ->
     @calcPoints()
+    @hoverCalculateMargins()
     @generatePaths()
-    @calcHoverMargins()
+    @calcHilightMargins()
 
   # calculate series data point coordinates
   #
@@ -72,10 +74,13 @@ class Morris.Line extends Morris.Grid
       row._y = for y in row.y
         if y? then @transY(y) else null
 
-  # calculate hover margins
+  # calculate hilight margins
   #
   # @private
-  calcHoverMargins: ->
+  calcHilightMargins: ->
+    @hilightMargins = ((r._x + @data[i]._x) / 2 for r, i in @data.slice(1))
+
+  hoverCalculateMargins: ->
     @hoverMargins = ((r._x + @data[i]._x) / 2 for r, i in @data.slice(1))
 
   # generate paths for series lines
@@ -95,8 +100,7 @@ class Morris.Line extends Morris.Grid
   draw: ->
     @drawXAxis()
     @drawSeries()
-    @drawHover()
-    @hilight(if @options.hideHover then null else @data.length - 1)
+    @hilight(if @options.hilightAutoHide then null else @data.length - 1) if @options.hilight
 
   # draw the x-axis labels
   #
@@ -140,7 +144,7 @@ class Morris.Line extends Morris.Grid
       path = @paths[i]
       if path isnt null
         @r.path(path)
-          .attr('stroke', @colorForSeries(i))
+          .attr('stroke', @colorFor(row, i, 'line'))
           .attr('stroke-width', @options.lineWidth)
     @seriesPoints = ([] for i in [0...@options.ykeys.length])
     for i in [@options.ykeys.length-1..0]
@@ -149,7 +153,7 @@ class Morris.Line extends Morris.Grid
           circle = null
         else
           circle = @r.circle(row._x, row._y[i], @options.pointSize)
-            .attr('fill', @pointFillColorForSeries(i) || @colorForSeries(i))
+            .attr('fill', @colorFor(row, i, 'point'))
             .attr('stroke-width', @strokeWidthForSeries(i))
             .attr('stroke', @strokeForSeries(i))
         @seriesPoints[i].push(circle)
@@ -191,61 +195,6 @@ class Morris.Line extends Morris.Grid
       else
         (coords[i + 1].y - coords[i - 1].y) / (coords[i + 1].x - coords[i - 1].x)
 
-  # draw the hover tooltip
-  #
-  # @private
-  drawHover: ->
-    # hover labels
-    @hoverHeight = @options.hoverFontSize * 1.5 * (@options.ykeys.length + 1)
-    @hover = @r.rect(-10, -@hoverHeight / 2 - @options.hoverPaddingY, 20, @hoverHeight + @options.hoverPaddingY * 2, 10)
-      .attr('fill', @options.hoverFillColor)
-      .attr('stroke', @options.hoverBorderColor)
-      .attr('stroke-width', @options.hoverBorderWidth)
-      .attr('opacity', @options.hoverOpacity)
-    @xLabel = @r.text(0, (@options.hoverFontSize * 0.75) - @hoverHeight / 2, '')
-      .attr('fill', @options.hoverLabelColor)
-      .attr('font-weight', 'bold')
-      .attr('font-size', @options.hoverFontSize)
-    @hoverSet = @r.set()
-    @hoverSet.push(@hover)
-    @hoverSet.push(@xLabel)
-    @yLabels = []
-    for i in [0...@options.ykeys.length]
-      idx = if @cumulative then (@options.ykeys.length - i - 1) else i
-      yLabel = @r.text(0, @options.hoverFontSize * 1.5 * (idx + 1.5) - @hoverHeight / 2, '')
-        .attr('fill', @colorForSeries(i))
-        .attr('font-size', @options.hoverFontSize)
-      @yLabels.push(yLabel)
-      @hoverSet.push(yLabel)
-
-  # @private
-  updateHover: (index) =>
-    @hoverSet.show()
-    row = @data[index]
-    @xLabel.attr('text', row.label)
-    for y, i in row.y
-      @yLabels[i].attr('text', "#{@options.labels[i]}: #{@yLabelFormat(y)}")
-    # recalculate hover box width
-    maxLabelWidth = Math.max.apply null, (l.getBBox().width for l in @yLabels)
-    maxLabelWidth = Math.max maxLabelWidth, @xLabel.getBBox().width
-    @hover.attr 'width', maxLabelWidth + @options.hoverPaddingX * 2
-    @hover.attr 'x', -@options.hoverPaddingX - maxLabelWidth / 2
-    # move to y pos
-    yloc = Math.min.apply null, (y for y in row._y when y isnt null).concat(@bottom)
-    if yloc > @hoverHeight + @options.hoverPaddingY * 2 + @options.hoverMargin + @top
-      yloc = yloc - @hoverHeight / 2 - @options.hoverPaddingY - @options.hoverMargin
-    else
-      yloc = yloc + @hoverHeight / 2 + @options.hoverPaddingY + @options.hoverMargin
-    yloc = Math.max @top + @hoverHeight / 2 + @options.hoverPaddingY, yloc
-    yloc = Math.min @bottom - @hoverHeight / 2 - @options.hoverPaddingY, yloc
-    xloc = Math.min @right - maxLabelWidth / 2 - @options.hoverPaddingX, @data[index]._x
-    xloc = Math.max @left + maxLabelWidth / 2 + @options.hoverPaddingX, xloc
-    @hoverSet.attr 'transform', "t#{xloc},#{yloc}"
-
-  # @private
-  hideHover: ->
-    @hoverSet.hide()
-
   # @private
   hilight: (index) =>
     if @prevHilight isnt null and @prevHilight isnt index
@@ -256,21 +205,14 @@ class Morris.Line extends Morris.Grid
       for i in [0..@seriesPoints.length-1]
         if @seriesPoints[i][index]
           @seriesPoints[i][index].animate @pointGrow
-      @updateHover index
     @prevHilight = index
-    if not index?
-      @hideHover()
 
   # @private
   updateHilight: (x) =>
     x -= @el.offset().left
-    for hoverIndex in [0...@hoverMargins.length]
-      break if @hoverMargins[hoverIndex] > x
-    @hilight hoverIndex
-
-  # @private
-  colorForSeries: (index) ->
-    @options.lineColors[index % @options.lineColors.length]
+    for hilightIndex in [0...@hilightMargins.length]
+      break if @hilightMargins[hilightIndex] > x
+    @hilight hilightIndex
 
   # @private
   strokeWidthForSeries: (index) ->
@@ -280,89 +222,10 @@ class Morris.Line extends Morris.Grid
   strokeForSeries: (index) ->
     @options.pointStrokeColors[index % @options.pointStrokeColors.length]
 
-  # @private
-  pointFillColorForSeries: (index) ->
-    @options.pointFillColors[index % @options.pointFillColors.length]
-
-
-# generate a series of label, timestamp pairs for x-axis labels
-#
-# @private
-Morris.labelSeries = (dmin, dmax, pxwidth, specName, xLabelFormat) ->
-  ddensity = 200 * (dmax - dmin) / pxwidth # seconds per `margin` pixels
-  d0 = new Date(dmin)
-  spec = Morris.LABEL_SPECS[specName]
-  # if the spec doesn't exist, search for the closest one in the list
-  if spec is undefined
-    for name in Morris.AUTO_LABEL_ORDER
-      s = Morris.LABEL_SPECS[name]
-      if ddensity >= s.span
-        spec = s
-        break
-  # if we run out of options, use second-intervals
-  if spec is undefined
-    spec = Morris.LABEL_SPECS["second"]
-  # check if there's a user-defined formatting function
-  if xLabelFormat
-    spec = $.extend({}, spec, {fmt: xLabelFormat})
-  # calculate labels
-  d = spec.start(d0)
-  ret = []
-  while  (t = d.getTime()) <= dmax
-    if t >= dmin
-      ret.push [spec.fmt(d), t]
-    spec.incr(d)
-  return ret
-
-# @private
-minutesSpecHelper = (interval) ->
-  span: interval * 60 * 1000
-  start: (d) -> new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours())
-  fmt: (d) -> "#{Morris.pad2(d.getHours())}:#{Morris.pad2(d.getMinutes())}"
-  incr: (d) -> d.setMinutes(d.getMinutes() + interval)
-
-# @private
-secondsSpecHelper = (interval) ->
-  span: interval * 1000
-  start: (d) -> new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes())
-  fmt: (d) -> "#{Morris.pad2(d.getHours())}:#{Morris.pad2(d.getMinutes())}:#{Morris.pad2(d.getSeconds())}"
-  incr: (d) -> d.setSeconds(d.getSeconds() + interval)
-
-Morris.LABEL_SPECS =
-  "decade":
-    span: 172800000000 # 10 * 365 * 24 * 60 * 60 * 1000
-    start: (d) -> new Date(d.getFullYear() - d.getFullYear() % 10, 0, 1)
-    fmt: (d) -> "#{d.getFullYear()}"
-    incr: (d) -> d.setFullYear(d.getFullYear() + 10)
-  "year":
-    span: 17280000000 # 365 * 24 * 60 * 60 * 1000
-    start: (d) -> new Date(d.getFullYear(), 0, 1)
-    fmt: (d) -> "#{d.getFullYear()}"
-    incr: (d) -> d.setFullYear(d.getFullYear() + 1)
-  "month":
-    span: 2419200000 # 28 * 24 * 60 * 60 * 1000
-    start: (d) -> new Date(d.getFullYear(), d.getMonth(), 1)
-    fmt: (d) -> "#{d.getFullYear()}-#{Morris.pad2(d.getMonth() + 1)}"
-    incr: (d) -> d.setMonth(d.getMonth() + 1)
-  "day":
-    span: 86400000 # 24 * 60 * 60 * 1000
-    start: (d) -> new Date(d.getFullYear(), d.getMonth(), d.getDate())
-    fmt: (d) -> "#{d.getFullYear()}-#{Morris.pad2(d.getMonth() + 1)}-#{Morris.pad2(d.getDate())}"
-    incr: (d) -> d.setDate(d.getDate() + 1)
-  "hour": minutesSpecHelper(60)
-  "30min": minutesSpecHelper(30)
-  "15min": minutesSpecHelper(15)
-  "10min": minutesSpecHelper(10)
-  "5min": minutesSpecHelper(5)
-  "minute": minutesSpecHelper(1)
-  "30sec": secondsSpecHelper(30)
-  "15sec": secondsSpecHelper(15)
-  "10sec": secondsSpecHelper(10)
-  "5sec": secondsSpecHelper(5)
-  "second": secondsSpecHelper(1)
-
-Morris.AUTO_LABEL_ORDER = [
-  "decade", "year", "month", "day", "hour",
-  "30min", "15min", "10min", "5min", "minute",
-  "30sec", "15sec", "10sec", "5sec", "second"
-]
+  colorFor: (row, sidx, type) ->
+    if typeof @options.lineColors is 'function'
+      @options.lineColors.call(@, row, sidx, type)
+    else if type is 'point'
+      @options.pointFillColors[sidx % @options.pointFillColors.length] || @options.lineColors[sidx % @options.lineColors.length]
+    else
+      @options.lineColors[sidx % @options.lineColors.length]
