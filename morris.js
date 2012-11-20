@@ -1033,6 +1033,7 @@
     Bar.prototype.init = function() {
       var touchHandler,
         _this = this;
+      this.cumulative = this.options.stacked;
       this.prevHilight = null;
       this.el.mousemove(function(evt) {
         return _this.updateHilight(evt.pageX);
@@ -1138,9 +1139,9 @@
     };
 
     Bar.prototype.drawSeries = function() {
-      var barWidth, bottom, groupWidth, idx, left, leftPadding, numBars, row, sidx, top, ypos, zeroPos;
+      var barWidth, bottom, groupWidth, idx, lastTop, left, leftPadding, numBars, row, sidx, size, top, ypos, zeroPos;
       groupWidth = this.width / this.options.data.length;
-      numBars = this.options.ykeys.length;
+      numBars = this.options.stacked != null ? 1 : this.options.ykeys.length;
       barWidth = (groupWidth * this.options.barSizeRatio - this.options.barGap * (numBars - 1)) / numBars;
       leftPadding = groupWidth * (1 - this.options.barSizeRatio) / 2;
       zeroPos = this.ymin <= 0 && this.ymax >= 0 ? this.transY(0) : null;
@@ -1150,6 +1151,7 @@
         _results = [];
         for (idx = _i = 0, _len = _ref.length; _i < _len; idx = ++_i) {
           row = _ref[idx];
+          lastTop = 0;
           _results.push((function() {
             var _j, _len1, _ref1, _results1;
             _ref1 = row._y;
@@ -1164,8 +1166,16 @@
                   top = ypos;
                   bottom = this.bottom;
                 }
-                left = this.left + idx * groupWidth + leftPadding + sidx * (barWidth + this.options.barGap);
-                _results1.push(this.r.rect(left, top, barWidth, bottom - top).attr('fill', this.colorFor(row, sidx, 'bar')).attr('stroke-width', 0));
+                left = this.left + idx * groupWidth + leftPadding;
+                if (!this.options.stacked) {
+                  left += sidx * (barWidth + this.options.barGap);
+                }
+                size = bottom - top;
+                if (this.options.stacked) {
+                  top -= lastTop;
+                }
+                this.r.rect(left, top, barWidth, size).attr('fill', this.colorFor(row, sidx, 'bar')).attr('stroke-width', 0);
+                _results1.push(lastTop += size);
               } else {
                 _results1.push(null);
               }
