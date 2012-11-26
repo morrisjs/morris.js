@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="lib/prettify.css">
 </head>
 <body>
-<h1>Bar charts</h1>
+<h1>Stacked Bars chart</h1>
 <div id="graph"></div>
 <pre id="code" class="prettyprint linenums">
 // Use Morris.Bar
@@ -23,7 +23,8 @@ Morris.Bar({
   ],
   xkey: 'x',
   ykeys: ['y', 'z', 'a'],
-  labels: ['Y', 'Z', 'A']
+  labels: ['Y', 'Z', 'A'],
+  stacked: true
 });
 </pre>
 </body>
