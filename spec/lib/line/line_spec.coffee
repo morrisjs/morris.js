@@ -69,13 +69,79 @@ describe 'Morris.Line', ->
       chart.data.map((x) -> x.label).should == ['2012/1/1', '2012/1/2']
 
   describe '#generatePaths', ->
-    it 'should generate smooth lines when options.smooth is true'
-    it 'should generate jagged lines when options.smooth is false'
-    it 'should generate smooth/jagged lines according to the value for each series when options.smooth is an array'
-    it 'should filter undefined values from series'
-    it 'should filter null values from series only when options.continuousLine is true'
+    TestDefaults = {}
+    beforeEach ->
+      TestDefaults = {element: 'graph', xkey: 'x', ykeys: ['y'], labels: ['dontcare']}
+
+    it 'should generate smooth lines when options.smooth is true', ->
+      testData = [{x: 1, y: 1}, {x: 3, y: 1 }]
+      chart = Morris.Line(TestDefaults extends {data: testData, continuousLine: true})
+      path = chart.generatePaths()[0]
+      path.match(/[A-Z]/g).should.deep.equal ['M', 'C']
+
+    it 'should generate jagged, continuous lines when options.smooth is false and options.continuousLine is true', ->
+      testData = [{x: 1, y: 1}, {x: 2, y: null }, {x: 3, y: 1}]
+      chart = Morris.Line(TestDefaults extends {data: testData, smooth: false, continuousLine: true})
+      path = chart.generatePaths()[0]
+      path.match(/[A-Z]/g).should.deep.equal ['M', 'L']
+
+    it 'should generate jagged, discontinuous lines when options.smooth is false and options.continuousLine is false', ->
+      testData = [{x: 1, y: 1}, {x: 2, y: null }, {x: 3, y: 1}, {x: 4, y: 1}]
+      chart = Morris.Line(TestDefaults extends {data: testData, smooth: false, continuousLine: false})
+      path = chart.generatePaths()[0]
+      path.match(/[A-Z]/g).should.deep.equal ['M', 'M', 'L']
+
+    it 'should generate smooth/jagged lines according to the value for each series when options.smooth is an array', ->
+      testData = [{x: 1, a: 1, b: 1}, {x: 3, a: 1, b: 1}]
+      chart = Morris.Line(TestDefaults extends {data: testData, smooth: ['a'], ykeys: ['a', 'b']})
+      pathA = chart.generatePaths()[0]
+      pathA.match(/[A-Z]/g).should.deep.equal ['M', 'C']
+
+      pathB = chart.generatePaths()[1]
+      pathB.match(/[A-Z]/g).should.deep.equal ['M', 'L']
+
+    #skipping because undefined values are converted to nulls in the setData method morris.grid line#98
+    it.skip 'should filter undefined values from series', ->
+      testData = [{x: 1, y: 1}, {x: 2, y: undefined}, {x: 3, y: 1}]
+      options =
+        data: testData
+        continuousLine: false #doesn't matter for undefined values
+
+      chart = Morris.Line(TestDefaults extends options)
+      path = chart.generatePaths()[0]
+      path.match(/[A-Z]/g).should.deep.equal ['M', 'C']
+
+    it 'should filter null values from series only when options.continuousLine is true', ->
+      testData = [{x: 1, y: 1}, {x: 2, y: null}, {x: 3, y: 1}]
+      chart = Morris.Line(TestDefaults extends {data: testData, continuousLine: true})
+      path = chart.generatePaths()[0]
+      path.match(/[A-Z]/g).should.deep.equal ['M', 'C']
+
+    it 'should not filter null values from series when options.continuousLine is false', ->
+      testData = [{x: 1, y: 1}, {x: 2, y: null}, {x: 3, y: 1}, {x: 4, y: 1}]
+      chart = Morris.Line(TestDefaults extends {data: testData, continuousLine: false})
+      path = chart.generatePaths()[0]
+      path.match(/[A-Z]/g).should.deep.equal ['M', 'M', 'C']
 
   describe '#createPath', ->
-    it 'should generate a smooth line'
-    it 'should generate a jagged line'
-    it 'should break the line at null values'
+    TestDefaults = {}
+    beforeEach ->
+      TestDefaults = {element: 'graph', xkey: 'x', ykeys: ['y'], labels: ['dontcare']}
+
+    it 'should generate a smooth line', ->
+      testData = [{x: 1, y: 1}, {x: 3, y: 1}]
+      chart = Morris.Line(TestDefaults extends {data: testData})
+      path = chart.createPath(testData, true)
+      path.match(/[A-Z]/g).should.deep.equal ['M', 'C']
+
+    it 'should generate a jagged line', ->
+      testData = [{x: 1, y: 1}, {x: 3, y: 1}]
+      chart = Morris.Line(TestDefaults extends {data: testData})
+      path = chart.createPath(testData, false)
+      path.match(/[A-Z]/g).should.deep.equal ['M', 'L']
+
+    it 'should break the line at null values', ->
+      testData = [{x: 1, y: 1}, {x: 2, y: null}, {x: 3, y: 1}, {x: 4, y: 1}]
+      chart = Morris.Line(TestDefaults extends {data: testData})
+      path = chart.createPath(testData, true)
+      path.match(/[A-Z]/g).should.deep.equal ['M', 'M', 'C']

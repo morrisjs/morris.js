@@ -54,7 +54,7 @@ class Morris.Line extends Morris.Grid
     hideHover: false
     xLabels: 'auto'
     xLabelFormat: null
-    continuousLine: false
+    continuousLine: true
 
   # Do any size-related calculations
   #
@@ -86,7 +86,8 @@ class Morris.Line extends Morris.Grid
     @paths = for i in [0...@options.ykeys.length]
       smooth = @options.smooth is true or @options.ykeys[i] in @options.smooth
       coords = ({x: r._x, y: r._y[i]} for r in @data )
-      coords = coords.filter((c)-> c.y != null ) if @options.continuousLine
+      coords = (c for c in coords when c.y != null) if @options.continuousLine
+
       if coords.length > 1
         @createPath coords, smooth
       else
@@ -161,19 +162,20 @@ class Morris.Line extends Morris.Grid
   # @private
   createPath: (coords, smooth) ->
     path = ""
-    if smooth
-      grads = @gradients coords
-      nextPathType = "M"
-      for i in [0..coords.length-1]
-        c = coords[i]
-        if c.y == null
-          nextPathType = "M"
-          continue
+    grads = @gradients coords if smooth
 
-        if nextPathType == "M"
-          path += "M#{c.x},#{c.y}"
-          nextPathType = "C"
-        else
+    nextPathType = "M"
+    for i in [0..coords.length-1]
+      c = coords[i]
+      if c.y == null
+        nextPathType = "M"
+        continue
+
+      if nextPathType == "M"
+        path += "M#{c.x},#{c.y}"
+        nextPathType = "CorL"
+      else
+        if smooth
           g = grads[i]
           lc = coords[i - 1]
           lg = grads[i - 1]
@@ -183,8 +185,8 @@ class Morris.Line extends Morris.Grid
           x2 = c.x - ix
           y2 = Math.min(@bottom, c.y - ix * g)
           path += "C#{x1},#{y1},#{x2},#{y2},#{c.x},#{c.y}"
-    else
-      path = "M" + ("#{c.x},#{c.y}" for c in coords).join("L")
+        else
+          path += "L#{c.x},#{c.y}"
     return path
 
   # calculate a gradient at each point for a series of points
