@@ -54,7 +54,7 @@ class Morris.Line extends Morris.Grid
     hideHover: false
     xLabels: 'auto'
     xLabelFormat: null
-    continuousLine: false
+    continuousLine: true
 
   # Do any size-related calculations
   #
