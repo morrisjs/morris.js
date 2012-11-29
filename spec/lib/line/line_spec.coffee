@@ -67,3 +67,15 @@ describe 'Morris.Line', ->
           x = new Date(d)
           "#{x.getYear()}/#{x.getMonth()+1}/#{x.getDay()}"
       chart.data.map((x) -> x.label).should == ['2012/1/1', '2012/1/2']
+
+  describe '#generatePaths', ->
+    it 'should generate smooth lines when options.smooth is true'
+    it 'should generate jagged lines when options.smooth is false'
+    it 'should generate smooth/jagged lines according to the value for each series when options.smooth is an array'
+    it 'should filter undefined values from series'
+    it 'should filter null values from series only when options.continuousLine is true'
+
+  describe '#createPath', ->
+    it 'should generate a smooth line'
+    it 'should generate a jagged line'
+    it 'should break the line at null values'
