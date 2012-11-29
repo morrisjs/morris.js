@@ -86,7 +86,8 @@ class Morris.Line extends Morris.Grid
     @paths = for i in [0...@options.ykeys.length]
       smooth = @options.smooth is true or @options.ykeys[i] in @options.smooth
       coords = ({x: r._x, y: r._y[i]} for r in @data )
-      coords = coords.filter((c)-> c.y != null ) if @options.continuousLine
+      coords = (c for c in coords when c.y != null) if @options.continuousLine
+
       if coords.length > 1
         @createPath coords, smooth
       else
