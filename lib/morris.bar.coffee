@@ -8,6 +8,7 @@ class Morris.Bar extends Morris.Grid
   # setup event handlers
   #
   init: ->
+    @cumulative = @options.stacked
     @prevHilight = null
     @el.mousemove (evt) =>
       @updateHilight evt.pageX
@@ -105,11 +106,12 @@ class Morris.Bar extends Morris.Grid
   # @private
   drawSeries: ->
     groupWidth = @width / @options.data.length
-    numBars = @options.ykeys.length
+    numBars = if @options.stacked? then 1 else @options.ykeys.length
     barWidth = (groupWidth * @options.barSizeRatio - @options.barGap * (numBars - 1)) / numBars
     leftPadding = groupWidth * (1 - @options.barSizeRatio) / 2
     zeroPos = if @ymin <= 0 and @ymax >= 0 then @transY(0) else null
     @bars = for row, idx in @data
+      lastTop = 0
       for ypos, sidx in row._y
         if ypos != null
           if zeroPos
@@ -118,10 +120,17 @@ class Morris.Bar extends Morris.Grid
           else
             top = ypos
             bottom = @bottom
-          left = @left + idx * groupWidth + leftPadding + sidx * (barWidth + @options.barGap)
-          @r.rect(left, top, barWidth, bottom - top)
+
+          left = @left + idx * groupWidth + leftPadding
+          left += sidx * (barWidth + @options.barGap) unless @options.stacked
+          size = bottom - top
+
+          top -= lastTop if @options.stacked
+          @r.rect(left, top, barWidth, size)
             .attr('fill', @colorFor(row, sidx, 'bar'))
             .attr('stroke-width', 0)
+
+          lastTop += size
         else
           null
 
