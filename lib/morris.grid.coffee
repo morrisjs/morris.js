@@ -35,6 +35,8 @@ class Morris.Grid extends Morris.EventEmitter
 
     # load data
     @setData @options.data
+    
+    @postInit() if @postInit
 
   # Default options
   #

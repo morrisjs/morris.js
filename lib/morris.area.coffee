@@ -31,7 +31,7 @@ class Morris.Area extends Morris.Line
     super()
 
   fillForSeries: (i) ->
-    color = Raphael.rgb2hsl @colorForSeries(i)
+    color = Raphael.rgb2hsl @colorFor(@data[i], i, 'line')
     Raphael.hsl(
       color.h,
       Math.min(255, color.s * 0.75),
