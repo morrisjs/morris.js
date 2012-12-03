@@ -55,6 +55,7 @@ class Morris.Line extends Morris.Grid
     hilightAutoHide: false
     xLabels: 'auto'
     xLabelFormat: null
+    continuousLine: true
 
   # Do any size-related calculations
   #
@@ -72,7 +73,7 @@ class Morris.Line extends Morris.Grid
     for row in @data
       row._x = @transX(row.x)
       row._y = for y in row.y
-        if y? then @transY(y) else null
+        if y? then @transY(y) else y
 
   # calculate hilight margins
   #
@@ -89,9 +90,11 @@ class Morris.Line extends Morris.Grid
   generatePaths: ->
     @paths = for i in [0...@options.ykeys.length]
       smooth = @options.smooth is true or @options.ykeys[i] in @options.smooth
-      coords = ({x: r._x, y: r._y[i]} for r in @data when r._y[i] isnt null)
+      coords = ({x: r._x, y: r._y[i]} for r in @data when r._y[i] isnt undefined)
+      coords = (c for c in coords when c.y isnt null) if @options.continuousLine
+
       if coords.length > 1
-        @createPath coords, smooth
+        Morris.Line.createPath coords, smooth, @bottom
       else
         null
 
@@ -161,39 +164,50 @@ class Morris.Line extends Morris.Grid
   # create a path for a data series
   #
   # @private
-  createPath: (coords, smooth) ->
+  @createPath: (coords, smooth, bottom) ->
     path = ""
-    if smooth
-      grads = @gradients coords
-      for i in [0..coords.length-1]
-        c = coords[i]
-        if i is 0
-          path += "M#{c.x},#{c.y}"
+    grads = Morris.Line.gradients(coords) if smooth
+
+    prevCoord = {y: null}
+    for coord, i in coords
+      if coord.y?
+        if prevCoord.y?
+          if smooth
+            g = grads[i]
+            lg = grads[i - 1]
+            ix = (coord.x - prevCoord.x) / 4
+            x1 = prevCoord.x + ix
+            y1 = Math.max(bottom, prevCoord.y + ix * lg)
+            x2 = coord.x - ix
+            y2 = Math.max(bottom, coord.y - ix * g)
+            path += "C#{x1},#{y1},#{x2},#{y2},#{coord.x},#{coord.y}"
+          else
+            path += "L#{coord.x},#{coord.y}"
         else
-          g = grads[i]
-          lc = coords[i - 1]
-          lg = grads[i - 1]
-          ix = (c.x - lc.x) / 4
-          x1 = lc.x + ix
-          y1 = Math.min(@bottom, lc.y + ix * lg)
-          x2 = c.x - ix
-          y2 = Math.min(@bottom, c.y - ix * g)
-          path += "C#{x1},#{y1},#{x2},#{y2},#{c.x},#{c.y}"
-    else
-      path = "M" + ("#{c.x},#{c.y}" for c in coords).join("L")
+          if not smooth or grads[i]?
+            path += "M#{coord.x},#{coord.y}"
+      prevCoord = coord
     return path
 
   # calculate a gradient at each point for a series of points
   #
   # @private
-  gradients: (coords) ->
-    for c, i in coords
-      if i is 0
-        (coords[1].y - c.y) / (coords[1].x - c.x)
-      else if i is (coords.length - 1)
-        (c.y - coords[i - 1].y) / (c.x - coords[i - 1].x)
+  @gradients: (coords) ->
+    grad = (a, b) -> (a.y - b.y) / (a.x - b.x)
+    for coord, i in coords
+      if coord.y?
+        nextCoord = coords[i + 1] or {y: null}
+        prevCoord = coords[i - 1] or {y: null}
+        if prevCoord.y? and nextCoord.y?
+          grad(prevCoord, nextCoord)
+        else if prevCoord.y?
+          grad(prevCoord, coord)
+        else if nextCoord.y?
+          grad(coord, nextCoord)
+        else
+          null
       else
-        (coords[i + 1].y - coords[i - 1].y) / (coords[i + 1].x - coords[i - 1].x)
+        null
 
   # @private
   hilight: (index) =>

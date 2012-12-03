@@ -97,7 +97,7 @@ class Morris.Grid extends Morris.EventEmitter
       ret.y = for ykey, idx in @options.ykeys
         yval = row[ykey]
         yval = parseFloat(yval) if typeof yval is 'string'
-        yval = null unless typeof yval is 'number'
+        yval = null if yval? and typeof yval isnt 'number'
         if yval?
           if @cumulative
             total += yval
