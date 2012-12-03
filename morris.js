@@ -155,7 +155,7 @@
               if (typeof yval === 'string') {
                 yval = parseFloat(yval);
               }
-              if (typeof yval !== 'number') {
+              if ((yval != null) && typeof yval !== 'number') {
                 yval = null;
               }
               if (yval != null) {
@@ -484,7 +484,8 @@
       smooth: true,
       hideHover: false,
       xLabels: 'auto',
-      xLabelFormat: null
+      xLabelFormat: null,
+      continuousLine: true
     };
 
     Line.prototype.calc = function() {
@@ -509,7 +510,7 @@
             if (y != null) {
               _results1.push(this.transY(y));
             } else {
-              _results1.push(null);
+              _results1.push(y);
             }
           }
           return _results1;
@@ -533,7 +534,7 @@
     };
 
     Line.prototype.generatePaths = function() {
-      var coords, i, r, smooth;
+      var c, coords, i, r, smooth;
       return this.paths = (function() {
         var _i, _ref, _ref1, _results;
         _results = [];
@@ -545,7 +546,7 @@
             _results1 = [];
             for (_j = 0, _len = _ref2.length; _j < _len; _j++) {
               r = _ref2[_j];
-              if (r._y[i] !== null) {
+              if (r._y[i] !== void 0) {
                 _results1.push({
                   x: r._x,
                   y: r._y[i]
@@ -554,8 +555,21 @@
             }
             return _results1;
           }).call(this);
+          if (this.options.continuousLine) {
+            coords = (function() {
+              var _j, _len, _results1;
+              _results1 = [];
+              for (_j = 0, _len = coords.length; _j < _len; _j++) {
+                c = coords[_j];
+                if (c.y !== null) {
+                  _results1.push(c);
+                }
+              }
+              return _results1;
+            })();
+          }
           if (coords.length > 1) {
-            _results.push(this.createPath(coords, smooth));
+            _results.push(Morris.Line.createPath(coords, smooth, this.bottom));
           } else {
             _results.push(null);
           }
@@ -651,52 +665,68 @@
       return _results;
     };
 
-    Line.prototype.createPath = function(coords, smooth) {
-      var c, g, grads, i, ix, lc, lg, path, x1, x2, y1, y2, _i, _ref;
+    Line.createPath = function(coords, smooth, bottom) {
+      var coord, g, grads, i, ix, lg, path, prevCoord, x1, x2, y1, y2, _i, _len;
       path = "";
       if (smooth) {
-        grads = this.gradients(coords);
-        for (i = _i = 0, _ref = coords.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
-          c = coords[i];
-          if (i === 0) {
-            path += "M" + c.x + "," + c.y;
+        grads = Morris.Line.gradients(coords);
+      }
+      prevCoord = {
+        y: null
+      };
+      for (i = _i = 0, _len = coords.length; _i < _len; i = ++_i) {
+        coord = coords[i];
+        if (coord.y != null) {
+          if (prevCoord.y != null) {
+            if (smooth) {
+              g = grads[i];
+              lg = grads[i - 1];
+              ix = (coord.x - prevCoord.x) / 4;
+              x1 = prevCoord.x + ix;
+              y1 = Math.max(bottom, prevCoord.y + ix * lg);
+              x2 = coord.x - ix;
+              y2 = Math.max(bottom, coord.y - ix * g);
+              path += "C" + x1 + "," + y1 + "," + x2 + "," + y2 + "," + coord.x + "," + coord.y;
+            } else {
+              path += "L" + coord.x + "," + coord.y;
+            }
           } else {
-            g = grads[i];
-            lc = coords[i - 1];
-            lg = grads[i - 1];
-            ix = (c.x - lc.x) / 4;
-            x1 = lc.x + ix;
-            y1 = Math.min(this.bottom, lc.y + ix * lg);
-            x2 = c.x - ix;
-            y2 = Math.min(this.bottom, c.y - ix * g);
-            path += "C" + x1 + "," + y1 + "," + x2 + "," + y2 + "," + c.x + "," + c.y;
+            if (!smooth || (grads[i] != null)) {
+              path += "M" + coord.x + "," + coord.y;
+            }
           }
         }
-      } else {
-        path = "M" + ((function() {
-          var _j, _len, _results;
-          _results = [];
-          for (_j = 0, _len = coords.length; _j < _len; _j++) {
-            c = coords[_j];
-            _results.push("" + c.x + "," + c.y);
-          }
-          return _results;
-        })()).join("L");
+        prevCoord = coord;
       }
       return path;
     };
 
-    Line.prototype.gradients = function(coords) {
-      var c, i, _i, _len, _results;
+    Line.gradients = function(coords) {
+      var coord, grad, i, nextCoord, prevCoord, _i, _len, _results;
+      grad = function(a, b) {
+        return (a.y - b.y) / (a.x - b.x);
+      };
       _results = [];
       for (i = _i = 0, _len = coords.length; _i < _len; i = ++_i) {
-        c = coords[i];
-        if (i === 0) {
-          _results.push((coords[1].y - c.y) / (coords[1].x - c.x));
-        } else if (i === (coords.length - 1)) {
-          _results.push((c.y - coords[i - 1].y) / (c.x - coords[i - 1].x));
+        coord = coords[i];
+        if (coord.y != null) {
+          nextCoord = coords[i + 1] || {
+            y: null
+          };
+          prevCoord = coords[i - 1] || {
+            y: null
+          };
+          if ((prevCoord.y != null) && (nextCoord.y != null)) {
+            _results.push(grad(prevCoord, nextCoord));
+          } else if (prevCoord.y != null) {
+            _results.push(grad(prevCoord, coord));
+          } else if (nextCoord.y != null) {
+            _results.push(grad(coord, nextCoord));
+          } else {
+            _results.push(null);
+          }
         } else {
-          _results.push((coords[i + 1].y - coords[i - 1].y) / (coords[i + 1].x - coords[i - 1].x));
+          _results.push(null);
         }
       }
       return _results;
