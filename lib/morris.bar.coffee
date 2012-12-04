@@ -118,4 +118,3 @@ class Morris.Bar extends Morris.Grid
   hoverGetPosition: (index) ->
     [x, y] = super(index)
     [x, (@top + @bottom)/2 - @hoverHeight/2]
-

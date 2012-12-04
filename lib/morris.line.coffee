@@ -150,13 +150,13 @@ class Morris.Line extends Morris.Grid
     @seriesPoints = ([] for i in [0...@options.ykeys.length])
     for i in [@options.ykeys.length-1..0]
       for row in @data
-        if row._y[i] == null
-          circle = null
-        else
+        if row._y[i]?
           circle = @r.circle(row._x, row._y[i], @options.pointSize)
             .attr('fill', @colorFor(row, i, 'point'))
             .attr('stroke-width', @strokeWidthForSeries(i))
             .attr('stroke', @strokeForSeries(i))
+        else
+          circle = null
         @seriesPoints[i].push(circle)
 
   # create a path for a data series
@@ -175,9 +175,9 @@ class Morris.Line extends Morris.Grid
             lg = grads[i - 1]
             ix = (coord.x - prevCoord.x) / 4
             x1 = prevCoord.x + ix
-            y1 = Math.max(bottom, prevCoord.y + ix * lg)
+            y1 = Math.min(bottom, prevCoord.y + ix * lg)
             x2 = coord.x - ix
-            y2 = Math.max(bottom, coord.y - ix * g)
+            y2 = Math.min(bottom, coord.y - ix * g)
             path += "C#{x1},#{y1},#{x2},#{y2},#{coord.x},#{coord.y}"
           else
             path += "L#{coord.x},#{coord.y}"

@@ -879,10 +879,10 @@
           _results1 = [];
           for (_k = 0, _len = _ref2.length; _k < _len; _k++) {
             row = _ref2[_k];
-            if (row._y[i] === null) {
-              circle = null;
-            } else {
+            if (row._y[i] != null) {
               circle = this.r.circle(row._x, row._y[i], this.options.pointSize).attr('fill', this.colorFor(row, i, 'point')).attr('stroke-width', this.strokeWidthForSeries(i)).attr('stroke', this.strokeForSeries(i));
+            } else {
+              circle = null;
             }
             _results1.push(this.seriesPoints[i].push(circle));
           }
@@ -910,9 +910,9 @@
               lg = grads[i - 1];
               ix = (coord.x - prevCoord.x) / 4;
               x1 = prevCoord.x + ix;
-              y1 = Math.max(bottom, prevCoord.y + ix * lg);
+              y1 = Math.min(bottom, prevCoord.y + ix * lg);
               x2 = coord.x - ix;
-              y2 = Math.max(bottom, coord.y - ix * g);
+              y2 = Math.min(bottom, coord.y - ix * g);
               path += "C" + x1 + "," + y1 + "," + x2 + "," + y2 + "," + coord.x + "," + coord.y;
             } else {
               path += "L" + coord.x + "," + coord.y;
