@@ -62,7 +62,7 @@ class Morris.Bar extends Morris.Grid
     for row, idx in @data
       row._x = @left + @width * (idx + 0.5) / @data.length
       row._y = for y in row.y
-        if y? then @transY(y) else null
+        if y? then @transY(y.value) else null
 
   # calculate hover margins
   #
@@ -166,7 +166,8 @@ class Morris.Bar extends Morris.Grid
     @xLabel.attr('text', row.label)
     for y, i in row.y
       @yLabels[i].attr('fill', @colorFor(row, i, 'hover'))
-      @yLabels[i].attr('text', "#{@options.labels[i]}: #{@yLabelFormat(y)}")
+      label = if y.label? then y.label else @yLabelFormat(y.value)
+      @yLabels[i].attr('text', "#{@options.labels[i]}: #{label}")
     # recalculate hover box width
     maxLabelWidth = Math.max.apply null, (l.getBBox().width for l in @yLabels)
     maxLabelWidth = Math.max maxLabelWidth, @xLabel.getBBox().width

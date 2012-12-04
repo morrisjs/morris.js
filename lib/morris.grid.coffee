@@ -94,6 +94,13 @@ class Morris.Grid extends Morris.EventEmitter
       total = 0
       ret.y = for ykey, idx in @options.ykeys
         yval = row[ykey]
+
+        if typeof yval is 'object'
+          ylabel = yval.label
+          yval = yval.value
+        else
+          ylabel = null
+
         yval = parseFloat(yval) if typeof yval is 'string'
         yval = null if yval? and typeof yval isnt 'number'
         if yval?
@@ -108,7 +115,9 @@ class Morris.Grid extends Morris.EventEmitter
         if @cumulative and total?
           ymax = Math.max(total, ymax)
           ymin = Math.min(total, ymin)
-        yval
+        yval =
+          value: yval
+          label: ylabel
       ret
 
     if @options.parseTime
