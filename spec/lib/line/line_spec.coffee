@@ -119,25 +119,25 @@ describe 'Morris.Line', ->
 
     it 'should generate a smooth line', ->
       testData = [{x: 0, y: 10}, {x: 10, y: 0}, {x: 20, y: 10}]
-      path = Morris.Line.createPath(testData, true, 0)
+      path = Morris.Line.createPath(testData, true, 20)
       path.should.equal 'M0,10C2.5,7.5,7.5,0,10,0C12.5,0,17.5,7.5,20,10'
 
     it 'should generate a jagged line', ->
       testData = [{x: 0, y: 10}, {x: 10, y: 0}, {x: 20, y: 10}]
-      path = Morris.Line.createPath(testData, false, 0)
+      path = Morris.Line.createPath(testData, false, 20)
       path.should.equal 'M0,10L10,0L20,10'
 
     it 'should prevent paths from descending below the bottom of the chart', ->
-      testData = [{x: 0, y: 20}, {x: 10, y: 10}, {x: 20, y: 30}]
-      path = Morris.Line.createPath(testData, true, 10)
-      path.should.equal 'M0,20C2.5,17.5,7.5,10,10,10C12.5,11.25,17.5,25,20,30'
+      testData = [{x: 0, y: 20}, {x: 10, y: 30}, {x: 20, y: 10}]
+      path = Morris.Line.createPath(testData, true, 30)
+      path.should.equal 'M0,20C2.5,22.5,7.5,30,10,30C12.5,28.75,17.5,15,20,10'
 
     it 'should break the line at null values', ->
       testData = [{x: 0, y: 10}, {x: 10, y: 0}, {x: 20, y: null}, {x: 30, y: 10}, {x: 40, y: 0}]
-      path = Morris.Line.createPath(testData, true, 0)
+      path = Morris.Line.createPath(testData, true, 20)
       path.should.equal 'M0,10C2.5,7.5,7.5,2.5,10,0M30,10C32.5,7.5,37.5,2.5,40,0'
 
     it 'should ignore leading and trailing null values', ->
       testData = [{x: 0, y: null}, {x: 10, y: 10}, {x: 20, y: 0}, {x: 30, y: 10}, {x: 40, y: null}]
-      path = Morris.Line.createPath(testData, true, 0)
+      path = Morris.Line.createPath(testData, true, 20)
       path.should.equal 'M10,10C12.5,7.5,17.5,0,20,0C22.5,0,27.5,7.5,30,10'
