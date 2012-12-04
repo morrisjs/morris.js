@@ -1,8 +1,8 @@
 (function() {
   var $, Morris, minutesSpecHelper, secondsSpecHelper,
+    __slice = [].slice,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    __slice = [].slice,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
@@ -10,46 +10,9 @@
 
   $ = jQuery;
 
-  Morris.Module = (function() {
+  Morris.EventEmitter = (function() {
 
-    function Module() {}
-
-    Module.extend = function(obj) {
-      var key, value, _ref;
-      for (key in obj) {
-        value = obj[key];
-        if (key !== 'extended' && key !== 'included') {
-          this[key] = value;
-        }
-      }
-      if ((_ref = obj.extended) != null) {
-        _ref.apply(this);
-      }
-      return this;
-    };
-
-    Module.include = function(obj) {
-      var key, value, _ref;
-      for (key in obj) {
-        value = obj[key];
-        if (key !== 'extended' && key !== 'included') {
-          this.prototype[key] = value;
-        }
-      }
-      return (_ref = obj.included) != null ? _ref.apply(this) : void 0;
-    };
-
-    return Module;
-
-  })();
-
-  Morris.EventEmitter = (function(_super) {
-
-    __extends(EventEmitter, _super);
-
-    function EventEmitter() {
-      return EventEmitter.__super__.constructor.apply(this, arguments);
-    }
+    function EventEmitter() {}
 
     EventEmitter.prototype.on = function(name, handler) {
       if (this.handlers == null) {
@@ -77,7 +40,7 @@
 
     return EventEmitter;
 
-  })(Morris.Module);
+  })();
 
   Morris.commas = function(num) {
     var absnum, intnum, ret, strabsnum;
@@ -99,135 +62,6 @@
   Morris.pad2 = function(number) {
     return (number < 10 ? '0' : '') + number;
   };
-
-  Morris.labelSeries = function(dmin, dmax, pxwidth, specName, xLabelFormat) {
-    var d, d0, ddensity, name, ret, s, spec, t, _i, _len, _ref;
-    ddensity = 200 * (dmax - dmin) / pxwidth;
-    d0 = new Date(dmin);
-    spec = Morris.LABEL_SPECS[specName];
-    if (spec === void 0) {
-      _ref = Morris.AUTO_LABEL_ORDER;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        name = _ref[_i];
-        s = Morris.LABEL_SPECS[name];
-        if (ddensity >= s.span) {
-          spec = s;
-          break;
-        }
-      }
-    }
-    if (spec === void 0) {
-      spec = Morris.LABEL_SPECS["second"];
-    }
-    if (xLabelFormat) {
-      spec = $.extend({}, spec, {
-        fmt: xLabelFormat
-      });
-    }
-    d = spec.start(d0);
-    ret = [];
-    while ((t = d.getTime()) <= dmax) {
-      if (t >= dmin) {
-        ret.push([spec.fmt(d), t]);
-      }
-      spec.incr(d);
-    }
-    return ret;
-  };
-
-  minutesSpecHelper = function(interval) {
-    return {
-      span: interval * 60 * 1000,
-      start: function(d) {
-        return new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours());
-      },
-      fmt: function(d) {
-        return "" + (Morris.pad2(d.getHours())) + ":" + (Morris.pad2(d.getMinutes()));
-      },
-      incr: function(d) {
-        return d.setMinutes(d.getMinutes() + interval);
-      }
-    };
-  };
-
-  secondsSpecHelper = function(interval) {
-    return {
-      span: interval * 1000,
-      start: function(d) {
-        return new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes());
-      },
-      fmt: function(d) {
-        return "" + (Morris.pad2(d.getHours())) + ":" + (Morris.pad2(d.getMinutes())) + ":" + (Morris.pad2(d.getSeconds()));
-      },
-      incr: function(d) {
-        return d.setSeconds(d.getSeconds() + interval);
-      }
-    };
-  };
-
-  Morris.LABEL_SPECS = {
-    "decade": {
-      span: 172800000000,
-      start: function(d) {
-        return new Date(d.getFullYear() - d.getFullYear() % 10, 0, 1);
-      },
-      fmt: function(d) {
-        return "" + (d.getFullYear());
-      },
-      incr: function(d) {
-        return d.setFullYear(d.getFullYear() + 10);
-      }
-    },
-    "year": {
-      span: 17280000000,
-      start: function(d) {
-        return new Date(d.getFullYear(), 0, 1);
-      },
-      fmt: function(d) {
-        return "" + (d.getFullYear());
-      },
-      incr: function(d) {
-        return d.setFullYear(d.getFullYear() + 1);
-      }
-    },
-    "month": {
-      span: 2419200000,
-      start: function(d) {
-        return new Date(d.getFullYear(), d.getMonth(), 1);
-      },
-      fmt: function(d) {
-        return "" + (d.getFullYear()) + "-" + (Morris.pad2(d.getMonth() + 1));
-      },
-      incr: function(d) {
-        return d.setMonth(d.getMonth() + 1);
-      }
-    },
-    "day": {
-      span: 86400000,
-      start: function(d) {
-        return new Date(d.getFullYear(), d.getMonth(), d.getDate());
-      },
-      fmt: function(d) {
-        return "" + (d.getFullYear()) + "-" + (Morris.pad2(d.getMonth() + 1)) + "-" + (Morris.pad2(d.getDate()));
-      },
-      incr: function(d) {
-        return d.setDate(d.getDate() + 1);
-      }
-    },
-    "hour": minutesSpecHelper(60),
-    "30min": minutesSpecHelper(30),
-    "15min": minutesSpecHelper(15),
-    "10min": minutesSpecHelper(10),
-    "5min": minutesSpecHelper(5),
-    "minute": minutesSpecHelper(1),
-    "30sec": secondsSpecHelper(30),
-    "15sec": secondsSpecHelper(15),
-    "10sec": secondsSpecHelper(10),
-    "5sec": secondsSpecHelper(5),
-    "second": secondsSpecHelper(1)
-  };
-
-  Morris.AUTO_LABEL_ORDER = ["decade", "year", "month", "day", "hour", "30min", "15min", "10min", "5min", "minute", "30sec", "15sec", "10sec", "5sec", "second"];
 
   Morris.Grid = (function(_super) {
 
@@ -528,6 +362,184 @@
       return "" + this.options.preUnits + (Morris.commas(label)) + this.options.postUnits;
     };
 
+    Grid.prototype.hoverConfigure = function(options) {
+      return this.hoverOptions = $.extend({}, this.hoverDefaults, options != null ? options : {});
+    };
+
+    Grid.prototype.hoverInit = function() {
+      if (this.hoverOptions.enableHover) {
+        this.hover = this.hoverBuild();
+        this.hoverBindEvents();
+        return this.hoverShow(this.hoverOptions.hideHover ? null : this.data.length - 1);
+      }
+    };
+
+    Grid.prototype.hoverDefaults = {
+      enableHover: true,
+      popupClass: "morris-popup",
+      hideHover: false,
+      allowOverflow: false,
+      pointMargin: 10,
+      hoverFill: function(index, row) {
+        return this.hoverFill(index, row);
+      }
+    };
+
+    Grid.prototype.hoverBindEvents = function() {
+      var touchHandler,
+        _this = this;
+      this.el.mousemove(function(evt) {
+        return _this.hoverUpdate(evt.pageX);
+      });
+      if (this.hoverOptions.hideHover) {
+        this.el.mouseout(function(evt) {
+          return _this.hoverShow(null);
+        });
+      }
+      touchHandler = function(evt) {
+        var touch;
+        touch = evt.originalEvent.touches[0] || evt.originalEvent.changedTouches[0];
+        _this.hoverUpdate(touch.pageX);
+        return touch;
+      };
+      this.el.bind('touchstart', touchHandler);
+      this.el.bind('touchmove', touchHandler);
+      this.el.bind('touchend', touchHandler);
+      this.hover.mousemove(function(evt) {
+        return evt.stopPropagation();
+      });
+      this.hover.mouseout(function(evt) {
+        return evt.stopPropagation();
+      });
+      this.hover.bind('touchstart', function(evt) {
+        return evt.stopPropagation();
+      });
+      this.hover.bind('touchmove', function(evt) {
+        return evt.stopPropagation();
+      });
+      return this.hover.bind('touchend', function(evt) {
+        return evt.stopPropagation();
+      });
+    };
+
+    Grid.prototype.hoverCalculateMargins = function() {
+      var i;
+      return this.hoverMargins = (function() {
+        var _i, _ref, _results;
+        _results = [];
+        for (i = _i = 1, _ref = this.data.length; 1 <= _ref ? _i < _ref : _i > _ref; i = 1 <= _ref ? ++_i : --_i) {
+          _results.push(this.left + i * this.width / this.data.length);
+        }
+        return _results;
+      }).call(this);
+    };
+
+    Grid.prototype.hoverBuild = function() {
+      var hover;
+      hover = $("<div/>");
+      hover.addClass("" + this.hoverOptions.popupClass + " js-morris-popup");
+      hover.appendTo(this.el);
+      hover.hide();
+      return hover;
+    };
+
+    Grid.prototype.hoverUpdate = function(x) {
+      var hoverIndex, _i, _ref;
+      x -= this.el.offset().left;
+      for (hoverIndex = _i = 0, _ref = this.hoverMargins.length; 0 <= _ref ? _i < _ref : _i > _ref; hoverIndex = 0 <= _ref ? ++_i : --_i) {
+        if (this.hoverMargins[hoverIndex] > x) {
+          break;
+        }
+      }
+      return this.hoverShow(hoverIndex);
+    };
+
+    Grid.prototype.hoverShow = function(index) {
+      if (index !== null) {
+        this.hover.html("");
+        this.hoverOptions.hoverFill.call(this, index, this.data[index]);
+        this.hoverPosition(index);
+        this.fire("hover.show", index);
+        this.hover.show();
+      }
+      if (!(index != null)) {
+        return this.hoverHide();
+      }
+    };
+
+    Grid.prototype.hoverHide = function() {
+      return this.hover.hide();
+    };
+
+    Grid.prototype.colorFor = function(row, i, type) {
+      return "inherit";
+    };
+
+    Grid.prototype.yLabelFormat = function(label) {
+      return Morris.commas(label);
+    };
+
+    Grid.prototype.hoverPosition = function(index) {
+      var x, y, _ref;
+      _ref = this.hoverGetPosition(index), x = _ref[0], y = _ref[1];
+      return this.hover.css({
+        top: "" + (this.el.offset().top + y) + "px",
+        left: "" + (this.el.offset().left + x) + "px"
+      });
+    };
+
+    Grid.prototype.hoverGetPosition = function(index) {
+      var miny, row, x, y;
+      row = this.data[index];
+      this.hoverWidth = this.hover.outerWidth(true);
+      this.hoverHeight = this.hover.outerHeight(true);
+      miny = y = Math.min.apply(null, ((function() {
+        var _i, _len, _ref, _results;
+        _ref = row._y;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          y = _ref[_i];
+          if (y !== null) {
+            _results.push(y);
+          }
+        }
+        return _results;
+      })()).concat(this.bottom));
+      x = row._x - this.hoverWidth / 2;
+      y = miny;
+      y = y - this.hoverHeight - this.hoverOptions.pointMargin;
+      if (!this.hoverOptions.allowOverflow) {
+        if (x < this.left) {
+          x = row._x + this.hoverOptions.pointMargin;
+        } else if (x > this.right - this.hoverWidth) {
+          x = row._x - this.hoverWidth - this.hoverOptions.pointMargin;
+        }
+        y = Math.max(y, this.top);
+        y = Math.min(y, this.bottom - this.hoverHeight - this.hoverOptions.pointMargin);
+        if (y - miny < this.hoverWidth + this.hoverOptions.pointMargin) {
+          y = miny + this.hoverOptions.pointMargin;
+        }
+      }
+      return [x, y];
+    };
+
+    Grid.prototype.hoverFill = function(index, row) {
+      var i, xLabel, y, yLabel, _i, _len, _ref, _results;
+      xLabel = $("<h4/>");
+      xLabel.text(row.label);
+      xLabel.appendTo(this.hover);
+      _ref = row.y;
+      _results = [];
+      for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
+        y = _ref[i];
+        yLabel = $("<p/>");
+        yLabel.css("color", this.colorFor(row, i, "hover"));
+        yLabel.text("" + this.options.labels[i] + ": " + (this.yLabelFormat(y)));
+        _results.push(yLabel.appendTo(this.hover));
+      }
+      return _results;
+    };
+
     return Grid;
 
   })(Morris.EventEmitter);
@@ -589,178 +601,42 @@
     }
   };
 
-  Morris.Hover = {
-    hoverConfigure: function(options) {
-      return this.hoverOptions = $.extend({}, this.hoverDefaults, options != null ? options : {});
-    },
-    hoverInit: function() {
-      if (this.hoverOptions.enableHover) {
-        this.hover = this.hoverBuild();
-        this.hoverBindEvents();
-        return this.hoverShow(this.hoverOptions.hideHover ? null : this.data.length - 1);
+  Morris.Hover = (function() {
+
+    function Hover(options) {
+      if (options == null) {
+        options = {};
       }
-    },
-    hoverDefaults: {
-      enableHover: true,
-      popupClass: "morris-popup",
-      hideHover: false,
-      allowOverflow: false,
-      pointMargin: 10,
-      hoverFill: function(index, row) {
-        return this.hoverFill(index, row);
-      }
-    },
-    hoverBindEvents: function() {
-      var touchHandler,
-        _this = this;
-      this.el.mousemove(function(evt) {
-        return _this.hoverUpdate(evt.pageX);
-      });
-      if (this.hoverOptions.hideHover) {
-        this.el.mouseout(function(evt) {
-          return _this.hoverShow(null);
-        });
-      }
-      touchHandler = function(evt) {
-        var touch;
-        touch = evt.originalEvent.touches[0] || evt.originalEvent.changedTouches[0];
-        _this.hoverUpdate(touch.pageX);
-        return touch;
-      };
-      this.el.bind('touchstart', touchHandler);
-      this.el.bind('touchmove', touchHandler);
-      this.el.bind('touchend', touchHandler);
-      this.hover.mousemove(function(evt) {
-        return evt.stopPropagation();
-      });
-      this.hover.mouseout(function(evt) {
-        return evt.stopPropagation();
-      });
-      this.hover.bind('touchstart', function(evt) {
-        return evt.stopPropagation();
-      });
-      this.hover.bind('touchmove', function(evt) {
-        return evt.stopPropagation();
-      });
-      return this.hover.bind('touchend', function(evt) {
-        return evt.stopPropagation();
-      });
-    },
-    hoverCalculateMargins: function() {
-      var i;
-      return this.hoverMargins = (function() {
-        var _i, _ref, _results;
-        _results = [];
-        for (i = _i = 1, _ref = this.data.length; 1 <= _ref ? _i < _ref : _i > _ref; i = 1 <= _ref ? ++_i : --_i) {
-          _results.push(this.left + i * this.width / this.data.length);
-        }
-        return _results;
-      }).call(this);
-    },
-    hoverBuild: function() {
-      var hover;
-      hover = $("<div/>");
-      hover.addClass("" + this.hoverOptions.popupClass + " js-morris-popup");
-      hover.appendTo(this.el);
-      hover.hide();
-      return hover;
-    },
-    hoverUpdate: function(x) {
-      var hoverIndex, _i, _ref;
-      x -= this.el.offset().left;
-      for (hoverIndex = _i = 0, _ref = this.hoverMargins.length; 0 <= _ref ? _i < _ref : _i > _ref; hoverIndex = 0 <= _ref ? ++_i : --_i) {
-        if (this.hoverMargins[hoverIndex] > x) {
-          break;
-        }
-      }
-      return this.hoverShow(hoverIndex);
-    },
-    hoverShow: function(index) {
-      if (index !== null) {
-        this.hover.html("");
-        this.hoverOptions.hoverFill.call(this, index, this.data[index]);
-        this.hoverPosition(index);
-        this.fire("hover.show", index);
-        this.hover.show();
-      }
-      if (!(index != null)) {
-        return this.hoverHide();
-      }
-    },
-    hoverHide: function() {
-      return this.hover.hide();
-    },
-    colorFor: function(row, i, type) {
-      return "inherit";
-    },
-    yLabelFormat: function(label) {
-      return Morris.commas(label);
-    },
-    hoverPosition: function(index) {
-      var x, y, _ref;
-      _ref = this.hoverGetPosition(index), x = _ref[0], y = _ref[1];
-      return this.hover.css({
-        top: "" + (this.el.offset().top + y) + "px",
-        left: "" + (this.el.offset().left + x) + "px"
-      });
-    },
-    hoverGetPosition: function(index) {
-      var miny, row, x, y;
-      row = this.data[index];
-      this.hoverWidth = this.hover.outerWidth(true);
-      this.hoverHeight = this.hover.outerHeight(true);
-      miny = y = Math.min.apply(null, ((function() {
-        var _i, _len, _ref, _results;
-        _ref = row._y;
-        _results = [];
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          y = _ref[_i];
-          if (y !== null) {
-            _results.push(y);
-          }
-        }
-        return _results;
-      })()).concat(this.bottom));
-      x = row._x - this.hoverWidth / 2;
-      y = miny;
-      y = y - this.hoverHeight - this.hoverOptions.pointMargin;
-      if (!this.hoverOptions.allowOverflow) {
-        if (x < this.left) {
-          x = row._x + this.hoverOptions.pointMargin;
-        } else if (x > this.right - this.hoverWidth) {
-          x = row._x - this.hoverWidth - this.hoverOptions.pointMargin;
-        }
-        y = Math.max(y, this.top);
-        y = Math.min(y, this.bottom - this.hoverHeight - this.hoverOptions.pointMargin);
-        if (y - miny < this.hoverWidth + this.hoverOptions.pointMargin) {
-          y = miny + this.hoverOptions.pointMargin;
-        }
-      }
-      return [x, y];
-    },
-    hoverFill: function(index, row) {
-      var i, xLabel, y, yLabel, _i, _len, _ref, _results;
-      xLabel = $("<h4/>");
-      xLabel.text(row.label);
-      xLabel.appendTo(this.hover);
-      _ref = row.y;
-      _results = [];
-      for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
-        y = _ref[i];
-        yLabel = $("<p/>");
-        yLabel.css("color", this.colorFor(row, i, "hover"));
-        yLabel.text("" + this.options.labels[i] + ": " + (this.yLabelFormat(y)));
-        _results.push(yLabel.appendTo(this.hover));
-      }
-      return _results;
+      this.options = $.extend({}, Morris.Hover.defaults, options);
+      this.el = $("<div class='" + this.options["class"] + "'></div>");
+      this.el.hide();
     }
-  };
+
+    Hover.defaults = {
+      "class": 'morris-popup',
+      allowOverflow: false
+    };
+
+    Hover.prototype.show = function(x, y, data) {
+      if (typeof this.options.content === 'function') {
+        this.el.html(this.options.content(data));
+      } else {
+        this.el.html(this.options.content);
+      }
+      return this.el.show();
+    };
+
+    Hover.prototype.hide = function() {
+      return this.el.hide();
+    };
+
+    return Hover;
+
+  })();
 
   Morris.Line = (function(_super) {
 
     __extends(Line, _super);
-
-    Line.include(Morris.Hover);
 
     function Line(options) {
       this.updateHilight = __bind(this.updateHilight, this);
@@ -1135,6 +1011,135 @@
 
   })(Morris.Grid);
 
+  Morris.labelSeries = function(dmin, dmax, pxwidth, specName, xLabelFormat) {
+    var d, d0, ddensity, name, ret, s, spec, t, _i, _len, _ref;
+    ddensity = 200 * (dmax - dmin) / pxwidth;
+    d0 = new Date(dmin);
+    spec = Morris.LABEL_SPECS[specName];
+    if (spec === void 0) {
+      _ref = Morris.AUTO_LABEL_ORDER;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        name = _ref[_i];
+        s = Morris.LABEL_SPECS[name];
+        if (ddensity >= s.span) {
+          spec = s;
+          break;
+        }
+      }
+    }
+    if (spec === void 0) {
+      spec = Morris.LABEL_SPECS["second"];
+    }
+    if (xLabelFormat) {
+      spec = $.extend({}, spec, {
+        fmt: xLabelFormat
+      });
+    }
+    d = spec.start(d0);
+    ret = [];
+    while ((t = d.getTime()) <= dmax) {
+      if (t >= dmin) {
+        ret.push([spec.fmt(d), t]);
+      }
+      spec.incr(d);
+    }
+    return ret;
+  };
+
+  minutesSpecHelper = function(interval) {
+    return {
+      span: interval * 60 * 1000,
+      start: function(d) {
+        return new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours());
+      },
+      fmt: function(d) {
+        return "" + (Morris.pad2(d.getHours())) + ":" + (Morris.pad2(d.getMinutes()));
+      },
+      incr: function(d) {
+        return d.setMinutes(d.getMinutes() + interval);
+      }
+    };
+  };
+
+  secondsSpecHelper = function(interval) {
+    return {
+      span: interval * 1000,
+      start: function(d) {
+        return new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes());
+      },
+      fmt: function(d) {
+        return "" + (Morris.pad2(d.getHours())) + ":" + (Morris.pad2(d.getMinutes())) + ":" + (Morris.pad2(d.getSeconds()));
+      },
+      incr: function(d) {
+        return d.setSeconds(d.getSeconds() + interval);
+      }
+    };
+  };
+
+  Morris.LABEL_SPECS = {
+    "decade": {
+      span: 172800000000,
+      start: function(d) {
+        return new Date(d.getFullYear() - d.getFullYear() % 10, 0, 1);
+      },
+      fmt: function(d) {
+        return "" + (d.getFullYear());
+      },
+      incr: function(d) {
+        return d.setFullYear(d.getFullYear() + 10);
+      }
+    },
+    "year": {
+      span: 17280000000,
+      start: function(d) {
+        return new Date(d.getFullYear(), 0, 1);
+      },
+      fmt: function(d) {
+        return "" + (d.getFullYear());
+      },
+      incr: function(d) {
+        return d.setFullYear(d.getFullYear() + 1);
+      }
+    },
+    "month": {
+      span: 2419200000,
+      start: function(d) {
+        return new Date(d.getFullYear(), d.getMonth(), 1);
+      },
+      fmt: function(d) {
+        return "" + (d.getFullYear()) + "-" + (Morris.pad2(d.getMonth() + 1));
+      },
+      incr: function(d) {
+        return d.setMonth(d.getMonth() + 1);
+      }
+    },
+    "day": {
+      span: 86400000,
+      start: function(d) {
+        return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      },
+      fmt: function(d) {
+        return "" + (d.getFullYear()) + "-" + (Morris.pad2(d.getMonth() + 1)) + "-" + (Morris.pad2(d.getDate()));
+      },
+      incr: function(d) {
+        return d.setDate(d.getDate() + 1);
+      }
+    },
+    "hour": minutesSpecHelper(60),
+    "30min": minutesSpecHelper(30),
+    "15min": minutesSpecHelper(15),
+    "10min": minutesSpecHelper(10),
+    "5min": minutesSpecHelper(5),
+    "minute": minutesSpecHelper(1),
+    "30sec": secondsSpecHelper(30),
+    "15sec": secondsSpecHelper(15),
+    "10sec": secondsSpecHelper(10),
+    "5sec": secondsSpecHelper(5),
+    "second": secondsSpecHelper(1)
+  };
+
+  Morris.AUTO_LABEL_ORDER = ["decade", "year", "month", "day", "hour", "30min", "15min", "10min", "5min", "minute", "30sec", "15sec", "10sec", "5sec", "second"];
+
   Morris.Area = (function(_super) {
 
     __extends(Area, _super);
@@ -1195,14 +1200,6 @@
   Morris.Bar = (function(_super) {
 
     __extends(Bar, _super);
-
-    Bar.include(Morris.Hover);
-
-    Bar.prototype.hoverGetPosition = function(index) {
-      var x, y, _ref;
-      _ref = Morris.Hover.hoverGetPosition.call(this, index), x = _ref[0], y = _ref[1];
-      return [x, (this.top + this.bottom) / 2 - this.hoverHeight / 2];
-    };
 
     function Bar(options) {
       if (!(this instanceof Morris.Bar)) {
@@ -1348,6 +1345,12 @@
       } else {
         return this.options.barColors[sidx % this.options.barColors.length];
       }
+    };
+
+    Bar.prototype.hoverGetPosition = function(index) {
+      var x, y, _ref;
+      _ref = Bar.__super__.hoverGetPosition.call(this, index), x = _ref[0], y = _ref[1];
+      return [x, (this.top + this.bottom) / 2 - this.hoverHeight / 2];
     };
 
     return Bar;

@@ -1,11 +1,4 @@
 class Morris.Bar extends Morris.Grid
-  @include Morris.Hover
-
-  # override hoverCalculatePosition
-  hoverGetPosition: (index) ->
-    [x, y] = Morris.Hover.hoverGetPosition.call(this, index)
-    [x, (@top + @bottom)/2 - @hoverHeight/2]
-
   constructor: (options) ->
     return new Morris.Bar(options) unless (@ instanceof Morris.Bar)
     super($.extend {}, options, parseTime: false)
@@ -121,3 +114,8 @@ class Morris.Bar extends Morris.Grid
       @options.barColors.call(@, r, s, type)
     else
       @options.barColors[sidx % @options.barColors.length]
+
+  hoverGetPosition: (index) ->
+    [x, y] = super(index)
+    [x, (@top + @bottom)/2 - @hoverHeight/2]
+
