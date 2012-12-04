@@ -652,10 +652,10 @@
           _results1 = [];
           for (_k = 0, _len = _ref2.length; _k < _len; _k++) {
             row = _ref2[_k];
-            if (row._y[i] === null) {
-              circle = null;
-            } else {
+            if (row._y[i] != null) {
               circle = this.r.circle(row._x, row._y[i], this.options.pointSize).attr('fill', this.pointFillColorForSeries(i) || this.colorForSeries(i)).attr('stroke-width', this.strokeWidthForSeries(i)).attr('stroke', this.strokeForSeries(i));
+            } else {
+              circle = null;
             }
             _results1.push(this.seriesPoints[i].push(circle));
           }
@@ -780,7 +780,7 @@
         _results = [];
         for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
           y = _ref1[_j];
-          if (y !== null) {
+          if (y != null) {
             _results.push(y);
           }
         }

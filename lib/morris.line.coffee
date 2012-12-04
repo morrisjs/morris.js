@@ -148,13 +148,13 @@ class Morris.Line extends Morris.Grid
     @seriesPoints = ([] for i in [0...@options.ykeys.length])
     for i in [@options.ykeys.length-1..0]
       for row in @data
-        if row._y[i] == null
-          circle = null
-        else
+        if row._y[i]?
           circle = @r.circle(row._x, row._y[i], @options.pointSize)
             .attr('fill', @pointFillColorForSeries(i) || @colorForSeries(i))
             .attr('stroke-width', @strokeWidthForSeries(i))
             .attr('stroke', @strokeForSeries(i))
+        else
+          circle = null
         @seriesPoints[i].push(circle)
 
   # create a path for a data series
@@ -245,7 +245,7 @@ class Morris.Line extends Morris.Grid
     @hover.attr 'width', maxLabelWidth + @options.hoverPaddingX * 2
     @hover.attr 'x', -@options.hoverPaddingX - maxLabelWidth / 2
     # move to y pos
-    yloc = Math.min.apply null, (y for y in row._y when y isnt null).concat(@bottom)
+    yloc = Math.min.apply null, (y for y in row._y when y?).concat(@bottom)
     if yloc > @hoverHeight + @options.hoverPaddingY * 2 + @options.hoverMargin + @top
       yloc = yloc - @hoverHeight / 2 - @options.hoverPaddingY - @options.hoverMargin
     else
