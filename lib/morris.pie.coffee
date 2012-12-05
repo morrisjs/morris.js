@@ -7,7 +7,7 @@ Array::isUniform = (value, compare) ->
   return true
 
 class Morris.Pie extends Morris.EventEmitter
-  defaults:
+  pieDefaults:
     colors: [
       '#0B62A4'
       '#3980B5'
@@ -21,27 +21,37 @@ class Morris.Pie extends Morris.EventEmitter
       '#042135'
     ]
     idKey: "label"
+    stroke: "#FFFFFF"
+    strokeWidth: 3
     sort: false
     formatter: Morris.commas
     showLabel: "hover"
+    drawOut: 5
     includeZeros: false
   
   constructor: (options) ->
     if not (this instanceof Morris.Pie)
       return new Morris.Pie(options)
     
-    @el = $ options.element
+    if typeof options.element is 'string'
+      @el = $ document.getElementById(options.element)
+    else
+      @el = $ options.element
+    
     if @el is null or @el.length == 0
       throw new Error("Container element not found.")
     
     if options.data is undefined or options.data.length is 0
       return
     
-    @options = $.extend {}, @defaults, options
+    @options = $.extend {}, @pieDefaults, options
     @setData options.data
     
     if @options.showLabel is "hover"
       @el.mouseout (evt) => @hideLabel()
+    
+    if @options.showLabel isnt true
+      @el.mouseout (evt) => @deselect()
     
     @redraw()
   
@@ -53,7 +63,7 @@ class Morris.Pie extends Morris.EventEmitter
     for row, i in data
       @data.push
         label: row.label
-        value: row.value
+        value: @options.formatter.call(null, row.value, row)
         segment: row.value / total.value * 100
         id: row[@options.idKey]
     
@@ -72,7 +82,7 @@ class Morris.Pie extends Morris.EventEmitter
     @draw()
   
   clear: ->
-    @label = ""
+    @label = null
     @middles = []
     @segments = []
     @el.empty()
@@ -81,33 +91,36 @@ class Morris.Pie extends Morris.EventEmitter
   calc: ->
     @width = @el.width()
     @height = @el.height()
+    @height -= 30 if @options.showLabel isnt false
     @cx = @width / 2.0
     @cy = @height / 2.0
     @radius = 0.8 * Math.min(@cx, @cy)
-    
-    unless @options.showLabel is false
-      @height -= 30
-      @cy += 30
-  
+    @cy += 30 if @options.showLabel isnt false
+
   select: (i) ->
-    segment.deselect() for segment in @segments
+    s.deselect() for s in @segments
     segment = i
     segment = @segments[i] if typeof i is "number"
     segment.select()
+    
+    @fire "hover", segment.data.id, segment.data
     
     if @options.showLabel isnt false
       @showLabel segment
   
   showLabel: (segment) ->
-    if @text is null
-      @text = @r.text(@cx, 30, "").attr({"font-size": 15, "font-weight": "bold"})
-    @text.attr
+    if @label is null
+      @label = @r.text(@cx, 30, "").attr({"font-size": 15, "font-weight": "bold"})
+    @label.attr
       fill: segment.color
-      text: "#{segment.label}: #{segment.value}"
+      text: "#{segment.data.label}: #{segment.data.value}"
   
   hideLabel: ->
-    segment.deselect() for segment in @segments
-    @text.attr("text", "") if @text isnt null
+    @deselect()
+    @label.attr("text", "") if @label isnt null
+  
+  deselect: ->
+    s.deselect() for s in @segments
   
   draw: ->
     if @data.length == 1
@@ -116,13 +129,19 @@ class Morris.Pie extends Morris.EventEmitter
       @drawSegments()
   
   drawSingle: ->
-    row = @data[0]
-    if @options.includeZeros or row.segment > 0
-      @genSingle row
+    segment = @genSingle @data[0]
+    segment.render @r
+    segment.on "hover", (s) => @select(s)
+    segment.on "click", (id, data) => @fire "click", id, data
+    @segments.push segment
+    
+    if @options.showLabel is true
+      @select(0)
   
   drawSegments: ->
     angle = 0
     for row, i in @data
+      continue if row.segment == 0
       mangle = angle - 360 * row.segment / 200
       if not i
         angle = 90 - mangle
@@ -131,36 +150,46 @@ class Morris.Pie extends Morris.EventEmitter
       angle = to
       segment = @genSegment row, from, to, i
       segment.render @r
-      segment.on "hover", @select
+      segment.on "hover", (s) => @select(s)
+      segment.on "click", (id, data) => @fire("click", id, data)
       @segments.push segment
     if @options.showLabel is true
       @select @data.length - 1
   
   genSingle: (row) ->
+    new Morris.Pie.FullSegment(@cx, @cy, @radius, @getColor(0), row, @options)
   
   genSegment: (row, from, to, i) ->
+    new Morris.Pie.Segment(@cx, @cy, @radius, from, to, @getColor(i), row, @options)
+  
+  getColor: (i) ->
+    if typeof @options.colors is "function"
+      return @options.colors.call(@data[i], i, @options)
+    else
+      return @options.colors[i % @options.colors.length];
 
 class Morris.Pie.FullSegment extends Morris.EventEmitter
-  constructor: (@cx, @cy, @radius, @color, @data) ->
+  constructor: (@cx, @cy, @radius, @color, @data, @options) ->
     @selected = false
   
   render: (r) ->
-    @seg = r.circle(@cx, @cy, @radius - 5)
-            .attr(fillr: @color, stroke: "white", "stroke-width": 3, "stroke-linejoin": "round")
+    @seg = r.circle(@cx, @cy, @radius - @options.drawOut)
+            .attr(fillr: @color, stroke: @options.stroke, "stroke-width": @options.strokeWidth, "stroke-linejoin": "round")
             .hover(=> @fire("hover", @))
+            .click(=> @fire("click", @data.id, @data))
   
   select: ->
     unless @selected
-      @circle.animate(r: @radius, 150, "<>")
+      @seg.animate(r: @radius, 150, "<>")
       @selected = true
   
   deselect: ->
     if @selected
-      @circle.animate(r: @radius - 5, 150, "<>")
+      @seg.animate(r: @radius - @options.drawOut, 150, "<>")
       @selected = false
 
 class Morris.Pie.Segment extends Morris.EventEmitter
-  constructor: (@cx, @cy, @radius, from, to, @color, @data) ->
+  constructor: (@cx, @cy, @radius, from, to, @color, @data, @options) ->
     rad = Math.PI / 180
     @diff = Math.abs(to-from)
     @cos = Math.cos(-(from + (to-from) / 2) * rad)
@@ -170,7 +199,7 @@ class Morris.Pie.Segment extends Morris.EventEmitter
     @sin_to = Math.sin(-to * rad)
     @cos_to = Math.cos(-to * rad)
     @long = +(@diff > 180)
-    @path = @calcSegment(@radius - 5)
+    @path = @calcSegment(@radius - @options.drawOut)
     @selectedPath = @calcSegment(@radius)
     @selected = false
     @mx = @cx + @radius / 2 * @cos
@@ -190,8 +219,9 @@ class Morris.Pie.Segment extends Morris.EventEmitter
   
   render: (r) ->
     @seg = r.path(@path)
-      .attr(fill: @color, stroke: 'white', 'stroke-width': 3, 'stroke-linejoin': 'round')
+      .attr(fill: @color, stroke: @options.stroke, 'stroke-width': @options.strokeWidth, 'stroke-linejoin': 'round')
       .hover(=> @fire('hover', @))
+      .click(=> @fire("click", @data.id, @data))
   
   select: ->
     unless @selected
