@@ -188,6 +188,6 @@ describe 'Morris.Grid#setData', ->
       labels: ['y']
     line.ymin.should == 12
     line.ymax.should == 16
-    line.data.map((row) -> row.y).should.deep.equal [[13.5], [12], [16], [14]]
+    line.data.map((row) -> row.y.map((y) -> y.value)).should.deep.equal [[13.5], [12], [16], [14]]
 
 
