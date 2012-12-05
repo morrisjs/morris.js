@@ -62,7 +62,7 @@ class Morris.Bar extends Morris.Grid
     for row, idx in @data
       row._x = @left + @width * (idx + 0.5) / @data.length
       row._y = for y in row.y
-        if y? then @transY(y.value) else null
+        if y.value? then @transY(y.value) else null
 
   # calculate hover margins
   #

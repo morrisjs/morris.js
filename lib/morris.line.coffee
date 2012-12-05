@@ -71,7 +71,7 @@ class Morris.Line extends Morris.Grid
     for row in @data
       row._x = @transX(row.x)
       row._y = for y in row.y
-        if y? then @transY(y.value) else y.value
+        if y.value? then @transY(y.value) else y.value
 
   # calculate hover margins
   #
