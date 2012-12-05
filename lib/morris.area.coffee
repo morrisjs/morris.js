@@ -14,7 +14,8 @@ class Morris.Area extends Morris.Line
       row._x = @transX(row.x)
       total = 0
       row._y = for y in row.y
-        total += (y || 0)
+        y = if y? then y.value else 0
+        total += y
         @transY(total)
 
   # draw the data series

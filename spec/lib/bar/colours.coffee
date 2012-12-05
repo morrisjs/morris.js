@@ -25,12 +25,12 @@ describe 'Morris.Bar#colorFor', ->
 
     chart.colorFor(chart.data[0], 0, 'bar')
     stub.should.have.been.calledWith(
-      {x:0, y:2, label:'foo'},
+      {x:0, y: {label: null, value: 2}, label:'foo'},
       {index:0, key:'y', label:'Y'},
       'bar')
 
     chart.colorFor(chart.data[0], 1, 'hover')
     stub.should.have.been.calledWith(
-      {x:0, y:3, label:'foo'},
+      {x:0, y:{label: null, value: 3}, label:'foo'},
       {index:1, key:'z', label:'Z'},
       'hover')
