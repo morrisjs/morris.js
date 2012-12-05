@@ -95,7 +95,7 @@ class Morris.Grid extends Morris.EventEmitter
       ret.y = for ykey, idx in @options.ykeys
         yval = row[ykey]
 
-        if typeof yval is 'object'
+        if typeof yval is 'object' and yval?
           ylabel = yval.label
           yval = yval.value
         else
