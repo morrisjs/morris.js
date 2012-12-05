@@ -161,6 +161,7 @@ class Morris.Bar extends Morris.Grid
 
   # @private
   updateHover: (index) =>
+    return if @options.disableLegend
     @hoverSet.show()
     row = @data[index]
     @xLabel.attr('text', row.label)
