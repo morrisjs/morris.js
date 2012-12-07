@@ -462,7 +462,12 @@
       };
       this.el.bind('touchstart', touchHandler);
       this.el.bind('touchmove', touchHandler);
-      return this.el.bind('touchend', touchHandler);
+      this.el.bind('touchend', touchHandler);
+      return this.el.bind('click', function(evt) {
+        if (_this.prevHilight !== null) {
+          return _this.fire('click', _this.prevHilight, _this.data[_this.prevHilight]);
+        }
+      });
     };
 
     Line.prototype.defaults = {
@@ -1081,7 +1086,12 @@
       };
       this.el.bind('touchstart', touchHandler);
       this.el.bind('touchmove', touchHandler);
-      return this.el.bind('touchend', touchHandler);
+      this.el.bind('touchend', touchHandler);
+      return this.el.bind('click', function(evt) {
+        if (_this.prevHilight !== null) {
+          return _this.fire('click', _this.prevHilight, _this.data[_this.prevHilight]);
+        }
+      });
     };
 
     Bar.prototype.defaults = {
@@ -1313,7 +1323,9 @@
 
   })(Morris.Grid);
 
-  Morris.Donut = (function() {
+  Morris.Donut = (function(_super) {
+
+    __extends(Donut, _super);
 
     Donut.prototype.defaults = {
       colors: ['#0B62A4', '#3980B5', '#679DC6', '#95BBD7', '#B0CCE1', '#095791', '#095085', '#083E67', '#052C48', '#042135'],
@@ -1321,6 +1333,8 @@
     };
 
     function Donut(options) {
+      this.click = __bind(this.click, this);
+
       this.select = __bind(this.select, this);
       if (!(this instanceof Morris.Donut)) {
         return new Morris.Donut(options);
@@ -1342,7 +1356,7 @@
     }
 
     Donut.prototype.redraw = function() {
-      var C, cx, cy, d, idx, last, max_value, min, next, seg, total, w, x, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _results;
+      var C, cx, cy, d, i, idx, last, max_value, min, next, seg, total, w, x, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _results;
       this.el.empty();
       this.r = new Raphael(this.el[0]);
       cx = this.el.width() / 2;
@@ -1360,13 +1374,14 @@
       idx = 0;
       this.segments = [];
       _ref1 = this.data;
-      for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-        d = _ref1[_j];
+      for (i = _j = 0, _len1 = _ref1.length; _j < _len1; i = ++_j) {
+        d = _ref1[i];
         next = last + min + C * (d.value / total);
-        seg = new Morris.DonutSegment(cx, cy, w * 2, w, last, next, this.options.colors[idx % this.options.colors.length], d);
+        seg = new Morris.DonutSegment(cx, cy, w * 2, w, last, next, this.options.colors[idx % this.options.colors.length], d, i);
         seg.render(this.r);
         this.segments.push(seg);
         seg.on('hover', this.select);
+        seg.on('click', this.click);
         last = next;
         idx += 1;
       }
@@ -1417,6 +1432,10 @@
       return this.setLabels(segment.data.label, this.options.formatter(segment.data.value, segment.data));
     };
 
+    Donut.prototype.click = function(idx, row) {
+      return this.fire('click', idx, row);
+    };
+
     Donut.prototype.setLabels = function(label1, label2) {
       var inner, maxHeightBottom, maxHeightTop, maxWidth, text1bbox, text1scale, text2bbox, text2scale;
       inner = (Math.min(this.el.width() / 2, this.el.height() / 2) - 10) * 2 / 3;
@@ -1445,19 +1464,20 @@
 
     return Donut;
 
-  })();
+  })(Morris.EventEmitter);
 
   Morris.DonutSegment = (function(_super) {
 
     __extends(DonutSegment, _super);
 
-    function DonutSegment(cx, cy, inner, outer, p0, p1, color, data) {
+    function DonutSegment(cx, cy, inner, outer, p0, p1, color, data, i) {
       this.cx = cx;
       this.cy = cy;
       this.inner = inner;
       this.outer = outer;
       this.color = color;
       this.data = data;
+      this.i = i;
       this.deselect = __bind(this.deselect, this);
 
       this.select = __bind(this.select, this);
@@ -1502,6 +1522,8 @@
         'stroke-width': 3
       }).hover(function() {
         return _this.fire('hover', _this);
+      }).click(function() {
+        return _this.fire('click', _this.i, _this.data);
       });
     };
 

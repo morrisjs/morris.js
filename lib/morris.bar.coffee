@@ -23,6 +23,9 @@ class Morris.Bar extends Morris.Grid
     @el.bind 'touchmove', touchHandler
     @el.bind 'touchend', touchHandler
 
+    @el.bind 'click', (evt) =>
+      @fire 'click', @prevHilight, @data[@prevHilight] unless @prevHilight is null
+
   # Default configuration
   #
   defaults:

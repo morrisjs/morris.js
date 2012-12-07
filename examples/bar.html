@@ -24,6 +24,8 @@ Morris.Bar({
   xkey: 'x',
   ykeys: ['y', 'z', 'a'],
   labels: ['Y', 'Z', 'A']
+}).on('click', function(i, row){
+  console.log(i, row);
 });
 </pre>
 </body>
