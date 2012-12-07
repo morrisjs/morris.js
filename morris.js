@@ -603,6 +603,10 @@
 
   Morris.Hover = (function() {
 
+    Hover.defaults = {
+      "class": 'morris-popup'
+    };
+
     function Hover(options) {
       if (options == null) {
         options = {};
@@ -610,19 +614,31 @@
       this.options = $.extend({}, Morris.Hover.defaults, options);
       this.el = $("<div class='" + this.options["class"] + "'></div>");
       this.el.hide();
+      this.options.parent.append(this.el);
     }
 
-    Hover.defaults = {
-      "class": 'morris-popup',
-      allowOverflow: false
+    Hover.prototype.update = function(x, y, data) {
+      this.render(data);
+      this.show();
+      return this.moveTo(x, y);
     };
 
-    Hover.prototype.show = function(x, y, data) {
+    Hover.prototype.render = function(data) {
       if (typeof this.options.content === 'function') {
-        this.el.html(this.options.content(data));
+        return this.el.html(this.options.content(data));
       } else {
-        this.el.html(this.options.content);
+        return this.el.html(this.options.content);
       }
+    };
+
+    Hover.prototype.moveTo = function(x, y) {
+      return this.el.css({
+        left: (x - this.el.outerWidth() / 2) + "px",
+        top: (y - this.el.outerHeight() - 10) + "px"
+      });
+    };
+
+    Hover.prototype.show = function() {
       return this.el.show();
     };
 
