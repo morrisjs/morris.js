@@ -10,8 +10,6 @@ class Morris.Line extends Morris.Grid
     @pointGrow = Raphael.animation r: @options.pointSize + 3, 25, 'linear'
     @pointShrink = Raphael.animation r: @options.pointSize, 25, 'linear'
 
-    @hoverConfigure @options.hoverOptions
-
     # column hilight events
     if @options.hilight
       @prevHilight = null
@@ -27,9 +25,6 @@ class Morris.Line extends Morris.Grid
       @el.bind 'touchstart', touchHandler
       @el.bind 'touchmove', touchHandler
       @el.bind 'touchend', touchHandler
-
-  postInit: ->
-    @hoverInit()
 
   # Default configuration
   #
@@ -60,7 +55,6 @@ class Morris.Line extends Morris.Grid
   # @private
   calc: ->
     @calcPoints()
-    @hoverCalculateMargins()
     @generatePaths()
     @calcHilightMargins()
 
@@ -78,9 +72,6 @@ class Morris.Line extends Morris.Grid
   # @private
   calcHilightMargins: ->
     @hilightMargins = ((r._x + @data[i]._x) / 2 for r, i in @data.slice(1))
-
-  hoverCalculateMargins: ->
-    @hoverMargins = ((r._x + @data[i]._x) / 2 for r, i in @data.slice(1))
 
   # generate paths for series lines
   #

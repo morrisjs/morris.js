@@ -5,10 +5,6 @@ class Morris.Bar extends Morris.Grid
 
   init: ->
     @cumulative = @options.stacked
-    @hoverConfigure @options.hoverOptions
-
-  postInit: ->
-    @hoverInit()
 
   # Default configuration
   #
@@ -30,7 +26,6 @@ class Morris.Bar extends Morris.Grid
   # @private
   calc: ->
     @calcBars()
-    @hoverCalculateMargins()
 
   # calculate series data bars coordinates and sizes
   #
@@ -114,7 +109,3 @@ class Morris.Bar extends Morris.Grid
       @options.barColors.call(@, r, s, type)
     else
       @options.barColors[sidx % @options.barColors.length]
-
-  hoverGetPosition: (index) ->
-    [x, y] = super(index)
-    [x, (@top + @bottom)/2 - @hoverHeight/2]

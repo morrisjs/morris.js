@@ -9,17 +9,16 @@ class Morris.Hover
     @el = $ "<div class='#{@options.class}'></div>"
     @el.hide()
     @options.parent.append(@el)
+    @el.bind 'mousemove mouseout touchstart touchmove touchend', (evt) ->
+      evt.stopPropagation()
 
-  update: (x, y, data) ->
-    @render(data)
+  update: (html, x, y) ->
+    @html(html)
     @show()
     @moveTo(x, y)
 
-  render: (data) ->
-    if typeof @options.content is 'function'
-      @el.html @options.content(data)
-    else
-      @el.html @options.content
+  html: (content) ->
+    @el.html(content)
 
   moveTo: (x, y) ->
     parentWidth  = @options.parent.innerWidth()

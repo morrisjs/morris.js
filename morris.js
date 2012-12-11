@@ -91,6 +91,12 @@
         this.init();
       }
       this.setData(this.options.data);
+      if (this.options.hideHover !== 'always') {
+        this.hover = new Morris.Hover({
+          parent: this.el
+        });
+        this.initHover();
+      }
       if (this.postInit) {
         this.postInit();
       }
@@ -102,6 +108,7 @@
       gridStrokeWidth: 0.5,
       gridTextColor: '#888',
       gridTextSize: 12,
+      hideHover: false,
       numLines: 5,
       padding: 25,
       parseTime: true,
@@ -362,182 +369,39 @@
       return "" + this.options.preUnits + (Morris.commas(label)) + this.options.postUnits;
     };
 
-    Grid.prototype.hoverConfigure = function(options) {
-      return this.hoverOptions = $.extend({}, this.hoverDefaults, options != null ? options : {});
-    };
-
-    Grid.prototype.hoverInit = function() {
-      if (this.hoverOptions.enableHover) {
-        this.hover = this.hoverBuild();
-        this.hoverBindEvents();
-        return this.hoverShow(this.hoverOptions.hideHover ? null : this.data.length - 1);
-      }
-    };
-
-    Grid.prototype.hoverDefaults = {
-      enableHover: true,
-      popupClass: "morris-popup",
-      hideHover: false,
-      allowOverflow: false,
-      pointMargin: 10,
-      hoverFill: function(index, row) {
-        return this.hoverFill(index, row);
-      }
-    };
-
-    Grid.prototype.hoverBindEvents = function() {
-      var touchHandler,
-        _this = this;
-      this.el.mousemove(function(evt) {
-        return _this.hoverUpdate(evt.pageX);
-      });
-      if (this.hoverOptions.hideHover) {
-        this.el.mouseout(function(evt) {
-          return _this.hoverShow(null);
+    Grid.prototype.initHover = function() {
+      var _this = this;
+      if (this.hover != null) {
+        this.el.bind('mousemove', function(evt) {
+          return _this.updateHover(evt.pageX, evt.pageY);
+        });
+        if (this.options.hideHover) {
+          this.el.bind('mouseout', function(evt) {
+            return _this.hover.hide();
+          });
+        }
+        return this.el.bind('touchstart touchmove touchend', function(evt) {
+          var touch;
+          touch = evt.originalEvent.touches[0] || evt.originalEvent.changedTouches[0];
+          _this.updateHover(touch.pageX, touch.pageY);
+          return touch;
         });
       }
-      touchHandler = function(evt) {
-        var touch;
-        touch = evt.originalEvent.touches[0] || evt.originalEvent.changedTouches[0];
-        _this.hoverUpdate(touch.pageX);
-        return touch;
-      };
-      this.el.bind('touchstart', touchHandler);
-      this.el.bind('touchmove', touchHandler);
-      this.el.bind('touchend', touchHandler);
-      this.hover.mousemove(function(evt) {
-        return evt.stopPropagation();
-      });
-      this.hover.mouseout(function(evt) {
-        return evt.stopPropagation();
-      });
-      this.hover.bind('touchstart', function(evt) {
-        return evt.stopPropagation();
-      });
-      this.hover.bind('touchmove', function(evt) {
-        return evt.stopPropagation();
-      });
-      return this.hover.bind('touchend', function(evt) {
-        return evt.stopPropagation();
-      });
     };
 
-    Grid.prototype.hoverCalculateMargins = function() {
-      var i;
-      return this.hoverMargins = (function() {
-        var _i, _ref, _results;
-        _results = [];
-        for (i = _i = 1, _ref = this.data.length; 1 <= _ref ? _i < _ref : _i > _ref; i = 1 <= _ref ? ++_i : --_i) {
-          _results.push(this.left + i * this.width / this.data.length);
-        }
-        return _results;
-      }).call(this);
+    Grid.prototype.hitTest = function(x, y) {
+      return null;
     };
 
-    Grid.prototype.hoverBuild = function() {
-      var hover;
-      hover = $("<div/>");
-      hover.addClass("" + this.hoverOptions.popupClass + " js-morris-popup");
-      hover.appendTo(this.el);
-      hover.hide();
-      return hover;
-    };
-
-    Grid.prototype.hoverUpdate = function(x) {
-      var hoverIndex, _i, _ref;
-      x -= this.el.offset().left;
-      for (hoverIndex = _i = 0, _ref = this.hoverMargins.length; 0 <= _ref ? _i < _ref : _i > _ref; hoverIndex = 0 <= _ref ? ++_i : --_i) {
-        if (this.hoverMargins[hoverIndex] > x) {
-          break;
-        }
+    Grid.prototype.updateHover = function(x, y) {
+      var hit, offset, _ref;
+      offset = this.el.offset();
+      x -= offset.left;
+      y -= offset.top;
+      hit = hitTest(x, y);
+      if (hit != null) {
+        return (_ref = this.hover).update.apply(_ref, hit);
       }
-      return this.hoverShow(hoverIndex);
-    };
-
-    Grid.prototype.hoverShow = function(index) {
-      if (index !== null) {
-        this.hover.html("");
-        this.hoverOptions.hoverFill.call(this, index, this.data[index]);
-        this.hoverPosition(index);
-        this.fire("hover.show", index);
-        this.hover.show();
-      }
-      if (!(index != null)) {
-        return this.hoverHide();
-      }
-    };
-
-    Grid.prototype.hoverHide = function() {
-      return this.hover.hide();
-    };
-
-    Grid.prototype.colorFor = function(row, i, type) {
-      return "inherit";
-    };
-
-    Grid.prototype.yLabelFormat = function(label) {
-      return Morris.commas(label);
-    };
-
-    Grid.prototype.hoverPosition = function(index) {
-      var x, y, _ref;
-      _ref = this.hoverGetPosition(index), x = _ref[0], y = _ref[1];
-      return this.hover.css({
-        top: "" + (this.el.offset().top + y) + "px",
-        left: "" + (this.el.offset().left + x) + "px"
-      });
-    };
-
-    Grid.prototype.hoverGetPosition = function(index) {
-      var miny, row, x, y;
-      row = this.data[index];
-      this.hoverWidth = this.hover.outerWidth(true);
-      this.hoverHeight = this.hover.outerHeight(true);
-      miny = y = Math.min.apply(null, ((function() {
-        var _i, _len, _ref, _results;
-        _ref = row._y;
-        _results = [];
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          y = _ref[_i];
-          if (y !== null) {
-            _results.push(y);
-          }
-        }
-        return _results;
-      })()).concat(this.bottom));
-      x = row._x - this.hoverWidth / 2;
-      y = miny;
-      y = y - this.hoverHeight - this.hoverOptions.pointMargin;
-      if (!this.hoverOptions.allowOverflow) {
-        if (x < this.left) {
-          x = row._x + this.hoverOptions.pointMargin;
-        } else if (x > this.right - this.hoverWidth) {
-          x = row._x - this.hoverWidth - this.hoverOptions.pointMargin;
-        }
-        y = Math.max(y, this.top);
-        y = Math.min(y, this.bottom - this.hoverHeight - this.hoverOptions.pointMargin);
-        if (y - miny < this.hoverWidth + this.hoverOptions.pointMargin) {
-          y = miny + this.hoverOptions.pointMargin;
-        }
-      }
-      return [x, y];
-    };
-
-    Grid.prototype.hoverFill = function(index, row) {
-      var i, xLabel, y, yLabel, _i, _len, _ref, _results;
-      xLabel = $("<h4/>");
-      xLabel.text(row.label);
-      xLabel.appendTo(this.hover);
-      _ref = row.y;
-      _results = [];
-      for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
-        y = _ref[i];
-        yLabel = $("<p/>");
-        yLabel.css("color", this.colorFor(row, i, "hover"));
-        yLabel.text("" + this.options.labels[i] + ": " + (this.yLabelFormat(y)));
-        _results.push(yLabel.appendTo(this.hover));
-      }
-      return _results;
     };
 
     return Grid;
@@ -615,20 +479,19 @@
       this.el = $("<div class='" + this.options["class"] + "'></div>");
       this.el.hide();
       this.options.parent.append(this.el);
+      this.el.bind('mousemove mouseout touchstart touchmove touchend', function(evt) {
+        return evt.stopPropagation();
+      });
     }
 
-    Hover.prototype.update = function(x, y, data) {
-      this.render(data);
+    Hover.prototype.update = function(html, x, y) {
+      this.html(html);
       this.show();
       return this.moveTo(x, y);
     };
 
-    Hover.prototype.render = function(data) {
-      if (typeof this.options.content === 'function') {
-        return this.el.html(this.options.content(data));
-      } else {
-        return this.el.html(this.options.content);
-      }
+    Hover.prototype.html = function(content) {
+      return this.el.html(content);
     };
 
     Hover.prototype.moveTo = function(x, y) {
@@ -690,7 +553,6 @@
       this.pointShrink = Raphael.animation({
         r: this.options.pointSize
       }, 25, 'linear');
-      this.hoverConfigure(this.options.hoverOptions);
       if (this.options.hilight) {
         this.prevHilight = null;
         this.el.mousemove(function(evt) {
@@ -713,10 +575,6 @@
       }
     };
 
-    Line.prototype.postInit = function() {
-      return this.hoverInit();
-    };
-
     Line.prototype.defaults = {
       lineWidth: 3,
       pointSize: 4,
@@ -734,7 +592,6 @@
 
     Line.prototype.calc = function() {
       this.calcPoints();
-      this.hoverCalculateMargins();
       this.generatePaths();
       return this.calcHilightMargins();
     };
@@ -767,20 +624,6 @@
     Line.prototype.calcHilightMargins = function() {
       var i, r;
       return this.hilightMargins = (function() {
-        var _i, _len, _ref, _results;
-        _ref = this.data.slice(1);
-        _results = [];
-        for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
-          r = _ref[i];
-          _results.push((r._x + this.data[i]._x) / 2);
-        }
-        return _results;
-      }).call(this);
-    };
-
-    Line.prototype.hoverCalculateMargins = function() {
-      var i, r;
-      return this.hoverMargins = (function() {
         var _i, _len, _ref, _results;
         _ref = this.data.slice(1);
         _results = [];
@@ -1244,12 +1087,7 @@
     }
 
     Bar.prototype.init = function() {
-      this.cumulative = this.options.stacked;
-      return this.hoverConfigure(this.options.hoverOptions);
-    };
-
-    Bar.prototype.postInit = function() {
-      return this.hoverInit();
+      return this.cumulative = this.options.stacked;
     };
 
     Bar.prototype.defaults = {
@@ -1259,8 +1097,7 @@
     };
 
     Bar.prototype.calc = function() {
-      this.calcBars();
-      return this.hoverCalculateMargins();
+      return this.calcBars();
     };
 
     Bar.prototype.calcBars = function() {
@@ -1378,12 +1215,6 @@
       } else {
         return this.options.barColors[sidx % this.options.barColors.length];
       }
-    };
-
-    Bar.prototype.hoverGetPosition = function(index) {
-      var x, y, _ref;
-      _ref = Bar.__super__.hoverGetPosition.call(this, index), x = _ref[0], y = _ref[1];
-      return [x, (this.top + this.bottom) / 2 - this.hoverHeight / 2];
     };
 
     return Bar;

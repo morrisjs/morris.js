@@ -3,11 +3,9 @@ describe "Morris.Hover", ->
   describe "with dummy content", ->
 
     beforeEach ->
-      @parent = $('<div style="width:200px;height:180px"></div>')
+      parent = $('<div style="width:200px;height:180px"></div>')
         .appendTo($('#test'))
-      @hover = new Morris.Hover(
-        parent:  @parent,
-        content: '<div style="width:84px;height:84px"></div>')
+      @hover = new Morris.Hover(parent:  parent)
       @element = $('#test .morris-popup')
 
     it "should initialise a hidden, empty popup", ->
@@ -26,8 +24,14 @@ describe "Morris.Hover", ->
         @hover.hide()
         @element.should.be.hidden
 
+    describe "#html", ->
+      it "should replace the contents of the element", ->
+        @hover.html('<div>Foobarbaz</div>')
+        @element.should.have.html('<div>Foobarbaz</div>')
+
     describe "#moveTo", ->
-      beforeEach -> @hover.render()
+      beforeEach ->
+        @hover.html('<div style="width:84px;height:84px"></div>')
 
       it "should place the popup directly above the given point", ->
         @hover.moveTo(100, 150)
@@ -49,23 +53,11 @@ describe "Morris.Hover", ->
         @element.should.have.css('left', '50px')
         @element.should.have.css('top', '40px')
 
-  describe "#render", ->
-    it "should take content from a string", ->
-      hover = new Morris.Hover(parent: $('#test'), content: 'Hello, World!')
-      hover.render()
-      $('#test .morris-popup').html().should.equal 'Hello, World!'
-
-    it "should take content from a method", ->
-      hover = new Morris.Hover(parent: $('#test'), content: (x) -> "Hello, #{x}!")
-      hover.render('Tester')
-      $('#test .morris-popup').html().should.equal 'Hello, Tester!'
-
   describe "#update", ->
     it "should update content, show and reposition the popup", ->
-      hover = new Morris.Hover
-        parent:  $('#test')
-        content: (x) -> "<div style='width:84px;height:84px'>Hello, #{x}!</div>"
-      hover.update(150, 200, 'Everyone')
+      hover = new Morris.Hover(parent: $('#test'))
+      html = "<div style='width:84px;height:84px'>Hello, Everyone!</div>"
+      hover.update(html, 150, 200)
       el = $('#test .morris-popup')
       el.should.have.css('left', '100px')
       el.should.have.css('top', '90px')
