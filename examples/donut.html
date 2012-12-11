@@ -14,10 +14,11 @@
 <pre id="code" class="prettyprint linenums">
 Morris.Donut({
   element: 'graph',
+  defaultLabelColor: '#ff0000',
   data: [
     {value: 70, label: 'foo'},
-    {value: 15, label: 'bar'},
-    {value: 10, label: 'baz'},
+    {value: 15, label: 'bar', labelColor: '#00ff00'},
+    {value: 10, label: 'baz', labelColor: '#0000ff'},
     {value: 5, label: 'A really really long label'}
   ],
   formatter: function (x) { return x + "%"}
