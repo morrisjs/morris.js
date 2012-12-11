@@ -38,6 +38,11 @@ Once you're all set up, you can compile, minify and run the tests using `grunt`.
 
 ## Changelog
 
+### 0.3.4 - 11st December 2012
+
+- **Donut charts!** [#135](https://github.com/oesmith/morris.js/issues/135).
+- Added defaultLabelColor and labelColor to handle changing the color for labels.
+
 ### 0.3.3 - 1st November 2012
 
 - **Bar charts!** [#101](https://github.com/oesmith/morris.js/issues/101).

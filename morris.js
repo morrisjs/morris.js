@@ -1360,6 +1360,7 @@
       idx = 0;
       this.segments = [];
       _ref1 = this.data;
+
       for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
         d = _ref1[_j];
         next = last + min + C * (d.value / total);
@@ -1377,6 +1378,7 @@
       this.text2 = this.r.text(cx, cy + 10, '').attr({
         'font-size': 14
       });
+
       max_value = Math.max.apply(null, (function() {
         var _k, _len2, _ref2, _results;
         _ref2 = this.data;
@@ -1402,7 +1404,7 @@
     };
 
     Donut.prototype.select = function(idx) {
-      var s, segment, _i, _len, _ref;
+      var s, segment, _i, _len, _ref, _fill_color;
       _ref = this.segments;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         s = _ref[_i];
@@ -1414,18 +1416,22 @@
         segment = idx;
       }
       segment.select();
-      return this.setLabels(segment.data.label, this.options.formatter(segment.data.value, segment.data));
+      _fill_color = segment.data.labelColor || this.options.defaultLabelColor || '#000000';
+      return this.setLabels(segment.data.label, this.options.formatter(segment.data.value, segment.data), _fill_color);
     };
 
-    Donut.prototype.setLabels = function(label1, label2) {
+    Donut.prototype.setLabels = function(label1, label2, fill_color) {
+
       var inner, maxHeightBottom, maxHeightTop, maxWidth, text1bbox, text1scale, text2bbox, text2scale;
+      _default_fill = fill_color || '#000000' ;
       inner = (Math.min(this.el.width() / 2, this.el.height() / 2) - 10) * 2 / 3;
       maxWidth = 1.8 * inner;
       maxHeightTop = inner / 2;
       maxHeightBottom = inner / 3;
       this.text1.attr({
         text: label1,
-        transform: ''
+        transform: '',
+        fill: fill_color
       });
       text1bbox = this.text1.getBBox();
       text1scale = Math.min(maxWidth / text1bbox.width, maxHeightTop / text1bbox.height);
@@ -1434,7 +1440,8 @@
       });
       this.text2.attr({
         text: label2,
-        transform: ''
+        transform: '',
+        fill: fill_color
       });
       text2bbox = this.text2.getBBox();
       text2scale = Math.min(maxWidth / text2bbox.width, maxHeightBottom / text2bbox.height);
