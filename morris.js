@@ -632,9 +632,26 @@
     };
 
     Hover.prototype.moveTo = function(x, y) {
+      var hoverHeight, hoverWidth, left, parentHeight, parentWidth, top;
+      parentWidth = this.options.parent.innerWidth();
+      parentHeight = this.options.parent.innerHeight();
+      hoverWidth = this.el.outerWidth();
+      hoverHeight = this.el.outerHeight();
+      left = Math.min(Math.max(0, x - hoverWidth / 2), parentWidth - hoverWidth);
+      if (y != null) {
+        top = y - hoverHeight - 10;
+        if (top < 0) {
+          top = y + 10;
+          if (top + hoverHeight > parentHeight) {
+            top = parentHeight / 2 - hoverHeight / 2;
+          }
+        }
+      } else {
+        top = parentHeight / 2 - hoverHeight / 2;
+      }
       return this.el.css({
-        left: (x - this.el.outerWidth() / 2) + "px",
-        top: (y - this.el.outerHeight() - 10) + "px"
+        left: left + "px",
+        top: top + "px"
       });
     };
 

@@ -3,8 +3,10 @@ describe "Morris.Hover", ->
   describe "with dummy content", ->
 
     beforeEach ->
+      @parent = $('<div style="width:200px;height:180px"></div>')
+        .appendTo($('#test'))
       @hover = new Morris.Hover(
-        parent:  $('#test'),
+        parent:  @parent,
         content: '<div style="width:84px;height:84px"></div>')
       @element = $('#test .morris-popup')
 
@@ -25,9 +27,25 @@ describe "Morris.Hover", ->
         @element.should.be.hidden
 
     describe "#moveTo", ->
-      it "should hover the popup directly above the given point", ->
-        @hover.render()
+      beforeEach -> @hover.render()
+
+      it "should place the popup directly above the given point", ->
         @hover.moveTo(100, 150)
+        @element.should.have.css('left', '50px')
+        @element.should.have.css('top', '40px')
+
+      it "should place the popup below the given point if it does not fit above", ->
+        @hover.moveTo(100, 50)
+        @element.should.have.css('left', '50px')
+        @element.should.have.css('top', '60px')
+
+      it "should center the popup vertically if it will not fit above or below", ->
+        @hover.moveTo(100, 100)
+        @element.should.have.css('left', '50px')
+        @element.should.have.css('top', '40px')
+
+      it "should center the popup vertically if no y value is supplied", ->
+        @hover.moveTo(100)
         @element.should.have.css('left', '50px')
         @element.should.have.css('top', '40px')
 

@@ -22,9 +22,20 @@ class Morris.Hover
       @el.html @options.content
 
   moveTo: (x, y) ->
-    @el.css(
-      left: (x - @el.outerWidth() / 2) + "px"
-      top:  (y - @el.outerHeight() - 10) + "px")
+    parentWidth  = @options.parent.innerWidth()
+    parentHeight = @options.parent.innerHeight()
+    hoverWidth   = @el.outerWidth()
+    hoverHeight  = @el.outerHeight()
+    left = Math.min(Math.max(0, x - hoverWidth / 2), parentWidth - hoverWidth)
+    if y?
+      top = y - hoverHeight - 10
+      if top < 0
+        top = y + 10
+        if top + hoverHeight > parentHeight
+          top = parentHeight / 2 - hoverHeight / 2
+    else
+      top = parentHeight / 2 - hoverHeight / 2
+    @el.css(left: left + "px", top: top + "px")
 
   show: ->
     @el.show()
