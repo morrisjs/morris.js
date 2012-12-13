@@ -66,12 +66,38 @@ class Morris.Line extends Morris.Grid
       row._x = @transX(row.x)
       row._y = for y in row.y
         if y? then @transY(y) else y
+      row._ymax = Math.min.apply(null, [@bottom].concat(y for y in row._y when y?))
 
   # calculate hilight margins
   #
   # @private
   calcHilightMargins: ->
     @hilightMargins = ((r._x + @data[i]._x) / 2 for r, i in @data.slice(1))
+
+  # hover element hit test
+  #
+  # @private
+  hitTest: (x, y) ->
+    # TODO better search algo
+    for r, i in @data.slice(1)
+      break if x < (r._x + @data[i]._x) / 2
+    @hoverFor(i)
+
+  # hover content for a point
+  #
+  # @private
+  hoverFor: (index) ->
+    row = @data[index]
+    content = "<div class='morris-hover-row-label'>#{row.label}</div>"
+    for y, j in row.y
+      content += """
+        <div class='morris-hover-point' style='color: #{@colorFor(row, j, 'label')}'>
+          #{@options.labels[j]}:
+          #{@yLabelFormat(y)}
+        </div>
+      """
+    [content, row._x, row._ymax]
+
 
   # generate paths for series lines
   #

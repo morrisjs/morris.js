@@ -12,6 +12,9 @@ class Morris.Grid extends Morris.EventEmitter
     if not @el? or @el.length == 0
       throw new Error("Graph container element not found")
 
+    if @el.css('position') == 'static'
+      @el.css('position', 'relative')
+
     @options = $.extend {}, @gridDefaults, (@defaults || {}), options
 
     # bail if there's no data
@@ -280,7 +283,7 @@ class Morris.Grid extends Morris.EventEmitter
       @el.bind 'touchstart touchmove touchend', (evt) =>
         touch = evt.originalEvent.touches[0] or evt.originalEvent.changedTouches[0]
         @updateHover touch.pageX, touch.pageY
-        return touch
+        touch
 
   hitTest: (x, y) -> null
 
@@ -288,7 +291,7 @@ class Morris.Grid extends Morris.EventEmitter
     offset = @el.offset()
     x -= offset.left
     y -= offset.top
-    hit = hitTest(x, y)
+    hit = @hitTest(x, y)
     if hit?
       @hover.update(hit...)
 

@@ -76,6 +76,9 @@
       if (!(this.el != null) || this.el.length === 0) {
         throw new Error("Graph container element not found");
       }
+      if (this.el.css('position') === 'static') {
+        this.el.css('position', 'relative');
+      }
       this.options = $.extend({}, this.gridDefaults, this.defaults || {}, options);
       if (this.options.data === void 0 || this.options.data.length === 0) {
         return;
@@ -398,7 +401,7 @@
       offset = this.el.offset();
       x -= offset.left;
       y -= offset.top;
-      hit = hitTest(x, y);
+      hit = this.hitTest(x, y);
       if (hit != null) {
         return (_ref = this.hover).update.apply(_ref, hit);
       }
@@ -468,7 +471,7 @@
   Morris.Hover = (function() {
 
     Hover.defaults = {
-      "class": 'morris-popup'
+      "class": 'morris-hover morris-default-style'
     };
 
     function Hover(options) {
@@ -603,7 +606,7 @@
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         row = _ref[_i];
         row._x = this.transX(row.x);
-        _results.push(row._y = (function() {
+        row._y = (function() {
           var _j, _len1, _ref1, _results1;
           _ref1 = row.y;
           _results1 = [];
@@ -616,7 +619,19 @@
             }
           }
           return _results1;
-        }).call(this));
+        }).call(this);
+        _results.push(row._ymax = Math.min.apply(null, [this.bottom].concat((function() {
+          var _j, _len1, _ref1, _results1;
+          _ref1 = row._y;
+          _results1 = [];
+          for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+            y = _ref1[_j];
+            if (y != null) {
+              _results1.push(y);
+            }
+          }
+          return _results1;
+        })())));
       }
       return _results;
     };
@@ -633,6 +648,30 @@
         }
         return _results;
       }).call(this);
+    };
+
+    Line.prototype.hitTest = function(x, y) {
+      var i, r, _i, _len, _ref;
+      _ref = this.data.slice(1);
+      for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
+        r = _ref[i];
+        if (x < (r._x + this.data[i]._x) / 2) {
+          break;
+        }
+      }
+      return this.hoverFor(i);
+    };
+
+    Line.prototype.hoverFor = function(index) {
+      var content, j, row, y, _i, _len, _ref;
+      row = this.data[index];
+      content = "<div class='morris-hover-row-label'>" + row.label + "</div>";
+      _ref = row.y;
+      for (j = _i = 0, _len = _ref.length; _i < _len; j = ++_i) {
+        y = _ref[j];
+        content += "<div class='morris-hover-point' style='color: " + (this.colorFor(row, j, 'label')) + "'>\n  " + this.options.labels[j] + ":\n  " + (this.yLabelFormat(y)) + "\n</div>";
+      }
+      return [content, row._x, row._ymax];
     };
 
     Line.prototype.generatePaths = function() {

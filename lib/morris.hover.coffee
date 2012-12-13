@@ -2,7 +2,7 @@ class Morris.Hover
   # Displays contextual information in a floating HTML div.
 
   @defaults:
-    class: 'morris-popup'
+    class: 'morris-hover morris-default-style'
 
   constructor: (options = {}) ->
     @options = $.extend {}, Morris.Hover.defaults, options

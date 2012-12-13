@@ -6,7 +6,7 @@ describe "Morris.Hover", ->
       parent = $('<div style="width:200px;height:180px"></div>')
         .appendTo($('#test'))
       @hover = new Morris.Hover(parent:  parent)
-      @element = $('#test .morris-popup')
+      @element = $('#test .morris-hover')
 
     it "should initialise a hidden, empty popup", ->
       @element.should.exist
@@ -58,7 +58,7 @@ describe "Morris.Hover", ->
       hover = new Morris.Hover(parent: $('#test'))
       html = "<div style='width:84px;height:84px'>Hello, Everyone!</div>"
       hover.update(html, 150, 200)
-      el = $('#test .morris-popup')
+      el = $('#test .morris-hover')
       el.should.have.css('left', '100px')
       el.should.have.css('top', '90px')
       el.should.have.text('Hello, Everyone!')
