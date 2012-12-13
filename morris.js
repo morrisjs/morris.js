@@ -359,7 +359,7 @@
     };
 
     Grid.prototype.yLabelFormat = function(label) {
-      return this.options.yLabelFormat.call(this, label, this.options.preUnits, this.options.postUnits);
+      return this.options.yLabelFormat(label, this.options.preUnits, this.options.postUnits);
     };
 
     return Grid;

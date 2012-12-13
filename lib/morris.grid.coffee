@@ -255,7 +255,7 @@ class Morris.Grid extends Morris.EventEmitter
   # @private
   #
   yLabelFormat: (label) ->
-    @options.yLabelFormat.call(@, label, @options.preUnits, @options.postUnits)
+    @options.yLabelFormat(label, @options.preUnits, @options.postUnits)
 
 
 # Parse a date into a javascript timestamp
