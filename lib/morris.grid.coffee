@@ -44,6 +44,7 @@ class Morris.Grid extends Morris.EventEmitter
     gridStrokeWidth: 0.5
     gridTextColor: '#888'
     gridTextSize: 12
+    yLabelFormat: (label, prefix, suffix) -> "#{prefix}#{Morris.commas(label)}#{suffix}"
     numLines: 5
     padding: 25
     parseTime: true
@@ -254,7 +255,7 @@ class Morris.Grid extends Morris.EventEmitter
   # @private
   #
   yLabelFormat: (label) ->
-    "#{@options.preUnits}#{Morris.commas(label)}#{@options.postUnits}"
+    @options.yLabelFormat(label, @options.preUnits, @options.postUnits)
 
 
 # Parse a date into a javascript timestamp
