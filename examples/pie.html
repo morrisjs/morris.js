@@ -1,0 +1,36 @@
+<!doctype html>
+<head>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+  <script src="https://raw.github.com/DmitryBaranovskiy/raphael/300aa589f5a0ba7fce667cd62c7cdda0bd5ad904/raphael-min.js"></script>
+  <script src="../morris.js"></script>
+  <script src="lib/prettify.js"></script>
+  <script src="lib/example.js"></script>
+  <link rel="stylesheet" href="lib/example.css">
+  <link rel="stylesheet" href="lib/prettify.css">
+</head>
+<body>
+<h1>Pie Chart</h1>
+<div id="graph"></div>
+<pre id="code" class="prettyprint linenums">
+var pie = Morris.Pie({
+  element: 'graph',
+  data: [
+    {value: 70, label: 'foo'},
+    {value: 5, label: 'bar'},
+    {value: 10, label: 'baz'},
+    {value: 5, label: 'A really really long label'}
+  ],
+  formatter: function (x) { return x + "%"},
+  showLabel: false,
+  drawOut: 15
+});
+
+pie.on("hover", function(segmentId, segmentData){
+  console.log("hover", segmentId, segmentData);
+});
+
+pie.on("click", function(segmentId, segmentData){
+  console.log("click", segmentId, segmentData);
+});
+</pre>
+</body>
