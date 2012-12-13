@@ -96,7 +96,7 @@ class Morris.Line extends Morris.Grid
   # Draws the line chart.
   #
   draw: ->
-    @drawXAxis()
+    @drawXAxis() if @options.gridEnabled
     @drawSeries()
     @drawHover()
     @hilight(if @options.hideHover then null else @data.length - 1)

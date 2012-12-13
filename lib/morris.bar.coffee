@@ -74,7 +74,7 @@ class Morris.Bar extends Morris.Grid
   # Draws the bar chart.
   #
   draw: ->
-    @drawXAxis()
+    @drawXAxis() if @options.gridEnabled
     @drawSeries()
     @drawHover()
     @hilight(if @options.hideHover then null else @data.length - 1)

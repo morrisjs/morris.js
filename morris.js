@@ -95,6 +95,7 @@
 
     Grid.prototype.gridDefaults = {
       dateFormat: null,
+      gridEnabled: true,
       gridLineColor: '#aaa',
       gridStrokeWidth: 0.5,
       gridTextColor: '#888',
@@ -266,11 +267,17 @@
         this.elementWidth = w;
         this.elementHeight = h;
         this.dirty = false;
-        maxYLabelWidth = Math.max(this.measureText(this.yAxisFormat(this.ymin), this.options.gridTextSize).width, this.measureText(this.yAxisFormat(this.ymax), this.options.gridTextSize).width);
+        maxYLabelWidth = 0;
+        if (this.options.gridEnabled) {
+          maxYLabelWidth = Math.max(this.measureText(this.yAxisFormat(this.ymin), this.options.gridTextSize).width, this.measureText(this.yAxisFormat(this.ymax), this.options.gridTextSize).width);
+        }
         this.left = maxYLabelWidth + this.options.padding;
         this.right = this.elementWidth - this.options.padding;
         this.top = this.options.padding;
-        this.bottom = this.elementHeight - this.options.padding - 1.5 * this.options.gridTextSize;
+        this.bottom = this.elementHeight - this.options.padding;
+        if (this.options.gridEnabled) {
+          this.bottom -= 1.5 * this.options.gridTextSize;
+        }
         this.width = this.right - this.left;
         this.height = this.bottom - this.top;
         this.dx = this.width / (this.xmax - this.xmin);
@@ -296,7 +303,9 @@
     Grid.prototype.redraw = function() {
       this.r.clear();
       this._calc();
-      this.drawGrid();
+      if (this.options.gridEnabled) {
+        this.drawGrid();
+      }
       this.drawGoals();
       this.drawEvents();
       if (this.draw) {
@@ -579,7 +588,9 @@
     };
 
     Line.prototype.draw = function() {
-      this.drawXAxis();
+      if (this.options.gridEnabled) {
+        this.drawXAxis();
+      }
       this.drawSeries();
       this.drawHover();
       return this.hilight(this.options.hideHover ? null : this.data.length - 1);
@@ -1143,7 +1154,9 @@
     };
 
     Bar.prototype.draw = function() {
-      this.drawXAxis();
+      if (this.options.gridEnabled) {
+        this.drawXAxis();
+      }
       this.drawSeries();
       this.drawHover();
       return this.hilight(this.options.hideHover ? null : this.data.length - 1);
