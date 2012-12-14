@@ -10,21 +10,10 @@ class Morris.Line extends Morris.Grid
     @pointGrow = Raphael.animation r: @options.pointSize + 3, 25, 'linear'
     @pointShrink = Raphael.animation r: @options.pointSize, 25, 'linear'
 
-    # column hilight events
-    if @options.hilight
-      @prevHilight = null
-      @el.mousemove (evt) =>
-        @updateHilight evt.pageX
-      if @options.hilightAutoHide
-        @el.mouseout (evt) =>
-          @hilight null
-      touchHandler = (evt) =>
-        touch = evt.originalEvent.touches[0] or evt.originalEvent.changedTouches[0]
-        @updateHilight touch.pageX
-        return touch
-      @el.bind 'touchstart', touchHandler
-      @el.bind 'touchmove', touchHandler
-      @el.bind 'touchend', touchHandler
+    if @options.hideHover isnt 'always'
+      @hover = new Morris.Hover(parent: @el)
+      @on('hover', @onHover)
+      @on('hoverout', @onHoverOut)
 
   # Default configuration
   #
@@ -44,11 +33,10 @@ class Morris.Line extends Morris.Grid
     pointStrokeColors: ['#ffffff']
     pointFillColors: []
     smooth: true
-    hilight: true
-    hilightAutoHide: false
     xLabels: 'auto'
     xLabelFormat: null
     continuousLine: true
+    hideHover: false
 
   # Do any size-related calculations
   #
@@ -56,7 +44,6 @@ class Morris.Line extends Morris.Grid
   calc: ->
     @calcPoints()
     @generatePaths()
-    @calcHilightMargins()
 
   # calculate series data point coordinates
   #
@@ -68,25 +55,38 @@ class Morris.Line extends Morris.Grid
         if y? then @transY(y) else y
       row._ymax = Math.min.apply(null, [@bottom].concat(y for y in row._y when y?))
 
-  # calculate hilight margins
+  # hit test - returns the index of the row beneath the given coordinate
   #
-  # @private
-  calcHilightMargins: ->
-    @hilightMargins = ((r._x + @data[i]._x) / 2 for r, i in @data.slice(1))
-
-  # hover element hit test
-  #
-  # @private
   hitTest: (x, y) ->
     # TODO better search algo
-    for r, i in @data.slice(1)
-      break if x < (r._x + @data[i]._x) / 2
-    @hoverFor(i)
+    for r, index in @data.slice(1)
+      break if x < (r._x + @data[index]._x) / 2
+    index
+
+  # hover event handler
+  #
+  onHover: (x, y) =>
+    index = @hitTest(x, y)
+    if @options.hideHover isnt 'always'
+      @hover.update(@hoverContentForRow(index)...)
+      @hilight(index)
+
+  onHoverOut: =>
+    if @options.hideHover is 'auto'
+      @displayHoverForIndex(null)
+
+  displayHoverForRow: (index) ->
+    if index?
+      @hover.update(@hoverContentForRow(index)...)
+      @hilight(index)
+    else
+      @hover.hide()
+      @hilight()
 
   # hover content for a point
   #
   # @private
-  hoverFor: (index) ->
+  hoverContentForRow: (index) ->
     row = @data[index]
     content = "<div class='morris-hover-row-label'>#{row.label}</div>"
     for y, j in row.y
@@ -118,7 +118,8 @@ class Morris.Line extends Morris.Grid
   draw: ->
     @drawXAxis()
     @drawSeries()
-    @hilight(if @options.hilightAutoHide then null else @data.length - 1) if @options.hilight
+    if @options.hideHover is false
+      @displayHoverForRow(@data.length - 1)
 
   # draw the x-axis labels
   #
@@ -235,13 +236,6 @@ class Morris.Line extends Morris.Grid
         if @seriesPoints[i][index]
           @seriesPoints[i][index].animate @pointGrow
     @prevHilight = index
-
-  # @private
-  updateHilight: (x) =>
-    x -= @el.offset().left
-    for hilightIndex in [0...@hilightMargins.length]
-      break if @hilightMargins[hilightIndex] > x
-    @hilight hilightIndex
 
   # @private
   strokeWidthForSeries: (index) ->

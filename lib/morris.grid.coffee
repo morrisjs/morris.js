@@ -40,10 +40,18 @@ class Morris.Grid extends Morris.EventEmitter
     @setData @options.data
 
     # hover
-    unless @options.hideHover is 'always'
-      @hover = new Morris.Hover
-        parent: @el
-      @initHover()
+    @el.bind 'mousemove', (evt) =>
+      offset = @el.offset()
+      @fire 'hover', evt.pageX - offset.left, evt.pageY - offset.top
+
+    @el.bind 'mouseout', (evt) =>
+      @fire 'hoverout'
+
+    @el.bind 'touchstart touchmove touchend', (evt) =>
+      touch = evt.originalEvent.touches[0] or evt.originalEvent.changedTouches[0]
+      offset = @el.offset()
+      @fire 'hover', touch.pageX - offset.left, touch.pageY - offset.top
+      touch
 
     @postInit() if @postInit
 
@@ -268,29 +276,7 @@ class Morris.Grid extends Morris.EventEmitter
   yLabelFormat: (label) ->
     "#{@options.preUnits}#{Morris.commas(label)}#{@options.postUnits}"
 
-  # Hover stuff
-  #
-  #
-  initHover: ->
-    if @hover?
-      @el.bind 'mousemove', (evt) =>
-        @updateHover evt.pageX, evt.pageY
-
-      if @options.hideHover
-        @el.bind 'mouseout', (evt) =>
-          @hover.hide()
-
-      @el.bind 'touchstart touchmove touchend', (evt) =>
-        touch = evt.originalEvent.touches[0] or evt.originalEvent.changedTouches[0]
-        @updateHover touch.pageX, touch.pageY
-        touch
-
-  hitTest: (x, y) -> null
-
   updateHover: (x, y) ->
-    offset = @el.offset()
-    x -= offset.left
-    y -= offset.top
     hit = @hitTest(x, y)
     if hit?
       @hover.update(hit...)

@@ -68,6 +68,7 @@
     __extends(Grid, _super);
 
     function Grid(options) {
+      var _this = this;
       if (typeof options.element === 'string') {
         this.el = $(document.getElementById(options.element));
       } else {
@@ -94,12 +95,21 @@
         this.init();
       }
       this.setData(this.options.data);
-      if (this.options.hideHover !== 'always') {
-        this.hover = new Morris.Hover({
-          parent: this.el
-        });
-        this.initHover();
-      }
+      this.el.bind('mousemove', function(evt) {
+        var offset;
+        offset = _this.el.offset();
+        return _this.fire('hover', evt.pageX - offset.left, evt.pageY - offset.top);
+      });
+      this.el.bind('mouseout', function(evt) {
+        return _this.fire('hoverout');
+      });
+      this.el.bind('touchstart touchmove touchend', function(evt) {
+        var offset, touch;
+        touch = evt.originalEvent.touches[0] || evt.originalEvent.changedTouches[0];
+        offset = _this.el.offset();
+        _this.fire('hover', touch.pageX - offset.left, touch.pageY - offset.top);
+        return touch;
+      });
       if (this.postInit) {
         this.postInit();
       }
@@ -372,35 +382,8 @@
       return "" + this.options.preUnits + (Morris.commas(label)) + this.options.postUnits;
     };
 
-    Grid.prototype.initHover = function() {
-      var _this = this;
-      if (this.hover != null) {
-        this.el.bind('mousemove', function(evt) {
-          return _this.updateHover(evt.pageX, evt.pageY);
-        });
-        if (this.options.hideHover) {
-          this.el.bind('mouseout', function(evt) {
-            return _this.hover.hide();
-          });
-        }
-        return this.el.bind('touchstart touchmove touchend', function(evt) {
-          var touch;
-          touch = evt.originalEvent.touches[0] || evt.originalEvent.changedTouches[0];
-          _this.updateHover(touch.pageX, touch.pageY);
-          return touch;
-        });
-      }
-    };
-
-    Grid.prototype.hitTest = function(x, y) {
-      return null;
-    };
-
     Grid.prototype.updateHover = function(x, y) {
-      var hit, offset, _ref;
-      offset = this.el.offset();
-      x -= offset.left;
-      y -= offset.top;
+      var hit, _ref;
       hit = this.hitTest(x, y);
       if (hit != null) {
         return (_ref = this.hover).update.apply(_ref, hit);
@@ -482,9 +465,6 @@
       this.el = $("<div class='" + this.options["class"] + "'></div>");
       this.el.hide();
       this.options.parent.append(this.el);
-      this.el.bind('mousemove mouseout touchstart touchmove touchend', function(evt) {
-        return evt.stopPropagation();
-      });
     }
 
     Hover.prototype.update = function(html, x, y) {
@@ -538,9 +518,11 @@
     __extends(Line, _super);
 
     function Line(options) {
-      this.updateHilight = __bind(this.updateHilight, this);
-
       this.hilight = __bind(this.hilight, this);
+
+      this.onHoverOut = __bind(this.onHoverOut, this);
+
+      this.onHover = __bind(this.onHover, this);
       if (!(this instanceof Morris.Line)) {
         return new Morris.Line(options);
       }
@@ -548,33 +530,18 @@
     }
 
     Line.prototype.init = function() {
-      var touchHandler,
-        _this = this;
       this.pointGrow = Raphael.animation({
         r: this.options.pointSize + 3
       }, 25, 'linear');
       this.pointShrink = Raphael.animation({
         r: this.options.pointSize
       }, 25, 'linear');
-      if (this.options.hilight) {
-        this.prevHilight = null;
-        this.el.mousemove(function(evt) {
-          return _this.updateHilight(evt.pageX);
+      if (this.options.hideHover !== 'always') {
+        this.hover = new Morris.Hover({
+          parent: this.el
         });
-        if (this.options.hilightAutoHide) {
-          this.el.mouseout(function(evt) {
-            return _this.hilight(null);
-          });
-        }
-        touchHandler = function(evt) {
-          var touch;
-          touch = evt.originalEvent.touches[0] || evt.originalEvent.changedTouches[0];
-          _this.updateHilight(touch.pageX);
-          return touch;
-        };
-        this.el.bind('touchstart', touchHandler);
-        this.el.bind('touchmove', touchHandler);
-        return this.el.bind('touchend', touchHandler);
+        this.on('hover', this.onHover);
+        return this.on('hoverout', this.onHoverOut);
       }
     };
 
@@ -586,17 +553,15 @@
       pointStrokeColors: ['#ffffff'],
       pointFillColors: [],
       smooth: true,
-      hilight: true,
-      hilightAutoHide: false,
       xLabels: 'auto',
       xLabelFormat: null,
-      continuousLine: true
+      continuousLine: true,
+      hideHover: false
     };
 
     Line.prototype.calc = function() {
       this.calcPoints();
-      this.generatePaths();
-      return this.calcHilightMargins();
+      return this.generatePaths();
     };
 
     Line.prototype.calcPoints = function() {
@@ -636,33 +601,45 @@
       return _results;
     };
 
-    Line.prototype.calcHilightMargins = function() {
-      var i, r;
-      return this.hilightMargins = (function() {
-        var _i, _len, _ref, _results;
-        _ref = this.data.slice(1);
-        _results = [];
-        for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
-          r = _ref[i];
-          _results.push((r._x + this.data[i]._x) / 2);
-        }
-        return _results;
-      }).call(this);
-    };
-
     Line.prototype.hitTest = function(x, y) {
-      var i, r, _i, _len, _ref;
+      var index, r, _i, _len, _ref;
       _ref = this.data.slice(1);
-      for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
-        r = _ref[i];
-        if (x < (r._x + this.data[i]._x) / 2) {
+      for (index = _i = 0, _len = _ref.length; _i < _len; index = ++_i) {
+        r = _ref[index];
+        if (x < (r._x + this.data[index]._x) / 2) {
           break;
         }
       }
-      return this.hoverFor(i);
+      return index;
     };
 
-    Line.prototype.hoverFor = function(index) {
+    Line.prototype.onHover = function(x, y) {
+      var index, _ref;
+      index = this.hitTest(x, y);
+      if (this.options.hideHover !== 'always') {
+        (_ref = this.hover).update.apply(_ref, this.hoverContentForRow(index));
+        return this.hilight(index);
+      }
+    };
+
+    Line.prototype.onHoverOut = function() {
+      if (this.options.hideHover === 'auto') {
+        return this.displayHoverForIndex(null);
+      }
+    };
+
+    Line.prototype.displayHoverForRow = function(index) {
+      var _ref;
+      if (index != null) {
+        (_ref = this.hover).update.apply(_ref, this.hoverContentForRow(index));
+        return this.hilight(index);
+      } else {
+        this.hover.hide();
+        return this.hilight();
+      }
+    };
+
+    Line.prototype.hoverContentForRow = function(index) {
       var content, j, row, y, _i, _len, _ref;
       row = this.data[index];
       content = "<div class='morris-hover-row-label'>" + row.label + "</div>";
@@ -722,8 +699,8 @@
     Line.prototype.draw = function() {
       this.drawXAxis();
       this.drawSeries();
-      if (this.options.hilight) {
-        return this.hilight(this.options.hilightAutoHide ? null : this.data.length - 1);
+      if (this.options.hideHover === false) {
+        return this.displayHoverForRow(this.data.length - 1);
       }
     };
 
@@ -891,17 +868,6 @@
         }
       }
       return this.prevHilight = index;
-    };
-
-    Line.prototype.updateHilight = function(x) {
-      var hilightIndex, _i, _ref;
-      x -= this.el.offset().left;
-      for (hilightIndex = _i = 0, _ref = this.hilightMargins.length; 0 <= _ref ? _i < _ref : _i > _ref; hilightIndex = 0 <= _ref ? ++_i : --_i) {
-        if (this.hilightMargins[hilightIndex] > x) {
-          break;
-        }
-      }
-      return this.hilight(hilightIndex);
     };
 
     Line.prototype.strokeWidthForSeries = function(index) {

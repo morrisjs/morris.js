@@ -9,8 +9,6 @@ class Morris.Hover
     @el = $ "<div class='#{@options.class}'></div>"
     @el.hide()
     @options.parent.append(@el)
-    @el.bind 'mousemove mouseout touchstart touchmove touchend', (evt) ->
-      evt.stopPropagation()
 
   update: (html, x, y) ->
     @html(html)
