@@ -6,6 +6,11 @@ class Morris.Bar extends Morris.Grid
   init: ->
     @cumulative = @options.stacked
 
+    if @options.hideHover isnt 'always'
+      @hover = new Morris.Hover(parent: @el)
+      @on('hovermove', @onHoverMove)
+      @on('hoverout', @onHoverOut)
+
   # Default configuration
   #
   defaults:
@@ -26,6 +31,8 @@ class Morris.Bar extends Morris.Grid
   # @private
   calc: ->
     @calcBars()
+    if @options.hideHover is false
+      @hover.update(@hoverContentForRow(@data.length - 1)...)
 
   # calculate series data bars coordinates and sizes
   #
@@ -101,7 +108,7 @@ class Morris.Bar extends Morris.Grid
   #
   # @param row  [Object] row data
   # @param sidx [Number] series index
-  # @param type [String] "bar" or "hover"
+  # @param type [String] "bar", "hover" or "label"
   colorFor: (row, sidx, type) ->
     if typeof @options.barColors is 'function'
       r = { x: row.x, y: row.y[sidx], label: row.label }
@@ -109,3 +116,36 @@ class Morris.Bar extends Morris.Grid
       @options.barColors.call(@, r, s, type)
     else
       @options.barColors[sidx % @options.barColors.length]
+
+  # hit test - returns the index of the row beneath the given coordinate
+  #
+  hitTest: (x, y) ->
+    x = Math.max(Math.min(x, @right), @left)
+    Math.min(@data.length - 1,
+      Math.floor((x - @left) / ((@right - @left) / @data.length)))
+
+  # hover event handler
+  #
+  onHoverMove: (x, y) =>
+    index = @hitTest(x, y)
+    @hover.update(@hoverContentForRow(index)...)
+
+  onHoverOut: =>
+    if @options.hideHover is 'auto'
+      @hover.hide()
+
+  # hover content for a point
+  #
+  # @private
+  hoverContentForRow: (index) ->
+    row = @data[index]
+    content = "<div class='morris-hover-row-label'>#{row.label}</div>"
+    for y, j in row.y
+      content += """
+        <div class='morris-hover-point' style='color: #{@colorFor(row, j, 'label')}'>
+          #{@options.labels[j]}:
+          #{@yLabelFormat(y)}
+        </div>
+      """
+    x = @left + (index + 0.5) * (@right - @left) / @data.length
+    [content, x]

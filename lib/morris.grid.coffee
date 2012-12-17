@@ -42,7 +42,7 @@ class Morris.Grid extends Morris.EventEmitter
     # hover
     @el.bind 'mousemove', (evt) =>
       offset = @el.offset()
-      @fire 'hover', evt.pageX - offset.left, evt.pageY - offset.top
+      @fire 'hovermove', evt.pageX - offset.left, evt.pageY - offset.top
 
     @el.bind 'mouseout', (evt) =>
       @fire 'hoverout'

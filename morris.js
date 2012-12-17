@@ -98,7 +98,7 @@
       this.el.bind('mousemove', function(evt) {
         var offset;
         offset = _this.el.offset();
-        return _this.fire('hover', evt.pageX - offset.left, evt.pageY - offset.top);
+        return _this.fire('hovermove', evt.pageX - offset.left, evt.pageY - offset.top);
       });
       this.el.bind('mouseout', function(evt) {
         return _this.fire('hoverout');
@@ -522,7 +522,7 @@
 
       this.onHoverOut = __bind(this.onHoverOut, this);
 
-      this.onHover = __bind(this.onHover, this);
+      this.onHoverMove = __bind(this.onHoverMove, this);
       if (!(this instanceof Morris.Line)) {
         return new Morris.Line(options);
       }
@@ -540,7 +540,7 @@
         this.hover = new Morris.Hover({
           parent: this.el
         });
-        this.on('hover', this.onHover);
+        this.on('hovermove', this.onHoverMove);
         return this.on('hoverout', this.onHoverOut);
       }
     };
@@ -613,13 +613,10 @@
       return index;
     };
 
-    Line.prototype.onHover = function(x, y) {
-      var index, _ref;
+    Line.prototype.onHoverMove = function(x, y) {
+      var index;
       index = this.hitTest(x, y);
-      if (this.options.hideHover !== 'always') {
-        (_ref = this.hover).update.apply(_ref, this.hoverContentForRow(index));
-        return this.hilight(index);
-      }
+      return displayHoverForRow(index);
     };
 
     Line.prototype.onHoverOut = function() {
@@ -1083,6 +1080,9 @@
     __extends(Bar, _super);
 
     function Bar(options) {
+      this.onHoverOut = __bind(this.onHoverOut, this);
+
+      this.onHoverMove = __bind(this.onHoverMove, this);
       if (!(this instanceof Morris.Bar)) {
         return new Morris.Bar(options);
       }
@@ -1092,7 +1092,14 @@
     }
 
     Bar.prototype.init = function() {
-      return this.cumulative = this.options.stacked;
+      this.cumulative = this.options.stacked;
+      if (this.options.hideHover !== 'always') {
+        this.hover = new Morris.Hover({
+          parent: this.el
+        });
+        this.on('hovermove', this.onHoverMove);
+        return this.on('hoverout', this.onHoverOut);
+      }
     };
 
     Bar.prototype.defaults = {
@@ -1102,7 +1109,11 @@
     };
 
     Bar.prototype.calc = function() {
-      return this.calcBars();
+      var _ref;
+      this.calcBars();
+      if (this.options.hideHover === false) {
+        return (_ref = this.hover).update.apply(_ref, this.hoverContentForRow(this.data.length - 1));
+      }
     };
 
     Bar.prototype.calcBars = function() {
@@ -1220,6 +1231,36 @@
       } else {
         return this.options.barColors[sidx % this.options.barColors.length];
       }
+    };
+
+    Bar.prototype.hitTest = function(x, y) {
+      x = Math.max(Math.min(x, this.right), this.left);
+      return Math.min(this.data.length - 1, Math.floor((x - this.left) / ((this.right - this.left) / this.data.length)));
+    };
+
+    Bar.prototype.onHoverMove = function(x, y) {
+      var index, _ref;
+      index = this.hitTest(x, y);
+      return (_ref = this.hover).update.apply(_ref, this.hoverContentForRow(index));
+    };
+
+    Bar.prototype.onHoverOut = function() {
+      if (this.options.hideHover === 'auto') {
+        return this.hover.hide();
+      }
+    };
+
+    Bar.prototype.hoverContentForRow = function(index) {
+      var content, j, row, x, y, _i, _len, _ref;
+      row = this.data[index];
+      content = "<div class='morris-hover-row-label'>" + row.label + "</div>";
+      _ref = row.y;
+      for (j = _i = 0, _len = _ref.length; _i < _len; j = ++_i) {
+        y = _ref[j];
+        content += "<div class='morris-hover-point' style='color: " + (this.colorFor(row, j, 'label')) + "'>\n  " + this.options.labels[j] + ":\n  " + (this.yLabelFormat(y)) + "\n</div>";
+      }
+      x = this.left + (index + 0.5) * (this.right - this.left) / this.data.length;
+      return [content, x];
     };
 
     return Bar;

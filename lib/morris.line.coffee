@@ -12,7 +12,7 @@ class Morris.Line extends Morris.Grid
 
     if @options.hideHover isnt 'always'
       @hover = new Morris.Hover(parent: @el)
-      @on('hover', @onHover)
+      @on('hovermove', @onHoverMove)
       @on('hoverout', @onHoverOut)
 
   # Default configuration
@@ -65,11 +65,9 @@ class Morris.Line extends Morris.Grid
 
   # hover event handler
   #
-  onHover: (x, y) =>
+  onHoverMove: (x, y) =>
     index = @hitTest(x, y)
-    if @options.hideHover isnt 'always'
-      @hover.update(@hoverContentForRow(index)...)
-      @hilight(index)
+    displayHoverForRow(index)
 
   onHoverOut: =>
     if @options.hideHover is 'auto'
