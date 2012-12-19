@@ -7,6 +7,7 @@
   <script src="lib/example.js"></script>
   <link rel="stylesheet" href="lib/example.css">
   <link rel="stylesheet" href="lib/prettify.css">
+  <link rel="stylesheet" href="../morris.css">
 </head>
 <body>
 <h1>Decimal Data</h1>
@@ -25,7 +26,11 @@ window.m = Morris.Line({
   xkey: 'x',
   ykeys: ['y'],
   labels: ['sin(x)'],
-  parseTime: false
+  parseTime: false,
+  hoverCallback: function (index, options) {
+    var row = options.data[index];
+    return "sin(" + row.x + ") = " + row.y;
+  }
 });
 </pre>
 </body>
