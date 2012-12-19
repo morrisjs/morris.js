@@ -94,8 +94,15 @@ class Morris.Grid extends Morris.EventEmitter
       total = 0
       ret.y = for ykey, idx in @options.ykeys
         yval = row[ykey]
-        yval = parseFloat(yval) if typeof yval is 'string'
-        yval = null if yval? and typeof yval isnt 'number'
+
+        if typeof yval is 'object' and yval != null
+          yvalues = yval
+          yval = 0
+          for zkey in @options.zkeys
+            yval += @parseValue yvalues[zkey]
+        else
+          yval = @parseValue yval
+
         if yval?
           if @cumulative
             total += yval
@@ -108,7 +115,7 @@ class Morris.Grid extends Morris.EventEmitter
         if @cumulative and total?
           ymax = Math.max(total, ymax)
           ymin = Math.min(total, ymin)
-        yval
+        if yvalues then yvalues else yval
       ret
 
     if @options.parseTime
@@ -189,7 +196,13 @@ class Morris.Grid extends Morris.EventEmitter
 
   # Quick translation helpers
   #
-  transY: (y) -> @bottom - (y - @ymin) * @dy
+  transY: (y) ->
+    if typeof y is 'object'
+      newY = {}
+      newY[zkey] = @transY y[zkey] for zkey in @options.zkeys
+      newY
+    else
+      @bottom - (y - @ymin) * @dy
   transX: (x) ->
     if @data.length == 1
       (@left + @right) / 2
@@ -254,8 +267,20 @@ class Morris.Grid extends Morris.EventEmitter
   # @private
   #
   yLabelFormat: (label) ->
-    "#{@options.preUnits}#{Morris.commas(label)}#{@options.postUnits}"
+    if typeof label is 'object' and label != null
+      labels = []
+      for zkey, i in @options.zkeys
+        labels.push "#{@yLabelFormat label[zkey]} #{@options.zLabels[i]}"
+      labels.join ', '
+    else
+      "#{@options.preUnits}#{Morris.commas(label)}#{@options.postUnits}"
 
+  # @private
+  #
+  parseValue: (value) ->
+    value = parseFloat(value) if typeof value is 'string'
+    value = null if value? and typeof value isnt 'number'
+    value
 
 # Parse a date into a javascript timestamp
 #
