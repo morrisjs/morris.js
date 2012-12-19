@@ -124,12 +124,16 @@ class Morris.Bar extends Morris.Grid
     Math.min(@data.length - 1,
       Math.floor((x - @left) / ((@right - @left) / @data.length)))
 
-  # hover event handler
+  # hover movement event handler
   #
+  # @private
   onHoverMove: (x, y) =>
     index = @hitTest(x, y)
     @hover.update(@hoverContentForRow(index)...)
 
+  # hover out event handler
+  #
+  # @private
   onHoverOut: =>
     if @options.hideHover is 'auto'
       @hover.hide()
@@ -138,14 +142,17 @@ class Morris.Bar extends Morris.Grid
   #
   # @private
   hoverContentForRow: (index) ->
-    row = @data[index]
-    content = "<div class='morris-hover-row-label'>#{row.label}</div>"
-    for y, j in row.y
-      content += """
-        <div class='morris-hover-point' style='color: #{@colorFor(row, j, 'label')}'>
-          #{@options.labels[j]}:
-          #{@yLabelFormat(y)}
-        </div>
-      """
+    if typeof @options.hoverCallback is 'function'
+      content = @options.hoverCallback(index, @options)
+    else
+      row = @data[index]
+      content = "<div class='morris-hover-row-label'>#{row.label}</div>"
+      for y, j in row.y
+        content += """
+          <div class='morris-hover-point' style='color: #{@colorFor(row, j, 'label')}'>
+            #{@options.labels[j]}:
+            #{@yLabelFormat(y)}
+          </div>
+        """
     x = @left + (index + 0.5) * (@right - @left) / @data.length
     [content, x]

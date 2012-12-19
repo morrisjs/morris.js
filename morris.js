@@ -616,7 +616,7 @@
     Line.prototype.onHoverMove = function(x, y) {
       var index;
       index = this.hitTest(x, y);
-      return displayHoverForRow(index);
+      return this.displayHoverForRow(index);
     };
 
     Line.prototype.onHoverOut = function() {
@@ -639,11 +639,15 @@
     Line.prototype.hoverContentForRow = function(index) {
       var content, j, row, y, _i, _len, _ref;
       row = this.data[index];
-      content = "<div class='morris-hover-row-label'>" + row.label + "</div>";
-      _ref = row.y;
-      for (j = _i = 0, _len = _ref.length; _i < _len; j = ++_i) {
-        y = _ref[j];
-        content += "<div class='morris-hover-point' style='color: " + (this.colorFor(row, j, 'label')) + "'>\n  " + this.options.labels[j] + ":\n  " + (this.yLabelFormat(y)) + "\n</div>";
+      if (typeof this.options.hoverCallback === 'function') {
+        content = this.options.hoverCallback(index, this.options);
+      } else {
+        content = "<div class='morris-hover-row-label'>" + row.label + "</div>";
+        _ref = row.y;
+        for (j = _i = 0, _len = _ref.length; _i < _len; j = ++_i) {
+          y = _ref[j];
+          content += "<div class='morris-hover-point' style='color: " + (this.colorFor(row, j, 'label')) + "'>\n  " + this.options.labels[j] + ":\n  " + (this.yLabelFormat(y)) + "\n</div>";
+        }
       }
       return [content, row._x, row._ymax];
     };
@@ -1252,12 +1256,16 @@
 
     Bar.prototype.hoverContentForRow = function(index) {
       var content, j, row, x, y, _i, _len, _ref;
-      row = this.data[index];
-      content = "<div class='morris-hover-row-label'>" + row.label + "</div>";
-      _ref = row.y;
-      for (j = _i = 0, _len = _ref.length; _i < _len; j = ++_i) {
-        y = _ref[j];
-        content += "<div class='morris-hover-point' style='color: " + (this.colorFor(row, j, 'label')) + "'>\n  " + this.options.labels[j] + ":\n  " + (this.yLabelFormat(y)) + "\n</div>";
+      if (typeof this.options.hoverCallback === 'function') {
+        content = this.options.hoverCallback(index, this.options);
+      } else {
+        row = this.data[index];
+        content = "<div class='morris-hover-row-label'>" + row.label + "</div>";
+        _ref = row.y;
+        for (j = _i = 0, _len = _ref.length; _i < _len; j = ++_i) {
+          y = _ref[j];
+          content += "<div class='morris-hover-point' style='color: " + (this.colorFor(row, j, 'label')) + "'>\n  " + this.options.labels[j] + ":\n  " + (this.yLabelFormat(y)) + "\n</div>";
+        }
       }
       x = this.left + (index + 0.5) * (this.right - this.left) / this.data.length;
       return [content, x];

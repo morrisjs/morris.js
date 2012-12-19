@@ -63,16 +63,23 @@ class Morris.Line extends Morris.Grid
       break if x < (r._x + @data[index]._x) / 2
     index
 
-  # hover event handler
+  # hover movement event handler
   #
+  # @private
   onHoverMove: (x, y) =>
     index = @hitTest(x, y)
-    displayHoverForRow(index)
+    @displayHoverForRow(index)
 
+  # hover out event handler
+  #
+  # @private
   onHoverOut: =>
     if @options.hideHover is 'auto'
       @displayHoverForIndex(null)
 
+  # display a hover popup over the given row
+  #
+  # @private
   displayHoverForRow: (index) ->
     if index?
       @hover.update(@hoverContentForRow(index)...)
@@ -86,14 +93,17 @@ class Morris.Line extends Morris.Grid
   # @private
   hoverContentForRow: (index) ->
     row = @data[index]
-    content = "<div class='morris-hover-row-label'>#{row.label}</div>"
-    for y, j in row.y
-      content += """
-        <div class='morris-hover-point' style='color: #{@colorFor(row, j, 'label')}'>
-          #{@options.labels[j]}:
-          #{@yLabelFormat(y)}
-        </div>
-      """
+    if typeof @options.hoverCallback is 'function'
+      content = @options.hoverCallback(index, @options)
+    else
+      content = "<div class='morris-hover-row-label'>#{row.label}</div>"
+      for y, j in row.y
+        content += """
+          <div class='morris-hover-point' style='color: #{@colorFor(row, j, 'label')}'>
+            #{@options.labels[j]}:
+            #{@yLabelFormat(y)}
+          </div>
+        """
     [content, row._x, row._ymax]
 
 
