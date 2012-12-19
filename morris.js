@@ -115,7 +115,7 @@
     };
 
     Grid.prototype.setData = function(data, redraw) {
-      var e, idx, index, maxGoal, minGoal, ret, row, total, ykey, ymax, ymin, yval;
+      var e, idx, index, maxGoal, minGoal, ret, row, total, ykey, ymax, ymin, yval, yvalues, zkey;
       if (redraw == null) {
         redraw = true;
       }
@@ -146,17 +146,22 @@
           }
           total = 0;
           ret.y = (function() {
-            var _j, _len1, _ref, _results1;
+            var _j, _k, _len1, _len2, _ref, _ref1, _results1;
             _ref = this.options.ykeys;
             _results1 = [];
             for (idx = _j = 0, _len1 = _ref.length; _j < _len1; idx = ++_j) {
               ykey = _ref[idx];
               yval = row[ykey];
-              if (typeof yval === 'string') {
-                yval = parseFloat(yval);
-              }
-              if ((yval != null) && typeof yval !== 'number') {
-                yval = null;
+              if (typeof yval === 'object' && yval !== null) {
+                yvalues = yval;
+                yval = 0;
+                _ref1 = this.options.zkeys;
+                for (_k = 0, _len2 = _ref1.length; _k < _len2; _k++) {
+                  zkey = _ref1[_k];
+                  yval += this.parseValue(yvalues[zkey]);
+                }
+              } else {
+                yval = this.parseValue(yval);
               }
               if (yval != null) {
                 if (this.cumulative) {
@@ -174,7 +179,11 @@
                 ymax = Math.max(total, ymax);
                 ymin = Math.min(total, ymin);
               }
-              _results1.push(yval);
+              if (yvalues) {
+                _results1.push(yvalues);
+              } else {
+                _results1.push(yval);
+              }
             }
             return _results1;
           }).call(this);
@@ -282,7 +291,18 @@
     };
 
     Grid.prototype.transY = function(y) {
-      return this.bottom - (y - this.ymin) * this.dy;
+      var newY, zkey, _i, _len, _ref;
+      if (typeof y === 'object') {
+        newY = {};
+        _ref = this.options.zkeys;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          zkey = _ref[_i];
+          newY[zkey] = this.transY(y[zkey]);
+        }
+        return newY;
+      } else {
+        return this.bottom - (y - this.ymin) * this.dy;
+      }
     };
 
     Grid.prototype.transX = function(x) {
@@ -356,7 +376,28 @@
     };
 
     Grid.prototype.yLabelFormat = function(label) {
-      return "" + this.options.preUnits + (Morris.commas(label)) + this.options.postUnits;
+      var i, labels, zkey, _i, _len, _ref;
+      if (typeof label === 'object' && label !== null) {
+        labels = [];
+        _ref = this.options.zkeys;
+        for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
+          zkey = _ref[i];
+          labels.push("" + (this.yLabelFormat(label[zkey])) + " " + this.options.zLabels[i]);
+        }
+        return labels.join(', ');
+      } else {
+        return "" + this.options.preUnits + (Morris.commas(label)) + this.options.postUnits;
+      }
+    };
+
+    Grid.prototype.parseValue = function(value) {
+      if (typeof value === 'string') {
+        value = parseFloat(value);
+      }
+      if ((value != null) && typeof value !== 'number') {
+        value = null;
+      }
+      return value;
     };
 
     return Grid;
@@ -1169,12 +1210,13 @@
     };
 
     Bar.prototype.drawSeries = function() {
-      var barWidth, bottom, groupWidth, idx, lastTop, left, leftPadding, numBars, row, sidx, size, top, ypos, zeroPos;
+      var barWidth, bottom, colorIdx, groupWidth, i, idx, lastTop, left, leftPadding, multipleValues, numBars, row, sidx, size, top, y, ypos, ys, zeroPos, zkey;
       groupWidth = this.width / this.options.data.length;
       numBars = this.options.stacked != null ? 1 : this.options.ykeys.length;
       barWidth = (groupWidth * this.options.barSizeRatio - this.options.barGap * (numBars - 1)) / numBars;
       leftPadding = groupWidth * (1 - this.options.barSizeRatio) / 2;
       zeroPos = this.ymin <= 0 && this.ymax >= 0 ? this.transY(0) : null;
+      multipleValues = false;
       return this.bars = (function() {
         var _i, _len, _ref, _results;
         _ref = this.data;
@@ -1189,23 +1231,50 @@
             for (sidx = _j = 0, _len1 = _ref1.length; _j < _len1; sidx = ++_j) {
               ypos = _ref1[sidx];
               if (ypos !== null) {
-                if (zeroPos) {
-                  top = Math.min(ypos, zeroPos);
-                  bottom = Math.max(ypos, zeroPos);
+                if (typeof ypos === 'object') {
+                  multipleValues = true;
+                  ys = (function() {
+                    var _k, _len2, _ref2, _results2;
+                    _ref2 = this.options.zkeys;
+                    _results2 = [];
+                    for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
+                      zkey = _ref2[_k];
+                      _results2.push(ypos[zkey]);
+                    }
+                    return _results2;
+                  }).call(this);
                 } else {
-                  top = ypos;
-                  bottom = this.bottom;
+                  ys = [ypos];
                 }
-                left = this.left + idx * groupWidth + leftPadding;
-                if (!this.options.stacked) {
-                  left += sidx * (barWidth + this.options.barGap);
+                if (multipleValues) {
+                  lastTop = 0;
                 }
-                size = bottom - top;
-                if (this.options.stacked) {
-                  top -= lastTop;
-                }
-                this.r.rect(left, top, barWidth, size).attr('fill', this.colorFor(row, sidx, 'bar')).attr('stroke-width', 0);
-                _results1.push(lastTop += size);
+                _results1.push((function() {
+                  var _k, _len2, _results2;
+                  _results2 = [];
+                  for (i = _k = 0, _len2 = ys.length; _k < _len2; i = ++_k) {
+                    y = ys[i];
+                    if (zeroPos) {
+                      top = Math.min(y, zeroPos);
+                      bottom = Math.max(y, zeroPos);
+                    } else {
+                      top = y;
+                      bottom = this.bottom;
+                    }
+                    left = this.left + idx * groupWidth + leftPadding;
+                    if (!this.options.stacked) {
+                      left += sidx * (barWidth + this.options.barGap);
+                    }
+                    size = bottom - top;
+                    if (this.options.stacked || multipleValues) {
+                      top -= lastTop;
+                    }
+                    colorIdx = multipleValues ? i : sidx;
+                    this.r.rect(left, top, barWidth, size).attr('fill', this.colorFor(row, colorIdx, 'bar')).attr('stroke-width', 0);
+                    _results2.push(lastTop += size);
+                  }
+                  return _results2;
+                }).call(this));
               } else {
                 _results1.push(null);
               }

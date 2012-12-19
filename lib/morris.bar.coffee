@@ -110,27 +110,40 @@ class Morris.Bar extends Morris.Grid
     barWidth = (groupWidth * @options.barSizeRatio - @options.barGap * (numBars - 1)) / numBars
     leftPadding = groupWidth * (1 - @options.barSizeRatio) / 2
     zeroPos = if @ymin <= 0 and @ymax >= 0 then @transY(0) else null
+    multipleValues = false
     @bars = for row, idx in @data
       lastTop = 0
       for ypos, sidx in row._y
         if ypos != null
-          if zeroPos
-            top = Math.min(ypos, zeroPos)
-            bottom = Math.max(ypos, zeroPos)
+
+          if typeof ypos is 'object'
+            multipleValues = true
+            ys = for zkey in @options.zkeys
+              ypos[zkey]
           else
-            top = ypos
-            bottom = @bottom
+            ys = [ypos]
 
-          left = @left + idx * groupWidth + leftPadding
-          left += sidx * (barWidth + @options.barGap) unless @options.stacked
-          size = bottom - top
+          lastTop = 0 if multipleValues
+          for y, i in ys
+            if zeroPos
+              top = Math.min(y, zeroPos)
+              bottom = Math.max(y, zeroPos)
+            else
+              top = y
+              bottom = @bottom
 
-          top -= lastTop if @options.stacked
-          @r.rect(left, top, barWidth, size)
-            .attr('fill', @colorFor(row, sidx, 'bar'))
-            .attr('stroke-width', 0)
+            left = @left + idx * groupWidth + leftPadding
+            left += sidx * (barWidth + @options.barGap) unless @options.stacked
+            size = bottom - top
 
-          lastTop += size
+            top -= lastTop if @options.stacked or multipleValues
+            colorIdx = if multipleValues then i else sidx
+
+            @r.rect(left, top, barWidth, size)
+              .attr('fill', @colorFor(row, colorIdx, 'bar'))
+              .attr('stroke-width', 0)
+
+            lastTop += size
         else
           null
 

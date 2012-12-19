@@ -1,0 +1,30 @@
+<!doctype html>
+<head>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+  <script src="https://raw.github.com/DmitryBaranovskiy/raphael/300aa589f5a0ba7fce667cd62c7cdda0bd5ad904/raphael-min.js"></script>
+  <script src="../morris.js"></script>
+  <script src="lib/prettify.js"></script>
+  <script src="lib/example.js"></script>
+  <link rel="stylesheet" href="lib/example.css">
+  <link rel="stylesheet" href="lib/prettify.css">
+</head>
+<body>
+<h1>Multiple Values Bar chart</h1>
+<div id="graph"></div>
+<pre id="code" class="prettyprint linenums">
+// Use Morris.Bar
+Morris.Bar({
+  element: 'graph',
+  data: [
+    {x: '2011 Q1', y: {a: 7, b: 3}, z: {a: 3, b: 4} },
+    {x: '2011 Q2', y: {a: 6, b: 2}, z: {a: 4, b: 2} },
+    {x: '2011 Q3', y: {a: 5, b: 1}, z: {a: 5, b: 3} }
+  ],
+  xkey: 'x',
+  ykeys: ['y', 'z'],
+  zkeys: ['a', 'b'],
+  labels: ['Y', 'Z'],
+  zLabels: ['A', 'B']
+});
+</pre>
+</body>
