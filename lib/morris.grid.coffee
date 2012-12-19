@@ -12,6 +12,9 @@ class Morris.Grid extends Morris.EventEmitter
     if not @el? or @el.length == 0
       throw new Error("Graph container element not found")
 
+    if @el.css('position') == 'static'
+      @el.css('position', 'relative')
+
     @options = $.extend {}, @gridDefaults, (@defaults || {}), options
 
     # bail if there's no data
@@ -36,6 +39,22 @@ class Morris.Grid extends Morris.EventEmitter
     # load data
     @setData @options.data
 
+    # hover
+    @el.bind 'mousemove', (evt) =>
+      offset = @el.offset()
+      @fire 'hovermove', evt.pageX - offset.left, evt.pageY - offset.top
+
+    @el.bind 'mouseout', (evt) =>
+      @fire 'hoverout'
+
+    @el.bind 'touchstart touchmove touchend', (evt) =>
+      touch = evt.originalEvent.touches[0] or evt.originalEvent.changedTouches[0]
+      offset = @el.offset()
+      @fire 'hover', touch.pageX - offset.left, touch.pageY - offset.top
+      touch
+
+    @postInit() if @postInit
+
   # Default options
   #
   gridDefaults:
@@ -44,6 +63,7 @@ class Morris.Grid extends Morris.EventEmitter
     gridStrokeWidth: 0.5
     gridTextColor: '#888'
     gridTextSize: 12
+    hideHover: false
     numLines: 5
     padding: 25
     parseTime: true
@@ -256,6 +276,10 @@ class Morris.Grid extends Morris.EventEmitter
   yLabelFormat: (label) ->
     "#{@options.preUnits}#{Morris.commas(label)}#{@options.postUnits}"
 
+  updateHover: (x, y) ->
+    hit = @hitTest(x, y)
+    if hit?
+      @hover.update(hit...)
 
 # Parse a date into a javascript timestamp
 #

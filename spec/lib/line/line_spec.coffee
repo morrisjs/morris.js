@@ -29,9 +29,8 @@ describe 'Morris.Line', ->
     chart.strokeForSeries(0).should.equal red
     chart.strokeWidthForSeries(1).should.equal 2
     chart.strokeForSeries(1).should.equal blue
-    (null == chart.pointFillColorForSeries(0)).should.be
-    (chart.pointFillColorForSeries(0) || chart.colorForSeries(0)).should.equal chart.colorForSeries(0)
-    chart.pointFillColorForSeries(1).should.equal red
+    chart.colorFor(chart.data[0], 0, 'point').should.equal chart.colorFor(chart.data[0], 0, 'line')
+    chart.colorFor(chart.data[1], 1, 'point').should.equal red
 
   describe 'generating column labels', ->
 
