@@ -1042,7 +1042,7 @@
         row = _ref[_i];
         row._x = this.transX(row.x);
         total = 0;
-        _results.push(row._y = (function() {
+        row._y = (function() {
           var _j, _len1, _ref1, _results1;
           _ref1 = row.y;
           _results1 = [];
@@ -1052,7 +1052,8 @@
             _results1.push(this.transY(total));
           }
           return _results1;
-        }).call(this));
+        }).call(this);
+        _results.push(row._ymax = row._y[row._y.length - 1]);
       }
       return _results;
     };

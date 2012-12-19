@@ -16,6 +16,7 @@ class Morris.Area extends Morris.Line
       row._y = for y in row.y
         total += (y || 0)
         @transY(total)
+      row._ymax = row._y[row._y.length - 1]
 
   # draw the data series
   #
