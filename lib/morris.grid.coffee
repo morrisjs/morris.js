@@ -59,6 +59,7 @@ class Morris.Grid extends Morris.EventEmitter
   #
   gridDefaults:
     dateFormat: null
+    axes: true
     grid: true
     gridLineColor: '#aaa'
     gridStrokeWidth: 0.5
@@ -199,12 +200,12 @@ class Morris.Grid extends Morris.EventEmitter
       @right = @elementWidth - @options.padding
       @top = @options.padding
       @bottom = @elementHeight - @options.padding
-      if @options.grid
+      if @options.axes
         maxYLabelWidth = Math.max(
           @measureText(@yAxisFormat(@ymin), @options.gridTextSize).width,
           @measureText(@yAxisFormat(@ymax), @options.gridTextSize).width)
         @left += maxYLabelWidth
-        @bottom -= 1.5 * @options.gridTextSize if @options.grid
+        @bottom -= 1.5 * @options.gridTextSize
       @width = @right - @left
       @height = @bottom - @top
       @dx = @width / (@xmax - @xmin)
@@ -227,7 +228,7 @@ class Morris.Grid extends Morris.EventEmitter
   redraw: ->
     @r.clear()
     @_calc()
-    @drawGrid() if @options.grid
+    @drawGrid()
     @drawGoals()
     @drawEvents()
     @draw() if @draw
@@ -250,18 +251,21 @@ class Morris.Grid extends Morris.EventEmitter
   # draw y axis labels, horizontal lines
   #
   drawGrid: ->
+    return if @options.grid is false and @options.axes is false
     firstY = @ymin
     lastY = @ymax
     for lineY in [firstY..lastY] by @yInterval
       v = parseFloat(lineY.toFixed(@precision))
       y = @transY(v)
-      @r.text(@left - @options.padding / 2, y, @yAxisFormat(v))
-        .attr('font-size', @options.gridTextSize)
-        .attr('fill', @options.gridTextColor)
-        .attr('text-anchor', 'end')
-      @r.path("M#{@left},#{y}H#{@left + @width}")
-        .attr('stroke', @options.gridLineColor)
-        .attr('stroke-width', @options.gridStrokeWidth)
+      if @options.axes
+        @r.text(@left - @options.padding / 2, y, @yAxisFormat(v))
+          .attr('font-size', @options.gridTextSize)
+          .attr('fill', @options.gridTextColor)
+          .attr('text-anchor', 'end')
+      if @options.grid
+        @r.path("M#{@left},#{y}H#{@left + @width}")
+          .attr('stroke', @options.gridLineColor)
+          .attr('stroke-width', @options.gridStrokeWidth)
 
   # @private
   #

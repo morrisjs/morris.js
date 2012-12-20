@@ -117,6 +117,7 @@
 
     Grid.prototype.gridDefaults = {
       dateFormat: null,
+      axes: true,
       grid: true,
       gridLineColor: '#aaa',
       gridStrokeWidth: 0.5,
@@ -294,12 +295,10 @@
         this.right = this.elementWidth - this.options.padding;
         this.top = this.options.padding;
         this.bottom = this.elementHeight - this.options.padding;
-        if (this.options.grid) {
+        if (this.options.axes) {
           maxYLabelWidth = Math.max(this.measureText(this.yAxisFormat(this.ymin), this.options.gridTextSize).width, this.measureText(this.yAxisFormat(this.ymax), this.options.gridTextSize).width);
           this.left += maxYLabelWidth;
-          if (this.options.grid) {
-            this.bottom -= 1.5 * this.options.gridTextSize;
-          }
+          this.bottom -= 1.5 * this.options.gridTextSize;
         }
         this.width = this.right - this.left;
         this.height = this.bottom - this.top;
@@ -326,9 +325,7 @@
     Grid.prototype.redraw = function() {
       this.r.clear();
       this._calc();
-      if (this.options.grid) {
-        this.drawGrid();
-      }
+      this.drawGrid();
       this.drawGoals();
       this.drawEvents();
       if (this.draw) {
@@ -360,14 +357,23 @@
 
     Grid.prototype.drawGrid = function() {
       var firstY, lastY, lineY, v, y, _i, _ref, _results;
+      if (this.options.grid === false && this.options.axes === false) {
+        return;
+      }
       firstY = this.ymin;
       lastY = this.ymax;
       _results = [];
       for (lineY = _i = firstY, _ref = this.yInterval; firstY <= lastY ? _i <= lastY : _i >= lastY; lineY = _i += _ref) {
         v = parseFloat(lineY.toFixed(this.precision));
         y = this.transY(v);
-        this.r.text(this.left - this.options.padding / 2, y, this.yAxisFormat(v)).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor).attr('text-anchor', 'end');
-        _results.push(this.r.path("M" + this.left + "," + y + "H" + (this.left + this.width)).attr('stroke', this.options.gridLineColor).attr('stroke-width', this.options.gridStrokeWidth));
+        if (this.options.axes) {
+          this.r.text(this.left - this.options.padding / 2, y, this.yAxisFormat(v)).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor).attr('text-anchor', 'end');
+        }
+        if (this.options.grid) {
+          _results.push(this.r.path("M" + this.left + "," + y + "H" + (this.left + this.width)).attr('stroke', this.options.gridLineColor).attr('stroke-width', this.options.gridStrokeWidth));
+        } else {
+          _results.push(void 0);
+        }
       }
       return _results;
     };
@@ -707,7 +713,7 @@
     };
 
     Line.prototype.draw = function() {
-      if (this.options.grid) {
+      if (this.options.axes) {
         this.drawXAxis();
       }
       this.drawSeries();
@@ -1158,7 +1164,7 @@
     };
 
     Bar.prototype.draw = function() {
-      if (this.options.grid) {
+      if (this.options.axes) {
         this.drawXAxis();
       }
       return this.drawSeries();
