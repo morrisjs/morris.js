@@ -117,7 +117,7 @@
 
     Grid.prototype.gridDefaults = {
       dateFormat: null,
-      gridEnabled: true,
+      grid: true,
       gridLineColor: '#aaa',
       gridStrokeWidth: 0.5,
       gridTextColor: '#888',
@@ -290,16 +290,16 @@
         this.elementWidth = w;
         this.elementHeight = h;
         this.dirty = false;
-        maxYLabelWidth = 0;
-        if (this.options.gridEnabled) {
-          maxYLabelWidth = Math.max(this.measureText(this.yAxisFormat(this.ymin), this.options.gridTextSize).width, this.measureText(this.yAxisFormat(this.ymax), this.options.gridTextSize).width);
-        }
-        this.left = maxYLabelWidth + this.options.padding;
+        this.left = this.options.padding;
         this.right = this.elementWidth - this.options.padding;
         this.top = this.options.padding;
         this.bottom = this.elementHeight - this.options.padding;
-        if (this.options.gridEnabled) {
-          this.bottom -= 1.5 * this.options.gridTextSize;
+        if (this.options.grid) {
+          maxYLabelWidth = Math.max(this.measureText(this.yAxisFormat(this.ymin), this.options.gridTextSize).width, this.measureText(this.yAxisFormat(this.ymax), this.options.gridTextSize).width);
+          this.left += maxYLabelWidth;
+          if (this.options.grid) {
+            this.bottom -= 1.5 * this.options.gridTextSize;
+          }
         }
         this.width = this.right - this.left;
         this.height = this.bottom - this.top;
@@ -326,7 +326,7 @@
     Grid.prototype.redraw = function() {
       this.r.clear();
       this._calc();
-      if (this.options.gridEnabled) {
+      if (this.options.grid) {
         this.drawGrid();
       }
       this.drawGoals();
@@ -707,7 +707,7 @@
     };
 
     Line.prototype.draw = function() {
-      if (this.options.gridEnabled) {
+      if (this.options.grid) {
         this.drawXAxis();
       }
       this.drawSeries();
@@ -1158,7 +1158,7 @@
     };
 
     Bar.prototype.draw = function() {
-      if (this.options.gridEnabled) {
+      if (this.options.grid) {
         this.drawXAxis();
       }
       return this.drawSeries();
@@ -1253,7 +1253,7 @@
 
     Bar.prototype.hitTest = function(x, y) {
       x = Math.max(Math.min(x, this.right), this.left);
-      return Math.min(this.data.length - 1, Math.floor((x - this.left) / ((this.right - this.left) / this.data.length)));
+      return Math.min(this.data.length - 1, Math.floor((x - this.left) / (this.width / this.data.length)));
     };
 
     Bar.prototype.onHoverMove = function(x, y) {
@@ -1281,7 +1281,7 @@
           content += "<div class='morris-hover-point' style='color: " + (this.colorFor(row, j, 'label')) + "'>\n  " + this.options.labels[j] + ":\n  " + (this.yLabelFormat(y)) + "\n</div>";
         }
       }
-      x = this.left + (index + 0.5) * (this.right - this.left) / this.data.length;
+      x = this.left + (index + 0.5) * this.width / this.data.length;
       return [content, x];
     };
 

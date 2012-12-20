@@ -46,7 +46,7 @@ class Morris.Bar extends Morris.Grid
   # Draws the bar chart.
   #
   draw: ->
-    @drawXAxis() if @options.gridEnabled
+    @drawXAxis() if @options.grid
     @drawSeries()
 
   # draw the x-axis labels
@@ -122,7 +122,7 @@ class Morris.Bar extends Morris.Grid
   hitTest: (x, y) ->
     x = Math.max(Math.min(x, @right), @left)
     Math.min(@data.length - 1,
-      Math.floor((x - @left) / ((@right - @left) / @data.length)))
+      Math.floor((x - @left) / (@width / @data.length)))
 
   # hover movement event handler
   #
@@ -154,5 +154,5 @@ class Morris.Bar extends Morris.Grid
             #{@yLabelFormat(y)}
           </div>
         """
-    x = @left + (index + 0.5) * (@right - @left) / @data.length
+    x = @left + (index + 0.5) * @width / @data.length
     [content, x]
