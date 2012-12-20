@@ -59,6 +59,7 @@ class Morris.Grid extends Morris.EventEmitter
   #
   gridDefaults:
     dateFormat: null
+    gridEnabled: true
     gridLineColor: '#aaa'
     gridStrokeWidth: 0.5
     gridTextColor: '#888'
@@ -194,13 +195,16 @@ class Morris.Grid extends Morris.EventEmitter
       @elementHeight = h
       @dirty = false
       # calculate grid dimensions
-      maxYLabelWidth = Math.max(
-        @measureText(@yAxisFormat(@ymin), @options.gridTextSize).width,
-        @measureText(@yAxisFormat(@ymax), @options.gridTextSize).width)
+      maxYLabelWidth = 0
+      if @options.gridEnabled
+        maxYLabelWidth = Math.max(
+          @measureText(@yAxisFormat(@ymin), @options.gridTextSize).width,
+          @measureText(@yAxisFormat(@ymax), @options.gridTextSize).width)
       @left = maxYLabelWidth + @options.padding
       @right = @elementWidth - @options.padding
       @top = @options.padding
-      @bottom = @elementHeight - @options.padding - 1.5 * @options.gridTextSize
+      @bottom = @elementHeight - @options.padding;
+      @bottom -= 1.5 * @options.gridTextSize if @options.gridEnabled
       @width = @right - @left
       @height = @bottom - @top
       @dx = @width / (@xmax - @xmin)
@@ -223,7 +227,7 @@ class Morris.Grid extends Morris.EventEmitter
   redraw: ->
     @r.clear()
     @_calc()
-    @drawGrid()
+    @drawGrid() if @options.gridEnabled
     @drawGoals()
     @drawEvents()
     @draw() if @draw

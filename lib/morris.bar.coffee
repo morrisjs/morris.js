@@ -46,7 +46,7 @@ class Morris.Bar extends Morris.Grid
   # Draws the bar chart.
   #
   draw: ->
-    @drawXAxis()
+    @drawXAxis() if @options.gridEnabled
     @drawSeries()
 
   # draw the x-axis labels
