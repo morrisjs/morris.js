@@ -35,6 +35,7 @@ class Morris.Line extends Morris.Grid
     smooth: true
     xLabels: 'auto'
     xLabelFormat: null
+    xLabelMargin: 50
     continuousLine: true
     hideHover: false
 
@@ -135,7 +136,6 @@ class Morris.Line extends Morris.Grid
   drawXAxis: ->
     # draw x axis labels
     ypos = @bottom + @options.gridTextSize * 1.25
-    xLabelMargin = 50 # make this an option?
     prevLabelMargin = null
     drawLabel = (labelText, xpos) =>
       label = @r.text(@transX(xpos), ypos, labelText)
@@ -146,7 +146,7 @@ class Morris.Line extends Morris.Grid
       # labels don't overflow the container
       if (not prevLabelMargin? or prevLabelMargin >= labelBox.x + labelBox.width) and
           labelBox.x >= 0 and (labelBox.x + labelBox.width) < @el.width()
-        prevLabelMargin = labelBox.x - xLabelMargin
+        prevLabelMargin = labelBox.x - @options.xLabelMargin
       else
         label.remove()
     if @options.parseTime

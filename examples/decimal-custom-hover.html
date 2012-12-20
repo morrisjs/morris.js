@@ -30,7 +30,8 @@ window.m = Morris.Line({
   hoverCallback: function (index, options) {
     var row = options.data[index];
     return "sin(" + row.x + ") = " + row.y;
-  }
+  },
+  xLabelMargin: 10
 });
 </pre>
 </body>

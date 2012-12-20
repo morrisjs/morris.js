@@ -575,6 +575,7 @@
       smooth: true,
       xLabels: 'auto',
       xLabelFormat: null,
+      xLabelMargin: 50,
       continuousLine: true,
       hideHover: false
     };
@@ -728,17 +729,16 @@
     };
 
     Line.prototype.drawXAxis = function() {
-      var drawLabel, l, labels, prevLabelMargin, row, xLabelMargin, ypos, _i, _len, _results,
+      var drawLabel, l, labels, prevLabelMargin, row, ypos, _i, _len, _results,
         _this = this;
       ypos = this.bottom + this.options.gridTextSize * 1.25;
-      xLabelMargin = 50;
       prevLabelMargin = null;
       drawLabel = function(labelText, xpos) {
         var label, labelBox;
         label = _this.r.text(_this.transX(xpos), ypos, labelText).attr('font-size', _this.options.gridTextSize).attr('fill', _this.options.gridTextColor);
         labelBox = label.getBBox();
         if ((!(prevLabelMargin != null) || prevLabelMargin >= labelBox.x + labelBox.width) && labelBox.x >= 0 && (labelBox.x + labelBox.width) < _this.el.width()) {
-          return prevLabelMargin = labelBox.x - xLabelMargin;
+          return prevLabelMargin = labelBox.x - _this.options.xLabelMargin;
         } else {
           return label.remove();
         }
@@ -1132,7 +1132,8 @@
     Bar.prototype.defaults = {
       barSizeRatio: 0.75,
       barGap: 3,
-      barColors: ['#0b62a4', '#7a92a3', '#4da74d', '#afd8f8', '#edc240', '#cb4b4b', '#9440ed']
+      barColors: ['#0b62a4', '#7a92a3', '#4da74d', '#afd8f8', '#edc240', '#cb4b4b', '#9440ed'],
+      xLabelMargin: 50
     };
 
     Bar.prototype.calc = function() {
@@ -1176,9 +1177,8 @@
     };
 
     Bar.prototype.drawXAxis = function() {
-      var i, label, labelBox, prevLabelMargin, row, xLabelMargin, ypos, _i, _ref, _results;
+      var i, label, labelBox, prevLabelMargin, row, ypos, _i, _ref, _results;
       ypos = this.bottom + this.options.gridTextSize * 1.25;
-      xLabelMargin = 50;
       prevLabelMargin = null;
       _results = [];
       for (i = _i = 0, _ref = this.data.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
@@ -1186,7 +1186,7 @@
         label = this.r.text(row._x, ypos, row.label).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor);
         labelBox = label.getBBox();
         if ((!(prevLabelMargin != null) || prevLabelMargin >= labelBox.x + labelBox.width) && labelBox.x >= 0 && (labelBox.x + labelBox.width) < this.el.width()) {
-          _results.push(prevLabelMargin = labelBox.x - xLabelMargin);
+          _results.push(prevLabelMargin = labelBox.x - this.options.xLabelMargin);
         } else {
           _results.push(label.remove());
         }

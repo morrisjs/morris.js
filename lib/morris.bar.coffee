@@ -25,6 +25,7 @@ class Morris.Bar extends Morris.Grid
       '#cb4b4b'
       '#9440ed'
     ]
+    xLabelMargin: 50
 
   # Do any size-related calculations
   #
@@ -55,7 +56,6 @@ class Morris.Bar extends Morris.Grid
   drawXAxis: ->
     # draw x axis labels
     ypos = @bottom + @options.gridTextSize * 1.25
-    xLabelMargin = 50 # make this an option?
     prevLabelMargin = null
     for i in [0...@data.length]
       row = @data[@data.length - 1 - i]
@@ -67,7 +67,7 @@ class Morris.Bar extends Morris.Grid
       # labels don't overflow the container
       if (not prevLabelMargin? or prevLabelMargin >= labelBox.x + labelBox.width) and
           labelBox.x >= 0 and (labelBox.x + labelBox.width) < @el.width()
-        prevLabelMargin = labelBox.x - xLabelMargin
+        prevLabelMargin = labelBox.x - @options.xLabelMargin
       else
         label.remove()
 
