@@ -124,6 +124,9 @@
       gridTextColor: '#888',
       gridTextSize: 12,
       hideHover: false,
+      yLabelFormat: function(label, prefix, suffix) {
+        return "" + prefix + (Morris.commas(label)) + suffix;
+      },
       numLines: 5,
       padding: 25,
       parseTime: true,
@@ -394,7 +397,7 @@
     };
 
     Grid.prototype.yLabelFormat = function(label) {
-      return "" + this.options.preUnits + (Morris.commas(label)) + this.options.postUnits;
+      return this.options.yLabelFormat(label, this.options.preUnits, this.options.postUnits);
     };
 
     Grid.prototype.updateHover = function(x, y) {

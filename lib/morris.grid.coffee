@@ -66,6 +66,7 @@ class Morris.Grid extends Morris.EventEmitter
     gridTextColor: '#888'
     gridTextSize: 12
     hideHover: false
+    yLabelFormat: (label, prefix, suffix) -> "#{prefix}#{Morris.commas(label)}#{suffix}"
     numLines: 5
     padding: 25
     parseTime: true
@@ -282,7 +283,7 @@ class Morris.Grid extends Morris.EventEmitter
   # @private
   #
   yLabelFormat: (label) ->
-    "#{@options.preUnits}#{Morris.commas(label)}#{@options.postUnits}"
+    @options.yLabelFormat(label, @options.preUnits, @options.postUnits)
 
   updateHover: (x, y) ->
     hit = @hitTest(x, y)
