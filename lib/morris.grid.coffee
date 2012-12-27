@@ -151,30 +151,9 @@ class Morris.Grid extends Morris.EventEmitter
       @xmin -= 1
       @xmax += 1
 
-    # Compute the vertical range of the graph if desired
-    if typeof @options.ymax is 'string'
-      if @options.ymax[0..3] is 'auto'
-        # use Array.concat to flatten arrays and find the max y value
-        if @options.ymax.length > 5
-          @ymax = parseInt(@options.ymax[5..], 10)
-          @ymax = Math.max(ymax, @ymax) if ymax?
-        else
-          @ymax = if ymax? then ymax else 0
-      else
-        @ymax = parseInt(@options.ymax, 10)
-    else
-      @ymax = @options.ymax
-    if typeof @options.ymin is 'string'
-      if @options.ymin[0..3] is 'auto'
-        if @options.ymin.length > 5
-          @ymin = parseInt(@options.ymin[5..], 10)
-          @ymin = Math.min(ymin, @ymin) if ymin?
-        else
-          @ymin = if ymin isnt null then ymin else 0
-      else
-        @ymin = parseInt(@options.ymin, 10)
-    else
-      @ymin = @options.ymin
+    @ymin = @yboundary('min', ymin)
+    @ymax = @yboundary('max', ymax)
+
     if @ymin is @ymax
       @ymin -= 1 if ymin
       @ymax += 1
@@ -187,6 +166,21 @@ class Morris.Grid extends Morris.EventEmitter
 
     @dirty = true
     @redraw() if redraw
+
+  yboundary: (boundaryType, currentValue) ->
+    boundaryOption = @options["y#{boundaryType}"]
+    if typeof boundaryOption is 'string'
+      if boundaryOption[0..3] is 'auto'
+        if boundaryOption.length > 5
+          suggestedValue = parseInt(boundaryOption[5..], 10)
+          return suggestedValue unless currentValue?
+          Math[boundaryType](currentValue, suggestedValue)
+        else
+          if currentValue? then currentValue else 0
+      else
+        parseInt(boundaryOption, 10)
+    else
+      boundaryOption
 
   _calc: ->
     w = @el.width()
