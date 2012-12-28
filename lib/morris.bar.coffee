@@ -27,7 +27,7 @@ class Morris.Bar extends Morris.Grid
     ]
     xLabelMargin: 50
     barShape: 'sharp'
-    verticalLabels: true
+    verticalLabels: false
 
   # Do any size-related calculations
   #
