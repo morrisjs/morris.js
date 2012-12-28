@@ -1133,7 +1133,9 @@
       barSizeRatio: 0.75,
       barGap: 3,
       barColors: ['#0b62a4', '#7a92a3', '#4da74d', '#afd8f8', '#edc240', '#cb4b4b', '#9440ed'],
-      xLabelMargin: 50
+      xLabelMargin: 50,
+      barShape: 'sharp',
+      verticalLabels: false
     };
 
     Bar.prototype.calc = function() {
@@ -1177,13 +1179,18 @@
     };
 
     Bar.prototype.drawXAxis = function() {
-      var i, label, labelBox, prevLabelMargin, row, ypos, _i, _ref, _results;
+      var i, label, labelBox, prevLabelMargin, row, width, ypos, _i, _ref, _results;
       ypos = this.bottom + this.options.gridTextSize * 1.25;
       prevLabelMargin = null;
       _results = [];
       for (i = _i = 0, _ref = this.data.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
         row = this.data[this.data.length - 1 - i];
         label = this.r.text(row._x, ypos, row.label).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor);
+        if (this.options.verticalLabels) {
+          width = label.getBBox().width / 3;
+          console.log(width);
+          label.transform('t0,' + width + 'r90');
+        }
         labelBox = label.getBBox();
         if ((!(prevLabelMargin != null) || prevLabelMargin >= labelBox.x + labelBox.width) && labelBox.x >= 0 && (labelBox.x + labelBox.width) < this.el.width()) {
           _results.push(prevLabelMargin = labelBox.x - this.options.xLabelMargin);
@@ -1195,7 +1202,7 @@
     };
 
     Bar.prototype.drawSeries = function() {
-      var barWidth, bottom, groupWidth, idx, lastTop, left, leftPadding, numBars, row, sidx, size, top, ypos, zeroPos;
+      var barWidth, bottom, groupWidth, idx, lastTop, left, leftPadding, numBars, r, row, shape, sidx, size, softPath, top, ypos, zeroPos;
       groupWidth = this.width / this.options.data.length;
       numBars = this.options.stacked != null ? 1 : this.options.ykeys.length;
       barWidth = (groupWidth * this.options.barSizeRatio - this.options.barGap * (numBars - 1)) / numBars;
@@ -1230,7 +1237,16 @@
                 if (this.options.stacked) {
                   top -= lastTop;
                 }
-                this.r.rect(left, top, barWidth, size).attr('fill', this.colorFor(row, sidx, 'bar')).attr('stroke-width', 0);
+                shape = this.options.stacked ? 'sharp' : this.options.barShape;
+                switch (shape) {
+                  case 'sharp':
+                    this.r.rect(left, top, barWidth, size).attr('fill', this.colorFor(row, sidx, 'bar')).attr('stroke-width', 0);
+                    break;
+                  case 'soft':
+                    r = Math.min(Math.round(barWidth / 6), size);
+                    softPath = ["M", left, bottom, "l", 0, r - size, "a", r, r, 0, 0, 1, r, -r, "l", barWidth - 2 * r, 0, "a", r, r, 0, 0, 1, r, r, "l", 0, size - r, "z"];
+                    this.r.path(softPath).attr('fill', this.colorFor(row, sidx, 'bar')).attr('stroke-width', 0);
+                }
                 _results1.push(lastTop += size);
               } else {
                 _results1.push(null);

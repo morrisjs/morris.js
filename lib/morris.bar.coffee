@@ -26,6 +26,8 @@ class Morris.Bar extends Morris.Grid
       '#9440ed'
     ]
     xLabelMargin: 50
+    barShape: 'sharp'
+    verticalLabels: false
 
   # Do any size-related calculations
   #
@@ -62,6 +64,10 @@ class Morris.Bar extends Morris.Grid
       label = @r.text(row._x, ypos, row.label)
         .attr('font-size', @options.gridTextSize)
         .attr('fill', @options.gridTextColor)
+      if @options.verticalLabels
+        yoffset = label.getBBox().width / 3;
+        label.transform('t0,'+ yoffset +'r90');
+
       labelBox = label.getBBox()
       # ensure a minimum of `xLabelMargin` pixels between labels, and ensure
       # labels don't overflow the container
@@ -96,9 +102,19 @@ class Morris.Bar extends Morris.Grid
           size = bottom - top
 
           top -= lastTop if @options.stacked
-          @r.rect(left, top, barWidth, size)
-            .attr('fill', @colorFor(row, sidx, 'bar'))
-            .attr('stroke-width', 0)
+
+          shape = if @options.stacked then 'sharp' else @options.barShape
+          switch shape
+            when 'sharp'
+              @r.rect(left, top, barWidth, size)
+                .attr('fill', @colorFor(row, sidx, 'bar'))
+                .attr('stroke-width', 0)
+            when 'soft'
+              r = Math.min(Math.round(barWidth/6), size)
+              softPath = ["M", left, bottom, "l", 0, r - size, "a", r, r, 0, 0, 1, r, -r, "l", barWidth - 2 * r, 0, "a", r, r, 0, 0, 1, r, r, "l", 0, size - r, "z"]
+              @r.path(softPath)
+                .attr('fill', @colorFor(row, sidx, 'bar'))
+                .attr('stroke-width', 0)
 
           lastTop += size
         else
