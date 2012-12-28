@@ -1135,7 +1135,7 @@
       barColors: ['#0b62a4', '#7a92a3', '#4da74d', '#afd8f8', '#edc240', '#cb4b4b', '#9440ed'],
       xLabelMargin: 50,
       barShape: 'sharp',
-      verticalLabels: false
+      verticalLabels: true
     };
 
     Bar.prototype.calc = function() {
@@ -1179,7 +1179,7 @@
     };
 
     Bar.prototype.drawXAxis = function() {
-      var i, label, labelBox, prevLabelMargin, row, width, ypos, _i, _ref, _results;
+      var i, label, labelBox, prevLabelMargin, row, yoffset, ypos, _i, _ref, _results;
       ypos = this.bottom + this.options.gridTextSize * 1.25;
       prevLabelMargin = null;
       _results = [];
@@ -1187,9 +1187,8 @@
         row = this.data[this.data.length - 1 - i];
         label = this.r.text(row._x, ypos, row.label).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor);
         if (this.options.verticalLabels) {
-          width = label.getBBox().width / 3;
-          console.log(width);
-          label.transform('t0,' + width + 'r90');
+          yoffset = Math.round(label.getBBox().width / 3);
+          label.transform('t0,' + yoffset + 'r90');
         }
         labelBox = label.getBBox();
         if ((!(prevLabelMargin != null) || prevLabelMargin >= labelBox.x + labelBox.width) && labelBox.x >= 0 && (labelBox.x + labelBox.width) < this.el.width()) {

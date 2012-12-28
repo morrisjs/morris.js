@@ -27,7 +27,7 @@ class Morris.Bar extends Morris.Grid
     ]
     xLabelMargin: 50
     barShape: 'sharp'
-    verticalLabels: false
+    verticalLabels: true
 
   # Do any size-related calculations
   #
@@ -65,8 +65,8 @@ class Morris.Bar extends Morris.Grid
         .attr('font-size', @options.gridTextSize)
         .attr('fill', @options.gridTextColor)
       if @options.verticalLabels
-        yoffset = label.getBBox().width / 3;
-        label.transform('t0,'+ yoffset +'r90');
+        yoffset = Math.round(label.getBBox().width / 3);
+        label.transform('t0,' + yoffset + 'r90');
 
       labelBox = label.getBBox()
       # ensure a minimum of `xLabelMargin` pixels between labels, and ensure
