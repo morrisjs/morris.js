@@ -147,9 +147,9 @@ class Morris.DonutSegment extends Morris.EventEmitter
       "M#{ix0},#{iy0}" +
       "A#{r},#{r},0,#{@long},0,#{ix1},#{iy1}")
 
-  render: (r) ->
-    @arc = r.path(@hilight).attr(stroke: @color, 'stroke-width': 2, opacity: 0)
-    @seg = r.path(@path)
+  render: (raphael) ->
+    @arc = raphael.path(@hilight).attr(stroke: @color, 'stroke-width': 2, opacity: 0)
+    @seg = raphael.path(@path)
       .attr(fill: @color, stroke: 'white', 'stroke-width': 3)
       .hover(=> @fire('hover', @))
 
