@@ -25,10 +25,10 @@ describe 'Morris.Line', ->
       pointStrokeColors: [red, blue]
       pointWidths: [1, 2]
       pointFillColors: [null, red]
-    chart.strokeWidthForSeries(0).should.equal 1
-    chart.strokeForSeries(0).should.equal red
-    chart.strokeWidthForSeries(1).should.equal 2
-    chart.strokeForSeries(1).should.equal blue
+    chart.morrisSVG.strokeWidthForSeries(0).should.equal 1
+    chart.morrisSVG.strokeForSeries(0).should.equal red
+    chart.morrisSVG.strokeWidthForSeries(1).should.equal 2
+    chart.morrisSVG.strokeForSeries(1).should.equal blue
     chart.colorFor(chart.data[0], 0, 'point').should.equal chart.colorFor(chart.data[0], 0, 'line')
     chart.colorFor(chart.data[1], 1, 'point').should.equal red
 

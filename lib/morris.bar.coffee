@@ -59,9 +59,7 @@ class Morris.Bar extends Morris.Grid
     prevLabelMargin = null
     for i in [0...@data.length]
       row = @data[@data.length - 1 - i]
-      label = @r.text(row._x, ypos, row.label)
-        .attr('font-size', @options.gridTextSize)
-        .attr('fill', @options.gridTextColor)
+      label = @morrisSVG.drawXAxisLabel(row._x, ypos, row.label)
       labelBox = label.getBBox()
       # ensure a minimum of `xLabelMargin` pixels between labels, and ensure
       # labels don't overflow the container
@@ -96,9 +94,7 @@ class Morris.Bar extends Morris.Grid
           size = bottom - top
 
           top -= lastTop if @options.stacked
-          @r.rect(left, top, barWidth, size)
-            .attr('fill', @colorFor(row, sidx, 'bar'))
-            .attr('stroke-width', 0)
+          @morrisSVG.drawBar(left, top, barWidth, size, @colorFor(row, sidx, 'bar'))
 
           lastTop += size
         else

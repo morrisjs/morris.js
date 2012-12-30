@@ -26,9 +26,7 @@ class Morris.Area extends Morris.Line
       path = @paths[i]
       if path isnt null
         path = path + "L#{@transX(@xmax)},#{@bottom}L#{@transX(@xmin)},#{@bottom}Z"
-        @r.path(path)
-          .attr('fill', @fillForSeries(i))
-          .attr('stroke-width', 0)
+        @morrisSVG.drawFilledPath(path, @fillForSeries(i))
     super()
 
   fillForSeries: (i) ->

@@ -54,7 +54,7 @@ class Morris.Donut
   redraw: ->
     @el.empty()
 
-    @r = new Raphael(@el[0])
+    @morrisSVG = new Morris.SVG(@el[0], @options)
 
     cx = @el.width() / 2
     cy = @el.height() / 2
@@ -72,13 +72,13 @@ class Morris.Donut
     for d in @data
       next = last + min + C * (d.value / total)
       seg = new Morris.DonutSegment(cx, cy, w*2, w, last, next, @options.colors[idx % @options.colors.length], d)
-      seg.render @r
+      seg.render @morrisSVG
       @segments.push seg
       seg.on 'hover', @select
       last = next
       idx += 1
-    @text1 = @r.text(cx, cy - 10, '').attr('font-size': 15, 'font-weight': 800)
-    @text2 = @r.text(cx, cy + 10, '').attr('font-size': 14)
+    @text1 = @morrisSVG.drawEmptyDonutLabel(cx, cy - 10, 15, 800)
+    @text2 = @morrisSVG.drawEmptyDonutLabel(cx, cy + 10, 14)
     max_value = Math.max.apply(null, d.value for d in @data)
     idx = 0
     for d in @data
@@ -147,11 +147,9 @@ class Morris.DonutSegment extends Morris.EventEmitter
       "M#{ix0},#{iy0}" +
       "A#{r},#{r},0,#{@long},0,#{ix1},#{iy1}")
 
-  render: (raphael) ->
-    @arc = raphael.path(@hilight).attr(stroke: @color, 'stroke-width': 2, opacity: 0)
-    @seg = raphael.path(@path)
-      .attr(fill: @color, stroke: 'white', 'stroke-width': 3)
-      .hover(=> @fire('hover', @))
+  render: (morrisSVG) ->
+    @arc = morrisSVG.drawDonutArc(@hilight, @color)
+    @seg = morrisSVG.drawDonutSegment(@path, @color, => @fire('hover', @))
 
   select: =>
     unless @selected

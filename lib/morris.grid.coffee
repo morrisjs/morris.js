@@ -27,6 +27,7 @@ class Morris.Grid extends Morris.EventEmitter
 
     # the raphael drawing instance
     @r = new Raphael(@el[0])
+    @morrisSVG = new Morris.SVG(@el[0], @options)
 
     # some redraw stuff
     @elementWidth = null
@@ -227,7 +228,7 @@ class Morris.Grid extends Morris.EventEmitter
   # If you need to re-size your charts, call this method after changing the
   # size of the container element.
   redraw: ->
-    @r.clear()
+    @morrisSVG.clear()
     @_calc()
     @drawGrid()
     @drawGoals()
@@ -238,16 +239,12 @@ class Morris.Grid extends Morris.EventEmitter
   #
   drawGoals: ->
     for goal, i in @options.goals
-      @r.path("M#{@left},#{@transY(goal)}H#{@left + @width}")
-        .attr('stroke', @options.goalLineColors[i % @options.goalLineColors.length])
-        .attr('stroke-width', @options.goalStrokeWidth)
+      @morrisSVG.drawGoal("M#{@left},#{@transY(goal)}H#{@left + @width}")
 
   # draw events vertical lines
   drawEvents: ->
     for event, i in @events
-      @r.path("M#{@transX(event)},#{@bottom}V#{@top}")
-        .attr('stroke', @options.eventLineColors[i % @options.eventLineColors.length])
-        .attr('stroke-width', @options.eventStrokeWidth)
+      @morrisSVG.drawEvent("M#{@transX(event)},#{@bottom}V#{@top}")
 
   # draw y axis labels, horizontal lines
   #
@@ -259,22 +256,14 @@ class Morris.Grid extends Morris.EventEmitter
       v = parseFloat(lineY.toFixed(@precision))
       y = @transY(v)
       if @options.axes
-        @r.text(@left - @options.padding / 2, y, @yAxisFormat(v))
-          .attr('font-size', @options.gridTextSize)
-          .attr('fill', @options.gridTextColor)
-          .attr('text-anchor', 'end')
+        @morrisSVG.drawYAxisLabel(@left - @options.padding / 2, y, @yAxisFormat(v))
       if @options.grid
-        @r.path("M#{@left},#{y}H#{@left + @width}")
-          .attr('stroke', @options.gridLineColor)
-          .attr('stroke-width', @options.gridStrokeWidth)
+        @morrisSVG.drawGridLine("M#{@left},#{y}H#{@left + @width}")
 
   # @private
   #
   measureText: (text, fontSize = 12) ->
-    tt = @r.text(100, 100, text).attr('font-size', fontSize)
-    ret = tt.getBBox()
-    tt.remove()
-    ret
+    @morrisSVG.measureText(text, fontSize)
 
   # @private
   #
