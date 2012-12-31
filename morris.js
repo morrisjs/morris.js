@@ -1119,7 +1119,6 @@
     }
 
     Bar.prototype.init = function() {
-      this.cumulative = this.options.stacked;
       if (this.options.hideHover !== 'always') {
         this.hover = new Morris.Hover({
           parent: this.el
@@ -1133,7 +1132,8 @@
       barSizeRatio: 0.75,
       barGap: 3,
       barColors: ['#0b62a4', '#7a92a3', '#4da74d', '#afd8f8', '#edc240', '#cb4b4b', '#9440ed'],
-      xLabelMargin: 50
+      xLabelMargin: 50,
+      stacked: false
     };
 
     Bar.prototype.calc = function() {
@@ -1142,6 +1142,55 @@
       if (this.options.hideHover === false) {
         return (_ref = this.hover).update.apply(_ref, this.hoverContentForRow(this.data.length - 1));
       }
+    };
+
+    Bar.prototype.redraw = function() {
+      var categorySums, i, idx, row, sidx, stack, stackSum, stackSums, stacksMaxes, y, _i, _j, _k, _l, _len, _len1, _len2, _len3, _m, _ref, _ref1, _ref2;
+      this.numBars = this.options.stacked.length;
+      if (this.options.stacked === true) {
+        this.numBars = 1;
+      }
+      if (this.options.stacked === false) {
+        this.numBars = this.options.ykeys.length;
+      }
+      stacksMaxes = (function() {
+        var _i, _ref, _results;
+        _results = [];
+        for (i = _i = 0, _ref = this.numBars; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+          _results.push(0);
+        }
+        return _results;
+      }).call(this);
+      categorySums = [];
+      for (i = _i = 0, _ref = this.numBars; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        categorySums.push((function() {
+          var _j, _ref1, _results;
+          _results = [];
+          for (i = _j = 0, _ref1 = this.data.length; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; i = 0 <= _ref1 ? ++_j : --_j) {
+            _results.push(0);
+          }
+          return _results;
+        }).call(this));
+      }
+      _ref1 = this.data;
+      for (idx = _j = 0, _len = _ref1.length; _j < _len; idx = ++_j) {
+        row = _ref1[idx];
+        _ref2 = row.y;
+        for (sidx = _k = 0, _len1 = _ref2.length; _k < _len1; sidx = ++_k) {
+          y = _ref2[sidx];
+          stack = this.stackForBar(sidx);
+          categorySums[stack][idx] += y;
+        }
+      }
+      for (stack = _l = 0, _len2 = categorySums.length; _l < _len2; stack = ++_l) {
+        stackSums = categorySums[stack];
+        for (_m = 0, _len3 = stackSums.length; _m < _len3; _m++) {
+          stackSum = stackSums[_m];
+          stacksMaxes[stack] = Math.max(stacksMaxes[stack], stackSum);
+        }
+      }
+      this.ymax = Math.max(this.ymax, Math.max.apply(null, stacksMaxes));
+      return Bar.__super__.redraw.call(this);
     };
 
     Bar.prototype.calcBars = function() {
@@ -1195,10 +1244,9 @@
     };
 
     Bar.prototype.drawSeries = function() {
-      var barWidth, bottom, groupWidth, idx, lastTop, left, leftPadding, numBars, row, sidx, size, top, ypos, zeroPos;
+      var barWidth, bottom, groupWidth, i, idx, lastTops, left, leftPadding, row, sidx, size, stack, top, ypos, zeroPos;
       groupWidth = this.width / this.options.data.length;
-      numBars = this.options.stacked != null ? 1 : this.options.ykeys.length;
-      barWidth = (groupWidth * this.options.barSizeRatio - this.options.barGap * (numBars - 1)) / numBars;
+      barWidth = (groupWidth * this.options.barSizeRatio - this.options.barGap * (this.numBars - 1)) / this.numBars;
       leftPadding = groupWidth * (1 - this.options.barSizeRatio) / 2;
       zeroPos = this.ymin <= 0 && this.ymax >= 0 ? this.transY(0) : null;
       return this.bars = (function() {
@@ -1207,13 +1255,21 @@
         _results = [];
         for (idx = _i = 0, _len = _ref.length; _i < _len; idx = ++_i) {
           row = _ref[idx];
-          lastTop = 0;
+          lastTops = (function() {
+            var _j, _ref1, _results1;
+            _results1 = [];
+            for (i = _j = 0, _ref1 = this.numBars; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; i = 0 <= _ref1 ? ++_j : --_j) {
+              _results1.push(0);
+            }
+            return _results1;
+          }).call(this);
           _results.push((function() {
             var _j, _len1, _ref1, _results1;
             _ref1 = row._y;
             _results1 = [];
             for (sidx = _j = 0, _len1 = _ref1.length; _j < _len1; sidx = ++_j) {
               ypos = _ref1[sidx];
+              stack = this.stackForBar(sidx);
               if (ypos !== null) {
                 if (zeroPos) {
                   top = Math.min(ypos, zeroPos);
@@ -1223,15 +1279,11 @@
                   bottom = this.bottom;
                 }
                 left = this.left + idx * groupWidth + leftPadding;
-                if (!this.options.stacked) {
-                  left += sidx * (barWidth + this.options.barGap);
-                }
+                left += stack * (barWidth + this.options.barGap);
                 size = bottom - top;
-                if (this.options.stacked) {
-                  top -= lastTop;
-                }
+                top -= lastTops[stack];
                 this.r.rect(left, top, barWidth, size).attr('fill', this.colorFor(row, sidx, 'bar')).attr('stroke-width', 0);
-                _results1.push(lastTop += size);
+                _results1.push(lastTops[stack] += size);
               } else {
                 _results1.push(null);
               }
@@ -1241,6 +1293,27 @@
         }
         return _results;
       }).call(this);
+    };
+
+    Bar.prototype.stackForBar = function(sidx) {
+      var i, stack, _i, _len, _ref, _ref1;
+      if (this.options.stacked === true) {
+        return 0;
+      }
+      if (this.options.stacked === false) {
+        return sidx;
+      }
+      _ref = this.options.stacked;
+      for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
+        stack = _ref[i];
+        if (typeof stack === "string" && this.options.ykeys[sidx] === stack) {
+          return i;
+        }
+        if (_ref1 = this.options.ykeys[sidx], __indexOf.call(stack, _ref1) >= 0) {
+          return i;
+        }
+      }
+      return 0;
     };
 
     Bar.prototype.colorFor = function(row, sidx, type) {
