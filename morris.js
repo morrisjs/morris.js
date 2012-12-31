@@ -543,6 +543,8 @@
       this.onHoverOut = __bind(this.onHoverOut, this);
 
       this.onHoverMove = __bind(this.onHoverMove, this);
+
+      this.addAnnotation = __bind(this.addAnnotation, this);
       if (!(this instanceof Morris.Line)) {
         return new Morris.Line(options);
       }
@@ -577,7 +579,122 @@
       xLabelFormat: null,
       xLabelMargin: 50,
       continuousLine: true,
-      hideHover: false
+      hideHover: false,
+      supportAnnotations: false,
+      annotationFill: '9-#dadada-#fafafa',
+      annotationStroke: '#444444',
+      annotationStarFill: '135-#fe0-#fa0',
+      annotationStarStroke: '#777',
+      annotations: []
+    };
+
+    Line.prototype.redraw = function() {
+      var annotation, _i, _len, _ref, _results;
+      Line.__super__.redraw.call(this);
+      if (this.options.supportAnnotations) {
+        _ref = this.options.annotations;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          annotation = _ref[_i];
+          _results.push(this.addAnnotation(annotation[this.options.xkey], annotation.label, annotation));
+        }
+        return _results;
+      }
+    };
+
+    Line.prototype.addAnnotation = function(x, label, options) {
+      var defaults, i, row, _i, _len, _ref, _x;
+      if (!this.options.supportAnnotations) {
+        return false;
+      }
+      options = options != null ? options : {};
+      defaults = {
+        fill: this.options.annotationFill,
+        stroke: this.options.annotationStroke,
+        x: x,
+        id: x,
+        sticky: false,
+        starFill: this.options.annotationStarFill,
+        starStroke: this.options.annotationStarStroke
+      };
+      options = $.extend({}, defaults, options);
+      if (!this.options.parseTime) {
+        if (__indexOf.call((function() {
+          var _i, _len, _ref, _results;
+          _ref = this.data;
+          _results = [];
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            row = _ref[_i];
+            _results.push(row.label);
+          }
+          return _results;
+        }).call(this), x) < 0) {
+          return false;
+        }
+        _ref = this.data;
+        for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
+          row = _ref[i];
+          if (row.label === x) {
+            break;
+          }
+        }
+        _x = this.transX(i);
+      } else {
+        _x = this.transX(Morris.parseDate(x));
+      }
+      return this._addAnnotation(_x, label, options);
+    };
+
+    Line.prototype._addAnnotation = function(x, label, options) {
+      var flag, y,
+        _this = this;
+      x = Math.round(x);
+      y = this.bottom;
+      flag = Morris.Line.createAnnotationFlag(this.r, x, y, options);
+      flag.mouseover(function() {
+        flag.toFront().animate({
+          opacity: 1.0
+        }, 150, '<');
+        return _this.fire('annotationHovered', options.id, options.x, label);
+      });
+      flag.mouseout(function() {
+        return flag.animate({
+          opacity: 0.6
+        }, 150, '<');
+      });
+      flag.click(function() {
+        return _this.fire('annotationClicked', options.id, options.x, label);
+      });
+      return true;
+    };
+
+    Line.createAnnotationFlag = function(paper, x, y, options) {
+      var flag, glow, st, star;
+      flag = paper.path('M-15,0L-60,0S-70,0,-70,-10' + 'L-70,-50S-70,-60,-60,-60L40,-60' + 'S50,-60,50,-50L50,-10S50,0,40,0' + 'L15,0L0,25Z' + 'M-50,-20L30,-20M-50,-40L30,-40');
+      flag.attr({
+        fill: options.fill,
+        stroke: options.stroke,
+        opacity: 0.6,
+        cursor: 'pointer'
+      });
+      flag.transform("T" + x + "," + y + "S0.13,0.16," + x + "," + y);
+      if (options.sticky) {
+        star = paper.path('M0,-1L0.588,0.809L-0.951,-0.309L0.951,-0.309L-0.588,0.809Z').transform("T" + (x + 6) + "," + (y - 10) + "S5,5," + (x + 6) + "," + (y - 10)).attr({
+          'stroke-width': 0,
+          'fill': options.starFill,
+          'cursor': 'pointer'
+        });
+        glow = star.glow({
+          width: 1,
+          opacity: 1,
+          color: options.starStroke
+        });
+        glow.attr('cursor', 'pointer');
+        st = paper.set();
+        st.push(flag, glow, star);
+        return st;
+      }
+      return flag;
     };
 
     Line.prototype.calc = function() {
