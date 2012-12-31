@@ -26,8 +26,7 @@ class Morris.Grid extends Morris.EventEmitter
       @options.postUnits = options.units
 
     # the raphael drawing instance
-    @r = new Raphael(@el[0])
-    @morrisSVG = new Morris.SVG(@el[0], @options)
+    @raphael = new Raphael(@el[0])
 
     # some redraw stuff
     @elementWidth = null
@@ -228,7 +227,7 @@ class Morris.Grid extends Morris.EventEmitter
   # If you need to re-size your charts, call this method after changing the
   # size of the container element.
   redraw: ->
-    @morrisSVG.clear()
+    @raphael.clear()
     @_calc()
     @drawGrid()
     @drawGoals()
@@ -239,12 +238,12 @@ class Morris.Grid extends Morris.EventEmitter
   #
   drawGoals: ->
     for goal, i in @options.goals
-      @morrisSVG.drawGoal("M#{@left},#{@transY(goal)}H#{@left + @width}")
+      @drawGoal("M#{@left},#{@transY(goal)}H#{@left + @width}")
 
   # draw events vertical lines
   drawEvents: ->
     for event, i in @events
-      @morrisSVG.drawEvent("M#{@transX(event)},#{@bottom}V#{@top}")
+      @drawEvent("M#{@transX(event)},#{@bottom}V#{@top}")
 
   # draw y axis labels, horizontal lines
   #
@@ -256,14 +255,17 @@ class Morris.Grid extends Morris.EventEmitter
       v = parseFloat(lineY.toFixed(@precision))
       y = @transY(v)
       if @options.axes
-        @morrisSVG.drawYAxisLabel(@left - @options.padding / 2, y, @yAxisFormat(v))
+        @drawYAxisLabel(@left - @options.padding / 2, y, @yAxisFormat(v))
       if @options.grid
-        @morrisSVG.drawGridLine("M#{@left},#{y}H#{@left + @width}")
+        @drawGridLine("M#{@left},#{y}H#{@left + @width}")
 
   # @private
   #
   measureText: (text, fontSize = 12) ->
-    @morrisSVG.measureText(text, fontSize)
+    tt = @raphael.text(100, 100, text).attr('font-size', fontSize)
+    ret = tt.getBBox()
+    tt.remove()
+    ret
 
   # @private
   #
@@ -281,6 +283,27 @@ class Morris.Grid extends Morris.EventEmitter
     hit = @hitTest(x, y)
     if hit?
       @hover.update(hit...)
+
+  drawGoal: (path) ->
+    @raphael.path(path)
+      .attr('stroke', @options.goalLineColors[i % @options.goalLineColors.length])
+      .attr('stroke-width', @options.goalStrokeWidth)
+
+  drawEvent: (path) ->
+    @raphael.path(path)
+      .attr('stroke', @options.eventLineColors[i % @options.eventLineColors.length])
+      .attr('stroke-width', @options.eventStrokeWidth)
+
+  drawYAxisLabel: (xPos, yPos, text) ->
+    @raphael.text(xPos, yPos, text)
+      .attr('font-size', @options.gridTextSize)
+      .attr('fill', @options.gridTextColor)
+      .attr('text-anchor', 'end')
+
+  drawGridLine: (path) ->
+    @raphael.path(path)
+      .attr('stroke', @options.gridLineColor)
+      .attr('stroke-width', @options.gridStrokeWidth)
 
 # Parse a date into a javascript timestamp
 #
