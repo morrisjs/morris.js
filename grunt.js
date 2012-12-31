@@ -15,6 +15,7 @@ module.exports = function (grunt) {
     concat: {
       'build/morris.coffee': [
         'lib/morris.coffee',
+        'lib/morris.svg.coffee',
         'lib/morris.grid.coffee',
         'lib/morris.hover.coffee',
         'lib/morris.line.coffee',

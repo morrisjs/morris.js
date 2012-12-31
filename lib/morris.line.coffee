@@ -138,9 +138,7 @@ class Morris.Line extends Morris.Grid
     ypos = @bottom + @options.gridTextSize * 1.25
     prevLabelMargin = null
     drawLabel = (labelText, xpos) =>
-      label = @r.text(@transX(xpos), ypos, labelText)
-        .attr('font-size', @options.gridTextSize)
-        .attr('fill', @options.gridTextColor)
+      label = @drawXAxisLabel(@transX(xpos), ypos, labelText)
       labelBox = label.getBBox()
       # ensure a minimum of `xLabelMargin` pixels between labels, and ensure
       # labels don't overflow the container
@@ -170,17 +168,12 @@ class Morris.Line extends Morris.Grid
     for i in [@options.ykeys.length-1..0]
       path = @paths[i]
       if path isnt null
-        @r.path(path)
-          .attr('stroke', @colorFor(row, i, 'line'))
-          .attr('stroke-width', @options.lineWidth)
+        @drawLinePath(path, @colorFor(row, i, 'line')) #row isn't available here?
     @seriesPoints = ([] for i in [0...@options.ykeys.length])
     for i in [@options.ykeys.length-1..0]
       for row in @data
         if row._y[i]?
-          circle = @r.circle(row._x, row._y[i], @options.pointSize)
-            .attr('fill', @colorFor(row, i, 'point'))
-            .attr('stroke-width', @strokeWidthForSeries(i))
-            .attr('stroke', @strokeForSeries(i))
+          circle = @drawLinePoint(row._x, row._y[i], @options.pointSize, @colorFor(row, i, 'point'), i)
         else
           circle = null
         @seriesPoints[i].push(circle)
@@ -245,14 +238,6 @@ class Morris.Line extends Morris.Grid
           @seriesPoints[i][index].animate @pointGrow
     @prevHilight = index
 
-  # @private
-  strokeWidthForSeries: (index) ->
-    @options.pointWidths[index % @options.pointWidths.length]
-
-  # @private
-  strokeForSeries: (index) ->
-    @options.pointStrokeColors[index % @options.pointStrokeColors.length]
-
   colorFor: (row, sidx, type) ->
     if typeof @options.lineColors is 'function'
       @options.lineColors.call(@, row, sidx, type)
@@ -261,6 +246,29 @@ class Morris.Line extends Morris.Grid
     else
       @options.lineColors[sidx % @options.lineColors.length]
 
+  drawXAxisLabel: (xPos, yPos, text) ->
+    @raphael.text(xPos, yPos, text)
+      .attr('font-size', @options.gridTextSize)
+      .attr('fill', @options.gridTextColor)
+
+  drawLinePath: (path, lineColor) ->
+    @raphael.path(path)
+      .attr('stroke', lineColor)
+      .attr('stroke-width', @options.lineWidth)
+
+  drawLinePoint: (xPos, yPos, size, pointColor, lineIndex) ->
+    @raphael.circle(xPos, yPos, size)
+      .attr('fill', pointColor)
+      .attr('stroke-width', @strokeWidthForSeries(lineIndex))
+      .attr('stroke', @strokeForSeries(lineIndex))
+
+  # @private
+  strokeWidthForSeries: (index) ->
+    @options.pointWidths[index % @options.pointWidths.length]
+
+  # @private
+  strokeForSeries: (index) ->
+    @options.pointStrokeColors[index % @options.pointStrokeColors.length]
 
 # generate a series of label, timestamp pairs for x-axis labels
 #
