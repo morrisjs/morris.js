@@ -1300,223 +1300,561 @@
 
   })(Morris.Grid);
 
-  Morris.Donut = (function() {
+  Morris.isUniform = function(array, value, compare) {
+    var el, _i, _len;
+    value = value != null ? value : array[0];
+    compare = compare != null ? compare : function(a, b) {
+      return a === b;
+    };
+    if (array.length === 0) {
+      return true;
+    }
+    for (_i = 0, _len = array.length; _i < _len; _i++) {
+      el = array[_i];
+      if (!compare(el, value)) {
+        return false;
+      }
+    }
+    return true;
+  };
 
-    Donut.prototype.defaults = {
+  Morris.Pie = (function(_super) {
+
+    __extends(Pie, _super);
+
+    Pie.prototype.pieDefaults = {
       colors: ['#0B62A4', '#3980B5', '#679DC6', '#95BBD7', '#B0CCE1', '#095791', '#095085', '#083E67', '#052C48', '#042135'],
-      formatter: Morris.commas
+      idKey: "label",
+      stroke: "#FFFFFF",
+      strokeWidth: 3,
+      sort: false,
+      formatter: Morris.commas,
+      showLabel: "hover",
+      drawOut: 5,
+      includeZeros: false
     };
 
-    function Donut(options) {
-      this.select = __bind(this.select, this);
-      if (!(this instanceof Morris.Donut)) {
-        return new Morris.Donut(options);
+    function Pie(options) {
+      var _this = this;
+      if (!(this instanceof Morris.Pie)) {
+        return new Morris.Pie(options);
       }
       if (typeof options.element === 'string') {
         this.el = $(document.getElementById(options.element));
       } else {
         this.el = $(options.element);
       }
-      this.options = $.extend({}, this.defaults, options);
       if (this.el === null || this.el.length === 0) {
-        throw new Error("Graph placeholder not found.");
+        throw new Error("Container element not found.");
       }
       if (options.data === void 0 || options.data.length === 0) {
         return;
       }
-      this.data = options.data;
+      this.options = $.extend({}, this.pieDefaults, options);
+      this.setData(options.data);
+      if (this.options.showLabel === "hover") {
+        this.el.mouseout(function(evt) {
+          return _this.hideLabel();
+        });
+      }
+      if (this.options.showLabel !== true) {
+        this.el.mouseout(function(evt) {
+          return _this.deselect();
+        });
+      }
       this.redraw();
     }
 
-    Donut.prototype.redraw = function() {
-      var C, cx, cy, d, idx, last, max_value, min, next, seg, total, w, x, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _results;
-      this.el.empty();
-      this.r = new Raphael(this.el[0]);
-      cx = this.el.width() / 2;
-      cy = this.el.height() / 2;
-      w = (Math.min(cx, cy) - 10) / 3;
+    Pie.prototype.setData = function(data) {
+      var isUniform, row, total, _i, _j, _k, _len, _len1, _len2, _ref, _ref1;
       total = 0;
-      _ref = this.data;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        x = _ref[_i];
-        total += x.value;
+      for (_i = 0, _len = data.length; _i < _len; _i++) {
+        row = data[_i];
+        total = total + row.value;
       }
-      min = 5 / (2 * w);
-      C = 1.9999 * Math.PI - min * this.data.length;
-      last = 0;
-      idx = 0;
-      this.segments = [];
-      _ref1 = this.data;
-      for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-        d = _ref1[_j];
-        next = last + min + C * (d.value / total);
-        seg = new Morris.DonutSegment(cx, cy, w * 2, w, last, next, this.options.colors[idx % this.options.colors.length], d);
-        seg.render(this.r);
-        this.segments.push(seg);
-        seg.on('hover', this.select);
-        last = next;
-        idx += 1;
+      if (total === 0) {
+        total = 1;
       }
-      this.text1 = this.r.text(cx, cy - 10, '').attr({
-        'font-size': 15,
-        'font-weight': 800
+      this.data = [];
+      for (_j = 0, _len1 = data.length; _j < _len1; _j++) {
+        row = data[_j];
+        this.data.push({
+          label: row.label,
+          value: this.options.formatter(row.value, row),
+          sector: row.value / total * 100,
+          id: row[this.options.idKey]
+        });
+      }
+      isUniform = Morris.isUniform(this.data, 0, function(a, v) {
+        return a.sector === v;
       });
-      this.text2 = this.r.text(cx, cy + 10, '').attr({
-        'font-size': 14
-      });
-      max_value = Math.max.apply(null, (function() {
-        var _k, _len2, _ref2, _results;
-        _ref2 = this.data;
-        _results = [];
-        for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
-          d = _ref2[_k];
-          _results.push(d.value);
+      if (isUniform) {
+        _ref = this.data;
+        for (_k = 0, _len2 = _ref.length; _k < _len2; _k++) {
+          row = _ref[_k];
+          row.sector = 100 / this.data.length;
         }
-        return _results;
-      }).call(this));
-      idx = 0;
-      _ref2 = this.data;
-      _results = [];
-      for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
-        d = _ref2[_k];
-        if (d.value === max_value) {
-          this.select(idx);
-          break;
-        }
-        _results.push(idx += 1);
       }
-      return _results;
+      if ((_ref1 = this.options.sortData) === true || _ref1 === "asc") {
+        return this.data = this.data.sort(function(a, b) {
+          return a.sector > b.sector;
+        });
+      } else if (this.options.sortData === "desc") {
+        return this.data = this.data.sort(function(a, b) {
+          return a.sector < b.sector;
+        });
+      }
     };
 
-    Donut.prototype.select = function(idx) {
-      var s, segment, _i, _len, _ref;
-      _ref = this.segments;
+    Pie.prototype.redraw = function() {
+      this.clear();
+      this.calc();
+      return this.draw();
+    };
+
+    Pie.prototype.clear = function() {
+      this.label = null;
+      this.middles = [];
+      this.sectors = [];
+      this.el.empty();
+      return this.r = new Raphael(this.el[0]);
+    };
+
+    Pie.prototype.calc = function() {
+      this.width = this.el.width();
+      this.height = this.el.height();
+      if (this.options.showLabel !== false) {
+        this.height -= 30;
+      }
+      this.cx = this.width / 2.0;
+      this.cy = this.height / 2.0;
+      this.radius = 0.8 * Math.min(this.cx, this.cy);
+      if (this.options.showLabel !== false) {
+        return this.cy += 30;
+      }
+    };
+
+    Pie.prototype.select = function(i) {
+      var s, sector, _i, _len, _ref;
+      _ref = this.sectors;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         s = _ref[_i];
         s.deselect();
       }
-      if (typeof idx === 'number') {
-        segment = this.segments[idx];
-      } else {
-        segment = idx;
+      sector = i;
+      if (typeof i === "number") {
+        sector = this.sectors[i];
       }
-      segment.select();
-      return this.setLabels(segment.data.label, this.options.formatter(segment.data.value, segment.data));
+      sector.select();
+      this.fire("hover", sector.data.id, sector.data);
+      if (this.options.showLabel !== false) {
+        return this.showLabel(sector);
+      }
     };
 
-    Donut.prototype.setLabels = function(label1, label2) {
-      var inner, maxHeightBottom, maxHeightTop, maxWidth, text1bbox, text1scale, text2bbox, text2scale;
-      inner = (Math.min(this.el.width() / 2, this.el.height() / 2) - 10) * 2 / 3;
-      maxWidth = 1.8 * inner;
-      maxHeightTop = inner / 2;
-      maxHeightBottom = inner / 3;
-      this.text1.attr({
-        text: label1,
-        transform: ''
-      });
-      text1bbox = this.text1.getBBox();
-      text1scale = Math.min(maxWidth / text1bbox.width, maxHeightTop / text1bbox.height);
-      this.text1.attr({
-        transform: "S" + text1scale + "," + text1scale + "," + (text1bbox.x + text1bbox.width / 2) + "," + (text1bbox.y + text1bbox.height)
-      });
-      this.text2.attr({
-        text: label2,
-        transform: ''
-      });
-      text2bbox = this.text2.getBBox();
-      text2scale = Math.min(maxWidth / text2bbox.width, maxHeightBottom / text2bbox.height);
-      return this.text2.attr({
-        transform: "S" + text2scale + "," + text2scale + "," + (text2bbox.x + text2bbox.width / 2) + "," + text2bbox.y
+    Pie.prototype.showLabel = function(sector) {
+      if (this.label === null) {
+        this.label = this.r.text(this.cx, 30, "").attr({
+          "font-size": 15,
+          "font-weight": "bold"
+        });
+      }
+      return this.label.attr({
+        fill: sector.color,
+        text: "" + sector.data.label + ": " + sector.data.value
       });
     };
 
-    return Donut;
+    Pie.prototype.hideLabel = function() {
+      this.deselect();
+      if (this.label !== null) {
+        return this.label.attr("text", "");
+      }
+    };
 
-  })();
+    Pie.prototype.deselect = function() {
+      var s, _i, _len, _ref, _results;
+      _ref = this.sectors;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        s = _ref[_i];
+        _results.push(s.deselect());
+      }
+      return _results;
+    };
 
-  Morris.DonutSegment = (function(_super) {
+    Pie.prototype.draw = function() {
+      if (this.data.length === 1) {
+        return this.drawSingle();
+      } else {
+        return this.drawSectors();
+      }
+    };
 
-    __extends(DonutSegment, _super);
+    Pie.prototype.drawSingle = function() {
+      var angle, sector,
+        _this = this;
+      angle = 90 + 360 * this.data[0].sector / 200;
+      sector = this.genSingle(this.data[0], angle, angle - 3.6 * this.data[0].sector);
+      sector.render(this.r);
+      sector.on("hover", function(s) {
+        return _this.select(s);
+      });
+      sector.on("click", function(id, data) {
+        return _this.fire("click", id, data);
+      });
+      this.sectors.push(sector);
+      if (this.options.showLabel === true) {
+        return this.select(0);
+      }
+    };
 
-    function DonutSegment(cx, cy, inner, outer, p0, p1, color, data) {
+    Pie.prototype.drawSectors = function() {
+      var angle, from, i, mangle, row, sector, to, _i, _len, _ref, _ref1,
+        _this = this;
+      angle = 0;
+      _ref = this.data;
+      for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
+        row = _ref[i];
+        if (row.sector === 0) {
+          continue;
+        }
+        mangle = angle - 360 * row.sector / 200;
+        if (!i) {
+          angle = 90 - mangle;
+          mangle = angle - 360.0 * row.sector / 200;
+        }
+        _ref1 = [angle, angle - 3.6 * row.sector], from = _ref1[0], to = _ref1[1];
+        angle = to;
+        sector = this.genSector(row, from, to, i);
+        sector.render(this.r);
+        sector.on("hover", function(s) {
+          return _this.select(s);
+        });
+        sector.on("click", function(id, data) {
+          return _this.fire("click", id, data);
+        });
+        this.sectors.push(sector);
+      }
+      if (this.options.showLabel === true) {
+        return this.select(this.data.length - 1);
+      }
+    };
+
+    Pie.prototype.genSingle = function(row) {
+      return new Morris.Pie.FullSector(this.cx, this.cy, this.radius, this.getColor(0), row, this.options);
+    };
+
+    Pie.prototype.genSector = function(row, from, to, i) {
+      return new Morris.Pie.Sector(this.cx, this.cy, this.radius, from, to, this.getColor(i), row, this.options);
+    };
+
+    Pie.prototype.getColor = function(i) {
+      if (typeof this.options.colors === "function") {
+        return this.options.colors.call(this.data[i], i, this.options);
+      } else {
+        return this.options.colors[i % this.options.colors.length];
+      }
+    };
+
+    return Pie;
+
+  })(Morris.EventEmitter);
+
+  Morris.Pie.FullSector = (function(_super) {
+
+    __extends(FullSector, _super);
+
+    function FullSector(cx, cy, radius, color, data, options) {
       this.cx = cx;
       this.cy = cy;
-      this.inner = inner;
-      this.outer = outer;
+      this.radius = radius;
       this.color = color;
       this.data = data;
-      this.deselect = __bind(this.deselect, this);
-
-      this.select = __bind(this.select, this);
-
-      this.sin_p0 = Math.sin(p0);
-      this.cos_p0 = Math.cos(p0);
-      this.sin_p1 = Math.sin(p1);
-      this.cos_p1 = Math.cos(p1);
-      this.long = (p1 - p0) > Math.PI ? 1 : 0;
-      this.path = this.calcSegment(this.inner + 3, this.inner + this.outer - 5);
-      this.selectedPath = this.calcSegment(this.inner + 3, this.inner + this.outer);
-      this.hilight = this.calcArc(this.inner);
+      this.options = options;
+      this.selected = false;
     }
 
-    DonutSegment.prototype.calcArcPoints = function(r) {
-      return [this.cx + r * this.sin_p0, this.cy + r * this.cos_p0, this.cx + r * this.sin_p1, this.cy + r * this.cos_p1];
-    };
-
-    DonutSegment.prototype.calcSegment = function(r1, r2) {
-      var ix0, ix1, iy0, iy1, ox0, ox1, oy0, oy1, _ref, _ref1;
-      _ref = this.calcArcPoints(r1), ix0 = _ref[0], iy0 = _ref[1], ix1 = _ref[2], iy1 = _ref[3];
-      _ref1 = this.calcArcPoints(r2), ox0 = _ref1[0], oy0 = _ref1[1], ox1 = _ref1[2], oy1 = _ref1[3];
-      return ("M" + ix0 + "," + iy0) + ("A" + r1 + "," + r1 + ",0," + this.long + ",0," + ix1 + "," + iy1) + ("L" + ox1 + "," + oy1) + ("A" + r2 + "," + r2 + ",0," + this.long + ",1," + ox0 + "," + oy0) + "Z";
-    };
-
-    DonutSegment.prototype.calcArc = function(r) {
-      var ix0, ix1, iy0, iy1, _ref;
-      _ref = this.calcArcPoints(r), ix0 = _ref[0], iy0 = _ref[1], ix1 = _ref[2], iy1 = _ref[3];
-      return ("M" + ix0 + "," + iy0) + ("A" + r + "," + r + ",0," + this.long + ",0," + ix1 + "," + iy1);
-    };
-
-    DonutSegment.prototype.render = function(r) {
+    FullSector.prototype.render = function(r) {
       var _this = this;
-      this.arc = r.path(this.hilight).attr({
-        stroke: this.color,
-        'stroke-width': 2,
-        opacity: 0
+      return this.sec = r.circle(this.cx, this.cy, this.radius - this.options.drawOut).attr({
+        fillr: this.color,
+        stroke: this.options.stroke,
+        "stroke-width": this.options.strokeWidth,
+        "stroke-linejoin": "round"
+      }).hover(function() {
+        return _this.fire("hover", _this);
+      }).click(function() {
+        return _this.fire("click", _this.data.id, _this.data);
       });
-      return this.seg = r.path(this.path).attr({
+    };
+
+    FullSector.prototype.select = function() {
+      if (!this.selected) {
+        this.sec.animate({
+          r: this.radius
+        }, 150, "<>");
+        return this.selected = true;
+      }
+    };
+
+    FullSector.prototype.deselect = function() {
+      if (this.selected) {
+        this.sec.animate({
+          r: this.radius - this.options.drawOut
+        }, 150, "<>");
+        return this.selected = false;
+      }
+    };
+
+    return FullSector;
+
+  })(Morris.EventEmitter);
+
+  Morris.Pie.Sector = (function(_super) {
+
+    __extends(Sector, _super);
+
+    function Sector(cx, cy, radius, from, to, color, data, options) {
+      var rad;
+      this.cx = cx;
+      this.cy = cy;
+      this.radius = radius;
+      this.color = color;
+      this.data = data;
+      this.options = options;
+      rad = Math.PI / 180;
+      this.diff = Math.abs(to - from);
+      this.cos = Math.cos(-(from + (to - from) / 2) * rad);
+      this.sin = Math.sin(-(from + (to - from) / 2) * rad);
+      this.sin_from = Math.sin(-from * rad);
+      this.cos_from = Math.cos(-from * rad);
+      this.sin_to = Math.sin(-to * rad);
+      this.cos_to = Math.cos(-to * rad);
+      this.long = +(this.diff > 180);
+      this.path = this.calcSegment(this.radius - this.options.drawOut);
+      this.selectedPath = this.calcSegment(this.radius);
+      this.selected = false;
+      this.mx = this.cx + this.radius / 2 * this.cos;
+      this.my = this.cy + this.radius / 2 * this.sin;
+    }
+
+    Sector.prototype.calcArcPoints = function(r) {
+      return [this.cx + r * this.cos_from, this.cy + r * this.sin_from, this.cx + r * this.cos_to, this.cy + r * this.sin_to];
+    };
+
+    Sector.prototype.calcSegment = function(r) {
+      var x1, x2, y1, y2, _ref;
+      _ref = this.calcArcPoints(r), x1 = _ref[0], y1 = _ref[1], x2 = _ref[2], y2 = _ref[3];
+      return "M" + this.cx + "," + this.cy + "L" + x1 + "," + y1 + "A" + r + "," + r + ",0," + this.long + ",1," + x2 + "," + y2 + "Z";
+    };
+
+    Sector.prototype.render = function(r) {
+      var _this = this;
+      return this.sec = r.path(this.path).attr({
         fill: this.color,
-        stroke: 'white',
-        'stroke-width': 3
+        stroke: this.options.stroke,
+        'stroke-width': this.options.strokeWidth,
+        'stroke-linejoin': 'round'
       }).hover(function() {
         return _this.fire('hover', _this);
+      }).click(function() {
+        return _this.fire("click", _this.data.id, _this.data);
       });
     };
 
-    DonutSegment.prototype.select = function() {
+    Sector.prototype.select = function() {
       if (!this.selected) {
-        this.seg.animate({
+        this.sec.animate({
           path: this.selectedPath
-        }, 150, '<>');
-        this.arc.animate({
-          opacity: 1
         }, 150, '<>');
         return this.selected = true;
       }
     };
 
-    DonutSegment.prototype.deselect = function() {
+    Sector.prototype.deselect = function() {
       if (this.selected) {
-        this.seg.animate({
+        this.sec.animate({
           path: this.path
-        }, 150, '<>');
-        this.arc.animate({
-          opacity: 0
         }, 150, '<>');
         return this.selected = false;
       }
     };
 
-    return DonutSegment;
+    return Sector;
+
+  })(Morris.EventEmitter);
+
+  Morris.Donut = (function(_super) {
+
+    __extends(Donut, _super);
+
+    Donut.prototype.donutDefaults = {
+      width: "50%"
+    };
+
+    function Donut(options) {
+      if (!(this instanceof Morris.Donut)) {
+        return new Morris.Donut(options);
+      }
+      Donut.__super__.constructor.call(this, $.extend({}, this.donutDefaults, options));
+    }
+
+    Donut.prototype.genSector = function(row, from, to, i) {
+      return new Morris.Donut.Sector(this.cx, this.cy, this.radius, from, to, this.getColor(i), row, this.options);
+    };
+
+    Donut.prototype.genSingle = function(row, from, to) {
+      return new Morris.Donut.FullSector(this.cx, this.cy, this.radius, this.getColor(0), row, this.options);
+    };
+
+    return Donut;
+
+  })(Morris.Pie);
+
+  Morris.Donut.FullSegment = (function(_super) {
+
+    __extends(FullSegment, _super);
+
+    function FullSegment(cx, cy, r, color, data, options) {
+      var rad, width;
+      this.cx = cx;
+      this.cy = cy;
+      this.r = r;
+      this.color = color;
+      this.data = data;
+      this.options = options;
+      rad = Math.PI / 180;
+      width = this.options.width;
+      if (width.match(/[0-9]+(\.[0-9]+)?\%/)) {
+        width = this.r * parseFloat(width) / 100;
+      }
+      this.rin = this.r - width;
+      this.drawOut = this.options.drawOut;
+      this.drawOutInner = 0.5 * this.options.drawOut * this.rin / this.r;
+      this.selected = false;
+      this.swidth = width + this.drawOut - this.drawOutInner - this.options.strokeWidth * 2;
+      this.width = width - this.options.strokeWidth * 2;
+      this.r = this.r - width / 2 - this.options.strokeWidth;
+      this.sr = this.r + (this.drawOut + this.drawOutInner) / 2;
+      this.path = ["M", this.cx, this.cy - this.r, "A", this.r, this.r, 0, 1, 1, this.cx - 0.01, this.cy - this.r];
+      this.selectedPath = ["M", this.cx, this.cy - this.sr, "A", this.sr, this.sr, 0, 1, 1, this.cx - 0.01, this.cy - this.sr];
+    }
+
+    FullSegment.prototype.render = function(r) {
+      var _this = this;
+      return this.sec = r.path(this.path).attr({
+        'stroke': this.color,
+        'stroke-width': this.width
+      }).hover(function() {
+        return _this.fire('hover', _this);
+      }).click(function() {
+        return _this.fire("click", _this);
+      });
+    };
+
+    FullSegment.prototype.select = function() {
+      var attrs;
+      if (!this.selected) {
+        attrs = {
+          path: this.selectedPath,
+          'stroke-width': this.swidth
+        };
+        this.sec.animate(attrs, 150, '<>');
+        return this.selected = true;
+      }
+    };
+
+    FullSegment.prototype.deselect = function() {
+      var attrs;
+      if (this.selected) {
+        attrs = {
+          path: this.path,
+          'stroke-width': this.width
+        };
+        this.sec.animate(attrs, 150, '<>');
+        return this.selected = false;
+      }
+    };
+
+    return FullSegment;
+
+  })(Morris.EventEmitter);
+
+  Morris.Donut.Sector = (function(_super) {
+
+    __extends(Sector, _super);
+
+    function Sector(cx, cy, r, to, from, color, data, options) {
+      var rad, width;
+      this.cx = cx;
+      this.cy = cy;
+      this.r = r;
+      this.color = color;
+      this.data = data;
+      this.options = options;
+      rad = Math.PI / 180;
+      this.long = +(to - from > 180);
+      this.sin_from = Math.sin(-from * rad);
+      this.cos_from = Math.cos(-from * rad);
+      this.sin_to = Math.sin(-to * rad);
+      this.cos_to = Math.cos(-to * rad);
+      width = this.options.width;
+      if (width.match(/[0-9]+(\.[0-9]+)?\%/)) {
+        width = this.r * parseFloat(width) / 100;
+      }
+      this.rin = this.r - width;
+      this.drawOut = this.options.drawOut;
+      this.drawOutInner = 0.5 * this.options.drawOut * this.rin / this.r;
+      this.selected = false;
+      this.path = this.calcSegment(this.r - this.drawOut, this.rin - this.drawOutInner);
+      this.selectedPath = this.calcSegment(this.r, this.rin);
+    }
+
+    Sector.prototype.calcArcPoints = function(r) {
+      return [this.cx + r * this.cos_from, this.cy + r * this.sin_from, this.cx + r * this.cos_to, this.cy + r * this.sin_to];
+    };
+
+    Sector.prototype.calcSegment = function(r, rin) {
+      var path, x1, x2, xx1, xx2, y1, y2, yy1, yy2, _ref, _ref1;
+      _ref = this.calcArcPoints(r), x1 = _ref[0], y1 = _ref[1], x2 = _ref[2], y2 = _ref[3];
+      _ref1 = this.calcArcPoints(rin), xx1 = _ref1[0], yy1 = _ref1[1], xx2 = _ref1[2], yy2 = _ref1[3];
+      return path = ["M", xx1, yy1, "L", x1, y1, "A", r, r, 0, this.long, 0, x2, y2, "L", xx2, yy2, "A", rin, rin, 0, this.long, 1, xx1, yy1, "z"];
+    };
+
+    Sector.prototype.render = function(r) {
+      var _this = this;
+      return this.sec = r.path(this.path).attr({
+        fill: this.color,
+        stroke: this.options.stroke,
+        'stroke-width': this.options.strokeWidth,
+        'stroke-linejoin': 'round'
+      }).hover(function() {
+        return _this.fire('hover', _this);
+      }).click(function() {
+        return _this.fire("click", _this);
+      });
+    };
+
+    Sector.prototype.select = function() {
+      if (!this.selected) {
+        this.sec.animate({
+          path: this.selectedPath
+        }, 150, '<>');
+        return this.selected = true;
+      }
+    };
+
+    Sector.prototype.deselect = function() {
+      if (this.selected) {
+        this.sec.animate({
+          path: this.path
+        }, 150, '<>');
+        return this.selected = false;
+      }
+    };
+
+    return Sector;
 
   })(Morris.EventEmitter);
 
