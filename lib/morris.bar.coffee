@@ -10,6 +10,7 @@ class Morris.Bar extends Morris.Grid
       @hover = new Morris.Hover(parent: @el)
       @on('hovermove', @onHoverMove)
       @on('hoverout', @onHoverOut)
+      @on('gridclick', @onGridClick)
 
   # Default configuration
   #
@@ -123,6 +124,13 @@ class Morris.Bar extends Morris.Grid
     x = Math.max(Math.min(x, @right), @left)
     Math.min(@data.length - 1,
       Math.floor((x - @left) / (@width / @data.length)))
+
+  # click on grid event handler
+  #
+  # @private
+  onGridClick: (x, y) =>
+    index = @hitTest(x, y)
+    @fire 'click', index, @options.data[index], x, y
 
   # hover movement event handler
   #

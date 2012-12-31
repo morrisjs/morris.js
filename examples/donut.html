@@ -22,6 +22,8 @@ Morris.Donut({
     {value: 5, label: 'A really really long label'}
   ],
   formatter: function (x) { return x + "%"}
+}).on('click', function(i, row){
+  console.log(i, row);
 });
 </pre>
 </body>

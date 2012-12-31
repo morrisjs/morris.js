@@ -8,7 +8,7 @@
 #       { label: 'yang', value: 50 }
 #     ]
 #   });
-class Morris.Donut
+class Morris.Donut extends Morris.EventEmitter
   defaults:
     colors: [
       '#0B62A4'
@@ -71,10 +71,11 @@ class Morris.Donut
     @segments = []
     for d in @data
       next = last + min + C * (d.value / total)
-      seg = new Morris.DonutSegment(cx, cy, w*2, w, last, next, @options.colors[idx % @options.colors.length], d)
+      seg = new Morris.DonutSegment(cx, cy, w*2, w, last, next, @options.colors[idx % @options.colors.length], d, idx)
       seg.render @r
       @segments.push seg
       seg.on 'hover', @select
+      seg.on 'click', @click
       last = next
       idx += 1
     @text1 = @r.text(cx, cy - 10, '').attr('font-size': 15, 'font-weight': 800)
@@ -86,6 +87,11 @@ class Morris.Donut
         @select idx
         break
       idx += 1
+
+  # @private
+  click: (idx) =>
+    if typeof idx is 'number' then segment = @segments[idx] else segment = idx
+    @fire 'click', segment.idx, segment.data
 
   # Select the segment at the given index.
   select: (idx) =>
@@ -114,7 +120,7 @@ class Morris.Donut
 #
 # @private
 class Morris.DonutSegment extends Morris.EventEmitter
-  constructor: (@cx, @cy, @inner, @outer, p0, p1, @color, @data) ->
+  constructor: (@cx, @cy, @inner, @outer, p0, p1, @color, @data, @idx) ->
     @sin_p0 = Math.sin(p0)
     @cos_p0 = Math.cos(p0)
     @sin_p1 = Math.sin(p1)
@@ -152,6 +158,7 @@ class Morris.DonutSegment extends Morris.EventEmitter
     @seg = r.path(@path)
       .attr(fill: @color, stroke: 'white', 'stroke-width': 3)
       .hover(=> @fire('hover', @))
+      .click(=> @fire('click', @))
 
   select: =>
     unless @selected

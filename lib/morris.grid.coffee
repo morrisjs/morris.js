@@ -53,6 +53,10 @@ class Morris.Grid extends Morris.EventEmitter
       @fire 'hover', touch.pageX - offset.left, touch.pageY - offset.top
       touch
 
+    @el.bind 'click', (evt) =>
+      offset = @el.offset()
+      @fire 'gridclick', evt.pageX - offset.left, evt.pageY - offset.top
+
     @postInit() if @postInit
 
   # Default options
