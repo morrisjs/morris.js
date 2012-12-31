@@ -1331,7 +1331,7 @@
       formatter: Morris.commas,
       showLabel: "hover",
       drawOut: 5,
-      includeZeros: false
+      minSectorAngle: 5
     };
 
     function Pie(options) {
@@ -1366,7 +1366,7 @@
     }
 
     Pie.prototype.setData = function(data) {
-      var isUniform, row, total, _i, _j, _k, _len, _len1, _len2, _ref, _ref1;
+      var angle, angles, i, row, sumAngles, total, updateSum, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _len5, _len6, _m, _n, _o, _ref, _ref1;
       total = 0;
       for (_i = 0, _len = data.length; _i < _len; _i++) {
         row = data[_i];
@@ -1382,18 +1382,55 @@
           label: row.label,
           value: this.options.formatter(row.value, row),
           sector: row.value / total * 100,
+          angle: row.value / total * 360,
           id: row[this.options.idKey]
         });
       }
-      isUniform = Morris.isUniform(this.data, 0, function(a, v) {
+      if (Morris.isUniform(this.data, 0, function(a, v) {
         return a.sector === v;
-      });
-      if (isUniform) {
+      })) {
         _ref = this.data;
         for (_k = 0, _len2 = _ref.length; _k < _len2; _k++) {
           row = _ref[_k];
           row.sector = 100 / this.data.length;
         }
+      }
+      angles = (function() {
+        var _l, _len3, _ref1, _results;
+        _ref1 = this.data;
+        _results = [];
+        for (_l = 0, _len3 = _ref1.length; _l < _len3; _l++) {
+          row = _ref1[_l];
+          _results.push(row.angle);
+        }
+        return _results;
+      }).call(this);
+      updateSum = 0;
+      for (i = _l = 0, _len3 = angles.length; _l < _len3; i = ++_l) {
+        angle = angles[i];
+        if (!(angle < this.options.minSectorAngle)) {
+          continue;
+        }
+        angles[i] = this.options.minSectorAngle;
+        updateSum += this.options.minSectorAngle - angle;
+      }
+      sumAngles = 0;
+      for (i = _m = 0, _len4 = angles.length; _m < _len4; i = ++_m) {
+        angle = angles[i];
+        if (angle >= updateSum * 2) {
+          sumAngles += angle;
+        }
+      }
+      for (i = _n = 0, _len5 = angles.length; _n < _len5; i = ++_n) {
+        angle = angles[i];
+        if (angle >= updateSum * 2) {
+          angles[i] = angle - updateSum * angle / sumAngles;
+        }
+      }
+      for (i = _o = 0, _len6 = angles.length; _o < _len6; i = ++_o) {
+        angle = angles[i];
+        this.data[i].angle = angle;
+        this.data[i].sector = angle / 3.6;
       }
       if ((_ref1 = this.options.sortData) === true || _ref1 === "asc") {
         return this.data = this.data.sort(function(a, b) {

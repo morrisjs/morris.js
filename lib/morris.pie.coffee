@@ -27,7 +27,7 @@ class Morris.Pie extends Morris.EventEmitter
     formatter: Morris.commas
     showLabel: "hover"
     drawOut: 5
-    includeZeros: false
+    minSectorAngle: 5
   
   constructor: (options) ->
     if not (this instanceof Morris.Pie)
@@ -68,14 +68,31 @@ class Morris.Pie extends Morris.EventEmitter
         label: row.label
         value: @options.formatter(row.value, row)
         sector: row.value / total * 100
+        angle: row.value / total * 360
         id: row[@options.idKey]
     
-    isUniform = Morris.isUniform @data, 0, (a, v) -> a.sector == v
-    
-    if isUniform
+    if Morris.isUniform(@data, 0, (a, v) -> a.sector == v)
       for row in @data
         row.sector = 100 / @data.length
     
+    angles = (row.angle for row in @data)
+    
+    updateSum = 0
+    for angle, i in angles when angle < @options.minSectorAngle
+      angles[i] = @options.minSectorAngle
+      updateSum += @options.minSectorAngle - angle
+
+    sumAngles = 0
+    for angle, i in angles when angle >= updateSum * 2
+      sumAngles += angle
+
+    for angle, i in angles when angle >= updateSum * 2
+      angles[i] = angle - updateSum * angle / sumAngles
+
+    for angle, i in angles
+      @data[i].angle = angle
+      @data[i].sector = angle / 3.6
+
     if @options.sortData in [true, "asc"]
       @data = @data.sort (a,b) -> a.sector > b.sector
     else if @options.sortData is "desc"
