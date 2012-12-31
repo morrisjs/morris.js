@@ -4,8 +4,6 @@ class Morris.Bar extends Morris.Grid
     super($.extend {}, options, parseTime: false)
 
   init: ->
-    @cumulative = @options.stacked
-
     if @options.hideHover isnt 'always'
       @hover = new Morris.Hover(parent: @el)
       @on('hovermove', @onHoverMove)
@@ -26,6 +24,7 @@ class Morris.Bar extends Morris.Grid
       '#9440ed'
     ]
     xLabelMargin: 50
+    stacked: false
 
   # Do any size-related calculations
   #
@@ -34,6 +33,29 @@ class Morris.Bar extends Morris.Grid
     @calcBars()
     if @options.hideHover is false
       @hover.update(@hoverContentForRow(@data.length - 1)...)
+
+  # Update ymax regarding stacks
+  redraw: ->
+    @numBars = @options.stacked.length
+    @numBars = 1 if @options.stacked is true
+    @numBars = @options.ykeys.length if @options.stacked is false
+
+    stacksMaxes = (0 for i in [0...@numBars])
+    categorySums = []
+    for i in [0...@numBars]
+      categorySums.push((0 for i in [0...@data.length]))
+
+    for row, idx in @data
+      for y, sidx in row.y
+        stack = @stackForBar(sidx)
+        categorySums[stack][idx] += y
+
+    for stackSums, stack in categorySums
+      for stackSum in stackSums
+        stacksMaxes[stack] = Math.max(stacksMaxes[stack], stackSum)
+
+    @ymax = Math.max(@ymax, Math.max.apply(null, stacksMaxes))
+    super()
 
   # calculate series data bars coordinates and sizes
   #
@@ -76,13 +98,13 @@ class Morris.Bar extends Morris.Grid
   # @private
   drawSeries: ->
     groupWidth = @width / @options.data.length
-    numBars = if @options.stacked? then 1 else @options.ykeys.length
-    barWidth = (groupWidth * @options.barSizeRatio - @options.barGap * (numBars - 1)) / numBars
+    barWidth = (groupWidth * @options.barSizeRatio - @options.barGap * (@numBars - 1)) / @numBars
     leftPadding = groupWidth * (1 - @options.barSizeRatio) / 2
     zeroPos = if @ymin <= 0 and @ymax >= 0 then @transY(0) else null
     @bars = for row, idx in @data
-      lastTop = 0
+      lastTops = (0 for i in [0...@numBars])
       for ypos, sidx in row._y
+        stack = @stackForBar(sidx)
         if ypos != null
           if zeroPos
             top = Math.min(ypos, zeroPos)
@@ -92,17 +114,29 @@ class Morris.Bar extends Morris.Grid
             bottom = @bottom
 
           left = @left + idx * groupWidth + leftPadding
-          left += sidx * (barWidth + @options.barGap) unless @options.stacked
+          left += stack * (barWidth + @options.barGap)
           size = bottom - top
 
-          top -= lastTop if @options.stacked
+          top -= lastTops[stack]
           @r.rect(left, top, barWidth, size)
             .attr('fill', @colorFor(row, sidx, 'bar'))
             .attr('stroke-width', 0)
 
-          lastTop += size
+          lastTops[stack] += size
         else
           null
+
+  stackForBar: (sidx) ->
+    if @options.stacked is true
+      return 0
+    if @options.stacked is false
+      return sidx
+    for stack, i in @options.stacked
+      if typeof stack is "string" and @options.ykeys[sidx] is stack 
+        return i
+      if @options.ykeys[sidx] in stack
+        return i
+    return 0
 
   # @private
   #
