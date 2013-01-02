@@ -1393,6 +1393,7 @@
         for (_k = 0, _len2 = _ref.length; _k < _len2; _k++) {
           row = _ref[_k];
           row.sector = 100 / this.data.length;
+          row.angle = 360 / this.data.length;
         }
       }
       angles = (function() {

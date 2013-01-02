@@ -74,6 +74,7 @@ class Morris.Pie extends Morris.EventEmitter
     if Morris.isUniform(@data, 0, (a, v) -> a.sector == v)
       for row in @data
         row.sector = 100 / @data.length
+        row.angle = 360 / @data.length
     
     angles = (row.angle for row in @data)
     
