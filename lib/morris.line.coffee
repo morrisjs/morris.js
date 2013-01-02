@@ -11,7 +11,7 @@ class Morris.Line extends Morris.Grid
     @pointShrink = Raphael.animation r: @options.pointSize, 25, 'linear'
 
     if @options.hideHover isnt 'always'
-      @hover = new Morris.Hover(parent: @el)
+      @hover = new Morris.Hover $.extend({}, @options.hoverOptions, parent: @el)
       @on('hovermove', @onHoverMove)
       @on('hoverout', @onHoverOut)
 
@@ -37,7 +37,7 @@ class Morris.Line extends Morris.Grid
     xLabelFormat: null
     xLabelMargin: 50
     continuousLine: true
-    hideHover: false
+    hoverOptions: {}
 
   # Do any size-related calculations
   #
