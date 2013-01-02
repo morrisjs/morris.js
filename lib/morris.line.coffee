@@ -76,7 +76,7 @@ class Morris.Line extends Morris.Grid
   # @private
   onHoverOut: =>
     if @options.hideHover is 'auto'
-      @displayHoverForIndex(null)
+      @displayHoverForRow(null)
 
   # display a hover popup over the given row
   #
