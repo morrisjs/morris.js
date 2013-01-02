@@ -7,7 +7,7 @@ class Morris.Bar extends Morris.Grid
     @cumulative = @options.stacked
 
     if @options.hideHover isnt 'always'
-      @hover = new Morris.Hover(parent: @el)
+      @hover = new Morris.Hover $.extend({}, @options.hoverOptions, parent: @el)
       @on('hovermove', @onHoverMove)
       @on('hoverout', @onHoverOut)
 
@@ -26,6 +26,7 @@ class Morris.Bar extends Morris.Grid
       '#9440ed'
     ]
     xLabelMargin: 50
+    hoverOptions: {}
 
   # Do any size-related calculations
   #

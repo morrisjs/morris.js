@@ -474,7 +474,9 @@
   Morris.Hover = (function() {
 
     Hover.defaults = {
-      "class": 'morris-hover morris-default-style'
+      cssPrefix: 'morris',
+      position: 'auto',
+      "class": ['-hover', '-default-style']
     };
 
     function Hover(options) {
@@ -482,10 +484,23 @@
         options = {};
       }
       this.options = $.extend({}, Morris.Hover.defaults, options);
-      this.el = $("<div class='" + this.options["class"] + "'></div>");
+      this.el = $("<div class='" + (this.buildClassAttr(this.options["class"])) + "'></div>");
       this.el.hide();
       this.options.parent.append(this.el);
     }
+
+    Hover.prototype.buildClassAttr = function(c) {
+      var class_, classes, _i, _len;
+      if (typeof c === 'string') {
+        c = [c];
+      }
+      classes = [];
+      for (_i = 0, _len = c.length; _i < _len; _i++) {
+        class_ = c[_i];
+        classes.push(class_.indexOf('-') === 0 ? this.options.cssPrefix + class_ : class_);
+      }
+      return classes.join(' ');
+    };
 
     Hover.prototype.update = function(html, x, y) {
       this.html(html);
@@ -498,22 +513,46 @@
     };
 
     Hover.prototype.moveTo = function(x, y) {
-      var hoverHeight, hoverWidth, left, parentHeight, parentWidth, top;
+      var hoverHeight, hoverWidth, left, p, parentHeight, parentWidth, top, _ref;
+      p = this.options.cssPrefix;
+      this.el.removeClass("" + p + "-hover-below " + p + "-hover-above " + p + "-hover-left " + p + "-hover-right");
       parentWidth = this.options.parent.innerWidth();
       parentHeight = this.options.parent.innerHeight();
       hoverWidth = this.el.outerWidth();
       hoverHeight = this.el.outerHeight();
-      left = Math.min(Math.max(0, x - hoverWidth / 2), parentWidth - hoverWidth);
-      if (y != null) {
+      if ((_ref = this.options.position) === 'absolute' || _ref === 'absolute above') {
+        left = x - hoverWidth / 2;
         top = y - hoverHeight - 10;
-        if (top < 0) {
-          top = y + 10;
-          if (top + hoverHeight > parentHeight) {
-            top = parentHeight / 2 - hoverHeight / 2;
-          }
-        }
+        this.el.addClass("" + p + "-hover-above");
+      } else if (this.options.position === 'absolute below') {
+        left = x - hoverWidth / 2;
+        top = y + 10;
+        this.el.addClass("" + p + "-hover-below");
+      } else if (this.options.position === 'absolute left') {
+        left = x - hoverWidth - 10;
+        top = y - hoverHeight / 2;
+        this.el.addClass("" + p + "-hover-left");
+      } else if (this.options.position === 'absolute right') {
+        left = x + 10;
+        top = y - hoverHeight / 2;
+        this.el.addClass("" + p + "-hover-right");
       } else {
-        top = parentHeight / 2 - hoverHeight / 2;
+        left = Math.min(Math.max(0, x - hoverWidth / 2), parentWidth - hoverWidth);
+        if (y != null) {
+          top = y - hoverHeight - 10;
+          if (top < 0) {
+            top = y + 10;
+            if (top + hoverHeight > parentHeight) {
+              top = parentHeight / 2 - hoverHeight / 2;
+            } else {
+              this.el.addClass("" + p + "-hover-below");
+            }
+          } else {
+            this.el.addClass("" + p + "-hover-above");
+          }
+        } else {
+          top = parentHeight / 2 - hoverHeight / 2;
+        }
       }
       return this.el.css({
         left: left + "px",
@@ -557,9 +596,9 @@
         r: this.options.pointSize
       }, 25, 'linear');
       if (this.options.hideHover !== 'always') {
-        this.hover = new Morris.Hover({
+        this.hover = new Morris.Hover($.extend({}, this.options.hoverOptions, {
           parent: this.el
-        });
+        }));
         this.on('hovermove', this.onHoverMove);
         return this.on('hoverout', this.onHoverOut);
       }
@@ -577,7 +616,7 @@
       xLabelFormat: null,
       xLabelMargin: 50,
       continuousLine: true,
-      hideHover: false
+      hoverOptions: {}
     };
 
     Line.prototype.calc = function() {
@@ -1121,9 +1160,9 @@
     Bar.prototype.init = function() {
       this.cumulative = this.options.stacked;
       if (this.options.hideHover !== 'always') {
-        this.hover = new Morris.Hover({
+        this.hover = new Morris.Hover($.extend({}, this.options.hoverOptions, {
           parent: this.el
-        });
+        }));
         this.on('hovermove', this.onHoverMove);
         return this.on('hoverout', this.onHoverOut);
       }
@@ -1133,7 +1172,8 @@
       barSizeRatio: 0.75,
       barGap: 3,
       barColors: ['#0b62a4', '#7a92a3', '#4da74d', '#afd8f8', '#edc240', '#cb4b4b', '#9440ed'],
-      xLabelMargin: 50
+      xLabelMargin: 50,
+      hoverOptions: {}
     };
 
     Bar.prototype.calc = function() {
