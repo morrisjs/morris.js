@@ -558,6 +558,7 @@
       this.pointShrink = Raphael.animation({
         r: this.options.pointSize
       }, 25, 'linear');
+      this.annotations = {};
       if (this.options.hideHover !== 'always') {
         this.hover = new Morris.Hover({
           parent: this.el
@@ -592,6 +593,7 @@
       var annotation, _i, _len, _ref, _results;
       Line.__super__.redraw.call(this);
       if (this.options.supportAnnotations) {
+        this.clearAnnotations();
         _ref = this.options.annotations;
         _results = [];
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -602,9 +604,29 @@
       }
     };
 
+    Line.prototype.clearAnnotations = function() {
+      var annotation, x, _ref;
+      _ref = this.annotations;
+      for (x in _ref) {
+        annotation = _ref[x];
+        annotation.remove();
+      }
+      return this.annotations = {};
+    };
+
+    Line.prototype.removeAnnotation = function(x) {
+      if (this.annotations[x]) {
+        this.annotations[x].remove();
+        return delete this.annotations[x];
+      }
+    };
+
     Line.prototype.addAnnotation = function(x, label, options) {
       var defaults, i, row, _i, _len, _ref, _x;
       if (!this.options.supportAnnotations) {
+        return false;
+      }
+      if (this.annotations[x]) {
         return false;
       }
       options = options != null ? options : {};
@@ -642,7 +664,8 @@
       } else {
         _x = this.transX(Morris.parseDate(x));
       }
-      return this._addAnnotation(_x, label, options);
+      this.annotations[x] = this._addAnnotation(_x, label, options);
+      return true;
     };
 
     Line.prototype._addAnnotation = function(x, label, options) {
@@ -662,10 +685,9 @@
           opacity: 0.6
         }, 150, '<');
       });
-      flag.click(function() {
+      return flag.click(function() {
         return _this.fire('annotationClicked', options.id, options.x, label);
       });
-      return true;
     };
 
     Line.createAnnotationFlag = function(paper, x, y, options) {

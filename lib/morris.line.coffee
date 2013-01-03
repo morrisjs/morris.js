@@ -10,6 +10,8 @@ class Morris.Line extends Morris.Grid
     @pointGrow = Raphael.animation r: @options.pointSize + 3, 25, 'linear'
     @pointShrink = Raphael.animation r: @options.pointSize, 25, 'linear'
 
+    @annotations = {}
+
     if @options.hideHover isnt 'always'
       @hover = new Morris.Hover(parent: @el)
       @on('hovermove', @onHoverMove)
@@ -48,12 +50,28 @@ class Morris.Line extends Morris.Grid
   redraw: ->
     super()
     if @options.supportAnnotations
+      @clearAnnotations()
       for annotation in @options.annotations
         @addAnnotation annotation[@options.xkey], annotation.label, annotation
+
+  # Clear annotations
+  clearAnnotations: ->
+    for x, annotation of @annotations
+      annotation.remove()
+    @annotations = {}
+
+  removeAnnotation: (x) ->
+    if @annotations[x]
+      @annotations[x].remove()
+      delete @annotations[x]
 
   # Add annotation
   addAnnotation: (x, label, options) =>
     unless @options.supportAnnotations
+      return false
+
+    # single annotation per x
+    if @annotations[x]
       return false
 
     options = options ? {}
@@ -74,7 +92,8 @@ class Morris.Line extends Morris.Grid
       _x = @transX i
     else
       _x = @transX Morris.parseDate(x)
-    @_addAnnotation _x, label, options
+    @annotations[x] = @_addAnnotation _x, label, options
+    true
 
   _addAnnotation: (x, label, options) ->
     x = Math.round x
@@ -86,7 +105,6 @@ class Morris.Line extends Morris.Grid
       @fire 'annotationHovered', options.id, options.x, label
     flag.mouseout => flag.animate { opacity: 0.6 }, 150, '<'
     flag.click => @fire 'annotationClicked', options.id, options.x, label
-    true
 
   @createAnnotationFlag: (paper, x, y, options) ->
     flag = paper.path(

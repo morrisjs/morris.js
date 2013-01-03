@@ -61,5 +61,16 @@ line.on('annotationClicked', function(id, x, label){
 line.addAnnotation('2011 W07', 'Annotation A', { fill: '0-#aaa-#777', stroke: '#666' });
 line.addAnnotation('2011 W17', 'Annotation B', { sticky: true });
 line.addAnnotation('2011 W20', 'Annotation C');
+
+setTimeout(function(){
+  line.clearAnnotations();
+
+  line.addAnnotation('2011 W17', 'Annotation B', { sticky: true });
+  line.addAnnotation('2011 W20', 'Annotation C');
+
+  setTimeout(function(){
+    line.removeAnnotation('2011 W20');
+  }, 1000);
+}, 2000);
 </pre>
 </body>
