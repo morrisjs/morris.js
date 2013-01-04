@@ -49,13 +49,14 @@ var line = Morris.Line({
   ykeys: ['licensed', 'sorned'],
   labels: ['Licensed', 'SORN'],
   supportAnnotations: true,
+  hideHoverOnAnnotationHover: true,
   annotations: [
     { period: '2011 W05', label: 'Annotation 0', sticky: true }
   ]
 });
 
-line.on('annotationClicked', function(id, x, label){
-  console.log(id, x, label);
+line.on('annotationClicked', function(id, x, label, coordinates){
+  console.log(id, x, label, coordinates);
 });
 
 line.addAnnotation('2011 W07', 'Annotation A', { fill: '0-#aaa-#777', stroke: '#666' });

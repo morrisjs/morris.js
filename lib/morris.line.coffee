@@ -11,6 +11,7 @@ class Morris.Line extends Morris.Grid
     @pointShrink = Raphael.animation r: @options.pointSize, 25, 'linear'
 
     @annotations = {}
+    @forceHideHover = false
 
     if @options.hideHover isnt 'always'
       @hover = new Morris.Hover(parent: @el)
@@ -41,6 +42,7 @@ class Morris.Line extends Morris.Grid
     continuousLine: true
     hideHover: false
     supportAnnotations: false
+    hideHoverOnAnnotationHover: false
     annotationFill: '9-#dadada-#fafafa'
     annotationStroke: '#444444'
     annotationStarFill: '135-#fe0-#fa0'
@@ -100,11 +102,21 @@ class Morris.Line extends Morris.Grid
     y = @bottom
     
     flag = Morris.Line.createAnnotationFlag @r, x, y, options
+    flag.mousemove =>
+      @forceHideHover = true if @options.hideHoverOnAnnotationHover
     flag.mouseover => 
+      @forceHideHover = true if @options.hideHoverOnAnnotationHover
       flag.toFront().animate { opacity: 1.0 }, 150, '<'
-      @fire 'annotationHovered', options.id, options.x, label
-    flag.mouseout => flag.animate { opacity: 0.6 }, 150, '<'
-    flag.click => @fire 'annotationClicked', options.id, options.x, label
+      coordinates = x: x, y: y
+      @fire 'annotationHovered', options.id, options.x, label, coordinates
+    flag.mouseout => 
+      @forceHideHover = false
+      flag.animate { opacity: 0.6 }, 150, '<'
+      coordinates = x: x, y: y
+      @fire 'annotationUnhovered', options.id, options.x, label, coordinates
+    flag.click => 
+      coordinates = x: x, y: y
+      @fire 'annotationClicked', options.id, options.x, label, coordinates
 
   @createAnnotationFlag: (paper, x, y, options) ->
     flag = paper.path(
@@ -167,6 +179,7 @@ class Morris.Line extends Morris.Grid
   #
   # @private
   onHoverMove: (x, y) =>
+    return @displayHoverForRow(null) if @forceHideHover
     index = @hitTest(x, y)
     @displayHoverForRow(index)
 
@@ -175,7 +188,7 @@ class Morris.Line extends Morris.Grid
   # @private
   onHoverOut: =>
     if @options.hideHover is 'auto'
-      @displayHoverForIndex(null)
+      @displayHoverForRow(null)
 
   # display a hover popup over the given row
   #

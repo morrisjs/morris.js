@@ -559,6 +559,7 @@
         r: this.options.pointSize
       }, 25, 'linear');
       this.annotations = {};
+      this.forceHideHover = false;
       if (this.options.hideHover !== 'always') {
         this.hover = new Morris.Hover({
           parent: this.el
@@ -582,6 +583,7 @@
       continuousLine: true,
       hideHover: false,
       supportAnnotations: false,
+      hideHoverOnAnnotationHover: false,
       annotationFill: '9-#dadada-#fafafa',
       annotationStroke: '#444444',
       annotationStarFill: '135-#fe0-#fa0',
@@ -674,19 +676,44 @@
       x = Math.round(x);
       y = this.bottom;
       flag = Morris.Line.createAnnotationFlag(this.r, x, y, options);
+      flag.mousemove(function() {
+        if (_this.options.hideHoverOnAnnotationHover) {
+          return _this.forceHideHover = true;
+        }
+      });
       flag.mouseover(function() {
+        var coordinates;
+        if (_this.options.hideHoverOnAnnotationHover) {
+          _this.forceHideHover = true;
+        }
         flag.toFront().animate({
           opacity: 1.0
         }, 150, '<');
-        return _this.fire('annotationHovered', options.id, options.x, label);
+        coordinates = {
+          x: x,
+          y: y
+        };
+        return _this.fire('annotationHovered', options.id, options.x, label, coordinates);
       });
       flag.mouseout(function() {
-        return flag.animate({
+        var coordinates;
+        _this.forceHideHover = false;
+        flag.animate({
           opacity: 0.6
         }, 150, '<');
+        coordinates = {
+          x: x,
+          y: y
+        };
+        return _this.fire('annotationUnhovered', options.id, options.x, label, coordinates);
       });
       return flag.click(function() {
-        return _this.fire('annotationClicked', options.id, options.x, label);
+        var coordinates;
+        coordinates = {
+          x: x,
+          y: y
+        };
+        return _this.fire('annotationClicked', options.id, options.x, label, coordinates);
       });
     };
 
@@ -775,13 +802,16 @@
 
     Line.prototype.onHoverMove = function(x, y) {
       var index;
+      if (this.forceHideHover) {
+        return this.displayHoverForRow(null);
+      }
       index = this.hitTest(x, y);
       return this.displayHoverForRow(index);
     };
 
     Line.prototype.onHoverOut = function() {
       if (this.options.hideHover === 'auto') {
-        return this.displayHoverForIndex(null);
+        return this.displayHoverForRow(null);
       }
     };
 
