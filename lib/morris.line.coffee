@@ -10,6 +10,9 @@ class Morris.Line extends Morris.Grid
     @pointGrow = Raphael.animation r: @options.pointSize + 3, 25, 'linear'
     @pointShrink = Raphael.animation r: @options.pointSize, 25, 'linear'
 
+    @annotations = {}
+    @forceHideHover = false
+
     if @options.hideHover isnt 'always'
       @hover = new Morris.Hover(parent: @el)
       @on('hovermove', @onHoverMove)
@@ -38,6 +41,114 @@ class Morris.Line extends Morris.Grid
     xLabelMargin: 50
     continuousLine: true
     hideHover: false
+    supportAnnotations: false
+    hideHoverOnAnnotationHover: false
+    annotationFill: '9-#dadada-#fafafa'
+    annotationStroke: '#444444'
+    annotationStarFill: '135-#fe0-#fa0'
+    annotationStarStroke: '#777'
+    annotations: []
+
+  redraw: ->
+    super()
+    if @options.supportAnnotations
+      @clearAnnotations()
+      for annotation in @options.annotations
+        @addAnnotation annotation[@options.xkey], annotation.label, annotation
+
+  # Clear annotations
+  clearAnnotations: ->
+    for x, annotation of @annotations
+      annotation.remove()
+    @annotations = {}
+
+  removeAnnotation: (x) ->
+    if @annotations[x]
+      @annotations[x].remove()
+      delete @annotations[x]
+
+  # Add annotation
+  addAnnotation: (x, label, options) =>
+    unless @options.supportAnnotations
+      return false
+
+    # single annotation per x
+    if @annotations[x]
+      return false
+
+    options = options ? {}
+    defaults =
+      fill: @options.annotationFill
+      stroke: @options.annotationStroke
+      x: x
+      id: x
+      sticky: false
+      starFill: @options.annotationStarFill
+      starStroke: @options.annotationStarStroke
+    options = $.extend {}, defaults, options
+
+    if not @options.parseTime
+      unless x in (row.label for row in @data)
+        return false
+      break for row, i in @data when row.label == x
+      _x = @transX i
+    else
+      _x = @transX Morris.parseDate(x)
+    @annotations[x] = @_addAnnotation _x, label, options
+    true
+
+  _addAnnotation: (x, label, options) ->
+    x = Math.round x
+    y = @bottom
+    
+    flag = Morris.Line.createAnnotationFlag @r, x, y, options
+    flag.mousemove =>
+      @forceHideHover = true if @options.hideHoverOnAnnotationHover
+    flag.mouseover => 
+      @forceHideHover = true if @options.hideHoverOnAnnotationHover
+      flag.toFront().animate { opacity: 1.0 }, 150, '<'
+      coordinates = x: x, y: y
+      @fire 'annotationHovered', options.id, options.x, label, coordinates
+    flag.mouseout => 
+      @forceHideHover = false
+      flag.animate { opacity: 0.6 }, 150, '<'
+      coordinates = x: x, y: y
+      @fire 'annotationUnhovered', options.id, options.x, label, coordinates
+    flag.click => 
+      coordinates = x: x, y: y
+      @fire 'annotationClicked', options.id, options.x, label, coordinates
+
+  @createAnnotationFlag: (paper, x, y, options) ->
+    flag = paper.path(
+      'M-15,0L-60,0S-70,0,-70,-10' +
+      'L-70,-50S-70,-60,-60,-60L40,-60' +
+      'S50,-60,50,-50L50,-10S50,0,40,0' +
+      'L15,0L0,25Z' + 
+      'M-50,-20L30,-20M-50,-40L30,-40'
+    )
+    flag.attr { fill: options.fill, stroke: options.stroke, opacity: 0.6, cursor: 'pointer' }
+    flag.transform "T#{x},#{y}S0.13,0.16,#{x},#{y}"
+
+    if options.sticky
+      star = paper.path(
+        'M0,-1L0.588,0.809L-0.951,-0.309L0.951,-0.309L-0.588,0.809Z'
+      ).transform("T#{x+6},#{y-10}S5,5,#{x+6},#{y-10}").attr
+        'stroke-width': 0
+        'fill': options.starFill
+        'cursor': 'pointer'
+
+      glow = star.glow
+        width: 1
+        opacity: 1
+        color: options.starStroke
+
+      glow.attr 'cursor', 'pointer'
+
+      st = paper.set()
+      st.push flag, glow, star
+      return st
+
+    return flag
 
   # Do any size-related calculations
   #
@@ -68,6 +179,7 @@ class Morris.Line extends Morris.Grid
   #
   # @private
   onHoverMove: (x, y) =>
+    return @displayHoverForRow(null) if @forceHideHover
     index = @hitTest(x, y)
     @displayHoverForRow(index)
 
@@ -76,7 +188,7 @@ class Morris.Line extends Morris.Grid
   # @private
   onHoverOut: =>
     if @options.hideHover is 'auto'
-      @displayHoverForIndex(null)
+      @displayHoverForRow(null)
 
   # display a hover popup over the given row
   #

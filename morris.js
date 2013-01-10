@@ -543,6 +543,8 @@
       this.onHoverOut = __bind(this.onHoverOut, this);
 
       this.onHoverMove = __bind(this.onHoverMove, this);
+
+      this.addAnnotation = __bind(this.addAnnotation, this);
       if (!(this instanceof Morris.Line)) {
         return new Morris.Line(options);
       }
@@ -556,6 +558,8 @@
       this.pointShrink = Raphael.animation({
         r: this.options.pointSize
       }, 25, 'linear');
+      this.annotations = {};
+      this.forceHideHover = false;
       if (this.options.hideHover !== 'always') {
         this.hover = new Morris.Hover({
           parent: this.el
@@ -577,7 +581,169 @@
       xLabelFormat: null,
       xLabelMargin: 50,
       continuousLine: true,
-      hideHover: false
+      hideHover: false,
+      supportAnnotations: false,
+      hideHoverOnAnnotationHover: false,
+      annotationFill: '9-#dadada-#fafafa',
+      annotationStroke: '#444444',
+      annotationStarFill: '135-#fe0-#fa0',
+      annotationStarStroke: '#777',
+      annotations: []
+    };
+
+    Line.prototype.redraw = function() {
+      var annotation, _i, _len, _ref, _results;
+      Line.__super__.redraw.call(this);
+      if (this.options.supportAnnotations) {
+        this.clearAnnotations();
+        _ref = this.options.annotations;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          annotation = _ref[_i];
+          _results.push(this.addAnnotation(annotation[this.options.xkey], annotation.label, annotation));
+        }
+        return _results;
+      }
+    };
+
+    Line.prototype.clearAnnotations = function() {
+      var annotation, x, _ref;
+      _ref = this.annotations;
+      for (x in _ref) {
+        annotation = _ref[x];
+        annotation.remove();
+      }
+      return this.annotations = {};
+    };
+
+    Line.prototype.removeAnnotation = function(x) {
+      if (this.annotations[x]) {
+        this.annotations[x].remove();
+        return delete this.annotations[x];
+      }
+    };
+
+    Line.prototype.addAnnotation = function(x, label, options) {
+      var defaults, i, row, _i, _len, _ref, _x;
+      if (!this.options.supportAnnotations) {
+        return false;
+      }
+      if (this.annotations[x]) {
+        return false;
+      }
+      options = options != null ? options : {};
+      defaults = {
+        fill: this.options.annotationFill,
+        stroke: this.options.annotationStroke,
+        x: x,
+        id: x,
+        sticky: false,
+        starFill: this.options.annotationStarFill,
+        starStroke: this.options.annotationStarStroke
+      };
+      options = $.extend({}, defaults, options);
+      if (!this.options.parseTime) {
+        if (__indexOf.call((function() {
+          var _i, _len, _ref, _results;
+          _ref = this.data;
+          _results = [];
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            row = _ref[_i];
+            _results.push(row.label);
+          }
+          return _results;
+        }).call(this), x) < 0) {
+          return false;
+        }
+        _ref = this.data;
+        for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
+          row = _ref[i];
+          if (row.label === x) {
+            break;
+          }
+        }
+        _x = this.transX(i);
+      } else {
+        _x = this.transX(Morris.parseDate(x));
+      }
+      this.annotations[x] = this._addAnnotation(_x, label, options);
+      return true;
+    };
+
+    Line.prototype._addAnnotation = function(x, label, options) {
+      var flag, y,
+        _this = this;
+      x = Math.round(x);
+      y = this.bottom;
+      flag = Morris.Line.createAnnotationFlag(this.r, x, y, options);
+      flag.mousemove(function() {
+        if (_this.options.hideHoverOnAnnotationHover) {
+          return _this.forceHideHover = true;
+        }
+      });
+      flag.mouseover(function() {
+        var coordinates;
+        if (_this.options.hideHoverOnAnnotationHover) {
+          _this.forceHideHover = true;
+        }
+        flag.toFront().animate({
+          opacity: 1.0
+        }, 150, '<');
+        coordinates = {
+          x: x,
+          y: y
+        };
+        return _this.fire('annotationHovered', options.id, options.x, label, coordinates);
+      });
+      flag.mouseout(function() {
+        var coordinates;
+        _this.forceHideHover = false;
+        flag.animate({
+          opacity: 0.6
+        }, 150, '<');
+        coordinates = {
+          x: x,
+          y: y
+        };
+        return _this.fire('annotationUnhovered', options.id, options.x, label, coordinates);
+      });
+      return flag.click(function() {
+        var coordinates;
+        coordinates = {
+          x: x,
+          y: y
+        };
+        return _this.fire('annotationClicked', options.id, options.x, label, coordinates);
+      });
+    };
+
+    Line.createAnnotationFlag = function(paper, x, y, options) {
+      var flag, glow, st, star;
+      flag = paper.path('M-15,0L-60,0S-70,0,-70,-10' + 'L-70,-50S-70,-60,-60,-60L40,-60' + 'S50,-60,50,-50L50,-10S50,0,40,0' + 'L15,0L0,25Z' + 'M-50,-20L30,-20M-50,-40L30,-40');
+      flag.attr({
+        fill: options.fill,
+        stroke: options.stroke,
+        opacity: 0.6,
+        cursor: 'pointer'
+      });
+      flag.transform("T" + x + "," + y + "S0.13,0.16," + x + "," + y);
+      if (options.sticky) {
+        star = paper.path('M0,-1L0.588,0.809L-0.951,-0.309L0.951,-0.309L-0.588,0.809Z').transform("T" + (x + 6) + "," + (y - 10) + "S5,5," + (x + 6) + "," + (y - 10)).attr({
+          'stroke-width': 0,
+          'fill': options.starFill,
+          'cursor': 'pointer'
+        });
+        glow = star.glow({
+          width: 1,
+          opacity: 1,
+          color: options.starStroke
+        });
+        glow.attr('cursor', 'pointer');
+        st = paper.set();
+        st.push(flag, glow, star);
+        return st;
+      }
+      return flag;
     };
 
     Line.prototype.calc = function() {
@@ -636,13 +802,16 @@
 
     Line.prototype.onHoverMove = function(x, y) {
       var index;
+      if (this.forceHideHover) {
+        return this.displayHoverForRow(null);
+      }
       index = this.hitTest(x, y);
       return this.displayHoverForRow(index);
     };
 
     Line.prototype.onHoverOut = function() {
       if (this.options.hideHover === 'auto') {
-        return this.displayHoverForIndex(null);
+        return this.displayHoverForRow(null);
       }
     };
 
