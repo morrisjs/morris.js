@@ -1230,7 +1230,19 @@
                 if (this.options.stacked) {
                   top -= lastTop;
                 }
-                this.r.rect(left, top, barWidth, size).attr('fill', this.colorFor(row, sidx, 'bar')).attr('stroke-width', 0);
+                
+                //this.r.rect(left, top, barWidth, size).attr('fill', this.colorFor(row, sidx, 'bar')).attr('stroke-width', 0);
+                var _this = this;
+                var dataInfo={
+                    series : row.label,
+                    item: this.options.ykeys[ sidx ],
+                    value: this.options.data[ idx][ this.options.ykeys[ sidx ] ]
+		            }
+                var plotData=function( dataInfo ){
+                  _this.r.rect(left, top, barWidth, size).attr('fill', _this.colorFor(row, sidx, 'bar')).attr('stroke-width', 0).click( function(){ _this.options.click( dataInfo ); } ) ;
+                }
+                plotData( dataInfo );
+                              
                 _results1.push(lastTop += size);
               } else {
                 _results1.push(null);
