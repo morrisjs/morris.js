@@ -577,7 +577,8 @@
       xLabelFormat: null,
       xLabelMargin: 50,
       continuousLine: true,
-      hideHover: false
+      hideHover: false,
+      click:function(){}
     };
 
     Line.prototype.calc = function() {
@@ -1147,7 +1148,8 @@
       barSizeRatio: 0.75,
       barGap: 3,
       barColors: ['#0b62a4', '#7a92a3', '#4da74d', '#afd8f8', '#edc240', '#cb4b4b', '#9440ed'],
-      xLabelMargin: 50
+      xLabelMargin: 50,
+      click:function(){}
     };
 
     Bar.prototype.calc = function() {
