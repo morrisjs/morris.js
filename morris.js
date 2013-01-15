@@ -795,7 +795,21 @@
           for (_k = 0, _len = _ref2.length; _k < _len; _k++) {
             row = _ref2[_k];
             if (row._y[i] != null) {
-              circle = this.r.circle(row._x, row._y[i], this.options.pointSize).attr('fill', this.colorFor(row, i, 'point')).attr('stroke-width', this.strokeWidthForSeries(i)).attr('stroke', this.strokeForSeries(i));
+              // circle = this.r.circle(row._x, row._y[i], this.options.pointSize).attr('fill', this.colorFor(row, i, 'point')).attr('stroke-width', this.strokeWidthForSeries(i)).attr('stroke', this.strokeForSeries(i));
+              
+		var _this = this;
+                var dataInfo={
+			series : row.label,
+			item: this.options.ykeys[ i ] ,
+			value:  this.options.data[ _k ][ this.options.ykeys[ i ] ]
+		}
+                var plotData=function( dataInfo ){
+			return _this.r.circle(row._x, row._y[i], _this.options.pointSize).attr('fill', _this.colorFor(row, i, 'point'))
+				.attr('stroke-width', _this.strokeWidthForSeries(i)).attr('stroke', _this.strokeForSeries(i)).click( function(){ _this.options.click( dataInfo ); } ) ;
+		}
+
+                circle = plotData( dataInfo );
+              
             } else {
               circle = null;
             }
