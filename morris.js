@@ -1304,6 +1304,7 @@
 
     Donut.prototype.defaults = {
       colors: ['#0B62A4', '#3980B5', '#679DC6', '#95BBD7', '#B0CCE1', '#095791', '#095085', '#083E67', '#052C48', '#042135'],
+      strokeColor: '#FFFFFF',
       formatter: Morris.commas
     };
 
@@ -1350,7 +1351,7 @@
       for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
         d = _ref1[_j];
         next = last + min + C * (d.value / total);
-        seg = new Morris.DonutSegment(cx, cy, w * 2, w, last, next, this.options.colors[idx % this.options.colors.length], d);
+        seg = new Morris.DonutSegment(cx, cy, w * 2, w, last, next, this.options.colors[idx % this.options.colors.length], this.options.strokeColor, d);
         seg.render(this.r);
         this.segments.push(seg);
         seg.on('hover', this.select);
@@ -1438,12 +1439,13 @@
 
     __extends(DonutSegment, _super);
 
-    function DonutSegment(cx, cy, inner, outer, p0, p1, color, data) {
+    function DonutSegment(cx, cy, inner, outer, p0, p1, color, strokeColor, data) {
       this.cx = cx;
       this.cy = cy;
       this.inner = inner;
       this.outer = outer;
       this.color = color;
+      this.strokeColor = strokeColor;
       this.data = data;
       this.deselect = __bind(this.deselect, this);
 
@@ -1485,7 +1487,7 @@
       });
       return this.seg = r.path(this.path).attr({
         fill: this.color,
-        stroke: 'white',
+        stroke: this.strokeColor,
         'stroke-width': 3
       }).hover(function() {
         return _this.fire('hover', _this);
