@@ -642,7 +642,7 @@
 
     Line.prototype.onHoverOut = function() {
       if (this.options.hideHover === 'auto') {
-        return this.displayHoverForIndex(null);
+        return this.displayHoverForRow(null);
       }
     };
 
