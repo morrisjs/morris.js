@@ -577,7 +577,8 @@
       xLabelFormat: null,
       xLabelMargin: 50,
       continuousLine: true,
-      hideHover: false
+      hideHover: false,
+      click:function(){}
     };
 
     Line.prototype.calc = function() {
@@ -795,7 +796,21 @@
           for (_k = 0, _len = _ref2.length; _k < _len; _k++) {
             row = _ref2[_k];
             if (row._y[i] != null) {
-              circle = this.r.circle(row._x, row._y[i], this.options.pointSize).attr('fill', this.colorFor(row, i, 'point')).attr('stroke-width', this.strokeWidthForSeries(i)).attr('stroke', this.strokeForSeries(i));
+              // circle = this.r.circle(row._x, row._y[i], this.options.pointSize).attr('fill', this.colorFor(row, i, 'point')).attr('stroke-width', this.strokeWidthForSeries(i)).attr('stroke', this.strokeForSeries(i));
+              
+		var _this = this;
+                var dataInfo={
+			series : row.label,
+			item: this.options.ykeys[ i ] ,
+			value:  this.options.data[ _k ][ this.options.ykeys[ i ] ]
+		}
+                var plotData=function( dataInfo ){
+			return _this.r.circle(row._x, row._y[i], _this.options.pointSize).attr('fill', _this.colorFor(row, i, 'point'))
+				.attr('stroke-width', _this.strokeWidthForSeries(i)).attr('stroke', _this.strokeForSeries(i)).click( function(){ _this.options.click( dataInfo ); } ) ;
+		}
+
+                circle = plotData( dataInfo );
+              
             } else {
               circle = null;
             }
@@ -1133,7 +1148,8 @@
       barSizeRatio: 0.75,
       barGap: 3,
       barColors: ['#0b62a4', '#7a92a3', '#4da74d', '#afd8f8', '#edc240', '#cb4b4b', '#9440ed'],
-      xLabelMargin: 50
+      xLabelMargin: 50,
+      click:function(){}
     };
 
     Bar.prototype.calc = function() {
@@ -1230,7 +1246,19 @@
                 if (this.options.stacked) {
                   top -= lastTop;
                 }
-                this.r.rect(left, top, barWidth, size).attr('fill', this.colorFor(row, sidx, 'bar')).attr('stroke-width', 0);
+                
+                //this.r.rect(left, top, barWidth, size).attr('fill', this.colorFor(row, sidx, 'bar')).attr('stroke-width', 0);
+                var _this = this;
+                var dataInfo={
+                    series : row.label,
+                    item: this.options.ykeys[ sidx ],
+                    value: this.options.data[ idx][ this.options.ykeys[ sidx ] ]
+		            }
+                var plotData=function( dataInfo ){
+                  _this.r.rect(left, top, barWidth, size).attr('fill', _this.colorFor(row, sidx, 'bar')).attr('stroke-width', 0).click( function(){ _this.options.click( dataInfo ); } ) ;
+                }
+                plotData( dataInfo );
+                              
                 _results1.push(lastTop += size);
               } else {
                 _results1.push(null);
