@@ -119,7 +119,7 @@ class Morris.DonutSegment extends Morris.EventEmitter
     @cos_p0 = Math.cos(p0)
     @sin_p1 = Math.sin(p1)
     @cos_p1 = Math.cos(p1)
-    @long = if (p1 - p0) > Math.PI then 1 else 0
+    @is_long = if (p1 - p0) > Math.PI then 1 else 0
     @path = @calcSegment(@inner + 3, @inner + @outer - 5)
     @selectedPath = @calcSegment(@inner + 3, @inner + @outer)
     @hilight = @calcArc(@inner)
@@ -136,16 +136,16 @@ class Morris.DonutSegment extends Morris.EventEmitter
     [ox0, oy0, ox1, oy1] = @calcArcPoints(r2)
     return (
       "M#{ix0},#{iy0}" +
-      "A#{r1},#{r1},0,#{@long},0,#{ix1},#{iy1}" +
+      "A#{r1},#{r1},0,#{@is_long},0,#{ix1},#{iy1}" +
       "L#{ox1},#{oy1}" +
-      "A#{r2},#{r2},0,#{@long},1,#{ox0},#{oy0}" +
+      "A#{r2},#{r2},0,#{@is_long},1,#{ox0},#{oy0}" +
       "Z")
 
   calcArc: (r) ->
     [ix0, iy0, ix1, iy1] = @calcArcPoints(r)
     return (
       "M#{ix0},#{iy0}" +
-      "A#{r},#{r},0,#{@long},0,#{ix1},#{iy1}")
+      "A#{r},#{r},0,#{@is_long},0,#{ix1},#{iy1}")
 
   render: (r) ->
     @arc = r.path(@hilight).attr(stroke: @color, 'stroke-width': 2, opacity: 0)
