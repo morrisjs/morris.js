@@ -17,6 +17,6 @@
   "devDependencies": {
     "grunt-coffee": "~> 0.0.6",
     "grunt-mocha": "~> 0.1.7",
-    "grunt-less": "~> 0.1.7"
+    "grunt-contrib-less": "~> 0.3.2"
   }
 }

@@ -1304,6 +1304,7 @@
 
     Donut.prototype.defaults = {
       colors: ['#0B62A4', '#3980B5', '#679DC6', '#95BBD7', '#B0CCE1', '#095791', '#095085', '#083E67', '#052C48', '#042135'],
+      strokeColor: '#FFFFFF',
       formatter: Morris.commas
     };
 
@@ -1350,7 +1351,7 @@
       for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
         d = _ref1[_j];
         next = last + min + C * (d.value / total);
-        seg = new Morris.DonutSegment(cx, cy, w * 2, w, last, next, this.options.colors[idx % this.options.colors.length], d);
+        seg = new Morris.DonutSegment(cx, cy, w * 2, w, last, next, this.options.colors[idx % this.options.colors.length], this.options.strokeColor, d);
         seg.render(this.r);
         this.segments.push(seg);
         seg.on('hover', this.select);
@@ -1438,12 +1439,13 @@
 
     __extends(DonutSegment, _super);
 
-    function DonutSegment(cx, cy, inner, outer, p0, p1, color, data) {
+    function DonutSegment(cx, cy, inner, outer, p0, p1, color, strokeColor, data) {
       this.cx = cx;
       this.cy = cy;
       this.inner = inner;
       this.outer = outer;
       this.color = color;
+      this.strokeColor = strokeColor;
       this.data = data;
       this.deselect = __bind(this.deselect, this);
 
@@ -1453,7 +1455,7 @@
       this.cos_p0 = Math.cos(p0);
       this.sin_p1 = Math.sin(p1);
       this.cos_p1 = Math.cos(p1);
-      this.long = (p1 - p0) > Math.PI ? 1 : 0;
+      this.is_long = (p1 - p0) > Math.PI ? 1 : 0;
       this.path = this.calcSegment(this.inner + 3, this.inner + this.outer - 5);
       this.selectedPath = this.calcSegment(this.inner + 3, this.inner + this.outer);
       this.hilight = this.calcArc(this.inner);
@@ -1467,13 +1469,13 @@
       var ix0, ix1, iy0, iy1, ox0, ox1, oy0, oy1, _ref, _ref1;
       _ref = this.calcArcPoints(r1), ix0 = _ref[0], iy0 = _ref[1], ix1 = _ref[2], iy1 = _ref[3];
       _ref1 = this.calcArcPoints(r2), ox0 = _ref1[0], oy0 = _ref1[1], ox1 = _ref1[2], oy1 = _ref1[3];
-      return ("M" + ix0 + "," + iy0) + ("A" + r1 + "," + r1 + ",0," + this.long + ",0," + ix1 + "," + iy1) + ("L" + ox1 + "," + oy1) + ("A" + r2 + "," + r2 + ",0," + this.long + ",1," + ox0 + "," + oy0) + "Z";
+      return ("M" + ix0 + "," + iy0) + ("A" + r1 + "," + r1 + ",0," + this.is_long + ",0," + ix1 + "," + iy1) + ("L" + ox1 + "," + oy1) + ("A" + r2 + "," + r2 + ",0," + this.is_long + ",1," + ox0 + "," + oy0) + "Z";
     };
 
     DonutSegment.prototype.calcArc = function(r) {
       var ix0, ix1, iy0, iy1, _ref;
       _ref = this.calcArcPoints(r), ix0 = _ref[0], iy0 = _ref[1], ix1 = _ref[2], iy1 = _ref[3];
-      return ("M" + ix0 + "," + iy0) + ("A" + r + "," + r + ",0," + this.long + ",0," + ix1 + "," + iy1);
+      return ("M" + ix0 + "," + iy0) + ("A" + r + "," + r + ",0," + this.is_long + ",0," + ix1 + "," + iy1);
     };
 
     DonutSegment.prototype.render = function(r) {
@@ -1485,7 +1487,7 @@
       });
       return this.seg = r.path(this.path).attr({
         fill: this.color,
-        stroke: 'white',
+        stroke: this.strokeColor,
         'stroke-width': 3
       }).hover(function() {
         return _this.fire('hover', _this);
