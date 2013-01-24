@@ -22,7 +22,7 @@ class Morris.Donut
       '#052C48'
       '#042135'
     ],
-    strokeColor: '#FFFFFF', 
+    backgroundColor: '#FFFFFF', 
     formatter: Morris.commas
 
   # Create and render a donut chart.
@@ -72,7 +72,7 @@ class Morris.Donut
     @segments = []
     for d in @data
       next = last + min + C * (d.value / total)
-      seg = new Morris.DonutSegment(cx, cy, w*2, w, last, next, @options.colors[idx % @options.colors.length], @options.strokeColor, d)
+      seg = new Morris.DonutSegment(cx, cy, w*2, w, last, next, @options.colors[idx % @options.colors.length], @options.backgroundColor, d)
       seg.render @r
       @segments.push seg
       seg.on 'hover', @select
@@ -115,7 +115,7 @@ class Morris.Donut
 #
 # @private
 class Morris.DonutSegment extends Morris.EventEmitter
-  constructor: (@cx, @cy, @inner, @outer, p0, p1, @color, @strokeColor, @data) ->
+  constructor: (@cx, @cy, @inner, @outer, p0, p1, @color, @backgroundColor, @data) ->
     @sin_p0 = Math.sin(p0)
     @cos_p0 = Math.cos(p0)
     @sin_p1 = Math.sin(p1)
@@ -151,7 +151,7 @@ class Morris.DonutSegment extends Morris.EventEmitter
   render: (r) ->
     @arc = r.path(@hilight).attr(stroke: @color, 'stroke-width': 2, opacity: 0)
     @seg = r.path(@path)
-      .attr(fill: @color, stroke: @strokeColor, 'stroke-width': 3)
+      .attr(fill: @color, stroke: @backgroundColor, 'stroke-width': 3)
       .hover(=> @fire('hover', @))
 
   select: =>
