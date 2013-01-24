@@ -55,7 +55,7 @@ class Morris.Donut
   redraw: ->
     @el.empty()
 
-    @r = new Raphael(@el[0])
+    @raphael = new Raphael(@el[0])
 
     cx = @el.width() / 2
     cy = @el.height() / 2
@@ -72,14 +72,14 @@ class Morris.Donut
     @segments = []
     for d in @data
       next = last + min + C * (d.value / total)
-      seg = new Morris.DonutSegment(cx, cy, w*2, w, last, next, @options.colors[idx % @options.colors.length], @options.backgroundColor, d)
-      seg.render @r
+      seg = new Morris.DonutSegment(cx, cy, w*2, w, last, next, @options.colors[idx % @options.colors.length], @options.backgroundColor, d, @raphael)
+      seg.render()
       @segments.push seg
       seg.on 'hover', @select
       last = next
       idx += 1
-    @text1 = @r.text(cx, cy - 10, '').attr('font-size': 15, 'font-weight': 800)
-    @text2 = @r.text(cx, cy + 10, '').attr('font-size': 14)
+    @text1 = @drawEmptyDonutLabel(cx, cy - 10, 15, 800)
+    @text2 = @drawEmptyDonutLabel(cx, cy + 10, 14)
     max_value = Math.max.apply(null, d.value for d in @data)
     idx = 0
     for d in @data
@@ -110,12 +110,17 @@ class Morris.Donut
     text2scale = Math.min(maxWidth / text2bbox.width, maxHeightBottom / text2bbox.height)
     @text2.attr(transform: "S#{text2scale},#{text2scale},#{text2bbox.x + text2bbox.width / 2},#{text2bbox.y}")
 
+  drawEmptyDonutLabel: (xPos, yPos, fontSize, fontWeight) ->
+    text = @raphael.text(xPos, yPos, '').attr('font-size', fontSize)
+    text.attr('font-weight', fontWeight) if fontWeight?
+    return text
+
 
 # A segment within a donut chart.
 #
 # @private
 class Morris.DonutSegment extends Morris.EventEmitter
-  constructor: (@cx, @cy, @inner, @outer, p0, p1, @color, @backgroundColor, @data) ->
+  constructor: (@cx, @cy, @inner, @outer, p0, p1, @color, @backgroundColor, @data, @raphael) ->
     @sin_p0 = Math.sin(p0)
     @cos_p0 = Math.cos(p0)
     @sin_p1 = Math.sin(p1)
@@ -148,11 +153,18 @@ class Morris.DonutSegment extends Morris.EventEmitter
       "M#{ix0},#{iy0}" +
       "A#{r},#{r},0,#{@is_long},0,#{ix1},#{iy1}")
 
-  render: (r) ->
-    @arc = r.path(@hilight).attr(stroke: @color, 'stroke-width': 2, opacity: 0)
-    @seg = r.path(@path)
-      .attr(fill: @color, stroke: @backgroundColor, 'stroke-width': 3)
-      .hover(=> @fire('hover', @))
+  render: ->
+    @arc = @drawDonutArc(@hilight, @color)
+    @seg = @drawDonutSegment(@path, @color, @backgroundColor, => @fire('hover', @))
+
+  drawDonutArc: (path, color) ->
+    @raphael.path(path)
+      .attr(stroke: color, 'stroke-width': 2, opacity: 0)
+
+  drawDonutSegment: (path, fillColor, strokeColor, hoverFunction) ->
+    @raphael.path(path)
+      .attr(fill: fillColor, stroke: strokeColor, 'stroke-width': 3)
+      .hover(hoverFunction)
 
   select: =>
     unless @selected

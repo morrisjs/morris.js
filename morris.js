@@ -87,7 +87,7 @@
       if (typeof this.options.units === 'string') {
         this.options.postUnits = options.units;
       }
-      this.r = new Raphael(this.el[0]);
+      this.raphael = new Raphael(this.el[0]);
       this.elementWidth = null;
       this.elementHeight = null;
       this.dirty = false;
@@ -324,7 +324,7 @@
     };
 
     Grid.prototype.redraw = function() {
-      this.r.clear();
+      this.raphael.clear();
       this._calc();
       this.drawGrid();
       this.drawGoals();
@@ -340,7 +340,7 @@
       _results = [];
       for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
         goal = _ref[i];
-        _results.push(this.r.path("M" + this.left + "," + (this.transY(goal)) + "H" + (this.left + this.width)).attr('stroke', this.options.goalLineColors[i % this.options.goalLineColors.length]).attr('stroke-width', this.options.goalStrokeWidth));
+        _results.push(this.drawGoal("M" + this.left + "," + (this.transY(goal)) + "H" + (this.left + this.width)));
       }
       return _results;
     };
@@ -351,7 +351,7 @@
       _results = [];
       for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
         event = _ref[i];
-        _results.push(this.r.path("M" + (this.transX(event)) + "," + this.bottom + "V" + this.top).attr('stroke', this.options.eventLineColors[i % this.options.eventLineColors.length]).attr('stroke-width', this.options.eventStrokeWidth));
+        _results.push(this.drawEvent("M" + (this.transX(event)) + "," + this.bottom + "V" + this.top));
       }
       return _results;
     };
@@ -368,10 +368,10 @@
         v = parseFloat(lineY.toFixed(this.precision));
         y = this.transY(v);
         if (this.options.axes) {
-          this.r.text(this.left - this.options.padding / 2, y, this.yAxisFormat(v)).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor).attr('text-anchor', 'end');
+          this.drawYAxisLabel(this.left - this.options.padding / 2, y, this.yAxisFormat(v));
         }
         if (this.options.grid) {
-          _results.push(this.r.path("M" + this.left + "," + y + "H" + (this.left + this.width)).attr('stroke', this.options.gridLineColor).attr('stroke-width', this.options.gridStrokeWidth));
+          _results.push(this.drawGridLine("M" + this.left + "," + y + "H" + (this.left + this.width)));
         } else {
           _results.push(void 0);
         }
@@ -384,7 +384,7 @@
       if (fontSize == null) {
         fontSize = 12;
       }
-      tt = this.r.text(100, 100, text).attr('font-size', fontSize);
+      tt = this.raphael.text(100, 100, text).attr('font-size', fontSize);
       ret = tt.getBBox();
       tt.remove();
       return ret;
@@ -408,6 +408,22 @@
       if (hit != null) {
         return (_ref = this.hover).update.apply(_ref, hit);
       }
+    };
+
+    Grid.prototype.drawGoal = function(path) {
+      return this.raphael.path(path).attr('stroke', this.options.goalLineColors[i % this.options.goalLineColors.length]).attr('stroke-width', this.options.goalStrokeWidth);
+    };
+
+    Grid.prototype.drawEvent = function(path) {
+      return this.raphael.path(path).attr('stroke', this.options.eventLineColors[i % this.options.eventLineColors.length]).attr('stroke-width', this.options.eventStrokeWidth);
+    };
+
+    Grid.prototype.drawYAxisLabel = function(xPos, yPos, text) {
+      return this.raphael.text(xPos, yPos, text).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor).attr('text-anchor', 'end');
+    };
+
+    Grid.prototype.drawGridLine = function(path) {
+      return this.raphael.path(path).attr('stroke', this.options.gridLineColor).attr('stroke-width', this.options.gridStrokeWidth);
     };
 
     return Grid;
@@ -735,7 +751,7 @@
       prevLabelMargin = null;
       drawLabel = function(labelText, xpos) {
         var label, labelBox;
-        label = _this.r.text(_this.transX(xpos), ypos, labelText).attr('font-size', _this.options.gridTextSize).attr('fill', _this.options.gridTextColor);
+        label = _this.drawXAxisLabel(_this.transX(xpos), ypos, labelText);
         labelBox = label.getBBox();
         if ((!(prevLabelMargin != null) || prevLabelMargin >= labelBox.x + labelBox.width) && labelBox.x >= 0 && (labelBox.x + labelBox.width) < _this.el.width()) {
           return prevLabelMargin = labelBox.x - _this.options.xLabelMargin;
@@ -775,7 +791,7 @@
       for (i = _i = _ref = this.options.ykeys.length - 1; _ref <= 0 ? _i <= 0 : _i >= 0; i = _ref <= 0 ? ++_i : --_i) {
         path = this.paths[i];
         if (path !== null) {
-          this.r.path(path).attr('stroke', this.colorFor(row, i, 'line')).attr('stroke-width', this.options.lineWidth);
+          this.drawLinePath(path, this.colorFor(row, i, 'line'));
         }
       }
       this.seriesPoints = (function() {
@@ -795,7 +811,7 @@
           for (_k = 0, _len = _ref2.length; _k < _len; _k++) {
             row = _ref2[_k];
             if (row._y[i] != null) {
-              circle = this.r.circle(row._x, row._y[i], this.options.pointSize).attr('fill', this.colorFor(row, i, 'point')).attr('stroke-width', this.strokeWidthForSeries(i)).attr('stroke', this.strokeForSeries(i));
+              circle = this.drawLinePoint(row._x, row._y[i], this.options.pointSize, this.colorFor(row, i, 'point'), i);
             } else {
               circle = null;
             }
@@ -893,14 +909,6 @@
       return this.prevHilight = index;
     };
 
-    Line.prototype.strokeWidthForSeries = function(index) {
-      return this.options.pointWidths[index % this.options.pointWidths.length];
-    };
-
-    Line.prototype.strokeForSeries = function(index) {
-      return this.options.pointStrokeColors[index % this.options.pointStrokeColors.length];
-    };
-
     Line.prototype.colorFor = function(row, sidx, type) {
       if (typeof this.options.lineColors === 'function') {
         return this.options.lineColors.call(this, row, sidx, type);
@@ -909,6 +917,26 @@
       } else {
         return this.options.lineColors[sidx % this.options.lineColors.length];
       }
+    };
+
+    Line.prototype.drawXAxisLabel = function(xPos, yPos, text) {
+      return this.raphael.text(xPos, yPos, text).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor);
+    };
+
+    Line.prototype.drawLinePath = function(path, lineColor) {
+      return this.raphael.path(path).attr('stroke', lineColor).attr('stroke-width', this.options.lineWidth);
+    };
+
+    Line.prototype.drawLinePoint = function(xPos, yPos, size, pointColor, lineIndex) {
+      return this.raphael.circle(xPos, yPos, size).attr('fill', pointColor).attr('stroke-width', this.strokeWidthForSeries(lineIndex)).attr('stroke', this.strokeForSeries(lineIndex));
+    };
+
+    Line.prototype.strokeWidthForSeries = function(index) {
+      return this.options.pointWidths[index % this.options.pointWidths.length];
+    };
+
+    Line.prototype.strokeForSeries = function(index) {
+      return this.options.pointStrokeColors[index % this.options.pointStrokeColors.length];
     };
 
     return Line;
@@ -1086,7 +1114,7 @@
         path = this.paths[i];
         if (path !== null) {
           path = path + ("L" + (this.transX(this.xmax)) + "," + this.bottom + "L" + (this.transX(this.xmin)) + "," + this.bottom + "Z");
-          this.r.path(path).attr('fill', this.fillForSeries(i)).attr('stroke-width', 0);
+          this.drawFilledPath(path, this.fillForSeries(i));
         }
       }
       return Area.__super__.drawSeries.call(this);
@@ -1096,6 +1124,10 @@
       var color;
       color = Raphael.rgb2hsl(this.colorFor(this.data[i], i, 'line'));
       return Raphael.hsl(color.h, Math.min(255, color.s * 0.75), Math.min(255, color.l * 1.25));
+    };
+
+    Area.prototype.drawFilledPath = function(path, fill) {
+      return this.raphael.path(path).attr('fill', fill).attr('stroke-width', 0);
     };
 
     return Area;
@@ -1183,7 +1215,7 @@
       _results = [];
       for (i = _i = 0, _ref = this.data.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
         row = this.data[this.data.length - 1 - i];
-        label = this.r.text(row._x, ypos, row.label).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor);
+        label = this.drawXAxisLabel(row._x, ypos, row.label);
         labelBox = label.getBBox();
         if ((!(prevLabelMargin != null) || prevLabelMargin >= labelBox.x + labelBox.width) && labelBox.x >= 0 && (labelBox.x + labelBox.width) < this.el.width()) {
           _results.push(prevLabelMargin = labelBox.x - this.options.xLabelMargin);
@@ -1230,7 +1262,7 @@
                 if (this.options.stacked) {
                   top -= lastTop;
                 }
-                this.r.rect(left, top, barWidth, size).attr('fill', this.colorFor(row, sidx, 'bar')).attr('stroke-width', 0);
+                this.drawBar(left, top, barWidth, size, this.colorFor(row, sidx, 'bar'));
                 _results1.push(lastTop += size);
               } else {
                 _results1.push(null);
@@ -1296,6 +1328,15 @@
       return [content, x];
     };
 
+    Bar.prototype.drawXAxisLabel = function(xPos, yPos, text) {
+      var label;
+      return label = this.raphael.text(xPos, yPos, text).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor);
+    };
+
+    Bar.prototype.drawBar = function(xPos, yPos, width, height, barColor) {
+      return this.raphael.rect(xPos, yPos, width, height).attr('fill', barColor).attr('stroke-width', 0);
+    };
+
     return Bar;
 
   })(Morris.Grid);
@@ -1332,7 +1373,7 @@
     Donut.prototype.redraw = function() {
       var C, cx, cy, d, idx, last, max_value, min, next, seg, total, w, x, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _results;
       this.el.empty();
-      this.r = new Raphael(this.el[0]);
+      this.raphael = new Raphael(this.el[0]);
       cx = this.el.width() / 2;
       cy = this.el.height() / 2;
       w = (Math.min(cx, cy) - 10) / 3;
@@ -1351,20 +1392,15 @@
       for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
         d = _ref1[_j];
         next = last + min + C * (d.value / total);
-        seg = new Morris.DonutSegment(cx, cy, w * 2, w, last, next, this.options.colors[idx % this.options.colors.length], this.options.backgroundColor, d);
-        seg.render(this.r);
+        seg = new Morris.DonutSegment(cx, cy, w * 2, w, last, next, this.options.colors[idx % this.options.colors.length], this.options.backgroundColor, d, this.raphael);
+        seg.render();
         this.segments.push(seg);
         seg.on('hover', this.select);
         last = next;
         idx += 1;
       }
-      this.text1 = this.r.text(cx, cy - 10, '').attr({
-        'font-size': 15,
-        'font-weight': 800
-      });
-      this.text2 = this.r.text(cx, cy + 10, '').attr({
-        'font-size': 14
-      });
+      this.text1 = this.drawEmptyDonutLabel(cx, cy - 10, 15, 800);
+      this.text2 = this.drawEmptyDonutLabel(cx, cy + 10, 14);
       max_value = Math.max.apply(null, (function() {
         var _k, _len2, _ref2, _results;
         _ref2 = this.data;
@@ -1431,6 +1467,15 @@
       });
     };
 
+    Donut.prototype.drawEmptyDonutLabel = function(xPos, yPos, fontSize, fontWeight) {
+      var text;
+      text = this.raphael.text(xPos, yPos, '').attr('font-size', fontSize);
+      if (fontWeight != null) {
+        text.attr('font-weight', fontWeight);
+      }
+      return text;
+    };
+
     return Donut;
 
   })();
@@ -1439,7 +1484,7 @@
 
     __extends(DonutSegment, _super);
 
-    function DonutSegment(cx, cy, inner, outer, p0, p1, color, backgroundColor, data) {
+    function DonutSegment(cx, cy, inner, outer, p0, p1, color, backgroundColor, data, raphael) {
       this.cx = cx;
       this.cy = cy;
       this.inner = inner;
@@ -1447,6 +1492,7 @@
       this.color = color;
       this.backgroundColor = backgroundColor;
       this.data = data;
+      this.raphael = raphael;
       this.deselect = __bind(this.deselect, this);
 
       this.select = __bind(this.select, this);
@@ -1478,20 +1524,28 @@
       return ("M" + ix0 + "," + iy0) + ("A" + r + "," + r + ",0," + this.is_long + ",0," + ix1 + "," + iy1);
     };
 
-    DonutSegment.prototype.render = function(r) {
+    DonutSegment.prototype.render = function() {
       var _this = this;
-      this.arc = r.path(this.hilight).attr({
-        stroke: this.color,
+      this.arc = this.drawDonutArc(this.hilight, this.color);
+      return this.seg = this.drawDonutSegment(this.path, this.color, this.backgroundColor, function() {
+        return _this.fire('hover', _this);
+      });
+    };
+
+    DonutSegment.prototype.drawDonutArc = function(path, color) {
+      return this.raphael.path(path).attr({
+        stroke: color,
         'stroke-width': 2,
         opacity: 0
       });
-      return this.seg = r.path(this.path).attr({
-        fill: this.color,
-        stroke: this.backgroundColor,
+    };
+
+    DonutSegment.prototype.drawDonutSegment = function(path, fillColor, strokeColor, hoverFunction) {
+      return this.raphael.path(path).attr({
+        fill: fillColor,
+        stroke: strokeColor,
         'stroke-width': 3
-      }).hover(function() {
-        return _this.fire('hover', _this);
-      });
+      }).hover(hoverFunction);
     };
 
     DonutSegment.prototype.select = function() {

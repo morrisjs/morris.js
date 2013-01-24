@@ -140,3 +140,68 @@ describe 'Morris.Line', ->
       testData = [{x: 0, y: null}, {x: 10, y: 10}, {x: 20, y: 0}, {x: 30, y: 10}, {x: 40, y: null}]
       path = Morris.Line.createPath(testData, true, 20)
       path.should.equal 'M10,10C12.5,7.5,17.5,0,20,0C22.5,0,27.5,7.5,30,10'
+
+  describe 'svg structure', ->
+    defaults =
+      element: 'graph'
+      data: [{x: '2012 Q1', y: 1}, {x: '2012 Q2', y: 1}]
+      lineColors: [ '#0b62a4', '#7a92a3']
+      xkey: 'x'
+      ykeys: ['y']
+      labels: ['dontcare']
+
+    it 'should contain a path that represents the line', ->
+      chart = Morris.Line $.extend {}, defaults
+      $('#graph').find("path[stroke='#0b62a4']").size().should.equal 1
+
+    it 'should contain a circle for each data point', ->
+      chart = Morris.Line $.extend {}, defaults
+      $('#graph').find("circle").size().should.equal 2
+
+    it 'should contain 5 grid lines', ->
+      chart = Morris.Line $.extend {}, defaults
+      $('#graph').find("path[stroke='#aaaaaa']").size().should.equal 5
+
+    it 'should contain 9 text elements', ->
+      chart = Morris.Line $.extend {}, defaults
+      $('#graph').find("text").size().should.equal 9
+
+  describe 'svg attributes', ->
+    defaults =
+      element: 'graph'
+      data: [{x: '2012 Q1', y: 1}, {x: '2012 Q2', y: 1}]
+      xkey: 'x'
+      ykeys: ['y', 'z']
+      labels: ['Y', 'Z']
+      lineColors: [ '#0b62a4', '#7a92a3']
+      lineWidth: 3
+      pointWidths: [5]
+      pointStrokeColors: ['#ffffff']
+      gridLineColor: '#aaa'
+      gridStrokeWidth: 0.5
+      gridTextColor: '#888'
+      gridTextSize: 12
+
+    it 'should have circles with configured fill color', ->
+      chart = Morris.Line $.extend {}, defaults
+      $('#graph').find("circle[fill='#0b62a4']").size().should.equal 2
+
+    it 'should have circles with configured stroke width', ->
+      chart = Morris.Line $.extend {}, defaults
+      $('#graph').find("circle[stroke-width='5']").size().should.equal 2
+
+    it 'should have circles with configured stroke color', ->
+      chart = Morris.Line $.extend {}, defaults
+      $('#graph').find("circle[stroke='#ffffff']").size().should.equal 2
+
+    it 'should have line with configured line width', ->
+      chart = Morris.Line $.extend {}, defaults
+      $('#graph').find("path[stroke-width='3']").size().should.equal 1
+
+    it 'should have text with configured font size', ->
+      chart = Morris.Line $.extend {}, defaults
+      $('#graph').find("text[font-size='12px']").size().should.equal 9
+
+    it 'should have text with configured font size', ->
+      chart = Morris.Line $.extend {}, defaults
+      $('#graph').find("text[fill='#888888']").size().should.equal 9
