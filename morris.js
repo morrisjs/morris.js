@@ -234,38 +234,8 @@
         this.xmin -= 1;
         this.xmax += 1;
       }
-      if (typeof this.options.ymax === 'string') {
-        if (this.options.ymax.slice(0, 4) === 'auto') {
-          if (this.options.ymax.length > 5) {
-            this.ymax = parseInt(this.options.ymax.slice(5), 10);
-            if (ymax != null) {
-              this.ymax = Math.max(ymax, this.ymax);
-            }
-          } else {
-            this.ymax = ymax != null ? ymax : 0;
-          }
-        } else {
-          this.ymax = parseInt(this.options.ymax, 10);
-        }
-      } else {
-        this.ymax = this.options.ymax;
-      }
-      if (typeof this.options.ymin === 'string') {
-        if (this.options.ymin.slice(0, 4) === 'auto') {
-          if (this.options.ymin.length > 5) {
-            this.ymin = parseInt(this.options.ymin.slice(5), 10);
-            if (ymin != null) {
-              this.ymin = Math.min(ymin, this.ymin);
-            }
-          } else {
-            this.ymin = ymin !== null ? ymin : 0;
-          }
-        } else {
-          this.ymin = parseInt(this.options.ymin, 10);
-        }
-      } else {
-        this.ymin = this.options.ymin;
-      }
+      this.ymin = this.yboundary('min', ymin);
+      this.ymax = this.yboundary('max', ymax);
       if (this.ymin === this.ymax) {
         if (ymin) {
           this.ymin -= 1;
@@ -281,6 +251,32 @@
       this.dirty = true;
       if (redraw) {
         return this.redraw();
+      }
+    };
+
+    Grid.prototype.yboundary = function(boundaryType, currentValue) {
+      var boundaryOption, suggestedValue;
+      boundaryOption = this.options["y" + boundaryType];
+      if (typeof boundaryOption === 'string') {
+        if (boundaryOption.slice(0, 4) === 'auto') {
+          if (boundaryOption.length > 5) {
+            suggestedValue = parseInt(boundaryOption.slice(5), 10);
+            if (currentValue == null) {
+              return suggestedValue;
+            }
+            return Math[boundaryType](currentValue, suggestedValue);
+          } else {
+            if (currentValue != null) {
+              return currentValue;
+            } else {
+              return 0;
+            }
+          }
+        } else {
+          return parseInt(boundaryOption, 10);
+        }
+      } else {
+        return boundaryOption;
       }
     };
 
