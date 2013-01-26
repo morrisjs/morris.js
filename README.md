@@ -38,6 +38,19 @@ Once you're all set up, you can compile, minify and run the tests using `grunt`.
 
 ## Changelog
 
+### 0.4.0 - 26th January 2013
+
+- Goals and events [#103](https://github.com/oesmith/morris.js/issues/103).
+- Bower package manager metadata.
+- More flexible formatters [#107](https://github.com/oesmith/morris.js/issues/107).
+- Color callbacks.
+- Decade intervals for time-axis labels.
+- Non-continous line tweaks [#116](https://github.com/oesmith/morris.js/issues/116).
+- Stacked bars [#120](https://github.com/oesmith/morris.js/issues/120).
+- HTML hover [#134](https://github.com/oesmith/morris.js/issues/134).
+- yLabelFormat [#139](https://github.com/oesmith/morris.js/issues/139).
+- Disable axes [#114](https://github.com/oesmith/morris.js/issues/114).
+
 ### 0.3.3 - 1st November 2012
 
 - **Bar charts!** [#101](https://github.com/oesmith/morris.js/issues/101).
