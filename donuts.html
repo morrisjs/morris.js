@@ -1,0 +1,79 @@
+---
+layout: default
+morris_version: 0.4.0
+---
+<div class="row">
+  <div class="span12">
+
+
+    <h1>Donut Charts</h1>
+
+
+    <hr>
+
+
+    <h2 id="donuts">Donut Charts</h2>
+    <p>
+      This really couldn't be easier.  Create a Donut chart using
+      <code>Morris.Donut(<em>options</em>)</code>, with the following
+      options.
+    </p>
+    <table class="table table-striped table-bordered">
+      <tbody>
+        <tr>
+          <td><code>data</code><br><b>required</b></td>
+          <td>
+            The data to plot.  This is an array of objects, containing
+            <code>label</code> and <code>value</code> attributes
+            corresponding to the labels and sizes of the segments of the
+            donut chart.
+            <br>
+            <em>
+              Note: by default, the segment with the greatest value will
+              be initially selected.  You can change the selection using
+              the </em><code>select(<em>index</em>)</code><em> method on
+              the object returned by </em><code>Morris.Donut</code><em>.
+            </em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>element</code><br><b>required</b></td>
+          <td>
+            The ID of (or a reference to) the element into which to insert the graph.
+            <br>
+            <em>Note: this element must have a width and height defined in its styling.</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>colors</code></td>
+          <td>
+            An array of strings containing HTML-style hex colors for each
+            of the donut segments.
+            <em>
+              Note: if there are fewer colors than segments, the colors
+              will cycle back to the start of the array when exhausted.
+            </em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>formatter</code></td>
+          <td>
+            A function that will translate a y-value into a label for
+            the centre of the donut.
+            <br>
+            eg: currency <code>function (y, <em>data</em>) { return '$' + y }</code>
+            <br>
+            <em>
+              Note: if required, the method is also passed an optional second
+              argument, which is the complete data row for the given value.
+            </em>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div>
+      <h3>Live Example</h3>
+      <a class="jsbin-embed" href="http://jsbin.com/ukaxod/1/embed?javascript,live">Morris.js Donut Chart Example</a>
+    </div>
+  </div>
+</div>

@@ -8,52 +8,74 @@ body {
 @import "bootstrap/responsive.less";
 
 .graph-container {
-  margin: 20px 0;
+  padding: 30px;
+  border: 1px solid #ccc;
+  box-shadow: 1px 1px 2px #eee;
+  margin: 10px 0;
+  position: relative;
+
+  &::after {
+    content: "example";
+    display: block;
+    position: absolute;
+    left: -1px;
+    top: -1px;
+    border: 1px solid #ccc;
+    background-color: #eeeeee;
+    padding: 3px 8px;
+    font-size: 12px;
+  }
+
+  .caption {
+    text-align: center;
+  }
+
+  .graph {
+    height: 220px;
+  }
+
 }
-.caption {
+
+.jsbin-embed {
+  height: 400px;
+}
+
+.github-ribbon {
+  position: absolute;
+  top: 0;
+  right: 0;
+  border: 0;
+}
+
+.hero {
   text-align: center;
-}
 
-.graph {
-  height: 250px;
-}
+  h1 {
+    font-size: 72px;
+    line-height: 72px;
+    color: #0b62a4;
+    margin: 20px 0 20px 0;
+    text-shadow: 1px 1px 5px #789;
+  }
 
-h1 {
-  margin-bottom: 20px;
+  .tagline {
+    font-size: 24px;
+    line-height: 32px;
+    margin: 20px 0 20px 0;
+  }
+
+  .buttons {
+    margin: 40px 0;
+  }
+
+  .follow-button {
+    margin: 0 15px;
+  }
 }
 
 h2 {
-  margin-top: 30px;
-  margin-bottom: 10px;
+  margin: 80px 0 10px 0;
+  &:first-child {
+    margin-top: 10px;
+  }
 }
-
-p, .row li {
-  font-size: 16px;
-  line-height: 24px;
-}
-
-li.moresupp {
-  font-size: 12px;
-  font-style: italic;
-}
-
-.reqs {
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
-}
-
-/* ===== Primary Styles ========================================================
-   Author:
-   ========================================================================== */
-
-
-
-
-
-
-
-
-
-
-

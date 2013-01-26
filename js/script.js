@@ -52,7 +52,7 @@ $(function () {
     ykeys: ['iphone', 'ipad', 'itouch'],
     labels: ['iPhone', 'iPad', 'iPod Touch'],
     pointSize: 2,
-    hideHover: true
+    hideHover: 'auto'
   });
 
   Morris.Bar({
@@ -60,15 +60,31 @@ $(function () {
     data: [
       {device: '1', geekbench: 136},
       {device: '3G', geekbench: 137},
-      {device: '4', geekbench: 380},
       {device: '3GS', geekbench: 275},
+      {device: '4', geekbench: 380},
       {device: '4S', geekbench: 655},
       {device: '5', geekbench: 1571}
     ],
     xkey: 'device',
     ykeys: ['geekbench'],
     labels: ['Geekbench'],
-    barRatio: 0.4
+    barRatio: 0.4,
+    xLabelMargin: 10,
+    hideHover: 'auto'
+  });
+
+  new Morris.Line({
+    element: 'examplefirst',
+    xkey: 'year',
+    ykeys: ['value'],
+    labels: ['Value'],
+    data: [
+      {year: '2008', value: 20},
+      {year: '2009', value: 10},
+      {year: '2010', value: 5},
+      {year: '2011', value: 5},
+      {year: '2012', value: 20}
+    ]
   });
 
   $('.code-example').each(function (index, el) {
