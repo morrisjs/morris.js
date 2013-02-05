@@ -11,6 +11,6 @@ Add **morris.js** and its dependencies ([jQuery](http://jquery.com) &
 {% endhighlight %}
 
 If you don't want to use the CDN-hosted assets, then you can extract them from
-the [zip bundle](//cdn.oesmith.co.uk/morris-{{ page.morris_version }}.zip) and
+the [zip bundle](https://github.com/oesmith/morris.js/archive/{{ page.morris_version }}.zip) and
 upload them to your own site.
 
