@@ -59,6 +59,7 @@ class Morris.Line extends Morris.Grid
   # hit test - returns the index of the row beneath the given coordinate
   #
   hitTest: (x, y) ->
+    return null if @data.length == 0
     # TODO better search algo
     for r, index in @data.slice(1)
       break if x < (r._x + @data[index]._x) / 2

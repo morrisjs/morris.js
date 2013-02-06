@@ -145,6 +145,14 @@
       if (redraw == null) {
         redraw = true;
       }
+      if (!(data != null) || data.length === 0) {
+        this.data = [];
+        this.raphael.clear();
+        if (this.hover != null) {
+          this.hover.hide();
+        }
+        return;
+      }
       ymax = this.cumulative ? 0 : null;
       ymin = this.cumulative ? 0 : null;
       if (this.options.goals.length > 0) {
@@ -636,6 +644,9 @@
 
     Line.prototype.hitTest = function(x, y) {
       var index, r, _i, _len, _ref;
+      if (this.data.length === 0) {
+        return null;
+      }
       _ref = this.data.slice(1);
       for (index = _i = 0, _len = _ref.length; _i < _len; index = ++_i) {
         r = _ref[index];
@@ -1291,6 +1302,9 @@
     };
 
     Bar.prototype.hitTest = function(x, y) {
+      if (this.data.length === 0) {
+        return null;
+      }
       x = Math.max(Math.min(x, this.right), this.left);
       return Math.min(this.data.length - 1, Math.floor((x - this.left) / (this.width / this.data.length)));
     };

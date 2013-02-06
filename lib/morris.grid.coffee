@@ -94,6 +94,12 @@ class Morris.Grid extends Morris.EventEmitter
   # Update the data series and redraw the chart.
   #
   setData: (data, redraw = true) ->
+    if !data? or data.length == 0
+      @data = []
+      @raphael.clear()
+      @hover.hide() if @hover?
+      return
+
     ymax = if @cumulative then 0 else null
     ymin = if @cumulative then 0 else null
 

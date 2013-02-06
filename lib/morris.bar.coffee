@@ -116,6 +116,7 @@ class Morris.Bar extends Morris.Grid
   # hit test - returns the index of the row beneath the given coordinate
   #
   hitTest: (x, y) ->
+    return null if @data.length == 0
     x = Math.max(Math.min(x, @right), @left)
     Math.min(@data.length - 1,
       Math.floor((x - @left) / (@width / @data.length)))

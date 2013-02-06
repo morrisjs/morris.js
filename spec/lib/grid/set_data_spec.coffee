@@ -174,4 +174,15 @@ describe 'Morris.Grid#setData', ->
     line.ymax.should == 16
     line.data.map((row) -> row.y).should.deep.equal [[13.5], [12], [16], [14]]
 
-
+  it 'should clear the chart when empty data is supplied', ->
+    line = Morris.Line
+      element: 'graph',
+      data: [{x: 2, y: '12'}, {x: 1, y: '13.5'}, {x: 4, y: '14'}, {x: 3, y: '16'}]
+      xkey: 'x'
+      ykeys: ['y']
+      labels: ['y']
+    line.data.length.should.equal 4
+    line.setData([])
+    line.data.length.should.equal 0
+    line.setData([{x: 2, y: '12'}, {x: 1, y: '13.5'}, {x: 4, y: '14'}, {x: 3, y: '16'}])
+    line.data.length.should.equal 4
