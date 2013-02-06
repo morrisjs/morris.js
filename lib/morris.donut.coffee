@@ -23,6 +23,7 @@ class Morris.Donut
       '#042135'
     ],
     backgroundColor: '#FFFFFF', 
+    labelColor: '#000000',
     formatter: Morris.commas
 
   # Create and render a donut chart.
@@ -78,8 +79,8 @@ class Morris.Donut
       seg.on 'hover', @select
       last = next
       idx += 1
-    @text1 = @drawEmptyDonutLabel(cx, cy - 10, 15, 800)
-    @text2 = @drawEmptyDonutLabel(cx, cy + 10, 14)
+    @text1 = @drawEmptyDonutLabel(cx, cy - 10, @options.labelColor, 15, 800)
+    @text2 = @drawEmptyDonutLabel(cx, cy + 10, @options.labelColor, 14)
     max_value = Math.max.apply(null, d.value for d in @data)
     idx = 0
     for d in @data
@@ -110,8 +111,10 @@ class Morris.Donut
     text2scale = Math.min(maxWidth / text2bbox.width, maxHeightBottom / text2bbox.height)
     @text2.attr(transform: "S#{text2scale},#{text2scale},#{text2bbox.x + text2bbox.width / 2},#{text2bbox.y}")
 
-  drawEmptyDonutLabel: (xPos, yPos, fontSize, fontWeight) ->
-    text = @raphael.text(xPos, yPos, '').attr('font-size', fontSize)
+  drawEmptyDonutLabel: (xPos, yPos, color, fontSize, fontWeight) ->
+    text = @raphael.text(xPos, yPos, '')
+      .attr('font-size', fontSize)
+      .attr('fill', color)
     text.attr('font-weight', fontWeight) if fontWeight?
     return text
 

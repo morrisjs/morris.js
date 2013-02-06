@@ -1353,6 +1353,7 @@
     Donut.prototype.defaults = {
       colors: ['#0B62A4', '#3980B5', '#679DC6', '#95BBD7', '#B0CCE1', '#095791', '#095085', '#083E67', '#052C48', '#042135'],
       backgroundColor: '#FFFFFF',
+      labelColor: '#000000',
       formatter: Morris.commas
     };
 
@@ -1406,8 +1407,8 @@
         last = next;
         idx += 1;
       }
-      this.text1 = this.drawEmptyDonutLabel(cx, cy - 10, 15, 800);
-      this.text2 = this.drawEmptyDonutLabel(cx, cy + 10, 14);
+      this.text1 = this.drawEmptyDonutLabel(cx, cy - 10, this.options.labelColor, 15, 800);
+      this.text2 = this.drawEmptyDonutLabel(cx, cy + 10, this.options.labelColor, 14);
       max_value = Math.max.apply(null, (function() {
         var _k, _len2, _ref2, _results;
         _ref2 = this.data;
@@ -1474,9 +1475,9 @@
       });
     };
 
-    Donut.prototype.drawEmptyDonutLabel = function(xPos, yPos, fontSize, fontWeight) {
+    Donut.prototype.drawEmptyDonutLabel = function(xPos, yPos, color, fontSize, fontWeight) {
       var text;
-      text = this.raphael.text(xPos, yPos, '').attr('font-size', fontSize);
+      text = this.raphael.text(xPos, yPos, '').attr('font-size', fontSize).attr('fill', color);
       if (fontWeight != null) {
         text.attr('font-weight', fontWeight);
       }
