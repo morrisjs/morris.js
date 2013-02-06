@@ -81,9 +81,6 @@
         this.el.css('position', 'relative');
       }
       this.options = $.extend({}, this.gridDefaults, this.defaults || {}, options);
-      if (this.options.data === void 0 || this.options.data.length === 0) {
-        return;
-      }
       if (typeof this.options.units === 'string') {
         this.options.postUnits = options.units;
       }

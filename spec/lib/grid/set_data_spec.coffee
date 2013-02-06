@@ -186,3 +186,14 @@ describe 'Morris.Grid#setData', ->
     line.data.length.should.equal 0
     line.setData([{x: 2, y: '12'}, {x: 1, y: '13.5'}, {x: 4, y: '14'}, {x: 3, y: '16'}])
     line.data.length.should.equal 4
+
+  it 'should be able to add data if the chart is initialised with empty data', ->
+    line = Morris.Line
+      element: 'graph',
+      data: []
+      xkey: 'x'
+      ykeys: ['y']
+      labels: ['y']
+    line.data.length.should.equal 0
+    line.setData([{x: 2, y: '12'}, {x: 1, y: '13.5'}, {x: 4, y: '14'}, {x: 3, y: '16'}])
+    line.data.length.should.equal 4

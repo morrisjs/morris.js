@@ -17,10 +17,6 @@ class Morris.Grid extends Morris.EventEmitter
 
     @options = $.extend {}, @gridDefaults, (@defaults || {}), options
 
-    # bail if there's no data
-    if @options.data is undefined or @options.data.length is 0
-      return
-
     # backwards compatibility for units -> postUnits
     if typeof @options.units is 'string'
       @options.postUnits = options.units
