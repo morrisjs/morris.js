@@ -230,31 +230,6 @@ class Morris.Grid extends Morris.EventEmitter
     @drawEvents()
     @draw() if @draw
 
-  # draw goals horizontal lines
-  #
-  drawGoals: ->
-    for goal, i in @options.goals
-      @drawGoal("M#{@left},#{@transY(goal)}H#{@left + @width}")
-
-  # draw events vertical lines
-  drawEvents: ->
-    for event, i in @events
-      @drawEvent("M#{@transX(event)},#{@bottom}V#{@top}")
-
-  # draw y axis labels, horizontal lines
-  #
-  drawGrid: ->
-    return if @options.grid is false and @options.axes is false
-    firstY = @ymin
-    lastY = @ymax
-    for lineY in [firstY..lastY] by @yInterval
-      v = parseFloat(lineY.toFixed(@precision))
-      y = @transY(v)
-      if @options.axes
-        @drawYAxisLabel(@left - @options.padding / 2, y, @yAxisFormat(v))
-      if @options.grid
-        @drawGridLine("M#{@left},#{y}H#{@left + @width}")
-
   # @private
   #
   measureText: (text, fontSize = 12) ->
@@ -280,14 +255,41 @@ class Morris.Grid extends Morris.EventEmitter
     if hit?
       @hover.update(hit...)
 
-  drawGoal: (path) ->
-    @raphael.path(path)
-      .attr('stroke', @options.goalLineColors[i % @options.goalLineColors.length])
+  # draw y axis labels, horizontal lines
+  #
+  drawGrid: ->
+    return if @options.grid is false and @options.axes is false
+    firstY = @ymin
+    lastY = @ymax
+    for lineY in [firstY..lastY] by @yInterval
+      v = parseFloat(lineY.toFixed(@precision))
+      y = @transY(v)
+      if @options.axes
+        @drawYAxisLabel(@left - @options.padding / 2, y, @yAxisFormat(v))
+      if @options.grid
+        @drawGridLine("M#{@left},#{y}H#{@left + @width}")
+
+  # draw goals horizontal lines
+  #
+  drawGoals: ->
+    for goal, i in @options.goals
+      color = @options.goalLineColors[i % @options.goalLineColors.length]
+      @drawGoal(goal, color)
+
+  # draw events vertical lines
+  drawEvents: ->
+    for event, i in @events
+      color = @options.eventLineColors[i % @options.eventLineColors.length]
+      @drawEvent(event, color)
+
+  drawGoal: (goal, color) ->
+    @raphael.path("M#{@left},#{@transY(goal)}H#{@right}")
+      .attr('stroke', color)
       .attr('stroke-width', @options.goalStrokeWidth)
 
-  drawEvent: (path) ->
-    @raphael.path(path)
-      .attr('stroke', @options.eventLineColors[i % @options.eventLineColors.length])
+  drawEvent: (event, color) ->
+    @raphael.path("M#{@transX(event)},#{@bottom}V#{@top}")
+      .attr('stroke', color)
       .attr('stroke-width', @options.eventStrokeWidth)
 
   drawYAxisLabel: (xPos, yPos, text) ->

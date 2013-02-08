@@ -335,51 +335,6 @@
       }
     };
 
-    Grid.prototype.drawGoals = function() {
-      var goal, i, _i, _len, _ref, _results;
-      _ref = this.options.goals;
-      _results = [];
-      for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
-        goal = _ref[i];
-        _results.push(this.drawGoal("M" + this.left + "," + (this.transY(goal)) + "H" + (this.left + this.width)));
-      }
-      return _results;
-    };
-
-    Grid.prototype.drawEvents = function() {
-      var event, i, _i, _len, _ref, _results;
-      _ref = this.events;
-      _results = [];
-      for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
-        event = _ref[i];
-        _results.push(this.drawEvent("M" + (this.transX(event)) + "," + this.bottom + "V" + this.top));
-      }
-      return _results;
-    };
-
-    Grid.prototype.drawGrid = function() {
-      var firstY, lastY, lineY, v, y, _i, _ref, _results;
-      if (this.options.grid === false && this.options.axes === false) {
-        return;
-      }
-      firstY = this.ymin;
-      lastY = this.ymax;
-      _results = [];
-      for (lineY = _i = firstY, _ref = this.yInterval; firstY <= lastY ? _i <= lastY : _i >= lastY; lineY = _i += _ref) {
-        v = parseFloat(lineY.toFixed(this.precision));
-        y = this.transY(v);
-        if (this.options.axes) {
-          this.drawYAxisLabel(this.left - this.options.padding / 2, y, this.yAxisFormat(v));
-        }
-        if (this.options.grid) {
-          _results.push(this.drawGridLine("M" + this.left + "," + y + "H" + (this.left + this.width)));
-        } else {
-          _results.push(void 0);
-        }
-      }
-      return _results;
-    };
-
     Grid.prototype.measureText = function(text, fontSize) {
       var ret, tt;
       if (fontSize == null) {
@@ -411,12 +366,59 @@
       }
     };
 
-    Grid.prototype.drawGoal = function(path) {
-      return this.raphael.path(path).attr('stroke', this.options.goalLineColors[i % this.options.goalLineColors.length]).attr('stroke-width', this.options.goalStrokeWidth);
+    Grid.prototype.drawGrid = function() {
+      var firstY, lastY, lineY, v, y, _i, _ref, _results;
+      if (this.options.grid === false && this.options.axes === false) {
+        return;
+      }
+      firstY = this.ymin;
+      lastY = this.ymax;
+      _results = [];
+      for (lineY = _i = firstY, _ref = this.yInterval; firstY <= lastY ? _i <= lastY : _i >= lastY; lineY = _i += _ref) {
+        v = parseFloat(lineY.toFixed(this.precision));
+        y = this.transY(v);
+        if (this.options.axes) {
+          this.drawYAxisLabel(this.left - this.options.padding / 2, y, this.yAxisFormat(v));
+        }
+        if (this.options.grid) {
+          _results.push(this.drawGridLine("M" + this.left + "," + y + "H" + (this.left + this.width)));
+        } else {
+          _results.push(void 0);
+        }
+      }
+      return _results;
     };
 
-    Grid.prototype.drawEvent = function(path) {
-      return this.raphael.path(path).attr('stroke', this.options.eventLineColors[i % this.options.eventLineColors.length]).attr('stroke-width', this.options.eventStrokeWidth);
+    Grid.prototype.drawGoals = function() {
+      var color, goal, i, _i, _len, _ref, _results;
+      _ref = this.options.goals;
+      _results = [];
+      for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
+        goal = _ref[i];
+        color = this.options.goalLineColors[i % this.options.goalLineColors.length];
+        _results.push(this.drawGoal(goal, color));
+      }
+      return _results;
+    };
+
+    Grid.prototype.drawEvents = function() {
+      var color, event, i, _i, _len, _ref, _results;
+      _ref = this.events;
+      _results = [];
+      for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
+        event = _ref[i];
+        color = this.options.eventLineColors[i % this.options.eventLineColors.length];
+        _results.push(this.drawEvent(event, color));
+      }
+      return _results;
+    };
+
+    Grid.prototype.drawGoal = function(goal, color) {
+      return this.raphael.path("M" + this.left + "," + (this.transY(goal)) + "H" + this.right).attr('stroke', color).attr('stroke-width', this.options.goalStrokeWidth);
+    };
+
+    Grid.prototype.drawEvent = function(event, color) {
+      return this.raphael.path("M" + (this.transX(event)) + "," + this.bottom + "V" + this.top).attr('stroke', color).attr('stroke-width', this.options.eventStrokeWidth);
     };
 
     Grid.prototype.drawYAxisLabel = function(xPos, yPos, text) {
