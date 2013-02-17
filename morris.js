@@ -1391,7 +1391,7 @@
       _ref = this.data;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         x = _ref[_i];
-        total += x.value;
+        total += parseFloat(x.value);
       }
       min = 5 / (2 * w);
       C = 1.9999 * Math.PI - min * this.data.length;
