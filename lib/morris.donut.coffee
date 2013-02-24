@@ -72,8 +72,11 @@ class Morris.Donut
     idx = 0
     @segments = []
     for d in @data
-      next = last + min + C * (d.value / total)
-      seg = new Morris.DonutSegment(cx, cy, w*2, w, last, next, @options.colors[idx % @options.colors.length], @options.backgroundColor, d, @raphael)
+      next = last + min + C * (parseFloat(d.value) / total)
+      seg = new Morris.DonutSegment(
+        cx, cy, w*2, w, last, next,
+        @options.colors[idx % @options.colors.length],
+        @options.backgroundColor, d, @raphael)
       seg.render()
       @segments.push seg
       seg.on 'hover', @select
@@ -81,10 +84,10 @@ class Morris.Donut
       idx += 1
     @text1 = @drawEmptyDonutLabel(cx, cy - 10, @options.labelColor, 15, 800)
     @text2 = @drawEmptyDonutLabel(cx, cy + 10, @options.labelColor, 14)
-    max_value = Math.max.apply(null, d.value for d in @data)
+    max_value = Math.max.apply(null, parseFloat(d.value) for d in @data)
     idx = 0
     for d in @data
-      if d.value == max_value
+      if parseFloat(d.value) == max_value
         @select idx
         break
       idx += 1
@@ -94,7 +97,9 @@ class Morris.Donut
     s.deselect() for s in @segments
     if typeof idx is 'number' then segment = @segments[idx] else segment = idx
     segment.select()
-    @setLabels segment.data.label, @options.formatter(segment.data.value, segment.data)
+    @setLabels(
+      segment.data.label,
+      @options.formatter(segment.data.value, segment.data))
 
   # @private
   setLabels: (label1, label2) ->

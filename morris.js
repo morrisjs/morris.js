@@ -1401,7 +1401,7 @@
       _ref1 = this.data;
       for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
         d = _ref1[_j];
-        next = last + min + C * (d.value / total);
+        next = last + min + C * (parseFloat(d.value) / total);
         seg = new Morris.DonutSegment(cx, cy, w * 2, w, last, next, this.options.colors[idx % this.options.colors.length], this.options.backgroundColor, d, this.raphael);
         seg.render();
         this.segments.push(seg);
@@ -1417,7 +1417,7 @@
         _results = [];
         for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
           d = _ref2[_k];
-          _results.push(d.value);
+          _results.push(parseFloat(d.value));
         }
         return _results;
       }).call(this));
@@ -1426,7 +1426,7 @@
       _results = [];
       for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
         d = _ref2[_k];
-        if (d.value === max_value) {
+        if (parseFloat(d.value) === max_value) {
           this.select(idx);
           break;
         }
