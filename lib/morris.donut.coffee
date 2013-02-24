@@ -46,6 +46,7 @@ class Morris.Donut
     if options.data is undefined or options.data.length is 0
       return
     @data = options.data
+    @values = (parseFloat(row.value) for row in @data)
 
     @redraw()
 
@@ -63,7 +64,7 @@ class Morris.Donut
     w = (Math.min(cx, cy) - 10) / 3
 
     total = 0
-    total += x.value for x in @data
+    total += value for value in @values
 
     min = 5 / (2 * w)
     C = 1.9999 * Math.PI - min * @data.length
@@ -71,23 +72,25 @@ class Morris.Donut
     last = 0
     idx = 0
     @segments = []
-    for d in @data
-      next = last + min + C * (parseFloat(d.value) / total)
+    for value in @values
+      next = last + min + C * (value / total)
       seg = new Morris.DonutSegment(
         cx, cy, w*2, w, last, next,
         @options.colors[idx % @options.colors.length],
-        @options.backgroundColor, d, @raphael)
+        @options.backgroundColor, idx, @raphael)
       seg.render()
       @segments.push seg
       seg.on 'hover', @select
       last = next
       idx += 1
+
     @text1 = @drawEmptyDonutLabel(cx, cy - 10, @options.labelColor, 15, 800)
     @text2 = @drawEmptyDonutLabel(cx, cy + 10, @options.labelColor, 14)
-    max_value = Math.max.apply(null, parseFloat(d.value) for d in @data)
+
+    max_value = Math.max.apply(null, value for value in @values)
     idx = 0
-    for d in @data
-      if parseFloat(d.value) == max_value
+    for value in @values
+      if value == max_value
         @select idx
         break
       idx += 1
@@ -95,11 +98,10 @@ class Morris.Donut
   # Select the segment at the given index.
   select: (idx) =>
     s.deselect() for s in @segments
-    if typeof idx is 'number' then segment = @segments[idx] else segment = idx
+    segment = @segments[idx]
     segment.select()
-    @setLabels(
-      segment.data.label,
-      @options.formatter(segment.data.value, segment.data))
+    row = @data[idx]
+    @setLabels(row.label, @options.formatter(row.value, row))
 
   # @private
   setLabels: (label1, label2) ->
@@ -128,7 +130,7 @@ class Morris.Donut
 #
 # @private
 class Morris.DonutSegment extends Morris.EventEmitter
-  constructor: (@cx, @cy, @inner, @outer, p0, p1, @color, @backgroundColor, @data, @raphael) ->
+  constructor: (@cx, @cy, @inner, @outer, p0, p1, @color, @backgroundColor, @index, @raphael) ->
     @sin_p0 = Math.sin(p0)
     @cos_p0 = Math.cos(p0)
     @sin_p1 = Math.sin(p1)
@@ -163,7 +165,7 @@ class Morris.DonutSegment extends Morris.EventEmitter
 
   render: ->
     @arc = @drawDonutArc(@hilight, @color)
-    @seg = @drawDonutSegment(@path, @color, @backgroundColor, => @fire('hover', @))
+    @seg = @drawDonutSegment(@path, @color, @backgroundColor, => @fire('hover', @index))
 
   drawDonutArc: (path, color) ->
     @raphael.path(path)
