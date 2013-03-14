@@ -17,9 +17,10 @@
   "devDependencies": {
     "grunt-coffee": "~> 0.0.6",
     "grunt-mocha": "~> 0.1.7",
-    "grunt-contrib-less": "~> 0.3.2"
+    "grunt-contrib-less": "~> 0.3.2",
+    "grunt": "~> 0.3.17"
   },
   "scripts": {
-    "test": "grunt coffee mocha"
+    "test": "./node_modules/.bin/grunt coffee mocha"
   }
 }
