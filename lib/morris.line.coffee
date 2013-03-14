@@ -305,14 +305,14 @@ minutesSpecHelper = (interval) ->
   span: interval * 60 * 1000
   start: (d) -> new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours())
   fmt: (d) -> "#{Morris.pad2(d.getHours())}:#{Morris.pad2(d.getMinutes())}"
-  incr: (d) -> d.setMinutes(d.getMinutes() + interval)
+  incr: (d) -> d.setUTCMinutes(d.getUTCMinutes() + interval)
 
 # @private
 secondsSpecHelper = (interval) ->
   span: interval * 1000
   start: (d) -> new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes())
   fmt: (d) -> "#{Morris.pad2(d.getHours())}:#{Morris.pad2(d.getMinutes())}:#{Morris.pad2(d.getSeconds())}"
-  incr: (d) -> d.setSeconds(d.getSeconds() + interval)
+  incr: (d) -> d.setUTCSeconds(d.getUTCSeconds() + interval)
 
 Morris.LABEL_SPECS =
   "decade":

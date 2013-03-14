@@ -302,8 +302,8 @@
           this.left += maxYLabelWidth;
           this.bottom -= 1.5 * this.options.gridTextSize;
         }
-        this.width = this.right - this.left;
-        this.height = this.bottom - this.top;
+        this.width = Math.max(1, this.right - this.left);
+        this.height = Math.max(1, this.bottom - this.top);
         this.dx = this.width / (this.xmax - this.xmin);
         this.dy = this.height / (this.ymax - this.ymin);
         if (this.calc) {
@@ -994,7 +994,7 @@
         return "" + (Morris.pad2(d.getHours())) + ":" + (Morris.pad2(d.getMinutes()));
       },
       incr: function(d) {
-        return d.setMinutes(d.getMinutes() + interval);
+        return d.setUTCMinutes(d.getUTCMinutes() + interval);
       }
     };
   };
@@ -1009,7 +1009,7 @@
         return "" + (Morris.pad2(d.getHours())) + ":" + (Morris.pad2(d.getMinutes())) + ":" + (Morris.pad2(d.getSeconds()));
       },
       incr: function(d) {
-        return d.setSeconds(d.getSeconds() + interval);
+        return d.setUTCSeconds(d.getUTCSeconds() + interval);
       }
     };
   };
