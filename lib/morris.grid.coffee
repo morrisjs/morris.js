@@ -203,8 +203,8 @@ class Morris.Grid extends Morris.EventEmitter
           @measureText(@yAxisFormat(@ymax), @options.gridTextSize).width)
         @left += maxYLabelWidth
         @bottom -= 1.5 * @options.gridTextSize
-      @width = @right - @left
-      @height = @bottom - @top
+      @width = Math.max(1, @right - @left)
+      @height = Math.max(1, @bottom - @top)
       @dx = @width / (@xmax - @xmin)
       @dy = @height / (@ymax - @ymin)
       @calc() if @calc
