@@ -138,7 +138,7 @@
     };
 
     Grid.prototype.setData = function(data, redraw) {
-      var e, idx, index, maxGoal, minGoal, ret, row, total, ykey, ymax, ymin, yval;
+      var e, gmax, gmin, idx, index, maxGoal, minGoal, ret, row, smag, span, step, total, unit, y, ykey, ymag, ymax, ymin, yval;
       if (redraw == null) {
         redraw = true;
       }
@@ -247,11 +247,39 @@
         }
         this.ymax += 1;
       }
-      this.yInterval = (this.ymax - this.ymin) / (this.options.numLines - 1);
-      if (this.yInterval > 0 && this.yInterval < 1) {
-        this.precision = -Math.floor(Math.log(this.yInterval) / Math.log(10));
-      } else {
-        this.precision = 0;
+      if (this.options.axes === true || this.options.grid === true) {
+        span = this.ymax - this.ymin;
+        ymag = Math.floor(Math.log(span) / Math.log(10));
+        unit = Math.pow(10, ymag);
+        gmin = Math.round(this.ymin / unit) * unit;
+        gmax = Math.round(this.ymax / unit) * unit;
+        step = (gmax - gmin) / (this.options.numLines - 1);
+        if (gmin < 0 && gmax > 0) {
+          gmin = Math.round(this.ymin / step) * step;
+          gmax = Math.round(this.ymax / step) * step;
+        }
+        if (step < 1) {
+          smag = Math.floor(Math.log(step) / Math.log(10));
+          this.grid = (function() {
+            var _i, _results;
+            _results = [];
+            for (y = _i = gmin; gmin <= gmax ? _i <= gmax : _i >= gmax; y = _i += step) {
+              _results.push(parseFloat(y.toFixed(1 - smag)));
+            }
+            return _results;
+          })();
+        } else {
+          this.grid = (function() {
+            var _i, _results;
+            _results = [];
+            for (y = _i = gmin; gmin <= gmax ? _i <= gmax : _i >= gmax; y = _i += step) {
+              _results.push(y);
+            }
+            return _results;
+          })();
+        }
+        this.ymin = gmin;
+        this.ymax = gmax;
       }
       this.dirty = true;
       if (redraw) {
@@ -367,18 +395,17 @@
     };
 
     Grid.prototype.drawGrid = function() {
-      var firstY, lastY, lineY, v, y, _i, _ref, _results;
+      var lineY, y, _i, _len, _ref, _results;
       if (this.options.grid === false && this.options.axes === false) {
         return;
       }
-      firstY = this.ymin;
-      lastY = this.ymax;
+      _ref = this.grid;
       _results = [];
-      for (lineY = _i = firstY, _ref = this.yInterval; firstY <= lastY ? _i <= lastY : _i >= lastY; lineY = _i += _ref) {
-        v = parseFloat(lineY.toFixed(this.precision));
-        y = this.transY(v);
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        lineY = _ref[_i];
+        y = this.transY(lineY);
         if (this.options.axes) {
-          this.drawYAxisLabel(this.left - this.options.padding / 2, y, this.yAxisFormat(v));
+          this.drawYAxisLabel(this.left - this.options.padding / 2, y, this.yAxisFormat(lineY));
         }
         if (this.options.grid) {
           _results.push(this.drawGridLine("M" + this.left + "," + y + "H" + (this.left + this.width)));

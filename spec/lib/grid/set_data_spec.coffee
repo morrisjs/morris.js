@@ -13,7 +13,7 @@ describe 'Morris.Grid#setData', ->
 
   describe 'ymin/ymax', ->
     beforeEach ->
-      @defaults = 
+      @defaults =
         element: 'graph'
         xkey: 'x'
         ykeys: ['y', 'z']

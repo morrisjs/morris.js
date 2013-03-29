@@ -160,11 +160,32 @@ class Morris.Grid extends Morris.EventEmitter
       @ymin -= 1 if ymin
       @ymax += 1
 
-    @yInterval = (@ymax - @ymin) / (@options.numLines - 1)
-    if @yInterval > 0 and @yInterval < 1
-        @precision =  -Math.floor(Math.log(@yInterval) / Math.log(10))
-    else
-        @precision = 0
+    if @options.axes is true or @options.grid is true
+      # calculate grid placement
+      span = @ymax - @ymin
+      ymag = Math.floor(Math.log(span) / Math.log(10))
+      unit = Math.pow(10, ymag)
+
+      # calculate initial grid min and max values
+      gmin = Math.round(@ymin / unit) * unit
+      gmax = Math.round(@ymax / unit) * unit
+      step = (gmax - gmin) / (@options.numLines - 1)
+
+      # ensure zero is plotted where the range includes zero
+      if gmin < 0 and gmax > 0
+        gmin = Math.round(@ymin / step) * step
+        gmax = Math.round(@ymax / step) * step
+
+      # special case for decimal numbers
+      if step < 1
+        smag = Math.floor(Math.log(step) / Math.log(10))
+        @grid = for y in [gmin..gmax] by step
+          parseFloat(y.toFixed(1 - smag))
+      else
+        @grid = (y for y in [gmin..gmax] by step)
+
+      @ymin = gmin
+      @ymax = gmax
 
     @dirty = true
     @redraw() if redraw
@@ -259,13 +280,10 @@ class Morris.Grid extends Morris.EventEmitter
   #
   drawGrid: ->
     return if @options.grid is false and @options.axes is false
-    firstY = @ymin
-    lastY = @ymax
-    for lineY in [firstY..lastY] by @yInterval
-      v = parseFloat(lineY.toFixed(@precision))
-      y = @transY(v)
+    for lineY in @grid
+      y = @transY(lineY)
       if @options.axes
-        @drawYAxisLabel(@left - @options.padding / 2, y, @yAxisFormat(v))
+        @drawYAxisLabel(@left - @options.padding / 2, y, @yAxisFormat(lineY))
       if @options.grid
         @drawGridLine("M#{@left},#{y}H#{@left + @width}")
 
