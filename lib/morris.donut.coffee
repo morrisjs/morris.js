@@ -8,7 +8,7 @@
 #       { label: 'yang', value: 50 }
 #     ]
 #   });
-class Morris.Donut
+class Morris.Donut extends Morris.EventEmitter
   defaults:
     colors: [
       '#0B62A4'
@@ -72,15 +72,16 @@ class Morris.Donut
     last = 0
     idx = 0
     @segments = []
-    for value in @values
+    for value, i in @values
       next = last + min + C * (value / total)
       seg = new Morris.DonutSegment(
         cx, cy, w*2, w, last, next,
         @options.colors[idx % @options.colors.length],
-        @options.backgroundColor, idx, @raphael)
+        @options.backgroundColor, @data[i], idx, @raphael)
       seg.render()
       @segments.push seg
       seg.on 'hover', @select
+      seg.on 'click', @click
       last = next
       idx += 1
 
@@ -94,6 +95,11 @@ class Morris.Donut
         @select idx
         break
       idx += 1
+
+  # @private
+  click: (idx) =>
+    if typeof idx is 'number' then segment = @segments[idx] else segment = idx
+    @fire 'click', segment.idx, segment.data
 
   # Select the segment at the given index.
   select: (idx) =>
@@ -130,7 +136,7 @@ class Morris.Donut
 #
 # @private
 class Morris.DonutSegment extends Morris.EventEmitter
-  constructor: (@cx, @cy, @inner, @outer, p0, p1, @color, @backgroundColor, @index, @raphael) ->
+  constructor: (@cx, @cy, @inner, @outer, p0, p1, @color, @backgroundColor, @data, @index, @raphael) ->
     @sin_p0 = Math.sin(p0)
     @cos_p0 = Math.cos(p0)
     @sin_p1 = Math.sin(p1)
@@ -165,16 +171,23 @@ class Morris.DonutSegment extends Morris.EventEmitter
 
   render: ->
     @arc = @drawDonutArc(@hilight, @color)
-    @seg = @drawDonutSegment(@path, @color, @backgroundColor, => @fire('hover', @index))
+    @seg = @drawDonutSegment(
+      @path, 
+      @color, 
+      @backgroundColor, 
+      => @fire('hover', @index),
+      => @fire('click', @index)
+    )
 
   drawDonutArc: (path, color) ->
     @raphael.path(path)
       .attr(stroke: color, 'stroke-width': 2, opacity: 0)
 
-  drawDonutSegment: (path, fillColor, strokeColor, hoverFunction) ->
+  drawDonutSegment: (path, fillColor, strokeColor, hoverFunction, clickFunction) ->
     @raphael.path(path)
       .attr(fill: fillColor, stroke: strokeColor, 'stroke-width': 3)
       .hover(hoverFunction)
+      .click(clickFunction)
 
   select: =>
     unless @selected

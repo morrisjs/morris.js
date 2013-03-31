@@ -107,6 +107,11 @@
         _this.fire('hover', touch.pageX - offset.left, touch.pageY - offset.top);
         return touch;
       });
+      this.el.bind('click', function(evt) {
+        var offset;
+        offset = _this.el.offset();
+        return _this.fire('gridclick', evt.pageX - offset.left, evt.pageY - offset.top);
+      });
       if (this.postInit) {
         this.postInit();
       }
@@ -562,6 +567,8 @@
       this.onHoverOut = __bind(this.onHoverOut, this);
 
       this.onHoverMove = __bind(this.onHoverMove, this);
+
+      this.onGridClick = __bind(this.onGridClick, this);
       if (!(this instanceof Morris.Line)) {
         return new Morris.Line(options);
       }
@@ -580,7 +587,8 @@
           parent: this.el
         });
         this.on('hovermove', this.onHoverMove);
-        return this.on('hoverout', this.onHoverOut);
+        this.on('hoverout', this.onHoverOut);
+        return this.on('gridclick', this.onGridClick);
       }
     };
 
@@ -654,6 +662,12 @@
         }
       }
       return index;
+    };
+
+    Line.prototype.onGridClick = function(x, y) {
+      var index;
+      index = this.hitTest(x, y);
+      return this.fire('click', index, this.options.data[index], x, y);
     };
 
     Line.prototype.onHoverMove = function(x, y) {
@@ -1148,6 +1162,8 @@
       this.onHoverOut = __bind(this.onHoverOut, this);
 
       this.onHoverMove = __bind(this.onHoverMove, this);
+
+      this.onGridClick = __bind(this.onGridClick, this);
       if (!(this instanceof Morris.Bar)) {
         return new Morris.Bar(options);
       }
@@ -1163,7 +1179,8 @@
           parent: this.el
         });
         this.on('hovermove', this.onHoverMove);
-        return this.on('hoverout', this.onHoverOut);
+        this.on('hoverout', this.onHoverOut);
+        return this.on('gridclick', this.onGridClick);
       }
     };
 
@@ -1308,6 +1325,12 @@
       return Math.min(this.data.length - 1, Math.floor((x - this.left) / (this.width / this.data.length)));
     };
 
+    Bar.prototype.onGridClick = function(x, y) {
+      var index;
+      index = this.hitTest(x, y);
+      return this.fire('click', index, this.options.data[index], x, y);
+    };
+
     Bar.prototype.onHoverMove = function(x, y) {
       var index, _ref;
       index = this.hitTest(x, y);
@@ -1350,7 +1373,9 @@
 
   })(Morris.Grid);
 
-  Morris.Donut = (function() {
+  Morris.Donut = (function(_super) {
+
+    __extends(Donut, _super);
 
     Donut.prototype.defaults = {
       colors: ['#0B62A4', '#3980B5', '#679DC6', '#95BBD7', '#B0CCE1', '#095791', '#095085', '#083E67', '#052C48', '#042135'],
@@ -1361,6 +1386,8 @@
 
     function Donut(options) {
       this.select = __bind(this.select, this);
+
+      this.click = __bind(this.click, this);
 
       var row;
       if (!(this instanceof Morris.Donut)) {
@@ -1393,7 +1420,7 @@
     }
 
     Donut.prototype.redraw = function() {
-      var C, cx, cy, idx, last, max_value, min, next, seg, total, value, w, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _results;
+      var C, cx, cy, i, idx, last, max_value, min, next, seg, total, value, w, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _results;
       this.el.empty();
       this.raphael = new Raphael(this.el[0]);
       cx = this.el.width() / 2;
@@ -1411,13 +1438,14 @@
       idx = 0;
       this.segments = [];
       _ref1 = this.values;
-      for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-        value = _ref1[_j];
+      for (i = _j = 0, _len1 = _ref1.length; _j < _len1; i = ++_j) {
+        value = _ref1[i];
         next = last + min + C * (value / total);
-        seg = new Morris.DonutSegment(cx, cy, w * 2, w, last, next, this.options.colors[idx % this.options.colors.length], this.options.backgroundColor, idx, this.raphael);
+        seg = new Morris.DonutSegment(cx, cy, w * 2, w, last, next, this.options.colors[idx % this.options.colors.length], this.options.backgroundColor, this.data[i], idx, this.raphael);
         seg.render();
         this.segments.push(seg);
         seg.on('hover', this.select);
+        seg.on('click', this.click);
         last = next;
         idx += 1;
       }
@@ -1445,6 +1473,16 @@
         _results.push(idx += 1);
       }
       return _results;
+    };
+
+    Donut.prototype.click = function(idx) {
+      var segment;
+      if (typeof idx === 'number') {
+        segment = this.segments[idx];
+      } else {
+        segment = idx;
+      }
+      return this.fire('click', segment.idx, segment.data);
     };
 
     Donut.prototype.select = function(idx) {
@@ -1497,19 +1535,20 @@
 
     return Donut;
 
-  })();
+  })(Morris.EventEmitter);
 
   Morris.DonutSegment = (function(_super) {
 
     __extends(DonutSegment, _super);
 
-    function DonutSegment(cx, cy, inner, outer, p0, p1, color, backgroundColor, index, raphael) {
+    function DonutSegment(cx, cy, inner, outer, p0, p1, color, backgroundColor, data, index, raphael) {
       this.cx = cx;
       this.cy = cy;
       this.inner = inner;
       this.outer = outer;
       this.color = color;
       this.backgroundColor = backgroundColor;
+      this.data = data;
       this.index = index;
       this.raphael = raphael;
       this.deselect = __bind(this.deselect, this);
@@ -1548,6 +1587,8 @@
       this.arc = this.drawDonutArc(this.hilight, this.color);
       return this.seg = this.drawDonutSegment(this.path, this.color, this.backgroundColor, function() {
         return _this.fire('hover', _this.index);
+      }, function() {
+        return _this.fire('click', _this.index);
       });
     };
 
@@ -1559,12 +1600,12 @@
       });
     };
 
-    DonutSegment.prototype.drawDonutSegment = function(path, fillColor, strokeColor, hoverFunction) {
+    DonutSegment.prototype.drawDonutSegment = function(path, fillColor, strokeColor, hoverFunction, clickFunction) {
       return this.raphael.path(path).attr({
         fill: fillColor,
         stroke: strokeColor,
         'stroke-width': 3
-      }).hover(hoverFunction);
+      }).hover(hoverFunction).click(clickFunction);
     };
 
     DonutSegment.prototype.select = function() {
