@@ -42,6 +42,19 @@ describe 'Morris.Area', ->
       gridTextColor: '#888'
       gridTextSize: 12
 
+    it 'should not be cumulative if behaveLikeLine', ->
+      chart = Morris.Area $.extend {}, defaults, behaveLikeLine: true
+      chart.cumulative.should.equal false
+
+    it 'should have a line with transparent fill if behaveLikeLine', ->
+      chart = Morris.Area $.extend {}, defaults, behaveLikeLine: true
+      $('#graph').find("path[fill-opacity='0.8']").size().should.equal 1
+
+    it 'should not have a line with transparent fill', ->
+      chart = Morris.Area $.extend {}, defaults
+      $('#graph').find("path[fill-opacity='0.8']").size().should.equal 0
+
     it 'should have a line with the fill of a modified line color', ->
       chart = Morris.Area $.extend {}, defaults
-      $('#graph').find("path[fill='#2577b5']").size().should.equal 1
+      $('#graph').find("path[fill='#0b62a4']").size().should.equal 0
+      $('#graph').find("path[fill='#7a92a3']").size().should.equal 0

@@ -793,40 +793,40 @@
     };
 
     Line.prototype.drawSeries = function() {
-      var circle, i, path, row, _i, _j, _ref, _ref1, _results;
+      var i, _i, _j, _ref, _ref1, _results;
+      this.seriesPoints = [];
       for (i = _i = _ref = this.options.ykeys.length - 1; _ref <= 0 ? _i <= 0 : _i >= 0; i = _ref <= 0 ? ++_i : --_i) {
-        path = this.paths[i];
-        if (path !== null) {
-          this.drawLinePath(path, this.colorFor(row, i, 'line'));
-        }
+        this._drawLineFor(i);
       }
-      this.seriesPoints = (function() {
-        var _j, _ref1, _results;
-        _results = [];
-        for (i = _j = 0, _ref1 = this.options.ykeys.length; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; i = 0 <= _ref1 ? ++_j : --_j) {
-          _results.push([]);
-        }
-        return _results;
-      }).call(this);
       _results = [];
       for (i = _j = _ref1 = this.options.ykeys.length - 1; _ref1 <= 0 ? _j <= 0 : _j >= 0; i = _ref1 <= 0 ? ++_j : --_j) {
-        _results.push((function() {
-          var _k, _len, _ref2, _results1;
-          _ref2 = this.data;
-          _results1 = [];
-          for (_k = 0, _len = _ref2.length; _k < _len; _k++) {
-            row = _ref2[_k];
-            if (row._y[i] != null) {
-              circle = this.drawLinePoint(row._x, row._y[i], this.options.pointSize, this.colorFor(row, i, 'point'), i);
-            } else {
-              circle = null;
-            }
-            _results1.push(this.seriesPoints[i].push(circle));
-          }
-          return _results1;
-        }).call(this));
+        _results.push(this._drawPointFor(i));
       }
       return _results;
+    };
+
+    Line.prototype._drawPointFor = function(index) {
+      var circle, row, _i, _len, _ref, _results;
+      this.seriesPoints[index] = [];
+      _ref = this.data;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        row = _ref[_i];
+        circle = null;
+        if (row._y[index] != null) {
+          circle = this.drawLinePoint(row._x, row._y[index], this.options.pointSize, this.colorFor(row, index, 'point'), index);
+        }
+        _results.push(this.seriesPoints[index].push(circle));
+      }
+      return _results;
+    };
+
+    Line.prototype._drawLineFor = function(index) {
+      var path;
+      path = this.paths[index];
+      if (path !== null) {
+        return this.drawLinePath(path, this.colorFor(null, index, 'line'));
+      }
     };
 
     Line.createPath = function(coords, smooth, bottom) {
@@ -1079,15 +1079,26 @@
   Morris.AUTO_LABEL_ORDER = ["decade", "year", "month", "day", "hour", "30min", "15min", "10min", "5min", "minute", "30sec", "15sec", "10sec", "5sec", "second"];
 
   Morris.Area = (function(_super) {
+    var areaDefaults;
 
     __extends(Area, _super);
 
+    areaDefaults = {
+      fillOpacity: 'auto',
+      behaveLikeLine: false
+    };
+
     function Area(options) {
+      var areaOptions;
       if (!(this instanceof Morris.Area)) {
         return new Morris.Area(options);
       }
-      this.cumulative = true;
-      Area.__super__.constructor.call(this, options);
+      areaOptions = $.extend({}, areaDefaults, options);
+      this.cumulative = !areaOptions.behaveLikeLine;
+      if (areaOptions.fillOpacity === 'auto') {
+        areaOptions.fillOpacity = areaOptions.behaveLikeLine ? .8 : 1;
+      }
+      Area.__super__.constructor.call(this, areaOptions);
     }
 
     Area.prototype.calcPoints = function() {
@@ -1104,36 +1115,63 @@
           _results1 = [];
           for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
             y = _ref1[_j];
-            total += y || 0;
-            _results1.push(this.transY(total));
+            if (this.options.behaveLikeLine) {
+              _results1.push(this.transY(y));
+            } else {
+              total += y || 0;
+              _results1.push(this.transY(total));
+            }
           }
           return _results1;
         }).call(this);
-        _results.push(row._ymax = row._y[row._y.length - 1]);
+        _results.push(row._ymax = Math.max.apply(Math, row._y));
       }
       return _results;
     };
 
     Area.prototype.drawSeries = function() {
-      var i, path, _i, _ref;
-      for (i = _i = _ref = this.options.ykeys.length - 1; _ref <= 0 ? _i <= 0 : _i >= 0; i = _ref <= 0 ? ++_i : --_i) {
-        path = this.paths[i];
-        if (path !== null) {
-          path = path + ("L" + (this.transX(this.xmax)) + "," + this.bottom + "L" + (this.transX(this.xmin)) + "," + this.bottom + "Z");
-          this.drawFilledPath(path, this.fillForSeries(i));
-        }
+      var i, range, _i, _j, _k, _len, _ref, _ref1, _results, _results1, _results2;
+      this.seriesPoints = [];
+      if (this.options.behaveLikeLine) {
+        range = (function() {
+          _results = [];
+          for (var _i = 0, _ref = this.options.ykeys.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; 0 <= _ref ? _i++ : _i--){ _results.push(_i); }
+          return _results;
+        }).apply(this);
+      } else {
+        range = (function() {
+          _results1 = [];
+          for (var _j = _ref1 = this.options.ykeys.length - 1; _ref1 <= 0 ? _j <= 0 : _j >= 0; _ref1 <= 0 ? _j++ : _j--){ _results1.push(_j); }
+          return _results1;
+        }).apply(this);
       }
-      return Area.__super__.drawSeries.call(this);
+      _results2 = [];
+      for (_k = 0, _len = range.length; _k < _len; _k++) {
+        i = range[_k];
+        this._drawFillFor(i);
+        this._drawLineFor(i);
+        _results2.push(this._drawPointFor(i));
+      }
+      return _results2;
+    };
+
+    Area.prototype._drawFillFor = function(index) {
+      var path;
+      path = this.paths[index];
+      if (path !== null) {
+        path = path + ("L" + (this.transX(this.xmax)) + "," + this.bottom + "L" + (this.transX(this.xmin)) + "," + this.bottom + "Z");
+        return this.drawFilledPath(path, this.fillForSeries(index));
+      }
     };
 
     Area.prototype.fillForSeries = function(i) {
       var color;
       color = Raphael.rgb2hsl(this.colorFor(this.data[i], i, 'line'));
-      return Raphael.hsl(color.h, Math.min(255, color.s * 0.75), Math.min(255, color.l * 1.25));
+      return Raphael.hsl(color.h, Math.min(255, this.options.behaveLikeLine ? color.s * 0.9 : color.s * 0.75), Math.min(255, this.options.behaveLikeLine ? color.l * 1.2 : color.l * 1.25));
     };
 
     Area.prototype.drawFilledPath = function(path, fill) {
-      return this.raphael.path(path).attr('fill', fill).attr('stroke-width', 0);
+      return this.raphael.path(path).attr('fill', fill).attr('fill-opacity', this.options.fillOpacity).attr('stroke-width', 0);
     };
 
     return Area;
