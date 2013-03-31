@@ -166,18 +166,24 @@ class Morris.Line extends Morris.Grid
   #
   # @private
   drawSeries: ->
+    @seriesPoints = []
     for i in [@options.ykeys.length-1..0]
-      path = @paths[i]
-      if path isnt null
-        @drawLinePath(path, @colorFor(row, i, 'line')) #row isn't available here?
-    @seriesPoints = ([] for i in [0...@options.ykeys.length])
+      @_drawLineFor i
     for i in [@options.ykeys.length-1..0]
-      for row in @data
-        if row._y[i]?
-          circle = @drawLinePoint(row._x, row._y[i], @options.pointSize, @colorFor(row, i, 'point'), i)
-        else
-          circle = null
-        @seriesPoints[i].push(circle)
+      @_drawPointFor i
+
+  _drawPointFor: (index) ->
+    @seriesPoints[index] = []
+    for row in @data
+      circle = null
+      if row._y[index]?
+        circle = @drawLinePoint(row._x, row._y[index], @options.pointSize, @colorFor(row, index, 'point'), index)
+      @seriesPoints[index].push(circle)
+
+  _drawLineFor: (index) ->
+    path = @paths[index]
+    if path isnt null
+      @drawLinePath path, @colorFor(null, index, 'line')
 
   # create a path for a data series
   #
