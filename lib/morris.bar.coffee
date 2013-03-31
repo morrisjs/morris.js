@@ -60,9 +60,7 @@ class Morris.Bar extends Morris.Grid
     prevLabelMargin = null
     for i in [0...@data.length]
       row = @data[@data.length - 1 - i]
-      label = @r.text(row._x, ypos, row.label)
-        .attr('font-size', @options.gridTextSize)
-        .attr('fill', @options.gridTextColor)
+      label = @drawXAxisLabel(row._x, ypos, row.label)
       labelBox = label.getBBox()
       # ensure a minimum of `xLabelMargin` pixels between labels, and ensure
       # labels don't overflow the container
@@ -97,9 +95,7 @@ class Morris.Bar extends Morris.Grid
           size = bottom - top
 
           top -= lastTop if @options.stacked
-          @r.rect(left, top, barWidth, size)
-            .attr('fill', @colorFor(row, sidx, 'bar'))
-            .attr('stroke-width', 0)
+          @drawBar(left, top, barWidth, size, @colorFor(row, sidx, 'bar'))
 
           lastTop += size
         else
@@ -121,6 +117,7 @@ class Morris.Bar extends Morris.Grid
   # hit test - returns the index of the row beneath the given coordinate
   #
   hitTest: (x, y) ->
+    return null if @data.length == 0
     x = Math.max(Math.min(x, @right), @left)
     Math.min(@data.length - 1,
       Math.floor((x - @left) / (@width / @data.length)))
@@ -164,3 +161,13 @@ class Morris.Bar extends Morris.Grid
         """
     x = @left + (index + 0.5) * @width / @data.length
     [content, x]
+
+  drawXAxisLabel: (xPos, yPos, text) ->
+    label = @raphael.text(xPos, yPos, text)
+      .attr('font-size', @options.gridTextSize)
+      .attr('fill', @options.gridTextColor)
+
+  drawBar: (xPos, yPos, width, height, barColor) ->
+    @raphael.rect(xPos, yPos, width, height)
+      .attr('fill', barColor)
+      .attr('stroke-width', 0)

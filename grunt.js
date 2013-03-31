@@ -50,7 +50,7 @@ module.exports = function (grunt) {
 
   grunt.loadNpmTasks('grunt-coffee');
   grunt.loadNpmTasks('grunt-mocha');
-  grunt.loadNpmTasks('grunt-less');
+  grunt.loadNpmTasks('grunt-contrib-less');
 
   grunt.registerTask('default', 'concat coffee less min mocha');
 };

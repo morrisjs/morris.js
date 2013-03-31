@@ -17,16 +17,12 @@ class Morris.Grid extends Morris.EventEmitter
 
     @options = $.extend {}, @gridDefaults, (@defaults || {}), options
 
-    # bail if there's no data
-    if @options.data is undefined or @options.data.length is 0
-      return
-
     # backwards compatibility for units -> postUnits
     if typeof @options.units is 'string'
       @options.postUnits = options.units
 
     # the raphael drawing instance
-    @r = new Raphael(@el[0])
+    @raphael = new Raphael(@el[0])
 
     # some redraw stuff
     @elementWidth = null
@@ -98,6 +94,12 @@ class Morris.Grid extends Morris.EventEmitter
   # Update the data series and redraw the chart.
   #
   setData: (data, redraw = true) ->
+    if !data? or data.length == 0
+      @data = []
+      @raphael.clear()
+      @hover.hide() if @hover?
+      return
+
     ymax = if @cumulative then 0 else null
     ymin = if @cumulative then 0 else null
 
@@ -155,30 +157,9 @@ class Morris.Grid extends Morris.EventEmitter
       @xmin -= 1
       @xmax += 1
 
-    # Compute the vertical range of the graph if desired
-    if typeof @options.ymax is 'string'
-      if @options.ymax[0..3] is 'auto'
-        # use Array.concat to flatten arrays and find the max y value
-        if @options.ymax.length > 5
-          @ymax = parseInt(@options.ymax[5..], 10)
-          @ymax = Math.max(ymax, @ymax) if ymax?
-        else
-          @ymax = if ymax? then ymax else 0
-      else
-        @ymax = parseInt(@options.ymax, 10)
-    else
-      @ymax = @options.ymax
-    if typeof @options.ymin is 'string'
-      if @options.ymin[0..3] is 'auto'
-        if @options.ymin.length > 5
-          @ymin = parseInt(@options.ymin[5..], 10)
-          @ymin = Math.min(ymin, @ymin) if ymin?
-        else
-          @ymin = if ymin isnt null then ymin else 0
-      else
-        @ymin = parseInt(@options.ymin, 10)
-    else
-      @ymin = @options.ymin
+    @ymin = @yboundary('min', ymin)
+    @ymax = @yboundary('max', ymax)
+
     if @ymin is @ymax
       @ymin -= 1 if ymin
       @ymax += 1
@@ -191,6 +172,21 @@ class Morris.Grid extends Morris.EventEmitter
 
     @dirty = true
     @redraw() if redraw
+
+  yboundary: (boundaryType, currentValue) ->
+    boundaryOption = @options["y#{boundaryType}"]
+    if typeof boundaryOption is 'string'
+      if boundaryOption[0..3] is 'auto'
+        if boundaryOption.length > 5
+          suggestedValue = parseInt(boundaryOption[5..], 10)
+          return suggestedValue unless currentValue?
+          Math[boundaryType](currentValue, suggestedValue)
+        else
+          if currentValue? then currentValue else 0
+      else
+        parseInt(boundaryOption, 10)
+    else
+      boundaryOption
 
   _calc: ->
     w = @el.width()
@@ -211,8 +207,8 @@ class Morris.Grid extends Morris.EventEmitter
           @measureText(@yAxisFormat(@ymax), @options.gridTextSize).width)
         @left += maxYLabelWidth
         @bottom -= 1.5 * @options.gridTextSize
-      @width = @right - @left
-      @height = @bottom - @top
+      @width = Math.max(1, @right - @left)
+      @height = Math.max(1, @bottom - @top)
       @dx = @width / (@xmax - @xmin)
       @dy = @height / (@ymax - @ymin)
       @calc() if @calc
@@ -231,51 +227,17 @@ class Morris.Grid extends Morris.EventEmitter
   # If you need to re-size your charts, call this method after changing the
   # size of the container element.
   redraw: ->
-    @r.clear()
+    @raphael.clear()
     @_calc()
     @drawGrid()
     @drawGoals()
     @drawEvents()
     @draw() if @draw
 
-  # draw goals horizontal lines
-  #
-  drawGoals: ->
-    for goal, i in @options.goals
-      @r.path("M#{@left},#{@transY(goal)}H#{@left + @width}")
-        .attr('stroke', @options.goalLineColors[i % @options.goalLineColors.length])
-        .attr('stroke-width', @options.goalStrokeWidth)
-
-  # draw events vertical lines
-  drawEvents: ->
-    for event, i in @events
-      @r.path("M#{@transX(event)},#{@bottom}V#{@top}")
-        .attr('stroke', @options.eventLineColors[i % @options.eventLineColors.length])
-        .attr('stroke-width', @options.eventStrokeWidth)
-
-  # draw y axis labels, horizontal lines
-  #
-  drawGrid: ->
-    return if @options.grid is false and @options.axes is false
-    firstY = @ymin
-    lastY = @ymax
-    for lineY in [firstY..lastY] by @yInterval
-      v = parseFloat(lineY.toFixed(@precision))
-      y = @transY(v)
-      if @options.axes
-        @r.text(@left - @options.padding / 2, y, @yAxisFormat(v))
-          .attr('font-size', @options.gridTextSize)
-          .attr('fill', @options.gridTextColor)
-          .attr('text-anchor', 'end')
-      if @options.grid
-        @r.path("M#{@left},#{y}H#{@left + @width}")
-          .attr('stroke', @options.gridLineColor)
-          .attr('stroke-width', @options.gridStrokeWidth)
-
   # @private
   #
   measureText: (text, fontSize = 12) ->
-    tt = @r.text(100, 100, text).attr('font-size', fontSize)
+    tt = @raphael.text(100, 100, text).attr('font-size', fontSize)
     ret = tt.getBBox()
     tt.remove()
     ret
@@ -296,6 +258,54 @@ class Morris.Grid extends Morris.EventEmitter
     hit = @hitTest(x, y)
     if hit?
       @hover.update(hit...)
+
+  # draw y axis labels, horizontal lines
+  #
+  drawGrid: ->
+    return if @options.grid is false and @options.axes is false
+    firstY = @ymin
+    lastY = @ymax
+    for lineY in [firstY..lastY] by @yInterval
+      v = parseFloat(lineY.toFixed(@precision))
+      y = @transY(v)
+      if @options.axes
+        @drawYAxisLabel(@left - @options.padding / 2, y, @yAxisFormat(v))
+      if @options.grid
+        @drawGridLine("M#{@left},#{y}H#{@left + @width}")
+
+  # draw goals horizontal lines
+  #
+  drawGoals: ->
+    for goal, i in @options.goals
+      color = @options.goalLineColors[i % @options.goalLineColors.length]
+      @drawGoal(goal, color)
+
+  # draw events vertical lines
+  drawEvents: ->
+    for event, i in @events
+      color = @options.eventLineColors[i % @options.eventLineColors.length]
+      @drawEvent(event, color)
+
+  drawGoal: (goal, color) ->
+    @raphael.path("M#{@left},#{@transY(goal)}H#{@right}")
+      .attr('stroke', color)
+      .attr('stroke-width', @options.goalStrokeWidth)
+
+  drawEvent: (event, color) ->
+    @raphael.path("M#{@transX(event)},#{@bottom}V#{@top}")
+      .attr('stroke', color)
+      .attr('stroke-width', @options.eventStrokeWidth)
+
+  drawYAxisLabel: (xPos, yPos, text) ->
+    @raphael.text(xPos, yPos, text)
+      .attr('font-size', @options.gridTextSize)
+      .attr('fill', @options.gridTextColor)
+      .attr('text-anchor', 'end')
+
+  drawGridLine: (path) ->
+    @raphael.path(path)
+      .attr('stroke', @options.gridLineColor)
+      .attr('stroke-width', @options.gridStrokeWidth)
 
 # Parse a date into a javascript timestamp
 #

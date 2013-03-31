@@ -12,14 +12,16 @@ describe 'Morris.Grid#setData', ->
     my_data.should.deep.equal expected_data
 
   describe 'ymin/ymax', ->
-
-    it 'should use a user-specified minimum and maximum value', ->
-      line = Morris.Line
+    beforeEach ->
+      @defaults = 
         element: 'graph'
-        data: [{x: 1, y: 1}]
         xkey: 'x'
         ykeys: ['y', 'z']
         labels: ['y', 'z']
+
+    it 'should use a user-specified minimum and maximum value', ->
+      line = Morris.Line $.extend @defaults,
+        data: [{x: 1, y: 1}]
         ymin: 10
         ymax: 20
       line.ymin.should.equal 10
@@ -28,22 +30,16 @@ describe 'Morris.Grid#setData', ->
     describe 'auto', ->
 
       it 'should automatically calculate the minimum and maximum value', ->
-        line = Morris.Line
-          element: 'graph'
+        line = Morris.Line $.extend @defaults,
           data: [{x: 1, y: 10}, {x: 2, y: 15}, {x: 3, y: null}, {x: 4}]
-          xkey: 'x'
-          ykeys: ['y', 'z']
-          labels: ['y', 'z']
           ymin: 'auto'
           ymax: 'auto'
         line.ymin.should.equal 10
         line.ymax.should.equal 15
-        line = Morris.Line
-          element: 'graph'
+
+      it 'should automatically calculate the minimum and maximum value given no y data', ->
+        line = Morris.Line $.extend @defaults,
           data: [{x: 1}, {x: 2}, {x: 3}, {x: 4}]
-          xkey: 'x'
-          ykeys: ['y', 'z']
-          labels: ['y', 'z']
           ymin: 'auto'
           ymax: 'auto'
         line.ymin.should.equal 0
@@ -52,44 +48,32 @@ describe 'Morris.Grid#setData', ->
     describe 'auto [n]', ->
 
       it 'should automatically calculate the minimum and maximum value', ->
-        line = Morris.Line
-          element: 'graph'
+        line = Morris.Line $.extend @defaults,
           data: [{x: 1, y: 10}, {x: 2, y: 15}, {x: 3, y: null}, {x: 4}]
-          xkey: 'x'
-          ykeys: ['y', 'z']
-          labels: ['y', 'z']
           ymin: 'auto 11'
           ymax: 'auto 13'
         line.ymin.should.equal 10
         line.ymax.should.equal 15
-        line = Morris.Line
-          element: 'graph'
+
+      it 'should automatically calculate the minimum and maximum value given no data', ->
+        line = Morris.Line $.extend @defaults,
           data: [{x: 1}, {x: 2}, {x: 3}, {x: 4}]
-          xkey: 'x'
-          ykeys: ['y', 'z']
-          labels: ['y', 'z']
           ymin: 'auto 11'
           ymax: 'auto 13'
         line.ymin.should.equal 11
         line.ymax.should.equal 13
 
       it 'should use a user-specified minimum and maximum value', ->
-        line = Morris.Line
-          element: 'graph'
+        line = Morris.Line $.extend @defaults,
           data: [{x: 1, y: 10}, {x: 2, y: 15}, {x: 3, y: null}, {x: 4}]
-          xkey: 'x'
-          ykeys: ['y', 'z']
-          labels: ['y', 'z']
           ymin: 'auto 5'
           ymax: 'auto 20'
         line.ymin.should.equal 5
         line.ymax.should.equal 20
-        line = Morris.Line
-          element: 'graph'
+
+      it 'should use a user-specified minimum and maximum value given no data', ->
+        line = Morris.Line $.extend @defaults,
           data: [{x: 1}, {x: 2}, {x: 3}, {x: 4}]
-          xkey: 'x'
-          ykeys: ['y', 'z']
-          labels: ['y', 'z']
           ymin: 'auto 5'
           ymax: 'auto 20'
         line.ymin.should.equal 5
@@ -190,4 +174,26 @@ describe 'Morris.Grid#setData', ->
     line.ymax.should == 16
     line.data.map((row) -> row.y).should.deep.equal [[13.5], [12], [16], [14]]
 
+  it 'should clear the chart when empty data is supplied', ->
+    line = Morris.Line
+      element: 'graph',
+      data: [{x: 2, y: '12'}, {x: 1, y: '13.5'}, {x: 4, y: '14'}, {x: 3, y: '16'}]
+      xkey: 'x'
+      ykeys: ['y']
+      labels: ['y']
+    line.data.length.should.equal 4
+    line.setData([])
+    line.data.length.should.equal 0
+    line.setData([{x: 2, y: '12'}, {x: 1, y: '13.5'}, {x: 4, y: '14'}, {x: 3, y: '16'}])
+    line.data.length.should.equal 4
 
+  it 'should be able to add data if the chart is initialised with empty data', ->
+    line = Morris.Line
+      element: 'graph',
+      data: []
+      xkey: 'x'
+      ykeys: ['y']
+      labels: ['y']
+    line.data.length.should.equal 0
+    line.setData([{x: 2, y: '12'}, {x: 1, y: '13.5'}, {x: 4, y: '14'}, {x: 3, y: '16'}])
+    line.data.length.should.equal 4

@@ -22,6 +22,8 @@ class Morris.Donut extends Morris.EventEmitter
       '#052C48'
       '#042135'
     ],
+    backgroundColor: '#FFFFFF', 
+    labelColor: '#000000',
     formatter: Morris.commas
 
   # Create and render a donut chart.
@@ -44,6 +46,7 @@ class Morris.Donut extends Morris.EventEmitter
     if options.data is undefined or options.data.length is 0
       return
     @data = options.data
+    @values = (parseFloat(row.value) for row in @data)
 
     @redraw()
 
@@ -54,14 +57,14 @@ class Morris.Donut extends Morris.EventEmitter
   redraw: ->
     @el.empty()
 
-    @r = new Raphael(@el[0])
+    @raphael = new Raphael(@el[0])
 
     cx = @el.width() / 2
     cy = @el.height() / 2
     w = (Math.min(cx, cy) - 10) / 3
 
     total = 0
-    total += x.value for x in @data
+    total += value for value in @values
 
     min = 5 / (2 * w)
     C = 1.9999 * Math.PI - min * @data.length
@@ -69,21 +72,26 @@ class Morris.Donut extends Morris.EventEmitter
     last = 0
     idx = 0
     @segments = []
-    for d in @data
-      next = last + min + C * (d.value / total)
-      seg = new Morris.DonutSegment(cx, cy, w*2, w, last, next, @options.colors[idx % @options.colors.length], d, idx)
-      seg.render @r
+    for value, i in @values
+      next = last + min + C * (value / total)
+      seg = new Morris.DonutSegment(
+        cx, cy, w*2, w, last, next,
+        @options.colors[idx % @options.colors.length],
+        @options.backgroundColor, @data[i], idx, @raphael)
+      seg.render()
       @segments.push seg
       seg.on 'hover', @select
       seg.on 'click', @click
       last = next
       idx += 1
-    @text1 = @r.text(cx, cy - 10, '').attr('font-size': 15, 'font-weight': 800)
-    @text2 = @r.text(cx, cy + 10, '').attr('font-size': 14)
-    max_value = Math.max.apply(null, d.value for d in @data)
+
+    @text1 = @drawEmptyDonutLabel(cx, cy - 10, @options.labelColor, 15, 800)
+    @text2 = @drawEmptyDonutLabel(cx, cy + 10, @options.labelColor, 14)
+
+    max_value = Math.max.apply(null, value for value in @values)
     idx = 0
-    for d in @data
-      if d.value == max_value
+    for value in @values
+      if value == max_value
         @select idx
         break
       idx += 1
@@ -96,9 +104,10 @@ class Morris.Donut extends Morris.EventEmitter
   # Select the segment at the given index.
   select: (idx) =>
     s.deselect() for s in @segments
-    if typeof idx is 'number' then segment = @segments[idx] else segment = idx
+    segment = @segments[idx]
     segment.select()
-    @setLabels segment.data.label, @options.formatter(segment.data.value, segment.data)
+    row = @data[idx]
+    @setLabels(row.label, @options.formatter(row.value, row))
 
   # @private
   setLabels: (label1, label2) ->
@@ -115,17 +124,24 @@ class Morris.Donut extends Morris.EventEmitter
     text2scale = Math.min(maxWidth / text2bbox.width, maxHeightBottom / text2bbox.height)
     @text2.attr(transform: "S#{text2scale},#{text2scale},#{text2bbox.x + text2bbox.width / 2},#{text2bbox.y}")
 
+  drawEmptyDonutLabel: (xPos, yPos, color, fontSize, fontWeight) ->
+    text = @raphael.text(xPos, yPos, '')
+      .attr('font-size', fontSize)
+      .attr('fill', color)
+    text.attr('font-weight', fontWeight) if fontWeight?
+    return text
+
 
 # A segment within a donut chart.
 #
 # @private
 class Morris.DonutSegment extends Morris.EventEmitter
-  constructor: (@cx, @cy, @inner, @outer, p0, p1, @color, @data, @idx) ->
+  constructor: (@cx, @cy, @inner, @outer, p0, p1, @color, @backgroundColor, @data, @index, @raphael) ->
     @sin_p0 = Math.sin(p0)
     @cos_p0 = Math.cos(p0)
     @sin_p1 = Math.sin(p1)
     @cos_p1 = Math.cos(p1)
-    @long = if (p1 - p0) > Math.PI then 1 else 0
+    @is_long = if (p1 - p0) > Math.PI then 1 else 0
     @path = @calcSegment(@inner + 3, @inner + @outer - 5)
     @selectedPath = @calcSegment(@inner + 3, @inner + @outer)
     @hilight = @calcArc(@inner)
@@ -142,23 +158,36 @@ class Morris.DonutSegment extends Morris.EventEmitter
     [ox0, oy0, ox1, oy1] = @calcArcPoints(r2)
     return (
       "M#{ix0},#{iy0}" +
-      "A#{r1},#{r1},0,#{@long},0,#{ix1},#{iy1}" +
+      "A#{r1},#{r1},0,#{@is_long},0,#{ix1},#{iy1}" +
       "L#{ox1},#{oy1}" +
-      "A#{r2},#{r2},0,#{@long},1,#{ox0},#{oy0}" +
+      "A#{r2},#{r2},0,#{@is_long},1,#{ox0},#{oy0}" +
       "Z")
 
   calcArc: (r) ->
     [ix0, iy0, ix1, iy1] = @calcArcPoints(r)
     return (
       "M#{ix0},#{iy0}" +
-      "A#{r},#{r},0,#{@long},0,#{ix1},#{iy1}")
+      "A#{r},#{r},0,#{@is_long},0,#{ix1},#{iy1}")
 
-  render: (r) ->
-    @arc = r.path(@hilight).attr(stroke: @color, 'stroke-width': 2, opacity: 0)
-    @seg = r.path(@path)
-      .attr(fill: @color, stroke: 'white', 'stroke-width': 3)
-      .hover(=> @fire('hover', @))
-      .click(=> @fire('click', @))
+  render: ->
+    @arc = @drawDonutArc(@hilight, @color)
+    @seg = @drawDonutSegment(
+      @path, 
+      @color, 
+      @backgroundColor, 
+      => @fire('hover', @index),
+      => @fire('click', @index)
+    )
+
+  drawDonutArc: (path, color) ->
+    @raphael.path(path)
+      .attr(stroke: color, 'stroke-width': 2, opacity: 0)
+
+  drawDonutSegment: (path, fillColor, strokeColor, hoverFunction, clickFunction) ->
+    @raphael.path(path)
+      .attr(fill: fillColor, stroke: strokeColor, 'stroke-width': 3)
+      .hover(hoverFunction)
+      .click(clickFunction)
 
   select: =>
     unless @selected
