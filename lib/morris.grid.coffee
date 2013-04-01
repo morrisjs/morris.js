@@ -165,7 +165,8 @@ class Morris.Grid extends Morris.EventEmitter
       @ymax += 1
 
     if @options.axes is true or @options.grid is true
-      if @options.ymax == @defaults.ymax and @options.ymin == @defaults.ymin
+      if (@options.ymax == @gridDefaults.ymax and
+          @options.ymin == @gridDefaults.ymin)
         # calculate 'magic' grid placement
         @grid = @autoGridLines(@ymin, @ymax, @options.numLines)
         @ymin = Math.min(@ymin, @grid[0])

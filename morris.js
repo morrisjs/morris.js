@@ -253,7 +253,7 @@
         this.ymax += 1;
       }
       if (this.options.axes === true || this.options.grid === true) {
-        if (this.options.ymax === this.defaults.ymax && this.options.ymin === this.defaults.ymin) {
+        if (this.options.ymax === this.gridDefaults.ymax && this.options.ymin === this.gridDefaults.ymin) {
           this.grid = this.autoGridLines(this.ymin, this.ymax, this.options.numLines);
           this.ymin = Math.min(this.ymin, this.grid[0]);
           this.ymax = Math.max(this.ymax, this.grid[this.grid.length - 1]);
@@ -1528,7 +1528,7 @@
       for (i = _j = 0, _len1 = _ref1.length; _j < _len1; i = ++_j) {
         value = _ref1[i];
         next = last + min + C * (value / total);
-        seg = new Morris.DonutSegment(cx, cy, w * 2, w, last, next, this.options.colors[idx % this.options.colors.length], this.options.backgroundColor, this.data[i], idx, this.raphael);
+        seg = new Morris.DonutSegment(cx, cy, w * 2, w, last, next, this.options.colors[idx % this.options.colors.length], this.options.backgroundColor, idx, this.raphael);
         seg.render();
         this.segments.push(seg);
         seg.on('hover', this.select);
@@ -1628,14 +1628,13 @@
 
     __extends(DonutSegment, _super);
 
-    function DonutSegment(cx, cy, inner, outer, p0, p1, color, backgroundColor, data, index, raphael) {
+    function DonutSegment(cx, cy, inner, outer, p0, p1, color, backgroundColor, index, raphael) {
       this.cx = cx;
       this.cy = cy;
       this.inner = inner;
       this.outer = outer;
       this.color = color;
       this.backgroundColor = backgroundColor;
-      this.data = data;
       this.index = index;
       this.raphael = raphael;
       this.deselect = __bind(this.deselect, this);
