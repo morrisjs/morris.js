@@ -14,6 +14,7 @@ class Morris.Line extends Morris.Grid
       @hover = new Morris.Hover(parent: @el)
       @on('hovermove', @onHoverMove)
       @on('hoverout', @onHoverOut)
+      @on('gridclick', @onGridClick)
 
   # Default configuration
   #
@@ -64,6 +65,13 @@ class Morris.Line extends Morris.Grid
     for r, index in @data.slice(1)
       break if x < (r._x + @data[index]._x) / 2
     index
+
+  # click on grid event handler
+  #
+  # @private
+  onGridClick: (x, y) =>
+    index = @hitTest(x, y)
+    @fire 'click', index, @options.data[index], x, y
 
   # hover movement event handler
   #
