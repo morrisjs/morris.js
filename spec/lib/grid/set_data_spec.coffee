@@ -197,3 +197,12 @@ describe 'Morris.Grid#setData', ->
     line.data.length.should.equal 0
     line.setData([{x: 2, y: '12'}, {x: 1, y: '13.5'}, {x: 4, y: '14'}, {x: 3, y: '16'}])
     line.data.length.should.equal 4
+
+  it 'should automatically choose significant numbers for y-labels', ->
+    line = Morris.Line
+      element: 'graph',
+      data: [{x: 1, y: 0}, {x: 2, y: 3600}]
+      xkey: 'x'
+      ykeys: ['y']
+      labels: ['y']
+    line.grid.should == [0, 1000, 2000, 3000, 4000]

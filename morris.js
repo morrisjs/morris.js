@@ -138,7 +138,7 @@
     };
 
     Grid.prototype.setData = function(data, redraw) {
-      var e, gmax, gmin, idx, index, maxGoal, minGoal, ret, row, smag, span, step, total, unit, y, ykey, ymag, ymax, ymin, yval;
+      var e, idx, index, maxGoal, minGoal, ret, row, step, total, y, ykey, ymax, ymin, yval;
       if (redraw == null) {
         redraw = true;
       }
@@ -248,38 +248,21 @@
         this.ymax += 1;
       }
       if (this.options.axes === true || this.options.grid === true) {
-        span = this.ymax - this.ymin;
-        ymag = Math.floor(Math.log(span) / Math.log(10));
-        unit = Math.pow(10, ymag);
-        gmin = Math.round(this.ymin / unit) * unit;
-        gmax = Math.round(this.ymax / unit) * unit;
-        step = (gmax - gmin) / (this.options.numLines - 1);
-        if (gmin < 0 && gmax > 0) {
-          gmin = Math.round(this.ymin / step) * step;
-          gmax = Math.round(this.ymax / step) * step;
-        }
-        if (step < 1) {
-          smag = Math.floor(Math.log(step) / Math.log(10));
-          this.grid = (function() {
-            var _i, _results;
-            _results = [];
-            for (y = _i = gmin; gmin <= gmax ? _i <= gmax : _i >= gmax; y = _i += step) {
-              _results.push(parseFloat(y.toFixed(1 - smag)));
-            }
-            return _results;
-          })();
+        if (this.options.ymax === this.defaults.ymax && this.options.ymin === this.defaults.ymin) {
+          this.grid = this.autoGridLines(this.ymin, this.ymax, this.options.numLines);
+          this.ymin = Math.min(this.ymin, this.grid[0]);
+          this.ymax = Math.max(this.ymax, this.grid[this.grid.length - 1]);
         } else {
+          step = (this.ymax - this.ymin) / (this.options.numLines - 1);
           this.grid = (function() {
-            var _i, _results;
+            var _i, _ref, _ref1, _results;
             _results = [];
-            for (y = _i = gmin; gmin <= gmax ? _i <= gmax : _i >= gmax; y = _i += step) {
+            for (y = _i = _ref = this.ymin, _ref1 = this.ymax; _ref <= _ref1 ? _i <= _ref1 : _i >= _ref1; y = _i += step) {
               _results.push(y);
             }
             return _results;
-          })();
+          }).call(this);
         }
-        this.ymin = gmin;
-        this.ymax = gmax;
       }
       this.dirty = true;
       if (redraw) {
@@ -311,6 +294,45 @@
       } else {
         return boundaryOption;
       }
+    };
+
+    Grid.prototype.autoGridLines = function(ymin, ymax, nlines) {
+      var gmax, gmin, grid, smag, span, step, unit, y, ymag;
+      span = ymax - ymin;
+      ymag = Math.floor(Math.log(span) / Math.log(10));
+      unit = Math.pow(10, ymag);
+      gmin = Math.floor(ymin / unit) * unit;
+      gmax = Math.ceil(ymax / unit) * unit;
+      step = (gmax - gmin) / (nlines - 1);
+      if (unit === 1 && step > 1 && Math.ceil(step) !== step) {
+        step = Math.ceil(step);
+        gmax = gmin + step * (nlines - 1);
+      }
+      if (gmin < 0 && gmax > 0) {
+        gmin = Math.floor(ymin / step) * step;
+        gmax = Math.ceil(ymax / step) * step;
+      }
+      if (step < 1) {
+        smag = Math.floor(Math.log(step) / Math.log(10));
+        grid = (function() {
+          var _i, _results;
+          _results = [];
+          for (y = _i = gmin; gmin <= gmax ? _i <= gmax : _i >= gmax; y = _i += step) {
+            _results.push(parseFloat(y.toFixed(1 - smag)));
+          }
+          return _results;
+        })();
+      } else {
+        grid = (function() {
+          var _i, _results;
+          _results = [];
+          for (y = _i = gmin; gmin <= gmax ? _i <= gmax : _i >= gmax; y = _i += step) {
+            _results.push(y);
+          }
+          return _results;
+        })();
+      }
+      return grid;
     };
 
     Grid.prototype._calc = function() {

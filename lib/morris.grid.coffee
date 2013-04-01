@@ -161,31 +161,14 @@ class Morris.Grid extends Morris.EventEmitter
       @ymax += 1
 
     if @options.axes is true or @options.grid is true
-      # calculate grid placement
-      span = @ymax - @ymin
-      ymag = Math.floor(Math.log(span) / Math.log(10))
-      unit = Math.pow(10, ymag)
-
-      # calculate initial grid min and max values
-      gmin = Math.round(@ymin / unit) * unit
-      gmax = Math.round(@ymax / unit) * unit
-      step = (gmax - gmin) / (@options.numLines - 1)
-
-      # ensure zero is plotted where the range includes zero
-      if gmin < 0 and gmax > 0
-        gmin = Math.round(@ymin / step) * step
-        gmax = Math.round(@ymax / step) * step
-
-      # special case for decimal numbers
-      if step < 1
-        smag = Math.floor(Math.log(step) / Math.log(10))
-        @grid = for y in [gmin..gmax] by step
-          parseFloat(y.toFixed(1 - smag))
+      if @options.ymax == @defaults.ymax and @options.ymin == @defaults.ymin
+        # calculate 'magic' grid placement
+        @grid = @autoGridLines(@ymin, @ymax, @options.numLines)
+        @ymin = Math.min(@ymin, @grid[0])
+        @ymax = Math.max(@ymax, @grid[@grid.length - 1])
       else
-        @grid = (y for y in [gmin..gmax] by step)
-
-      @ymin = gmin
-      @ymax = gmax
+        step = (@ymax - @ymin) / (@options.numLines - 1)
+        @grid = (y for y in [@ymin..@ymax] by step)
 
     @dirty = true
     @redraw() if redraw
@@ -204,6 +187,33 @@ class Morris.Grid extends Morris.EventEmitter
         parseInt(boundaryOption, 10)
     else
       boundaryOption
+
+  autoGridLines: (ymin, ymax, nlines) ->
+    span = ymax - ymin
+    ymag = Math.floor(Math.log(span) / Math.log(10))
+    unit = Math.pow(10, ymag)
+
+    # calculate initial grid min and max values
+    gmin = Math.floor(ymin / unit) * unit
+    gmax = Math.ceil(ymax / unit) * unit
+    step = (gmax - gmin) / (nlines - 1)
+    if unit == 1 and step > 1 and Math.ceil(step) != step
+      step = Math.ceil(step)
+      gmax = gmin + step * (nlines - 1)
+
+    # ensure zero is plotted where the range includes zero
+    if gmin < 0 and gmax > 0
+      gmin = Math.floor(ymin / step) * step
+      gmax = Math.ceil(ymax / step) * step
+
+    # special case for decimal numbers
+    if step < 1
+      smag = Math.floor(Math.log(step) / Math.log(10))
+      grid = for y in [gmin..gmax] by step
+        parseFloat(y.toFixed(1 - smag))
+    else
+      grid = (y for y in [gmin..gmax] by step)
+    grid
 
   _calc: ->
     w = @el.width()
