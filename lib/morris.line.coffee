@@ -344,6 +344,11 @@ Morris.LABEL_SPECS =
     start: (d) -> new Date(d.getFullYear(), d.getMonth(), 1)
     fmt: (d) -> "#{d.getFullYear()}-#{Morris.pad2(d.getMonth() + 1)}"
     incr: (d) -> d.setMonth(d.getMonth() + 1)
+  "week":
+    span: 604800000 # 7 * 24 * 60 * 60 * 1000
+    start: (d) -> new Date(d.getFullYear(), d.getMonth(), d.getDate())
+    fmt: (d) -> "#{d.getFullYear()}-#{Morris.pad2(d.getMonth() + 1)}-#{Morris.pad2(d.getDate())}"
+    incr: (d) -> d.setDate(d.getDate() + 7)   
   "day":
     span: 86400000 # 24 * 60 * 60 * 1000
     start: (d) -> new Date(d.getFullYear(), d.getMonth(), d.getDate())
@@ -362,7 +367,7 @@ Morris.LABEL_SPECS =
   "second": secondsSpecHelper(1)
 
 Morris.AUTO_LABEL_ORDER = [
-  "decade", "year", "month", "day", "hour",
+  "decade", "year", "month", "week", "day", "hour",
   "30min", "15min", "10min", "5min", "minute",
   "30sec", "15sec", "10sec", "5sec", "second"
 ]
