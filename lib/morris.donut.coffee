@@ -98,8 +98,7 @@ class Morris.Donut extends Morris.EventEmitter
 
   # @private
   click: (idx) =>
-    if typeof idx is 'number' then segment = @segments[idx] else segment = idx
-    @fire 'click', segment.idx, segment.data
+    @fire 'click', idx, @data[idx]
 
   # Select the segment at the given index.
   select: (idx) =>
