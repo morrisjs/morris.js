@@ -1,6 +1,6 @@
 ---
 layout: default
-morris_version: 0.4.1
+morris_version: 0.4.2
 ---
 <div class="row">
   <div class="span12">
@@ -100,11 +100,12 @@ morris_version: 0.4.1
             hover legends.
             <br>
             The function will be called with the index of the row under
-            the hover legend and the options object passed to the constructor
-            as arguments.
+            the hover legend, the options object passed to the constructor
+            as arguments, and a string containing the default generated
+            hover legend content HTML.
             <br>
             <em>eg:</em>
-            <pre>hoverCallback: function (index, options) {
+            <pre>hoverCallback: function (index, options, content) {
   var row = options.data[index];
   return "sin(" + row.x + ") = " + row.y;
 }</pre>
