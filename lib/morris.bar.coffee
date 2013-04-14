@@ -147,18 +147,17 @@ class Morris.Bar extends Morris.Grid
   #
   # @private
   hoverContentForRow: (index) ->
+    row = @data[index]
+    content = "<div class='morris-hover-row-label'>#{row.label}</div>"
+    for y, j in row.y
+      content += """
+        <div class='morris-hover-point' style='color: #{@colorFor(row, j, 'label')}'>
+          #{@options.labels[j]}:
+          #{@yLabelFormat(y)}
+        </div>
+      """
     if typeof @options.hoverCallback is 'function'
-      content = @options.hoverCallback(index, @options)
-    else
-      row = @data[index]
-      content = "<div class='morris-hover-row-label'>#{row.label}</div>"
-      for y, j in row.y
-        content += """
-          <div class='morris-hover-point' style='color: #{@colorFor(row, j, 'label')}'>
-            #{@options.labels[j]}:
-            #{@yLabelFormat(y)}
-          </div>
-        """
+      content = @options.hoverCallback(index, @options, content)
     x = @left + (index + 0.5) * @width / @data.length
     [content, x]
 
