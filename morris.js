@@ -1572,13 +1572,7 @@
     };
 
     Donut.prototype.click = function(idx) {
-      var segment;
-      if (typeof idx === 'number') {
-        segment = this.segments[idx];
-      } else {
-        segment = idx;
-      }
-      return this.fire('click', segment.idx, segment.data);
+      return this.fire('click', idx, this.data[idx]);
     };
 
     Donut.prototype.select = function(idx) {
