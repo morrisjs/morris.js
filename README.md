@@ -38,6 +38,14 @@ Once you're all set up, you can compile, minify and run the tests using `grunt`.
 
 ## Changelog
 
+### 0.4.2 - 14th April 2013
+
+- Fix DST handling [#191](https://github.com/oesmith/morris.js/issues/191)
+- Parse data values from strings in Morris.Donut [#189](https://github.com/oesmith/morris.js/issues/189)
+- Non-cumulative area charts [#199](https://github.com/oesmith/morris.js/issues/199)
+- Round Y-axis labels to significant numbers [#162](https://github.com/oesmith/morris.js/162)
+- Customising default hover content [#179](https://github.com/oesmith/morris.js/179)
+
 ### 0.4.1 - 8th February 2013
 
 - Fix goal and event rendering. [#181](https://github.com/oesmith/morris.js/issues/181)
