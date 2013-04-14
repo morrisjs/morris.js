@@ -17,7 +17,7 @@ var decimal_data = [];
 for (var x = 0; x <= 360; x += 10) {
   decimal_data.push({
     x: x,
-    y: Math.sin(Math.PI * x / 180).toFixed(4)
+    y: 1.5 + 1.5 * Math.sin(Math.PI * x / 180).toFixed(4)
   });
 }
 window.m = Morris.Line({
@@ -29,7 +29,7 @@ window.m = Morris.Line({
   parseTime: false,
   hoverCallback: function (index, options) {
     var row = options.data[index];
-    return "sin(" + row.x + ") = " + row.y;
+    return "1.5 + 1.5 sin(" + row.x + ") = " + row.y;
   },
   xLabelMargin: 10
 });

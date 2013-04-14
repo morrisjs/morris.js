@@ -234,10 +234,9 @@ class Morris.Grid extends Morris.EventEmitter
       @top = @options.padding
       @bottom = @elementHeight - @options.padding
       if @options.axes
-        maxYLabelWidth = Math.max(
-          @measureText(@yAxisFormat(@ymin), @options.gridTextSize).width,
-          @measureText(@yAxisFormat(@ymax), @options.gridTextSize).width)
-        @left += maxYLabelWidth
+        yLabelWidths = for gridLine in @grid
+          @measureText(@yAxisFormat(gridLine), @options.gridTextSize).width
+        @left += Math.max(yLabelWidths...)
         @bottom -= 1.5 * @options.gridTextSize
       @width = Math.max(1, @right - @left)
       @height = Math.max(1, @bottom - @top)

@@ -341,7 +341,7 @@
     };
 
     Grid.prototype._calc = function() {
-      var h, maxYLabelWidth, w;
+      var gridLine, h, w, yLabelWidths;
       w = this.el.width();
       h = this.el.height();
       if (this.elementWidth !== w || this.elementHeight !== h || this.dirty) {
@@ -353,8 +353,17 @@
         this.top = this.options.padding;
         this.bottom = this.elementHeight - this.options.padding;
         if (this.options.axes) {
-          maxYLabelWidth = Math.max(this.measureText(this.yAxisFormat(this.ymin), this.options.gridTextSize).width, this.measureText(this.yAxisFormat(this.ymax), this.options.gridTextSize).width);
-          this.left += maxYLabelWidth;
+          yLabelWidths = (function() {
+            var _i, _len, _ref, _results;
+            _ref = this.grid;
+            _results = [];
+            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+              gridLine = _ref[_i];
+              _results.push(this.measureText(this.yAxisFormat(gridLine), this.options.gridTextSize).width);
+            }
+            return _results;
+          }).call(this);
+          this.left += Math.max.apply(Math, yLabelWidths);
           this.bottom -= 1.5 * this.options.gridTextSize;
         }
         this.width = Math.max(1, this.right - this.left);
