@@ -179,6 +179,9 @@
             }
           } else {
             ret.x = index;
+            if (this.options.xLabelFormat) {
+              ret.label = this.options.xLabelFormat(ret);
+            }
           }
           total = 0;
           ret.y = (function() {
@@ -599,7 +602,7 @@
       }
       return this.el.css({
         left: left + "px",
-        top: top + "px"
+        top: parseInt(top) + "px"
       });
     };
 
