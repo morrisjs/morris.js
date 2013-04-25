@@ -111,6 +111,7 @@ class Morris.Grid extends Morris.EventEmitter
 
     @data = for row, index in data
       ret = {}
+
       ret.label = row[@options.xkey]
       if @options.parseTime
         ret.x = Morris.parseDate(ret.label)
@@ -120,6 +121,8 @@ class Morris.Grid extends Morris.EventEmitter
           ret.label = new Date(ret.label).toString()
       else
         ret.x = index
+        if @options.xLabelFormat
+          ret.label = @options.xLabelFormat ret
       total = 0
       ret.y = for ykey, idx in @options.ykeys
         yval = row[ykey]
