@@ -244,8 +244,7 @@ class Morris.Grid extends Morris.EventEmitter
         if @options.xLabelsDiagonal
           bottomOffsets = for i in [0...@data.length]
             @measureText(@data[i].text, @options.gridTextSize, -90).height
-          @maxXLabelHeight = Math.max(bottomOffsets...)
-          @bottom -= @maxXLabelHeight
+          @bottom -= Math.max(bottomOffsets...)
         else
           @bottom -= 1.5 * @options.gridTextSize
       @width = Math.max(1, @right - @left)
