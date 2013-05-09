@@ -56,16 +56,29 @@ class Morris.Bar extends Morris.Grid
   # @private
   drawXAxis: ->
     # draw x axis labels
-    ypos = @bottom + @options.gridTextSize * 1.25
+    ypos = @bottom + @options.padding / 2
     prevLabelMargin = null
+    prevAngleMargin = null
     for i in [0...@data.length]
       row = @data[@data.length - 1 - i]
       label = @drawXAxisLabel(row._x, ypos, row.label)
+      textBox = label.getBBox()
+      label.transform("r#{-@options.xLabelAngle}")
       labelBox = label.getBBox()
-      # ensure a minimum of `xLabelMargin` pixels between labels, and ensure
-      # labels don't overflow the container
-      if (not prevLabelMargin? or prevLabelMargin >= labelBox.x + labelBox.width) and
-          labelBox.x >= 0 and (labelBox.x + labelBox.width) < @el.width()
+      label.transform("t0,#{labelBox.height / 2}...")
+      if @options.xLabelAngle != 0
+        offset = -0.5 * textBox.width *
+          Math.cos(@options.xLabelAngle * Math.PI / 180.0)
+        label.transform("t#{offset},0...")
+      # try to avoid overlaps
+      if (not prevLabelMargin? or
+          prevLabelMargin >= labelBox.x + labelBox.width or
+          prevAngleMargin? and prevAngleMargin >= labelBox.x) and
+         labelBox.x >= 0 and (labelBox.x + labelBox.width) < @el.width()
+        if @options.xLabelAngle != 0
+          margin = 1.25 * @options.gridTextSize /
+            Math.sin(@options.xLabelAngle * Math.PI / 180.0)
+          prevAngleMargin = labelBox.x - margin
         prevLabelMargin = labelBox.x - @options.xLabelMargin
       else
         label.remove()
