@@ -36,7 +36,7 @@ class Morris.Line extends Morris.Grid
     smooth: true
     xLabels: 'auto'
     xLabelFormat: null
-    xLabelMargin: 50
+    xLabelMargin: 24
     continuousLine: true
     hideHover: false
 
@@ -143,21 +143,32 @@ class Morris.Line extends Morris.Grid
   # @private
   drawXAxis: ->
     # draw x axis labels
-    ypos = @bottom + @options.gridTextSize * 1.25
+    ypos = @bottom + @options.padding / 2
     prevLabelMargin = null
+    prevAngleMargin = null
     drawLabel = (labelText, xpos) =>
       label = @drawXAxisLabel(@transX(xpos), ypos, labelText)
+      textBox = label.getBBox()
+      label.transform("r#{-@options.xLabelAngle}")
       labelBox = label.getBBox()
-      if @options.xLabelsDiagonal
-        label.rotate(-90).translate(-labelBox.height/2, 0)
+      label.transform("t0,#{labelBox.height / 2}...")
+      if @options.xLabelAngle != 0
+        offset = -0.5 * textBox.width *
+          Math.cos(@options.xLabelAngle * Math.PI / 180.0)
+        label.transform("t#{offset},0...")
+      # try to avoid overlaps
+      labelBox = label.getBBox()
+      if (not prevLabelMargin? or
+          prevLabelMargin >= labelBox.x + labelBox.width or
+          prevAngleMargin? and prevAngleMargin >= labelBox.x) and
+         labelBox.x >= 0 and (labelBox.x + labelBox.width) < @el.width()
+        if @options.xLabelAngle != 0
+          margin = 1.25 * @options.gridTextSize /
+            Math.sin(@options.xLabelAngle * Math.PI / 180.0)
+          prevAngleMargin = labelBox.x - margin
+        prevLabelMargin = labelBox.x - @options.xLabelMargin
       else
-        # ensure a minimum of `xLabelMargin` pixels between labels, and ensure
-        # labels don't overflow the container
-        if (not prevLabelMargin? or prevLabelMargin >= labelBox.x + labelBox.width) and
-            labelBox.x >= 0 and (labelBox.x + labelBox.width) < @el.width()
-          prevLabelMargin = labelBox.x - @options.xLabelMargin
-        else
-          label.remove()
+        label.remove()
     if @options.parseTime
       if @data.length == 1 and @options.xLabels == 'auto'
         # where there's only one value in the series, we can't make a

@@ -15,7 +15,7 @@
 <pre id="code" class="prettyprint linenums">
 /* data stolen from http://howmanyleft.co.uk/vehicle/jaguar_'e'_type */
 var day_data = [
-  {"period": "2012-10-01", "licensed": 3407, "sorned": 660},
+  {"period": "2012-10-30", "licensed": 3407, "sorned": 660},
   {"period": "2012-09-30", "licensed": 3351, "sorned": 629},
   {"period": "2012-09-29", "licensed": 3269, "sorned": 618},
   {"period": "2012-09-20", "licensed": 3246, "sorned": 661},
@@ -32,7 +32,7 @@ Morris.Line({
   xkey: 'period',
   ykeys: ['licensed', 'sorned'],
   labels: ['Licensed', 'SORN'],
-  xLabelsDiagonal: true
+  xLabelAngle: 60
 });
 </pre>
 </body>
