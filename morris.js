@@ -127,6 +127,7 @@
       gridTextSize: 12,
       hideHover: false,
       yLabelFormat: null,
+      xLabelAngle: 0,
       numLines: 5,
       padding: 25,
       parseTime: true,
@@ -344,7 +345,7 @@
     };
 
     Grid.prototype._calc = function() {
-      var gridLine, h, w, yLabelWidths;
+      var bottomOffsets, gridLine, h, i, w, yLabelWidths;
       w = this.el.width();
       h = this.el.height();
       if (this.elementWidth !== w || this.elementHeight !== h || this.dirty) {
@@ -367,7 +368,15 @@
             return _results;
           }).call(this);
           this.left += Math.max.apply(Math, yLabelWidths);
-          this.bottom -= 1.5 * this.options.gridTextSize;
+          bottomOffsets = (function() {
+            var _i, _ref, _results;
+            _results = [];
+            for (i = _i = 0, _ref = this.data.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+              _results.push(this.measureText(this.data[i].text, this.options.gridTextSize, -this.options.xLabelAngle).height);
+            }
+            return _results;
+          }).call(this);
+          this.bottom -= Math.max.apply(Math, bottomOffsets);
         }
         this.width = Math.max(1, this.right - this.left);
         this.height = Math.max(1, this.bottom - this.top);
@@ -402,12 +411,15 @@
       }
     };
 
-    Grid.prototype.measureText = function(text, fontSize) {
+    Grid.prototype.measureText = function(text, fontSize, angle) {
       var ret, tt;
       if (fontSize == null) {
         fontSize = 12;
       }
-      tt = this.raphael.text(100, 100, text).attr('font-size', fontSize);
+      if (angle == null) {
+        angle = 0;
+      }
+      tt = this.raphael.text(100, 100, text).attr('font-size', fontSize).rotate(angle);
       ret = tt.getBBox();
       tt.remove();
       return ret;
@@ -663,7 +675,7 @@
       smooth: true,
       xLabels: 'auto',
       xLabelFormat: null,
-      xLabelMargin: 50,
+      xLabelMargin: 24,
       continuousLine: true,
       hideHover: false
     };
@@ -825,15 +837,28 @@
     };
 
     Line.prototype.drawXAxis = function() {
-      var drawLabel, l, labels, prevLabelMargin, row, ypos, _i, _len, _results,
+      var drawLabel, l, labels, prevAngleMargin, prevLabelMargin, row, ypos, _i, _len, _results,
         _this = this;
-      ypos = this.bottom + this.options.gridTextSize * 1.25;
+      ypos = this.bottom + this.options.padding / 2;
       prevLabelMargin = null;
+      prevAngleMargin = null;
       drawLabel = function(labelText, xpos) {
-        var label, labelBox;
+        var label, labelBox, margin, offset, textBox;
         label = _this.drawXAxisLabel(_this.transX(xpos), ypos, labelText);
+        textBox = label.getBBox();
+        label.transform("r" + (-_this.options.xLabelAngle));
         labelBox = label.getBBox();
-        if ((!(prevLabelMargin != null) || prevLabelMargin >= labelBox.x + labelBox.width) && labelBox.x >= 0 && (labelBox.x + labelBox.width) < _this.el.width()) {
+        label.transform("t0," + (labelBox.height / 2) + "...");
+        if (_this.options.xLabelAngle !== 0) {
+          offset = -0.5 * textBox.width * Math.cos(_this.options.xLabelAngle * Math.PI / 180.0);
+          label.transform("t" + offset + ",0...");
+        }
+        labelBox = label.getBBox();
+        if ((!(prevLabelMargin != null) || prevLabelMargin >= labelBox.x + labelBox.width || (prevAngleMargin != null) && prevAngleMargin >= labelBox.x) && labelBox.x >= 0 && (labelBox.x + labelBox.width) < _this.el.width()) {
+          if (_this.options.xLabelAngle !== 0) {
+            margin = 1.25 * _this.options.gridTextSize / Math.sin(_this.options.xLabelAngle * Math.PI / 180.0);
+            prevAngleMargin = labelBox.x - margin;
+          }
           return prevLabelMargin = labelBox.x - _this.options.xLabelMargin;
         } else {
           return label.remove();
@@ -1330,15 +1355,27 @@
     };
 
     Bar.prototype.drawXAxis = function() {
-      var i, label, labelBox, prevLabelMargin, row, ypos, _i, _ref, _results;
-      ypos = this.bottom + this.options.gridTextSize * 1.25;
+      var i, label, labelBox, margin, offset, prevAngleMargin, prevLabelMargin, row, textBox, ypos, _i, _ref, _results;
+      ypos = this.bottom + this.options.padding / 2;
       prevLabelMargin = null;
+      prevAngleMargin = null;
       _results = [];
       for (i = _i = 0, _ref = this.data.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
         row = this.data[this.data.length - 1 - i];
         label = this.drawXAxisLabel(row._x, ypos, row.label);
+        textBox = label.getBBox();
+        label.transform("r" + (-this.options.xLabelAngle));
         labelBox = label.getBBox();
-        if ((!(prevLabelMargin != null) || prevLabelMargin >= labelBox.x + labelBox.width) && labelBox.x >= 0 && (labelBox.x + labelBox.width) < this.el.width()) {
+        label.transform("t0," + (labelBox.height / 2) + "...");
+        if (this.options.xLabelAngle !== 0) {
+          offset = -0.5 * textBox.width * Math.cos(this.options.xLabelAngle * Math.PI / 180.0);
+          label.transform("t" + offset + ",0...");
+        }
+        if ((!(prevLabelMargin != null) || prevLabelMargin >= labelBox.x + labelBox.width || (prevAngleMargin != null) && prevAngleMargin >= labelBox.x) && labelBox.x >= 0 && (labelBox.x + labelBox.width) < this.el.width()) {
+          if (this.options.xLabelAngle !== 0) {
+            margin = 1.25 * this.options.gridTextSize / Math.sin(this.options.xLabelAngle * Math.PI / 180.0);
+            prevAngleMargin = labelBox.x - margin;
+          }
           _results.push(prevLabelMargin = labelBox.x - this.options.xLabelMargin);
         } else {
           _results.push(label.remove());
