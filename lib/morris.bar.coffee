@@ -62,13 +62,16 @@ class Morris.Bar extends Morris.Grid
       row = @data[@data.length - 1 - i]
       label = @drawXAxisLabel(row._x, ypos, row.label)
       labelBox = label.getBBox()
-      # ensure a minimum of `xLabelMargin` pixels between labels, and ensure
-      # labels don't overflow the container
-      if (not prevLabelMargin? or prevLabelMargin >= labelBox.x + labelBox.width) and
-          labelBox.x >= 0 and (labelBox.x + labelBox.width) < @el.width()
-        prevLabelMargin = labelBox.x - @options.xLabelMargin
+      if @options.xLabelsDiagonal
+        label.rotate(-90).translate(-labelBox.width/2, 0)
       else
-        label.remove()
+        # ensure a minimum of `xLabelMargin` pixels between labels, and ensure
+        # labels don't overflow the container
+        if (not prevLabelMargin? or prevLabelMargin >= labelBox.x + labelBox.width) and
+            labelBox.x >= 0 and (labelBox.x + labelBox.width) < @el.width()
+          prevLabelMargin = labelBox.x - @options.xLabelMargin
+        else
+          label.remove()
 
   # draw the data series
   #
