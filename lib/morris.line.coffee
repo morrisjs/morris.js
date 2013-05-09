@@ -148,13 +148,16 @@ class Morris.Line extends Morris.Grid
     drawLabel = (labelText, xpos) =>
       label = @drawXAxisLabel(@transX(xpos), ypos, labelText)
       labelBox = label.getBBox()
-      # ensure a minimum of `xLabelMargin` pixels between labels, and ensure
-      # labels don't overflow the container
-      if (not prevLabelMargin? or prevLabelMargin >= labelBox.x + labelBox.width) and
-          labelBox.x >= 0 and (labelBox.x + labelBox.width) < @el.width()
-        prevLabelMargin = labelBox.x - @options.xLabelMargin
+      if @options.xLabelsDiagonal
+        label.rotate(-90).translate(-labelBox.height/2, 0)
       else
-        label.remove()
+        # ensure a minimum of `xLabelMargin` pixels between labels, and ensure
+        # labels don't overflow the container
+        if (not prevLabelMargin? or prevLabelMargin >= labelBox.x + labelBox.width) and
+            labelBox.x >= 0 and (labelBox.x + labelBox.width) < @el.width()
+          prevLabelMargin = labelBox.x - @options.xLabelMargin
+        else
+          label.remove()
     if @options.parseTime
       if @data.length == 1 and @options.xLabels == 'auto'
         # where there's only one value in the series, we can't make a

@@ -127,6 +127,7 @@
       gridTextSize: 12,
       hideHover: false,
       yLabelFormat: null,
+      xLabelsDiagonal: false,
       numLines: 5,
       padding: 25,
       parseTime: true,
@@ -344,7 +345,7 @@
     };
 
     Grid.prototype._calc = function() {
-      var gridLine, h, w, yLabelWidths;
+      var bottomOffsets, gridLine, h, i, w, yLabelWidths;
       w = this.el.width();
       h = this.el.height();
       if (this.elementWidth !== w || this.elementHeight !== h || this.dirty) {
@@ -367,7 +368,20 @@
             return _results;
           }).call(this);
           this.left += Math.max.apply(Math, yLabelWidths);
-          this.bottom -= 1.5 * this.options.gridTextSize;
+          if (this.options.xLabelsDiagonal) {
+            bottomOffsets = (function() {
+              var _i, _ref, _results;
+              _results = [];
+              for (i = _i = 0, _ref = this.data.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+                _results.push(this.measureText(this.data[i].text, this.options.gridTextSize, -90).height);
+              }
+              return _results;
+            }).call(this);
+            this.maxXLabelHeight = Math.max.apply(Math, bottomOffsets);
+            this.bottom -= this.maxXLabelHeight;
+          } else {
+            this.bottom -= 1.5 * this.options.gridTextSize;
+          }
         }
         this.width = Math.max(1, this.right - this.left);
         this.height = Math.max(1, this.bottom - this.top);
@@ -402,12 +416,15 @@
       }
     };
 
-    Grid.prototype.measureText = function(text, fontSize) {
+    Grid.prototype.measureText = function(text, fontSize, angle) {
       var ret, tt;
       if (fontSize == null) {
         fontSize = 12;
       }
-      tt = this.raphael.text(100, 100, text).attr('font-size', fontSize);
+      if (angle == null) {
+        angle = 0;
+      }
+      tt = this.raphael.text(100, 100, text).attr('font-size', fontSize).rotate(angle);
       ret = tt.getBBox();
       tt.remove();
       return ret;
@@ -833,10 +850,14 @@
         var label, labelBox;
         label = _this.drawXAxisLabel(_this.transX(xpos), ypos, labelText);
         labelBox = label.getBBox();
-        if ((!(prevLabelMargin != null) || prevLabelMargin >= labelBox.x + labelBox.width) && labelBox.x >= 0 && (labelBox.x + labelBox.width) < _this.el.width()) {
-          return prevLabelMargin = labelBox.x - _this.options.xLabelMargin;
+        if (_this.options.xLabelsDiagonal) {
+          return label.rotate(-90).translate(-labelBox.height / 2, 0);
         } else {
-          return label.remove();
+          if ((!(prevLabelMargin != null) || prevLabelMargin >= labelBox.x + labelBox.width) && labelBox.x >= 0 && (labelBox.x + labelBox.width) < _this.el.width()) {
+            return prevLabelMargin = labelBox.x - _this.options.xLabelMargin;
+          } else {
+            return label.remove();
+          }
         }
       };
       if (this.options.parseTime) {
@@ -1338,10 +1359,14 @@
         row = this.data[this.data.length - 1 - i];
         label = this.drawXAxisLabel(row._x, ypos, row.label);
         labelBox = label.getBBox();
-        if ((!(prevLabelMargin != null) || prevLabelMargin >= labelBox.x + labelBox.width) && labelBox.x >= 0 && (labelBox.x + labelBox.width) < this.el.width()) {
-          _results.push(prevLabelMargin = labelBox.x - this.options.xLabelMargin);
+        if (this.options.xLabelsDiagonal) {
+          _results.push(label.rotate(-90).translate(-labelBox.width / 2, 0));
         } else {
-          _results.push(label.remove());
+          if ((!(prevLabelMargin != null) || prevLabelMargin >= labelBox.x + labelBox.width) && labelBox.x >= 0 && (labelBox.x + labelBox.width) < this.el.width()) {
+            _results.push(prevLabelMargin = labelBox.x - this.options.xLabelMargin);
+          } else {
+            _results.push(label.remove());
+          }
         }
       }
       return _results;

@@ -67,6 +67,7 @@ class Morris.Grid extends Morris.EventEmitter
     gridTextSize: 12
     hideHover: false
     yLabelFormat: null
+    xLabelsDiagonal: false
     numLines: 5
     padding: 25
     parseTime: true
@@ -240,7 +241,13 @@ class Morris.Grid extends Morris.EventEmitter
         yLabelWidths = for gridLine in @grid
           @measureText(@yAxisFormat(gridLine), @options.gridTextSize).width
         @left += Math.max(yLabelWidths...)
-        @bottom -= 1.5 * @options.gridTextSize
+        if @options.xLabelsDiagonal
+          bottomOffsets = for i in [0...@data.length]
+            @measureText(@data[i].text, @options.gridTextSize, -90).height
+          @maxXLabelHeight = Math.max(bottomOffsets...)
+          @bottom -= @maxXLabelHeight
+        else
+          @bottom -= 1.5 * @options.gridTextSize
       @width = Math.max(1, @right - @left)
       @height = Math.max(1, @bottom - @top)
       @dx = @width / (@xmax - @xmin)
@@ -270,8 +277,8 @@ class Morris.Grid extends Morris.EventEmitter
 
   # @private
   #
-  measureText: (text, fontSize = 12) ->
-    tt = @raphael.text(100, 100, text).attr('font-size', fontSize)
+  measureText: (text, fontSize = 12, angle = 0) ->
+    tt = @raphael.text(100, 100, text).attr('font-size', fontSize).rotate(angle)
     ret = tt.getBBox()
     tt.remove()
     ret
