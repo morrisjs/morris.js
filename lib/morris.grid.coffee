@@ -21,6 +21,9 @@ class Morris.Grid extends Morris.EventEmitter
     if typeof @options.units is 'string'
       @options.postUnits = options.units
 
+    # bound xLabelAngle to 0..90
+    @options.xLabelAngle = Math.max(0, Math.min(90, @options.xLabelAngle))
+
     # the raphael drawing instance
     @raphael = new Raphael(@el[0])
 

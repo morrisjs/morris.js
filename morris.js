@@ -84,6 +84,7 @@
       if (typeof this.options.units === 'string') {
         this.options.postUnits = options.units;
       }
+      this.options.xLabelAngle = Math.max(0, Math.min(90, this.options.xLabelAngle));
       this.raphael = new Raphael(this.el[0]);
       this.elementWidth = null;
       this.elementHeight = null;
