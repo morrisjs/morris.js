@@ -12,6 +12,7 @@ class Morris.EventEmitter
     unless @handlers[name]?
       @handlers[name] = []
     @handlers[name].push(handler)
+    @
 
   fire: (name, args...) ->
     if @handlers? and @handlers[name]?

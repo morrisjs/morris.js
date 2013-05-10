@@ -21,7 +21,8 @@
       if (this.handlers[name] == null) {
         this.handlers[name] = [];
       }
-      return this.handlers[name].push(handler);
+      this.handlers[name].push(handler);
+      return this;
     };
 
     EventEmitter.prototype.fire = function() {
@@ -1266,7 +1267,7 @@
     Area.prototype.fillForSeries = function(i) {
       var color;
       color = Raphael.rgb2hsl(this.colorFor(this.data[i], i, 'line'));
-      return Raphael.hsl(color.h, Math.min(255, this.options.behaveLikeLine ? color.s * 0.9 : color.s * 0.75), Math.min(255, this.options.behaveLikeLine ? color.l * 1.2 : color.l * 1.25));
+      return Raphael.hsl(color.h, this.options.behaveLikeLine ? color.s * 0.9 : color.s * 0.75, Math.min(0.98, this.options.behaveLikeLine ? color.l * 1.2 : color.l * 1.25));
     };
 
     Area.prototype.drawFilledPath = function(path, fill) {
