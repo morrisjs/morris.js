@@ -10,7 +10,7 @@ class Morris.Area extends Morris.Line
     areaOptions = $.extend {}, areaDefaults, options
 
     @cumulative = not areaOptions.behaveLikeLine
-    
+
     if areaOptions.fillOpacity is 'auto'
       areaOptions.fillOpacity = if areaOptions.behaveLikeLine then .8 else 1
 
@@ -40,7 +40,7 @@ class Morris.Area extends Morris.Line
       range = [0..@options.ykeys.length-1]
     else
       range = [@options.ykeys.length-1..0]
-    
+
     for i in range
       @_drawFillFor i
       @_drawLineFor i
@@ -56,8 +56,8 @@ class Morris.Area extends Morris.Line
     color = Raphael.rgb2hsl @colorFor(@data[i], i, 'line')
     Raphael.hsl(
       color.h,
-      Math.min(255, if @options.behaveLikeLine then color.s * 0.9 else color.s * 0.75),
-      Math.min(255, if @options.behaveLikeLine then color.l * 1.2 else color.l * 1.25))
+      if @options.behaveLikeLine then color.s * 0.9 else color.s * 0.75,
+      Math.min(0.98, if @options.behaveLikeLine then color.l * 1.2 else color.l * 1.25))
 
   drawFilledPath: (path, fill) ->
     @raphael.path(path)
