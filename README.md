@@ -38,6 +38,16 @@ Once you're all set up, you can compile, minify and run the tests using `grunt`.
 
 ## Changelog
 
+### 0.4.3 - 12th May 2013
+
+- Fix flickering hover box [#186](https://github.com/oesmith/morris.js/issues/186)
+- xLabelAngle option (diagonal labels!!) [#239](https://github.com/oesmith/morris.js/issues/239)
+- Fix area chart fill bug [#190](https://github.com/oesmith/morris.js/issues/190)
+- Make event handlers chainable
+- gridTextFamily and gridTextWeight options
+- Fix hovers with setData [#213](https://github.com/oesmith/morris.js/issues/213)
+- Fix hideHover behaviour [#236](https://github.com/oesmith/morris.js/issues/236)
+
 ### 0.4.2 - 14th April 2013
 
 - Fix DST handling [#191](https://github.com/oesmith/morris.js/issues/191)
