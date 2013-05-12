@@ -151,6 +151,7 @@
       if (redraw == null) {
         redraw = true;
       }
+      this.options.data = data;
       if (!(data != null) || data.length === 0) {
         this.data = [];
         this.raphael.clear();

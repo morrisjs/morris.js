@@ -97,6 +97,8 @@ class Morris.Grid extends Morris.EventEmitter
   # Update the data series and redraw the chart.
   #
   setData: (data, redraw = true) ->
+    @options.data = data
+
     if !data? or data.length == 0
       @data = []
       @raphael.clear()
