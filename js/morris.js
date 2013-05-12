@@ -21,7 +21,8 @@
       if (this.handlers[name] == null) {
         this.handlers[name] = [];
       }
-      return this.handlers[name].push(handler);
+      this.handlers[name].push(handler);
+      return this;
     };
 
     EventEmitter.prototype.fire = function() {
@@ -125,8 +126,11 @@
       gridStrokeWidth: 0.5,
       gridTextColor: '#888',
       gridTextSize: 12,
+      gridTextFamily: 'sans-serif',
+      gridTextWeight: 'normal',
       hideHover: false,
       yLabelFormat: null,
+      xLabelAngle: 0,
       numLines: 5,
       padding: 25,
       parseTime: true,
@@ -147,6 +151,7 @@
       if (redraw == null) {
         redraw = true;
       }
+      this.options.data = data;
       if (!(data != null) || data.length === 0) {
         this.data = [];
         this.raphael.clear();
@@ -179,6 +184,9 @@
             }
           } else {
             ret.x = index;
+            if (this.options.xLabelFormat) {
+              ret.label = this.options.xLabelFormat(ret);
+            }
           }
           total = 0;
           ret.y = (function() {
@@ -341,7 +349,7 @@
     };
 
     Grid.prototype._calc = function() {
-      var gridLine, h, w, yLabelWidths;
+      var bottomOffsets, gridLine, h, i, w, yLabelWidths;
       w = this.el.width();
       h = this.el.height();
       if (this.elementWidth !== w || this.elementHeight !== h || this.dirty) {
@@ -359,12 +367,20 @@
             _results = [];
             for (_i = 0, _len = _ref.length; _i < _len; _i++) {
               gridLine = _ref[_i];
-              _results.push(this.measureText(this.yAxisFormat(gridLine), this.options.gridTextSize).width);
+              _results.push(this.measureText(this.yAxisFormat(gridLine)).width);
             }
             return _results;
           }).call(this);
           this.left += Math.max.apply(Math, yLabelWidths);
-          this.bottom -= 1.5 * this.options.gridTextSize;
+          bottomOffsets = (function() {
+            var _i, _ref, _results;
+            _results = [];
+            for (i = _i = 0, _ref = this.data.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+              _results.push(this.measureText(this.data[i].text, -this.options.xLabelAngle).height);
+            }
+            return _results;
+          }).call(this);
+          this.bottom -= Math.max.apply(Math, bottomOffsets);
         }
         this.width = Math.max(1, this.right - this.left);
         this.height = Math.max(1, this.bottom - this.top);
@@ -399,12 +415,12 @@
       }
     };
 
-    Grid.prototype.measureText = function(text, fontSize) {
+    Grid.prototype.measureText = function(text, angle) {
       var ret, tt;
-      if (fontSize == null) {
-        fontSize = 12;
+      if (angle == null) {
+        angle = 0;
       }
-      tt = this.raphael.text(100, 100, text).attr('font-size', fontSize);
+      tt = this.raphael.text(100, 100, text).attr('font-size', this.options.gridTextSize).attr('font-family', this.options.gridTextFamily).attr('font-weight', this.options.gridTextWeight).rotate(angle);
       ret = tt.getBBox();
       tt.remove();
       return ret;
@@ -485,7 +501,7 @@
     };
 
     Grid.prototype.drawYAxisLabel = function(xPos, yPos, text) {
-      return this.raphael.text(xPos, yPos, text).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor).attr('text-anchor', 'end');
+      return this.raphael.text(xPos, yPos, text).attr('font-size', this.options.gridTextSize).attr('font-family', this.options.gridTextFamily).attr('font-weight', this.options.gridTextWeight).attr('fill', this.options.gridTextColor).attr('text-anchor', 'end');
     };
 
     Grid.prototype.drawGridLine = function(path) {
@@ -599,7 +615,7 @@
       }
       return this.el.css({
         left: left + "px",
-        top: top + "px"
+        top: parseInt(top) + "px"
       });
     };
 
@@ -660,7 +676,7 @@
       smooth: true,
       xLabels: 'auto',
       xLabelFormat: null,
-      xLabelMargin: 50,
+      xLabelMargin: 24,
       continuousLine: true,
       hideHover: false
     };
@@ -735,7 +751,7 @@
     };
 
     Line.prototype.onHoverOut = function() {
-      if (this.options.hideHover === 'auto') {
+      if (this.options.hideHover !== false) {
         return this.displayHoverForRow(null);
       }
     };
@@ -822,15 +838,28 @@
     };
 
     Line.prototype.drawXAxis = function() {
-      var drawLabel, l, labels, prevLabelMargin, row, ypos, _i, _len, _results,
+      var drawLabel, l, labels, prevAngleMargin, prevLabelMargin, row, ypos, _i, _len, _results,
         _this = this;
-      ypos = this.bottom + this.options.gridTextSize * 1.25;
+      ypos = this.bottom + this.options.padding / 2;
       prevLabelMargin = null;
+      prevAngleMargin = null;
       drawLabel = function(labelText, xpos) {
-        var label, labelBox;
+        var label, labelBox, margin, offset, textBox;
         label = _this.drawXAxisLabel(_this.transX(xpos), ypos, labelText);
+        textBox = label.getBBox();
+        label.transform("r" + (-_this.options.xLabelAngle));
         labelBox = label.getBBox();
-        if ((!(prevLabelMargin != null) || prevLabelMargin >= labelBox.x + labelBox.width) && labelBox.x >= 0 && (labelBox.x + labelBox.width) < _this.el.width()) {
+        label.transform("t0," + (labelBox.height / 2) + "...");
+        if (_this.options.xLabelAngle !== 0) {
+          offset = -0.5 * textBox.width * Math.cos(_this.options.xLabelAngle * Math.PI / 180.0);
+          label.transform("t" + offset + ",0...");
+        }
+        labelBox = label.getBBox();
+        if ((!(prevLabelMargin != null) || prevLabelMargin >= labelBox.x + labelBox.width || (prevAngleMargin != null) && prevAngleMargin >= labelBox.x) && labelBox.x >= 0 && (labelBox.x + labelBox.width) < _this.el.width()) {
+          if (_this.options.xLabelAngle !== 0) {
+            margin = 1.25 * _this.options.gridTextSize / Math.sin(_this.options.xLabelAngle * Math.PI / 180.0);
+            prevAngleMargin = labelBox.x - margin;
+          }
           return prevLabelMargin = labelBox.x - _this.options.xLabelMargin;
         } else {
           return label.remove();
@@ -997,7 +1026,7 @@
     };
 
     Line.prototype.drawXAxisLabel = function(xPos, yPos, text) {
-      return this.raphael.text(xPos, yPos, text).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor);
+      return this.raphael.text(xPos, yPos, text).attr('font-size', this.options.gridTextSize).attr('font-family', this.options.gridTextFamily).attr('font-weight', this.options.gridTextWeight).attr('fill', this.options.gridTextColor);
     };
 
     Line.prototype.drawLinePath = function(path, lineColor) {
@@ -1238,7 +1267,7 @@
     Area.prototype.fillForSeries = function(i) {
       var color;
       color = Raphael.rgb2hsl(this.colorFor(this.data[i], i, 'line'));
-      return Raphael.hsl(color.h, Math.min(255, this.options.behaveLikeLine ? color.s * 0.9 : color.s * 0.75), Math.min(255, this.options.behaveLikeLine ? color.l * 1.2 : color.l * 1.25));
+      return Raphael.hsl(color.h, this.options.behaveLikeLine ? color.s * 0.9 : color.s * 0.75, Math.min(0.98, this.options.behaveLikeLine ? color.l * 1.2 : color.l * 1.25));
     };
 
     Area.prototype.drawFilledPath = function(path, fill) {
@@ -1327,15 +1356,27 @@
     };
 
     Bar.prototype.drawXAxis = function() {
-      var i, label, labelBox, prevLabelMargin, row, ypos, _i, _ref, _results;
-      ypos = this.bottom + this.options.gridTextSize * 1.25;
+      var i, label, labelBox, margin, offset, prevAngleMargin, prevLabelMargin, row, textBox, ypos, _i, _ref, _results;
+      ypos = this.bottom + this.options.padding / 2;
       prevLabelMargin = null;
+      prevAngleMargin = null;
       _results = [];
       for (i = _i = 0, _ref = this.data.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
         row = this.data[this.data.length - 1 - i];
         label = this.drawXAxisLabel(row._x, ypos, row.label);
+        textBox = label.getBBox();
+        label.transform("r" + (-this.options.xLabelAngle));
         labelBox = label.getBBox();
-        if ((!(prevLabelMargin != null) || prevLabelMargin >= labelBox.x + labelBox.width) && labelBox.x >= 0 && (labelBox.x + labelBox.width) < this.el.width()) {
+        label.transform("t0," + (labelBox.height / 2) + "...");
+        if (this.options.xLabelAngle !== 0) {
+          offset = -0.5 * textBox.width * Math.cos(this.options.xLabelAngle * Math.PI / 180.0);
+          label.transform("t" + offset + ",0...");
+        }
+        if ((!(prevLabelMargin != null) || prevLabelMargin >= labelBox.x + labelBox.width || (prevAngleMargin != null) && prevAngleMargin >= labelBox.x) && labelBox.x >= 0 && (labelBox.x + labelBox.width) < this.el.width()) {
+          if (this.options.xLabelAngle !== 0) {
+            margin = 1.25 * this.options.gridTextSize / Math.sin(this.options.xLabelAngle * Math.PI / 180.0);
+            prevAngleMargin = labelBox.x - margin;
+          }
           _results.push(prevLabelMargin = labelBox.x - this.options.xLabelMargin);
         } else {
           _results.push(label.remove());
@@ -1433,7 +1474,7 @@
     };
 
     Bar.prototype.onHoverOut = function() {
-      if (this.options.hideHover === 'auto') {
+      if (this.options.hideHover !== false) {
         return this.hover.hide();
       }
     };
@@ -1456,7 +1497,7 @@
 
     Bar.prototype.drawXAxisLabel = function(xPos, yPos, text) {
       var label;
-      return label = this.raphael.text(xPos, yPos, text).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor);
+      return label = this.raphael.text(xPos, yPos, text).attr('font-size', this.options.gridTextSize).attr('font-family', this.options.gridTextFamily).attr('font-weight', this.options.gridTextWeight).attr('fill', this.options.gridTextColor);
     };
 
     Bar.prototype.drawBar = function(xPos, yPos, width, height, barColor) {
