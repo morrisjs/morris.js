@@ -65,6 +65,8 @@ class Morris.Grid extends Morris.EventEmitter
     gridStrokeWidth: 0.5
     gridTextColor: '#888'
     gridTextSize: 12
+    gridTextFamily: 'sans-serif'
+    gridTextWeight: 'normal'
     hideHover: false
     yLabelFormat: null
     xLabelAngle: 0
@@ -239,10 +241,10 @@ class Morris.Grid extends Morris.EventEmitter
       @bottom = @elementHeight - @options.padding
       if @options.axes
         yLabelWidths = for gridLine in @grid
-          @measureText(@yAxisFormat(gridLine), @options.gridTextSize).width
+          @measureText(@yAxisFormat(gridLine)).width
         @left += Math.max(yLabelWidths...)
         bottomOffsets = for i in [0...@data.length]
-          @measureText(@data[i].text, @options.gridTextSize, -@options.xLabelAngle).height
+          @measureText(@data[i].text, -@options.xLabelAngle).height
         @bottom -= Math.max(bottomOffsets...)
       @width = Math.max(1, @right - @left)
       @height = Math.max(1, @bottom - @top)
@@ -273,8 +275,12 @@ class Morris.Grid extends Morris.EventEmitter
 
   # @private
   #
-  measureText: (text, fontSize = 12, angle = 0) ->
-    tt = @raphael.text(100, 100, text).attr('font-size', fontSize).rotate(angle)
+  measureText: (text, angle = 0) ->
+    tt = @raphael.text(100, 100, text)
+      .attr('font-size', @options.gridTextSize)
+      .attr('font-family', @options.gridTextFamily)
+      .attr('font-weight', @options.gridTextWeight)
+      .rotate(angle)
     ret = tt.getBBox()
     tt.remove()
     ret
@@ -333,6 +339,8 @@ class Morris.Grid extends Morris.EventEmitter
   drawYAxisLabel: (xPos, yPos, text) ->
     @raphael.text(xPos, yPos, text)
       .attr('font-size', @options.gridTextSize)
+      .attr('font-family', @options.gridTextFamily)
+      .attr('font-weight', @options.gridTextWeight)
       .attr('fill', @options.gridTextColor)
       .attr('text-anchor', 'end')
 

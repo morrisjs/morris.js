@@ -277,6 +277,8 @@ class Morris.Line extends Morris.Grid
   drawXAxisLabel: (xPos, yPos, text) ->
     @raphael.text(xPos, yPos, text)
       .attr('font-size', @options.gridTextSize)
+      .attr('font-family', @options.gridTextFamily)
+      .attr('font-weight', @options.gridTextWeight)
       .attr('fill', @options.gridTextColor)
 
   drawLinePath: (path, lineColor) ->

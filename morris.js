@@ -126,6 +126,8 @@
       gridStrokeWidth: 0.5,
       gridTextColor: '#888',
       gridTextSize: 12,
+      gridTextFamily: 'sans-serif',
+      gridTextWeight: 'normal',
       hideHover: false,
       yLabelFormat: null,
       xLabelAngle: 0,
@@ -364,7 +366,7 @@
             _results = [];
             for (_i = 0, _len = _ref.length; _i < _len; _i++) {
               gridLine = _ref[_i];
-              _results.push(this.measureText(this.yAxisFormat(gridLine), this.options.gridTextSize).width);
+              _results.push(this.measureText(this.yAxisFormat(gridLine)).width);
             }
             return _results;
           }).call(this);
@@ -373,7 +375,7 @@
             var _i, _ref, _results;
             _results = [];
             for (i = _i = 0, _ref = this.data.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-              _results.push(this.measureText(this.data[i].text, this.options.gridTextSize, -this.options.xLabelAngle).height);
+              _results.push(this.measureText(this.data[i].text, -this.options.xLabelAngle).height);
             }
             return _results;
           }).call(this);
@@ -412,15 +414,12 @@
       }
     };
 
-    Grid.prototype.measureText = function(text, fontSize, angle) {
+    Grid.prototype.measureText = function(text, angle) {
       var ret, tt;
-      if (fontSize == null) {
-        fontSize = 12;
-      }
       if (angle == null) {
         angle = 0;
       }
-      tt = this.raphael.text(100, 100, text).attr('font-size', fontSize).rotate(angle);
+      tt = this.raphael.text(100, 100, text).attr('font-size', this.options.gridTextSize).attr('font-family', this.options.gridTextFamily).attr('font-weight', this.options.gridTextWeight).rotate(angle);
       ret = tt.getBBox();
       tt.remove();
       return ret;
@@ -501,7 +500,7 @@
     };
 
     Grid.prototype.drawYAxisLabel = function(xPos, yPos, text) {
-      return this.raphael.text(xPos, yPos, text).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor).attr('text-anchor', 'end');
+      return this.raphael.text(xPos, yPos, text).attr('font-size', this.options.gridTextSize).attr('font-family', this.options.gridTextFamily).attr('font-weight', this.options.gridTextWeight).attr('fill', this.options.gridTextColor).attr('text-anchor', 'end');
     };
 
     Grid.prototype.drawGridLine = function(path) {
@@ -1026,7 +1025,7 @@
     };
 
     Line.prototype.drawXAxisLabel = function(xPos, yPos, text) {
-      return this.raphael.text(xPos, yPos, text).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor);
+      return this.raphael.text(xPos, yPos, text).attr('font-size', this.options.gridTextSize).attr('font-family', this.options.gridTextFamily).attr('font-weight', this.options.gridTextWeight).attr('fill', this.options.gridTextColor);
     };
 
     Line.prototype.drawLinePath = function(path, lineColor) {
@@ -1497,7 +1496,7 @@
 
     Bar.prototype.drawXAxisLabel = function(xPos, yPos, text) {
       var label;
-      return label = this.raphael.text(xPos, yPos, text).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor);
+      return label = this.raphael.text(xPos, yPos, text).attr('font-size', this.options.gridTextSize).attr('font-family', this.options.gridTextFamily).attr('font-weight', this.options.gridTextWeight).attr('fill', this.options.gridTextColor);
     };
 
     Bar.prototype.drawBar = function(xPos, yPos, width, height, barColor) {
