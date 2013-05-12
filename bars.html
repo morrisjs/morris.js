@@ -1,6 +1,6 @@
 ---
 layout: default
-morris_version: 0.4.2
+morris_version: 0.4.3
 ---
 <div class="row">
   <div class="span12">
@@ -71,20 +71,6 @@ morris_version: 0.4.2
           </td>
         </tr>
         <tr>
-          <td><code>axes</code></td>
-          <td>
-            Set to <code>false</code> to disable drawing the x and
-            y axes.
-          </td>
-        </tr>
-        <tr>
-          <td><code>grid</code></td>
-          <td>
-            Set to <code>false</code> to disable drawing the horizontal
-            grid lines.
-          </td>
-        </tr>
-        <tr>
           <td><code>barColors</code></td>
           <td>
             Array containing colors for the series bars.
@@ -123,6 +109,44 @@ morris_version: 0.4.2
   var row = options.data[index];
   return "sin(" + row.x + ") = " + row.y;
 }</pre>
+          </td>
+        </tr>
+        <tr>
+          <td><code>axes</code></td>
+          <td>
+            Set to <code>false</code> to disable drawing the x and
+            y axes.
+          </td>
+        </tr>
+        <tr>
+          <td><code>grid</code></td>
+          <td>
+            Set to <code>false</code> to disable drawing the horizontal
+            grid lines.
+          </td>
+        </tr>
+        <tr>
+          <td><code>gridTextColor</code></td>
+          <td>
+            Set the color of the axis labels (default: #888).
+          </td>
+        </tr>
+        <tr>
+          <td><code>gridTextSize</code></td>
+          <td>
+            Set the point size of the axis labels (default: 12).
+          </td>
+        </tr>
+        <tr>
+          <td><code>gridTextFamily</code></td>
+          <td>
+            Set the font family of the axis labels (default: sans-serif).
+          </td>
+        </tr>
+        <tr>
+          <td><code>gridTextWeight</code></td>
+          <td>
+            Set the font weight of the axis labels (default: normal).
           </td>
         </tr>
       </tbody>
