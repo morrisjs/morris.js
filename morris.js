@@ -751,7 +751,7 @@
     };
 
     Line.prototype.onHoverOut = function() {
-      if (this.options.hideHover === 'auto') {
+      if (this.options.hideHover !== false) {
         return this.displayHoverForRow(null);
       }
     };
@@ -1474,7 +1474,7 @@
     };
 
     Bar.prototype.onHoverOut = function() {
-      if (this.options.hideHover === 'auto') {
+      if (this.options.hideHover !== false) {
         return this.hover.hide();
       }
     };

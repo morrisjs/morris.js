@@ -153,7 +153,7 @@ class Morris.Bar extends Morris.Grid
   #
   # @private
   onHoverOut: =>
-    if @options.hideHover is 'auto'
+    if @options.hideHover isnt false
       @hover.hide()
 
   # hover content for a point
