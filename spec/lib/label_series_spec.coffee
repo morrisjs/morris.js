@@ -65,6 +65,20 @@ describe '#labelSeries', ->
       ["2012-06", new Date(2012, 5, 1).getTime()]
     ])
 
+  it 'should generate week intervals', ->
+    Morris.labelSeries(
+      new Date(2012, 0, 1).getTime(),
+      new Date(2012, 1, 10).getTime(),
+      1000
+    ).should.deep.equal([
+      ["2012-01-01", new Date(2012, 0, 1).getTime()],
+      ["2012-01-08", new Date(2012, 0, 8).getTime()],
+      ["2012-01-15", new Date(2012, 0, 15).getTime()],
+      ["2012-01-22", new Date(2012, 0, 22).getTime()],
+      ["2012-01-29", new Date(2012, 0, 29).getTime()],
+      ["2012-02-05", new Date(2012, 1, 5).getTime()]
+    ])
+    
   it 'should generate day intervals', ->
     Morris.labelSeries(
       new Date(2012, 0, 1).getTime(),
