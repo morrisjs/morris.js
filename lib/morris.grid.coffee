@@ -29,6 +29,9 @@ class Morris.Grid extends Morris.EventEmitter
     @elementHeight = null
     @dirty = false
 
+    # range selection
+    @selectFrom = null
+
     # more stuff
     @init() if @init
 
@@ -38,9 +41,19 @@ class Morris.Grid extends Morris.EventEmitter
     # hover
     @el.bind 'mousemove', (evt) =>
       offset = @el.offset()
-      @fire 'hovermove', evt.pageX - offset.left, evt.pageY - offset.top
+      x = evt.pageX - offset.left
+      if @selectFrom
+        left = @data[@hitTest(Math.min(x, @selectFrom))]._x
+        right = @data[@hitTest(Math.max(x, @selectFrom))]._x
+        width = right - left
+        @selectionRect.attr({ x: left, width: width })
+      else
+        @fire 'hovermove', x, evt.pageY - offset.top
 
     @el.bind 'mouseleave', (evt) =>
+      if @selectFrom
+        @selectionRect.hide()
+        @selectFrom = null
       @fire 'hoverout'
 
     @el.bind 'touchstart touchmove touchend', (evt) =>
@@ -52,6 +65,21 @@ class Morris.Grid extends Morris.EventEmitter
     @el.bind 'click', (evt) =>
       offset = @el.offset()
       @fire 'gridclick', evt.pageX - offset.left, evt.pageY - offset.top
+
+    if @options.rangeSelect
+      @selectionRect = @raphael.rect(0, 0, 0, @el.innerHeight())
+        .attr({ fill: @options.rangeSelectColor, stroke: false })
+        .toBack()
+        .hide()
+
+      @el.bind 'mousedown', (evt) =>
+        offset = @el.offset()
+        @startRange evt.pageX - offset.left
+
+      @el.bind 'mouseup', (evt) =>
+        offset = @el.offset()
+        @endRange evt.pageX - offset.left
+        @fire 'hovermove', evt.pageX - offset.left, evt.pageY - offset.top
 
     @postInit() if @postInit
 
@@ -93,6 +121,8 @@ class Morris.Grid extends Morris.EventEmitter
       '#3a5f0b'
       '#005502'
     ]
+    rangeSelect: null
+    rangeSelectColor: '#eef'
 
   # Update the data series and redraw the chart.
   #
@@ -345,6 +375,22 @@ class Morris.Grid extends Morris.EventEmitter
     @raphael.path(path)
       .attr('stroke', @options.gridLineColor)
       .attr('stroke-width', @options.gridStrokeWidth)
+
+  # Range selection
+  #
+  startRange: (x) ->
+    @hover.hide()
+    @selectFrom = x
+    @selectionRect.attr({ x: x, width: 0 }).show()
+
+  endRange: (x) ->
+    if @selectFrom
+      start = Math.min(@selectFrom, x)
+      end = Math.max(@selectFrom, x)
+      @options.rangeSelect.call @el,
+        start: @data[@hitTest(start)].x
+        end: @data[@hitTest(end)].x
+      @selectFrom = null
 
 # Parse a date into a javascript timestamp
 #
