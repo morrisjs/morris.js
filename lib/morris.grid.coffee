@@ -299,11 +299,6 @@ class Morris.Grid extends Morris.EventEmitter
     else
       "#{@options.preUnits}#{Morris.commas(label)}#{@options.postUnits}"
 
-  updateHover: (x, y) ->
-    hit = @hitTest(x, y)
-    if hit?
-      @hover.update(hit...)
-
   # draw y axis labels, horizontal lines
   #
   drawGrid: ->
