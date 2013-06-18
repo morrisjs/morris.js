@@ -127,9 +127,9 @@ class Morris.Bar extends Morris.Grid
     else
       @options.barColors[sidx % @options.barColors.length]
 
-  # hit test - returns the index of the row beneath the given coordinate
+  # hit test - returns the index of the row at the given x-coordinate
   #
-  hitTest: (x, y) ->
+  hitTest: (x) ->
     return null if @data.length == 0
     x = Math.max(Math.min(x, @right), @left)
     Math.min(@data.length - 1,
@@ -139,14 +139,14 @@ class Morris.Bar extends Morris.Grid
   #
   # @private
   onGridClick: (x, y) =>
-    index = @hitTest(x, y)
+    index = @hitTest(x)
     @fire 'click', index, @options.data[index], x, y
 
   # hover movement event handler
   #
   # @private
   onHoverMove: (x, y) =>
-    index = @hitTest(x, y)
+    index = @hitTest(x)
     @hover.update(@hoverContentForRow(index)...)
 
   # hover out event handler

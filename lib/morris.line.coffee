@@ -57,9 +57,9 @@ class Morris.Line extends Morris.Grid
         if y? then @transY(y) else y
       row._ymax = Math.min.apply(null, [@bottom].concat(y for y in row._y when y?))
 
-  # hit test - returns the index of the row beneath the given coordinate
+  # hit test - returns the index of the row at the given x-coordinate
   #
-  hitTest: (x, y) ->
+  hitTest: (x) ->
     return null if @data.length == 0
     # TODO better search algo
     for r, index in @data.slice(1)
@@ -70,14 +70,14 @@ class Morris.Line extends Morris.Grid
   #
   # @private
   onGridClick: (x, y) =>
-    index = @hitTest(x, y)
+    index = @hitTest(x)
     @fire 'click', index, @options.data[index], x, y
 
   # hover movement event handler
   #
   # @private
   onHoverMove: (x, y) =>
-    index = @hitTest(x, y)
+    index = @hitTest(x)
     @displayHoverForRow(index)
 
   # hover out event handler
