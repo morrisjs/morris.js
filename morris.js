@@ -85,6 +85,10 @@
       if (typeof this.options.units === 'string') {
         this.options.postUnits = options.units;
       }
+      if (this.options.axes === false) {
+        this.options.xaxis = false;
+        this.options.yaxis = false;
+      }
       this.raphael = new Raphael(this.el[0]);
       this.elementWidth = null;
       this.elementHeight = null;
@@ -120,7 +124,8 @@
 
     Grid.prototype.gridDefaults = {
       dateFormat: null,
-      axes: true,
+      xaxis: true,
+      yaxis: true,
       grid: true,
       gridLineColor: '#aaa',
       gridStrokeWidth: 0.5,
@@ -260,7 +265,7 @@
         }
         this.ymax += 1;
       }
-      if (this.options.axes === true || this.options.grid === true) {
+      if (this.options.yaxis === true || this.options.grid === true) {
         if (this.options.ymax === this.gridDefaults.ymax && this.options.ymin === this.gridDefaults.ymin) {
           this.grid = this.autoGridLines(this.ymin, this.ymax, this.options.numLines);
           this.ymin = Math.min(this.ymin, this.grid[0]);
@@ -360,7 +365,7 @@
         this.right = this.elementWidth - this.options.padding;
         this.top = this.options.padding;
         this.bottom = this.elementHeight - this.options.padding;
-        if (this.options.axes) {
+        if (this.options.yaxis) {
           yLabelWidths = (function() {
             var _i, _len, _ref, _results;
             _ref = this.grid;
@@ -372,6 +377,8 @@
             return _results;
           }).call(this);
           this.left += Math.max.apply(Math, yLabelWidths);
+        }
+        if (this.options.xaxis) {
           bottomOffsets = (function() {
             var _i, _ref, _results;
             _results = [];
@@ -448,7 +455,7 @@
 
     Grid.prototype.drawGrid = function() {
       var lineY, y, _i, _len, _ref, _results;
-      if (this.options.grid === false && this.options.axes === false) {
+      if (this.options.grid === false && this.options.yaxis === false) {
         return;
       }
       _ref = this.grid;
@@ -456,7 +463,7 @@
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         lineY = _ref[_i];
         y = this.transY(lineY);
-        if (this.options.axes) {
+        if (this.options.yaxis) {
           this.drawYAxisLabel(this.left - this.options.padding / 2, y, this.yAxisFormat(lineY));
         }
         if (this.options.grid) {
@@ -828,7 +835,7 @@
     };
 
     Line.prototype.draw = function() {
-      if (this.options.axes) {
+      if (this.options.xaxis) {
         this.drawXAxis();
       }
       this.drawSeries();
@@ -1349,7 +1356,7 @@
     };
 
     Bar.prototype.draw = function() {
-      if (this.options.axes) {
+      if (this.options.xaxis) {
         this.drawXAxis();
       }
       return this.drawSeries();
