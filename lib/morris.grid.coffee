@@ -21,11 +21,6 @@ class Morris.Grid extends Morris.EventEmitter
     if typeof @options.units is 'string'
       @options.postUnits = options.units
 
-    # backwards compatibility for axes -> xaxis, yaxis
-    if @options.axes is false
-      @options.xaxis = false
-      @options.yaxis = false
-
     # the raphael drawing instance
     @raphael = new Raphael(@el[0])
 
@@ -64,8 +59,7 @@ class Morris.Grid extends Morris.EventEmitter
   #
   gridDefaults:
     dateFormat: null
-    xaxis: true
-    yaxis: true
+    axes: true
     grid: true
     gridLineColor: '#aaa'
     gridStrokeWidth: 0.5
@@ -178,7 +172,7 @@ class Morris.Grid extends Morris.EventEmitter
       @ymin -= 1 if ymin
       @ymax += 1
 
-    if @options.yaxis is true or @options.grid is true
+    if @options.axes in [true, 'both', 'y'] or @options.grid is true
       if (@options.ymax == @gridDefaults.ymax and
           @options.ymin == @gridDefaults.ymin)
         # calculate 'magic' grid placement
@@ -247,11 +241,11 @@ class Morris.Grid extends Morris.EventEmitter
       @right = @elementWidth - @options.padding
       @top = @options.padding
       @bottom = @elementHeight - @options.padding
-      if @options.yaxis
+      if @options.axes in [true, 'both', 'y']
         yLabelWidths = for gridLine in @grid
           @measureText(@yAxisFormat(gridLine)).width
         @left += Math.max(yLabelWidths...)
-      if @options.xaxis
+      if @options.axes in [true, 'both', 'x']
         bottomOffsets = for i in [0...@data.length]
           @measureText(@data[i].text, -@options.xLabelAngle).height
         @bottom -= Math.max(bottomOffsets...)
@@ -314,10 +308,10 @@ class Morris.Grid extends Morris.EventEmitter
   # draw y axis labels, horizontal lines
   #
   drawGrid: ->
-    return if @options.grid is false and @options.yaxis is false
+    return if @options.grid is false and @options.axes not in [true, 'both', 'y']
     for lineY in @grid
       y = @transY(lineY)
-      if @options.yaxis
+      if @options.axes in [true, 'both', 'y']
         @drawYAxisLabel(@left - @options.padding / 2, y, @yAxisFormat(lineY))
       if @options.grid
         @drawGridLine("M#{@left},#{y}H#{@left + @width}")
