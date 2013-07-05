@@ -8,6 +8,7 @@
 
   Morris = {};
   if (typeof module !== 'undefined' && module.exports) {
+      var Raphael = require('raphael');
     module.exports = Morris;
   } else {
     window.Morris = Morris

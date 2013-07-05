@@ -4,6 +4,9 @@
   "homepage": "http://oesmith.github.com/morris.js",
   "description": "Easy, pretty charts",
   "main": "morris.js",
+  "dependencies":{
+    "raphael":"2.x"
+  },
   "author": {
     "name": "Olly Smith",
     "email": "olly@oesmith.co.uk"
