@@ -121,7 +121,7 @@ class Morris.Line extends Morris.Grid
   # @private
   generatePaths: ->
     @paths = for i in [0...@options.ykeys.length]
-      smooth = @options.smooth is true or @options.ykeys[i] in @options.smooth
+      smooth = if typeof @options.smooth is "boolean" then @options.smooth else @options.ykeys[i] in @options.smooth
       coords = ({x: r._x, y: r._y[i]} for r in @data when r._y[i] isnt undefined)
       coords = (c for c in coords when c.y isnt null) if @options.continuousLine
 
