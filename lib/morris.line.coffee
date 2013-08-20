@@ -281,10 +281,10 @@ class Morris.Line extends Morris.Grid
       .attr('font-weight', @options.gridTextWeight)
       .attr('fill', @options.gridTextColor)
 
-  drawLinePath: (path, lineColor) ->
+  drawLinePath: (path, lineColor, lineIndex) ->
     @raphael.path(path)
       .attr('stroke', lineColor)
-      .attr('stroke-width', @options.lineWidth)
+      .attr('stroke-width', @lineWidthForSeries(lineIndex))
 
   drawLinePoint: (xPos, yPos, size, pointColor, lineIndex) ->
     @raphael.circle(xPos, yPos, size)
@@ -299,6 +299,13 @@ class Morris.Line extends Morris.Grid
   # @private
   strokeForSeries: (index) ->
     @options.pointStrokeColors[index % @options.pointStrokeColors.length]
+
+  # @private
+  lineWidthForSeries: (index) ->
+    if (@options.lineWidth instanceof Array)
+      @options.lineWidth[index % @options.lineWidth.length]
+    else
+      @options.lineWidth
 
 # generate a series of label, timestamp pairs for x-axis labels
 #

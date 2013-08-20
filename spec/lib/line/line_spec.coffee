@@ -114,6 +114,11 @@ describe 'Morris.Line', ->
       Morris.Line @defaults
       shouldHavePath /(M[\d\.]+,[\d\.]+C[\d\.]+(,[\d\.]+){5}){2}/
 
+    it 'should make line width customizable', ->
+      chart = Morris.Line $.extend(@defaults, lineWidth: [1, 2])
+      chart.lineWidthForSeries(0).should.equal 1
+      chart.lineWidthForSeries(1).should.equal 2
+
   describe '#createPath', ->
 
     it 'should generate a smooth line', ->
