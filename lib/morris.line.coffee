@@ -204,7 +204,7 @@ class Morris.Line extends Morris.Grid
   _drawLineFor: (index) ->
     path = @paths[index]
     if path isnt null
-      @drawLinePath path, @colorFor(null, index, 'line')
+      @drawLinePath path, @colorFor(null, index, 'line'), index
 
   # create a path for a data series
   #

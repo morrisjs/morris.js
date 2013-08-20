@@ -925,7 +925,7 @@
       var path;
       path = this.paths[index];
       if (path !== null) {
-        return this.drawLinePath(path, this.colorFor(null, index, 'line'));
+        return this.drawLinePath(path, this.colorFor(null, index, 'line'), index);
       }
     };
 
