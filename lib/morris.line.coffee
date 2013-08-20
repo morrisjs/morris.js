@@ -7,9 +7,6 @@ class Morris.Line extends Morris.Grid
 
   init: ->
     # Some instance variables for later
-    @pointGrow = Raphael.animation r: @options.pointSize + 3, 25, 'linear'
-    @pointShrink = Raphael.animation r: @options.pointSize, 25, 'linear'
-
     if @options.hideHover isnt 'always'
       @hover = new Morris.Hover(parent: @el)
       @on('hovermove', @onHoverMove)
@@ -259,11 +256,11 @@ class Morris.Line extends Morris.Grid
     if @prevHilight isnt null and @prevHilight isnt index
       for i in [0..@seriesPoints.length-1]
         if @seriesPoints[i][@prevHilight]
-          @seriesPoints[i][@prevHilight].animate @pointShrink
+          @seriesPoints[i][@prevHilight].animate @pointShrinkSeries(index)
     if index isnt null and @prevHilight isnt index
       for i in [0..@seriesPoints.length-1]
         if @seriesPoints[i][index]
-          @seriesPoints[i][index].animate @pointGrow
+          @seriesPoints[i][index].animate @pointGrowSeries(index)
     @prevHilight = index
 
   colorFor: (row, sidx, type) ->
@@ -310,9 +307,21 @@ class Morris.Line extends Morris.Grid
   # @private
   pointSizeForSeries: (index) ->
     if (@options.pointSize instanceof Array)
+      console.log(@options.pointSize)
+      console.log(index)
+      console.log(@options.pointSize.length)
+      console.log(index % @options.pointSize.length)
       @options.pointSize[index % @options.pointSize.length]
     else
       @options.pointSize
+  
+  # @private
+  pointGrowSeries: (index) ->
+    Raphael.animation r: @pointSizeForSeries(index) + 3, 25, 'linear'
+    
+  # @private
+  pointShrinkSeries: (index) ->
+    Raphael.animation r: @pointSizeForSeries(index), 25, 'linear'
 
 # generate a series of label, timestamp pairs for x-axis labels
 #

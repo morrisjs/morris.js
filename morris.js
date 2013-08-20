@@ -650,12 +650,6 @@
     }
 
     Line.prototype.init = function() {
-      this.pointGrow = Raphael.animation({
-        r: this.options.pointSize + 3
-      }, 25, 'linear');
-      this.pointShrink = Raphael.animation({
-        r: this.options.pointSize
-      }, 25, 'linear');
       if (this.options.hideHover !== 'always') {
         this.hover = new Morris.Hover({
           parent: this.el
@@ -1001,14 +995,14 @@
       if (this.prevHilight !== null && this.prevHilight !== index) {
         for (i = _i = 0, _ref = this.seriesPoints.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
           if (this.seriesPoints[i][this.prevHilight]) {
-            this.seriesPoints[i][this.prevHilight].animate(this.pointShrink);
+            this.seriesPoints[i][this.prevHilight].animate(this.pointShrinkSeries(index));
           }
         }
       }
       if (index !== null && this.prevHilight !== index) {
         for (i = _j = 0, _ref1 = this.seriesPoints.length - 1; 0 <= _ref1 ? _j <= _ref1 : _j >= _ref1; i = 0 <= _ref1 ? ++_j : --_j) {
           if (this.seriesPoints[i][index]) {
-            this.seriesPoints[i][index].animate(this.pointGrow);
+            this.seriesPoints[i][index].animate(this.pointGrowSeries(index));
           }
         }
       }
@@ -1055,10 +1049,26 @@
 
     Line.prototype.pointSizeForSeries = function(index) {
       if (this.options.pointSize instanceof Array) {
+        console.log(this.options.pointSize);
+        console.log(index);
+        console.log(this.options.pointSize.length);
+        console.log(index % this.options.pointSize.length);
         return this.options.pointSize[index % this.options.pointSize.length];
       } else {
         return this.options.pointSize;
       }
+    };
+
+    Line.prototype.pointGrowSeries = function(index) {
+      return Raphael.animation({
+        r: this.pointSizeForSeries(index) + 3
+      }, 25, 'linear');
+    };
+
+    Line.prototype.pointShrinkSeries = function(index) {
+      return Raphael.animation({
+        r: this.pointSizeForSeries(index)
+      }, 25, 'linear');
     };
 
     return Line;
