@@ -995,14 +995,14 @@
       if (this.prevHilight !== null && this.prevHilight !== index) {
         for (i = _i = 0, _ref = this.seriesPoints.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
           if (this.seriesPoints[i][this.prevHilight]) {
-            this.seriesPoints[i][this.prevHilight].animate(this.pointShrinkSeries(index));
+            this.seriesPoints[i][this.prevHilight].animate(this.pointShrinkSeries(i));
           }
         }
       }
       if (index !== null && this.prevHilight !== index) {
         for (i = _j = 0, _ref1 = this.seriesPoints.length - 1; 0 <= _ref1 ? _j <= _ref1 : _j >= _ref1; i = 0 <= _ref1 ? ++_j : --_j) {
           if (this.seriesPoints[i][index]) {
-            this.seriesPoints[i][index].animate(this.pointGrowSeries(index));
+            this.seriesPoints[i][index].animate(this.pointGrowSeries(i));
           }
         }
       }
@@ -1049,10 +1049,6 @@
 
     Line.prototype.pointSizeForSeries = function(index) {
       if (this.options.pointSize instanceof Array) {
-        console.log(this.options.pointSize);
-        console.log(index);
-        console.log(this.options.pointSize.length);
-        console.log(index % this.options.pointSize.length);
         return this.options.pointSize[index % this.options.pointSize.length];
       } else {
         return this.options.pointSize;

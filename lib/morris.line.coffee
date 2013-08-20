@@ -256,11 +256,11 @@ class Morris.Line extends Morris.Grid
     if @prevHilight isnt null and @prevHilight isnt index
       for i in [0..@seriesPoints.length-1]
         if @seriesPoints[i][@prevHilight]
-          @seriesPoints[i][@prevHilight].animate @pointShrinkSeries(index)
+          @seriesPoints[i][@prevHilight].animate @pointShrinkSeries(i)
     if index isnt null and @prevHilight isnt index
       for i in [0..@seriesPoints.length-1]
         if @seriesPoints[i][index]
-          @seriesPoints[i][index].animate @pointGrowSeries(index)
+          @seriesPoints[i][index].animate @pointGrowSeries(i)
     @prevHilight = index
 
   colorFor: (row, sidx, type) ->
@@ -307,18 +307,14 @@ class Morris.Line extends Morris.Grid
   # @private
   pointSizeForSeries: (index) ->
     if (@options.pointSize instanceof Array)
-      console.log(@options.pointSize)
-      console.log(index)
-      console.log(@options.pointSize.length)
-      console.log(index % @options.pointSize.length)
       @options.pointSize[index % @options.pointSize.length]
     else
       @options.pointSize
-  
+
   # @private
   pointGrowSeries: (index) ->
     Raphael.animation r: @pointSizeForSeries(index) + 3, 25, 'linear'
-    
+
   # @private
   pointShrinkSeries: (index) ->
     Raphael.animation r: @pointSizeForSeries(index), 25, 'linear'
