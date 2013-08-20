@@ -198,7 +198,7 @@ class Morris.Line extends Morris.Grid
     for row in @data
       circle = null
       if row._y[index]?
-        circle = @drawLinePoint(row._x, row._y[index], @options.pointSize, @colorFor(row, index, 'point'), index)
+        circle = @drawLinePoint(row._x, row._y[index], @colorFor(row, index, 'point'), index)
       @seriesPoints[index].push(circle)
 
   _drawLineFor: (index) ->
@@ -286,8 +286,8 @@ class Morris.Line extends Morris.Grid
       .attr('stroke', lineColor)
       .attr('stroke-width', @lineWidthForSeries(lineIndex))
 
-  drawLinePoint: (xPos, yPos, size, pointColor, lineIndex) ->
-    @raphael.circle(xPos, yPos, size)
+  drawLinePoint: (xPos, yPos, pointColor, lineIndex) ->
+    @raphael.circle(xPos, yPos, @pointSizeForSeries(lineIndex))
       .attr('fill', pointColor)
       .attr('stroke-width', @strokeWidthForSeries(lineIndex))
       .attr('stroke', @strokeForSeries(lineIndex))
@@ -306,6 +306,13 @@ class Morris.Line extends Morris.Grid
       @options.lineWidth[index % @options.lineWidth.length]
     else
       @options.lineWidth
+
+  # @private
+  pointSizeForSeries: (index) ->
+    if (@options.pointSize instanceof Array)
+      @options.pointSize[index % @options.pointSize.length]
+    else
+      @options.pointSize
 
 # generate a series of label, timestamp pairs for x-axis labels
 #
