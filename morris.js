@@ -650,12 +650,6 @@
     }
 
     Line.prototype.init = function() {
-      this.pointGrow = Raphael.animation({
-        r: this.options.pointSize + 3
-      }, 25, 'linear');
-      this.pointShrink = Raphael.animation({
-        r: this.options.pointSize
-      }, 25, 'linear');
       if (this.options.hideHover !== 'always') {
         this.hover = new Morris.Hover({
           parent: this.el
@@ -914,7 +908,7 @@
         row = _ref[_i];
         circle = null;
         if (row._y[index] != null) {
-          circle = this.drawLinePoint(row._x, row._y[index], this.options.pointSize, this.colorFor(row, index, 'point'), index);
+          circle = this.drawLinePoint(row._x, row._y[index], this.colorFor(row, index, 'point'), index);
         }
         _results.push(this.seriesPoints[index].push(circle));
       }
@@ -925,7 +919,7 @@
       var path;
       path = this.paths[index];
       if (path !== null) {
-        return this.drawLinePath(path, this.colorFor(null, index, 'line'));
+        return this.drawLinePath(path, this.colorFor(null, index, 'line'), index);
       }
     };
 
@@ -1001,14 +995,14 @@
       if (this.prevHilight !== null && this.prevHilight !== index) {
         for (i = _i = 0, _ref = this.seriesPoints.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
           if (this.seriesPoints[i][this.prevHilight]) {
-            this.seriesPoints[i][this.prevHilight].animate(this.pointShrink);
+            this.seriesPoints[i][this.prevHilight].animate(this.pointShrinkSeries(i));
           }
         }
       }
       if (index !== null && this.prevHilight !== index) {
         for (i = _j = 0, _ref1 = this.seriesPoints.length - 1; 0 <= _ref1 ? _j <= _ref1 : _j >= _ref1; i = 0 <= _ref1 ? ++_j : --_j) {
           if (this.seriesPoints[i][index]) {
-            this.seriesPoints[i][index].animate(this.pointGrow);
+            this.seriesPoints[i][index].animate(this.pointGrowSeries(i));
           }
         }
       }
@@ -1029,12 +1023,12 @@
       return this.raphael.text(xPos, yPos, text).attr('font-size', this.options.gridTextSize).attr('font-family', this.options.gridTextFamily).attr('font-weight', this.options.gridTextWeight).attr('fill', this.options.gridTextColor);
     };
 
-    Line.prototype.drawLinePath = function(path, lineColor) {
-      return this.raphael.path(path).attr('stroke', lineColor).attr('stroke-width', this.options.lineWidth);
+    Line.prototype.drawLinePath = function(path, lineColor, lineIndex) {
+      return this.raphael.path(path).attr('stroke', lineColor).attr('stroke-width', this.lineWidthForSeries(lineIndex));
     };
 
-    Line.prototype.drawLinePoint = function(xPos, yPos, size, pointColor, lineIndex) {
-      return this.raphael.circle(xPos, yPos, size).attr('fill', pointColor).attr('stroke-width', this.strokeWidthForSeries(lineIndex)).attr('stroke', this.strokeForSeries(lineIndex));
+    Line.prototype.drawLinePoint = function(xPos, yPos, pointColor, lineIndex) {
+      return this.raphael.circle(xPos, yPos, this.pointSizeForSeries(lineIndex)).attr('fill', pointColor).attr('stroke-width', this.strokeWidthForSeries(lineIndex)).attr('stroke', this.strokeForSeries(lineIndex));
     };
 
     Line.prototype.strokeWidthForSeries = function(index) {
@@ -1043,6 +1037,34 @@
 
     Line.prototype.strokeForSeries = function(index) {
       return this.options.pointStrokeColors[index % this.options.pointStrokeColors.length];
+    };
+
+    Line.prototype.lineWidthForSeries = function(index) {
+      if (this.options.lineWidth instanceof Array) {
+        return this.options.lineWidth[index % this.options.lineWidth.length];
+      } else {
+        return this.options.lineWidth;
+      }
+    };
+
+    Line.prototype.pointSizeForSeries = function(index) {
+      if (this.options.pointSize instanceof Array) {
+        return this.options.pointSize[index % this.options.pointSize.length];
+      } else {
+        return this.options.pointSize;
+      }
+    };
+
+    Line.prototype.pointGrowSeries = function(index) {
+      return Raphael.animation({
+        r: this.pointSizeForSeries(index) + 3
+      }, 25, 'linear');
+    };
+
+    Line.prototype.pointShrinkSeries = function(index) {
+      return Raphael.animation({
+        r: this.pointSizeForSeries(index)
+      }, 25, 'linear');
     };
 
     return Line;

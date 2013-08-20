@@ -7,9 +7,6 @@ class Morris.Line extends Morris.Grid
 
   init: ->
     # Some instance variables for later
-    @pointGrow = Raphael.animation r: @options.pointSize + 3, 25, 'linear'
-    @pointShrink = Raphael.animation r: @options.pointSize, 25, 'linear'
-
     if @options.hideHover isnt 'always'
       @hover = new Morris.Hover(parent: @el)
       @on('hovermove', @onHoverMove)
@@ -198,13 +195,13 @@ class Morris.Line extends Morris.Grid
     for row in @data
       circle = null
       if row._y[index]?
-        circle = @drawLinePoint(row._x, row._y[index], @options.pointSize, @colorFor(row, index, 'point'), index)
+        circle = @drawLinePoint(row._x, row._y[index], @colorFor(row, index, 'point'), index)
       @seriesPoints[index].push(circle)
 
   _drawLineFor: (index) ->
     path = @paths[index]
     if path isnt null
-      @drawLinePath path, @colorFor(null, index, 'line')
+      @drawLinePath path, @colorFor(null, index, 'line'), index
 
   # create a path for a data series
   #
@@ -259,11 +256,11 @@ class Morris.Line extends Morris.Grid
     if @prevHilight isnt null and @prevHilight isnt index
       for i in [0..@seriesPoints.length-1]
         if @seriesPoints[i][@prevHilight]
-          @seriesPoints[i][@prevHilight].animate @pointShrink
+          @seriesPoints[i][@prevHilight].animate @pointShrinkSeries(i)
     if index isnt null and @prevHilight isnt index
       for i in [0..@seriesPoints.length-1]
         if @seriesPoints[i][index]
-          @seriesPoints[i][index].animate @pointGrow
+          @seriesPoints[i][index].animate @pointGrowSeries(i)
     @prevHilight = index
 
   colorFor: (row, sidx, type) ->
@@ -281,13 +278,13 @@ class Morris.Line extends Morris.Grid
       .attr('font-weight', @options.gridTextWeight)
       .attr('fill', @options.gridTextColor)
 
-  drawLinePath: (path, lineColor) ->
+  drawLinePath: (path, lineColor, lineIndex) ->
     @raphael.path(path)
       .attr('stroke', lineColor)
-      .attr('stroke-width', @options.lineWidth)
+      .attr('stroke-width', @lineWidthForSeries(lineIndex))
 
-  drawLinePoint: (xPos, yPos, size, pointColor, lineIndex) ->
-    @raphael.circle(xPos, yPos, size)
+  drawLinePoint: (xPos, yPos, pointColor, lineIndex) ->
+    @raphael.circle(xPos, yPos, @pointSizeForSeries(lineIndex))
       .attr('fill', pointColor)
       .attr('stroke-width', @strokeWidthForSeries(lineIndex))
       .attr('stroke', @strokeForSeries(lineIndex))
@@ -299,6 +296,28 @@ class Morris.Line extends Morris.Grid
   # @private
   strokeForSeries: (index) ->
     @options.pointStrokeColors[index % @options.pointStrokeColors.length]
+
+  # @private
+  lineWidthForSeries: (index) ->
+    if (@options.lineWidth instanceof Array)
+      @options.lineWidth[index % @options.lineWidth.length]
+    else
+      @options.lineWidth
+
+  # @private
+  pointSizeForSeries: (index) ->
+    if (@options.pointSize instanceof Array)
+      @options.pointSize[index % @options.pointSize.length]
+    else
+      @options.pointSize
+
+  # @private
+  pointGrowSeries: (index) ->
+    Raphael.animation r: @pointSizeForSeries(index) + 3, 25, 'linear'
+
+  # @private
+  pointShrinkSeries: (index) ->
+    Raphael.animation r: @pointSizeForSeries(index), 25, 'linear'
 
 # generate a series of label, timestamp pairs for x-axis labels
 #
