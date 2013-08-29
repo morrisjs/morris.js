@@ -1,0 +1,852 @@
+<html>
+	<head>
+	</head>
+	<p>
+		Most of these option was copied and pasted directly from <a href="http://www.oesmith.co.uk/morris.js/">here</a>. <br/>
+		There were one or two options that were not documented. <br/>
+		This is just a quick reference for the chart options.
+	</p>
+	<body>
+		<table class="table" border="1">
+			<col width="125">
+  			<col width="200">
+			<tr>
+				<th colspan='3'>
+					General Options
+				</th>
+			</tr>
+			<tr>
+				<td valign="top">
+					Option
+				</td>
+				<td valign="top">
+					Default
+				</td>
+				<td valign="top">
+					Description
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					dateFormat
+				</td>
+				<td valign="top">
+					null
+				</td>
+				<td valign="top">
+					A function that accepts millisecond timestamps and formats them for display as chart labels. <br/>
+					default: function (x) { return new Date(x).toString(); }
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					axes
+				</td>
+				<td valign="top">
+					true
+				</td>
+				<td valign="top">
+					Set to false to disable drawing the x and y axes.
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					grid
+				</td>
+				<td valign="top">
+					true
+				</td>
+				<td valign="top">
+					Set to false to disable drawing the horizontal grid lines.
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					gridLineColor
+				</td>
+				<td valign="top">
+					'#aaa'
+				</td>
+				<td valign="top">
+					The color that you want your gridlines to be in hexadecimal format.
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					gridStrokeWidth
+				</td>
+				<td valign="top">
+					0.5
+				</td>
+				<td valign="top">
+					The width of the grid lines (thickness)
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					gridTextSize
+				</td>
+				<td valign="top">
+					12
+				</td>
+				<td valign="top">
+					Set the point size of the axis labels 
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					gridTextColor
+				</td>
+				<td valign="top">
+					'#888'
+				</td>
+				<td valign="top">
+					Set the color of the axis labels
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					gridTextFamily
+				</td>
+				<td valign="top">
+					'sans-serif'
+				</td>
+				<td valign="top">
+					Set the font family of the axis labels
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					gridTextWeight
+				</td>
+				<td valign="top">
+					'normal'
+				</td>
+				<td valign="top">
+					Set the font weight of the axis labels. ('bold', 'normal')
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					hideHover
+				</td>
+				<td valign="top">
+					false
+				</td>
+				<td valign="top">
+					Set to false to always show a hover legend. <br/>
+					Set to 'auto' to only show the hover legend when the mouse cursor is over the chart. <br/>
+					Set to true to never show a hover legend.
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					hoverCallback
+				</td>
+				<td valign="top">
+				</td>
+				<td valign="top">
+					Provide a function on this option to generate custom hover legends. <br/>
+					The function will be called with the index of the row under the hover legend, the options object passed to the constructor as arguments, and a string containing the default generated hover legend content HTML. <br/>
+					eg:<pre>
+hoverCallback: function (index, options, content) {
+  var row = options.data[index];
+  return "sin(" + row.x + ") = " + row.y;
+}</pre>
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					yLabelFormat
+				</td>
+				<td valign="top">
+					null
+				</td>
+				<td valign="top">
+					A function that accepts y-values and formats them for display as y-axis labels. <br/>
+					eg: function (y) { return y.toString() + 'km'; }
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					xLabelAngle
+				</td>
+				<td valign="top">
+					0
+				</td>
+				<td valign="top">
+					This will tilt the the angle of the x Labels. 
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					numLines
+				</td>
+				<td valign="top">
+					5
+				</td>
+				<td valign="top">
+					The number of gridline to draw.
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					padding
+				</td>
+				<td valign="top">
+					25
+				</td>
+				<td valign="top">
+					The amount of padding (top and bottom to use)
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					parseTime
+				</td>
+				<td valign="top">
+					true
+				</td>
+				<td valign="top">
+					Set to false to skip time/date parsing for X values, instead treating them as an equally-spaced series.
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					postUnits
+				</td>
+				<td valign="top">
+					''
+				</td>
+				<td valign="top">
+					Set to a string value (eg: '%') to add a label suffix all y-labels.
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					preUnits
+				</td>
+				<td valign="top">
+					''
+				</td>
+				<td valign="top">
+					Set to a string value (eg: '$') to add a label prefix all y-labels.
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					ymax
+				</td>
+				<td valign="top">
+					'auto'
+				</td>
+				<td valign="top">
+					Max. bound for Y-values. Alternatively, set this to 'auto' to compute automatically, or 'auto [num]' to automatically compute and ensure that the max y-value is at least [num].
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					ymin
+				</td>
+				<td valign="top">
+					'auto 0'
+				</td>
+				<td valign="top">
+					Min. bound for Y-values. Alternatively, set this to 'auto' to compute automatically, or 'auto [num]' to automatically compute and ensure that the min y-value is at most [num]. <br/>
+					Hint: you can use this to create graphs with false origins.
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					goals
+				</td>
+				<td valign="top">
+					[]
+				</td>
+				<td valign="top">
+					A list of y-values to draw as horizontal 'goal' lines on the chart. <br/>
+					eg: goals: [1.0, -1.0]
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					goalStrokeWidth
+				</td>
+				<td valign="top">
+					1.0
+				</td>
+				<td valign="top">
+					Width, in pixels, of the goal lines.
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					goalLineColors
+				</td>
+				<td valign="top">
+					['#666633', '#999966', '#cc6666', '#663333']
+				</td>
+				<td valign="top">
+					Array of color values to use for the goal line colors. If you list fewer colors here than you have lines in goals, then the values will be cycled.
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					events
+				</td>
+				<td valign="top">
+					[]
+				</td>
+				<td valign="top">
+					A list of x-values to draw as vertical 'event' lines on the chart. <br/>
+					eg: events: ['2012-01-01', '2012-02-01', '2012-03-01']
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					eventStrokeWidth
+				</td>
+				<td valign="top">
+					1.0
+				</td>
+				<td valign="top">
+					Width, in pixels, of the event lines.
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					eventLineColors
+				</td>
+				<td valign="top">
+					['#005a04', '#ccffbb', '#3a5f0b', '#005502']
+				</td>
+				<td valign="top">
+					Array of color values to use for the event line colors. If you list fewer colors here than you have lines in events, then the values will be cycled.
+				</td>
+			</tr>
+		</table>
+		<br/><br/><br/><br/>
+		<table class="table" border="1">
+			<col width="125">
+  			<col width="200">
+			<tr>
+				<th colspan='3'>
+					Donut (Doughnut) options
+				</th>
+			</tr>
+			<tr>
+				<td valign="top">
+					Option
+				</td>
+				<td valign="top">
+					Default
+				</td>
+				<td valign="top">
+					Description
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					data <br/><b>(required)</b>
+				</td>
+				<td valign="top">
+					Example data: <br/>
+<pre>
+data: [
+    {label: "Download Sales", value: 12},
+    {label: "In-Store Sales", value: 30},
+    {label: "Mail-Order Sales", value: 20}
+]</pre>
+				</td>
+				<td valign="top">
+					The data to plot. This is an array of objects, containing label and value attributes corresponding to the labels and sizes of the segments of the donut chart. <br/>
+					Note: by default, the segment with the greatest value will be initially selected. You can change the selection using the select(index) method on the object returned by Morris.Donut.
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					element <br/><b>(required)</b>
+				</td>
+				<td valign="top">
+				</td>
+				<td valign="top">
+					The ID of (or a reference to) the element into which to insert the graph. <br/>
+					Note: this element must have a width and height defined in its styling.
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					colors
+				</td>
+				<td valign="top">
+					['#0B62A4', '#3980B5', '#679DC6', '#95BBD7', '#B0CCE1', '#095791', '#095085', '#083E67', '#052C48', '#042135']
+				</td>
+				<td valign="top">
+					An array of strings containing HTML-style hex colors for each of the donut segments. Note: if there are fewer colors than segments, the colors will cycle back to the start of the array when exhausted.
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					backgroundColor
+				</td>
+				<td valign="top">
+					'#FFFFFF'
+				</td>
+				<td valign="top">
+					This is actaully the color for the border of the dougnut sections.
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					labelColor
+				</td>
+				<td valign="top">
+					'#000000'
+				</td>
+				<td valign="top">
+					Specifies the color of the label in the center of the doughnut.
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					formatter
+				</td>
+				<td valign="top">
+					Morris.commas
+				</td>
+				<td valign="top">
+					A function that will translate a y-value into a label for the centre of the donut. <br/>
+					eg: currency function (y, data) { return '$' + y } <br/>
+					Note: if required, the method is also passed an optional second argument, which is the complete data row for the given value
+				</td>
+			</tr>
+		</table>
+		<br/><br/><br/><br/>
+		<table class="table" border="1">
+			<col width="125">
+  			<col width="200">
+			<tr>
+				<th colspan='3'>
+					Bar Chart Options
+				</th>
+			</tr>
+			<tr>
+				<td valign="top">
+					Option
+				</td>
+				<td valign="top">
+					Default
+				</td>
+				<td valign="top">
+					Description
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					Element <br/><b>(required)</b>
+				</td>
+				<td valign="top">
+				</td>
+				<td valign="top">
+					The ID of (or a reference to) the element into which to insert the graph. <br/>
+					Note: this element must have a width and height defined in its styling.
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					data <br/><b>(required)</b>
+				</td>
+				<td valign="top">
+					Example:
+<pre>
+	data: [
+	    { y: '2006', a: 100, b: 90 },
+	    { y: '2007', a: 75,  b: 65 },
+	    { y: '2008', a: 50,  b: 40 },
+	    { y: '2009', a: 75,  b: 65 },
+	    { y: '2010', a: 50,  b: 40 },
+	    { y: '2011', a: 75,  b: 65 },
+	    { y: '2012', a: 100, b: 90 }
+	  ]
+</pre>
+				</td>
+				<td valign="top">
+					The data to plot. This is an array of objects, containing x and y attributes as described by the xkey and ykeys options. <br/>
+					Note: the order in which you provide the data is the order in which the bars are displayed. <br/>
+					Note 2: if you need to update the plot, use the setData method on the object that Morris.Bar returns (the same as with line charts).
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					xkey <br/><b>(required)</b>
+				</td>
+				<td valign="top">
+					Example: 'y'
+				</td>
+				<td valign="top">
+					A string containing the name of the attribute that contains X labels.
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					ykeys <br/><b>(required)</b>
+				</td>
+				<td valign="top">
+					Example: ykeys: ['a', 'b']
+				</td>
+				<td valign="top">
+					A list of strings containing names of attributes that contain Y values (one for each series of data to be plotted).
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					labels <br/><b>(required)</b>
+				</td>
+				<td valign="top">
+					Example: labels: ['Series A', 'Series B']
+				</td>
+				<td valign="top">
+					A list of strings containing labels for the data series to be plotted (corresponding to the values in the ykeys option).
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					barSizeRatio
+				</td>
+				<td valign="top">
+					0.5
+				</td>
+				<td valign="top">
+					Percentage of the allocated space that a bar should take up.
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					barGap
+				</td>
+				<td valign="top">
+					3
+				</td>
+				<td valign="top">
+					Space in pixels between bars.
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					barColors
+				</td>
+				<td valign="top">
+					['#0b62a4', '#7a92a3', '#4da74d', '#afd8f8', '#edc240', '#cb4b4b'
+				</td>
+				<td valign="top">
+					Array containing colors for the series bars.
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					stacked
+				</td>
+				<td valign="top">
+					false
+				</td>
+				<td valign="top">
+					Set to true to draw bars stacked vertically.
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					xLabelMargin
+				</td>
+				<td valign="top">
+					50
+				</td>
+				<td valign="top">
+					The space before and after xlables.
+				</td>
+			</tr>
+		</table>
+		<br/><br/><br/><br/>
+		<table class="table" border="1">
+			<col width="125">
+  			<col width="200">
+			<tr>
+				<th colspan='3'>
+					Line and Area Charts Options
+				</th>
+			</tr>
+			<tr>
+				<td valign="top">
+					Options
+				</td>
+				<td valign="top">
+					Default
+				</td>
+				<td valign="top">
+					Description
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					element <br/><b>(required)</b>
+				</td>
+				<td valign="top">
+				</td>
+				<td valign="top">
+					The ID of (or a reference to) the element into which to insert the graph. <br/>
+					Note: this element must have a width and height defined in its styling.
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					data <br/><b>(required)</b>
+				</td>
+				<td valign="top">
+					Example:
+<pre>
+	 data: [
+	    { y: '2006', a: 100, b: 90 },
+	    { y: '2007', a: 75,  b: 65 },
+	    { y: '2008', a: 50,  b: 40 },
+	    { y: '2009', a: 75,  b: 65 },
+	    { y: '2010', a: 50,  b: 40 },
+	    { y: '2011', a: 75,  b: 65 },
+	    { y: '2012', a: 100, b: 90 }
+	  ]
+</pre>
+				</td>
+				<td valign="top">
+					The data to plot. This is an array of objects, containing x and y attributes as described by the xkey and ykeys options. <br/>
+					Note: ordering doesn't matter here - you can supply the data in whatever order works best for you. <br/>
+					Note 2: if you need to update the plot, use the setData method on the object that Morris.Line returns. There's a setData example in the GitHub repo.
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					xkey </pre>
+				</td>
+				<td valign="top">
+					Example: 'y'
+				</td>
+				<td valign="top">
+					A string containing the name of the attribute that contains date (X) values. 
+					Timestamps are accepted in the form of millisecond timestamps (as returned by Date.getTime() or as strings in the following formats: 
+					<ul>
+						<li>2012</li>
+						<li>2012 Q1</li>
+						<li>2012 W1</li>
+						<li>2012-02</li>
+						<li>2012-02-24</li>
+						<li>2012-02-24 15:00</li>
+						<li>2012-02-24 15:00:00</li>
+						<li>2012-02-24 15:00:00.000</li>
+					</ul>
+					Note: when using millisecond timestamps, it's recommended that you check out the dateFormat option. <br/>
+					Note 2: date/time strings can optionally contain a T between the date and time parts, and/or a Z suffix, for compatibility with ISO-8601 dates.
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					ykeys <br/><b>(required)</b>
+				</td>
+				<td valign="top">
+					Example: ['a', 'b']
+				</td>
+				<td valign="top">
+					A list of strings containing names of attributes that contain Y values (one for each series of data to be plotted).
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					labels <br/><b>(required)</b>
+				</td>
+				<td valign="top">
+					Example: ['Series A', 'Series B']
+				</td>
+				<td valign="top">
+					A list of strings containing labels for the data series to be plotted (corresponding to the values in the ykeys option).
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					lineWidth
+				</td>
+				<td valign="top">
+					3
+				</td>
+				<td valign="top">
+					Width of the series lines, in pixels.
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					pointSize
+				</td>
+				<td valign="top">
+					4
+				</td>
+				<td valign="top">
+					Diameter of the series points, in pixels.
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					lineColors
+				</td>
+				<td valign="top">
+					['#0b62a4', '#7A92A3', '#4da74d', '#afd8f8', '#edc240', '#cb4b4b', '#9440ed']
+				</td>
+				<td valign="top">
+					Array containing colors for the series lines/points.
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					pointWidths
+				</td>
+				<td valign="top">
+					[1]
+				</td>
+				<td valign="top">
+					This is to give different series different point sizes.
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					pointStrokeColors
+				</td>
+				<td valign="top">
+					['#ffffff']
+				</td>
+				<td valign="top">
+					Colors for the outlines of the series points. (#ffffff by default).
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					pointFillColors
+				</td>
+				<td valign="top">
+					[]
+				</td>
+				<td valign="top">
+					Colors for the series points. By default uses the same values as lineColors
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					smooth
+				</td>
+				<td valign="top">
+					true
+				</td>
+				<td valign="top">
+					Set to false to disable line smoothing.
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					xLabels
+				</td>
+				<td valign="top">
+					'auto'
+				</td>
+				<td valign="top">
+					Sets the x axis labelling interval. By default the interval will be automatically computed. The following are valid interval strings: 
+					<ul>
+						<li>"decade"</li>
+						<li>"year"</li>
+						<li>"month"</li>
+						<li>"day"</li>
+						<li>"hour"</li>
+						<li>"30min"</li>
+						<li>"15min"</li>
+						<li>"10min"</li>
+						<li>"5min"</li>
+						<li>"minute"</li>
+						<li>"30sec"</li>
+						<li>"15sec"</li>
+						<li>"10sec"</li>
+						<li>"5sec"</li>
+						<li>"second"</li>
+					</ul>
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					xLabelFormat
+				</td>
+				<td valign="top">
+					null
+				</td>
+				<td valign="top">
+					A function that accepts Date objects and formats them for display as x-axis labels. Overrides the default formatter chosen by the automatic labeller or the xLabels option. <br/>
+					eg: <code>function (x) { return x.toString(); } </code>
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					continuousLine
+				</td>
+				<td valign="top">
+					true
+				</td>
+				<td valign="top">
+					When set to false (the default), all null and undefined values in a data series will be ignored and lines will be drawn spanning them. <br/>
+					When set to true, null values will break the line and undefined values will be spanned. <br/>
+					Note: in v0.5.0, this setting will be removed and the behaviour will be to break lines at null values.
+				</td>
+			</tr>
+		</table>
+		<br/><br/><br/><br/><br/><br/>
+		<table class="table" border="1">
+			<col width="125">
+  			<col width="200">
+			<tr>
+				<th colspan='3'>
+					Area Charts only Options
+				</th>
+			</tr>
+			<tr>
+				<td valign="top">
+					Option
+				</td>
+				<td valign="top">
+					Default
+				</td>
+				<td valign="top">
+					Description
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					fillOpacity
+				</td>
+				<td valign="top">
+					'auto'
+				</td>
+				<td valign="top">
+					Change the opacity of the area fill colour. Accepts values between 0.0 (for completely transparent) and 1.0 (for completely opaque).
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					behaveLikeLine
+				</td>
+				<td valign="top">
+					false
+				</td>
+				<td valign="top">
+					Set to true to overlay the areas on top of each other instead of stacking them.
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+				</td>
+				<td valign="top">
+				</td>
+				<td valign="top">
+				</td>
+			</tr>
+		</table>
+	</body>
+</html>
