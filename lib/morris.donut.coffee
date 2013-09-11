@@ -76,7 +76,7 @@ class Morris.Donut extends Morris.EventEmitter
       next = last + min + C * (value / total)
       seg = new Morris.DonutSegment(
         cx, cy, w*2, w, last, next,
-        @options.colors[idx % @options.colors.length],
+        @data[i].color || @options.colors[idx % @options.colors.length],
         @options.backgroundColor, idx, @raphael)
       seg.render()
       @segments.push seg
