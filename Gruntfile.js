@@ -1,4 +1,6 @@
 module.exports = function (grunt) {
+  require('matchdep').filterDev('grunt-*').forEach(grunt.loadNpmTasks);
+
   grunt.initConfig({
     coffee: {
       lib: {
@@ -42,15 +44,11 @@ module.exports = function (grunt) {
         run: true
       }
     },
-    watch: {
+    npm: {
       files: ['lib/**/*.coffee', 'spec/lib/**/*.coffee', 'spec/support/**/*.coffee', 'less/**/*.less'],
       tasks: 'default'
     }
   });
-
-  grunt.loadNpmTasks('grunt-coffee');
-  grunt.loadNpmTasks('grunt-mocha');
-  grunt.loadNpmTasks('grunt-contrib-less');
 
   grunt.registerTask('default', 'concat coffee less min mocha');
 };
