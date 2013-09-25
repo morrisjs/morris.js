@@ -4,15 +4,17 @@ module.exports = function (grunt) {
   grunt.initConfig({
     coffee: {
       lib: {
-        src: ['build/morris.coffee'],
-        dest: '.',
-        options: { bare: false }
+        options: { bare: false },
+        files: {
+          'morris.js': ['build/morris.coffee']
+        }
       },
       spec: {
-        src: ['build/spec.coffee'],
-        dest: 'build',
-        options: { bare: true }
-      }
+        options: { bare: true },
+        files: {
+          'build/spec.js': ['build/spec.coffee']
+        }
+      },
     },
     concat: {
       'build/morris.coffee': [
@@ -35,20 +37,28 @@ module.exports = function (grunt) {
         }
       }
     },
-    min: {
-      'morris.min.js': 'morris.js'
-    },
-    mocha: {
-      spec: {
-        src: 'spec/specs.html',
-        run: true
+    uglify: {
+      build: {
+        files: {
+          'morris.min.js': 'morris.js'
+        }
       }
     },
-    npm: {
-      files: ['lib/**/*.coffee', 'spec/lib/**/*.coffee', 'spec/support/**/*.coffee', 'less/**/*.less'],
-      tasks: 'default'
-    }
+    mocha: {
+      index: ['spec/specs.html'],
+      options: {run: true}
+    },
+    watch: {
+      all: {
+        files: ['lib/**/*.coffee', 'spec/lib/**/*.coffee', 'spec/support/**/*.coffee', 'less/**/*.less'],
+        tasks: 'default'
+      },
+      dev: {
+        files:  'lib/*.coffee' ,
+        tasks: ['concat:build/morris.coffee', 'coffee:lib']
+      }
+    },
   });
 
-  grunt.registerTask('default', 'concat coffee less min mocha');
+  grunt.registerTask('default', ['concat', 'coffee', 'less', 'uglify', 'mocha']);
 };
