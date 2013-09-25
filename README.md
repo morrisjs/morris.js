@@ -1,6 +1,6 @@
 # Morris.js - pretty time-series line graphs
 
-[![Build Status](https://secure.travis-ci.org/oesmith/morris.js.png?branch=master)](http://travis-ci.org/oesmith/morris.js)
+[![Build Status](https://travis-ci.org/sudodoki/morris.js.png)](https://travis-ci.org/sudodoki/morris.js.png)
 
 Morris.js is the library that powers the graphs on http://howmanyleft.co.uk/.
 It's a very simple API for drawing line, bar, area and donut charts.
