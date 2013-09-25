@@ -11,7 +11,6 @@
   $ = jQuery;
 
   Morris.EventEmitter = (function() {
-
     function EventEmitter() {}
 
     EventEmitter.prototype.on = function(name, handler) {
@@ -65,7 +64,6 @@
   };
 
   Morris.Grid = (function(_super) {
-
     __extends(Grid, _super);
 
     function Grid(options) {
@@ -75,7 +73,7 @@
       } else {
         this.el = $(options.element);
       }
-      if (!(this.el != null) || this.el.length === 0) {
+      if ((this.el == null) || this.el.length === 0) {
         throw new Error("Graph container element not found");
       }
       if (this.el.css('position') === 'static') {
@@ -152,7 +150,7 @@
         redraw = true;
       }
       this.options.data = data;
-      if (!(data != null) || data.length === 0) {
+      if ((data == null) || data.length === 0) {
         this.data = [];
         this.raphael.clear();
         if (this.hover != null) {
@@ -270,7 +268,7 @@
           this.grid = (function() {
             var _i, _ref, _ref1, _results;
             _results = [];
-            for (y = _i = _ref = this.ymin, _ref1 = this.ymax; _ref <= _ref1 ? _i <= _ref1 : _i >= _ref1; y = _i += step) {
+            for (y = _i = _ref = this.ymin, _ref1 = this.ymax; step > 0 ? _i <= _ref1 : _i >= _ref1; y = _i += step) {
               _results.push(y);
             }
             return _results;
@@ -330,7 +328,7 @@
         grid = (function() {
           var _i, _results;
           _results = [];
-          for (y = _i = gmin; gmin <= gmax ? _i <= gmax : _i >= gmax; y = _i += step) {
+          for (y = _i = gmin; step > 0 ? _i <= gmax : _i >= gmax; y = _i += step) {
             _results.push(parseFloat(y.toFixed(1 - smag)));
           }
           return _results;
@@ -339,7 +337,7 @@
         grid = (function() {
           var _i, _results;
           _results = [];
-          for (y = _i = gmin; gmin <= gmax ? _i <= gmax : _i >= gmax; y = _i += step) {
+          for (y = _i = gmin; step > 0 ? _i <= gmax : _i >= gmax; y = _i += step) {
             _results.push(y);
           }
           return _results;
@@ -570,7 +568,6 @@
   };
 
   Morris.Hover = (function() {
-
     Hover.defaults = {
       "class": 'morris-hover morris-default-style'
     };
@@ -632,16 +629,12 @@
   })();
 
   Morris.Line = (function(_super) {
-
     __extends(Line, _super);
 
     function Line(options) {
       this.hilight = __bind(this.hilight, this);
-
       this.onHoverOut = __bind(this.onHoverOut, this);
-
       this.onHoverMove = __bind(this.onHoverMove, this);
-
       this.onGridClick = __bind(this.onGridClick, this);
       if (!(this instanceof Morris.Line)) {
         return new Morris.Line(options);
@@ -855,7 +848,7 @@
           label.transform("t" + offset + ",0...");
         }
         labelBox = label.getBBox();
-        if ((!(prevLabelMargin != null) || prevLabelMargin >= labelBox.x + labelBox.width || (prevAngleMargin != null) && prevAngleMargin >= labelBox.x) && labelBox.x >= 0 && (labelBox.x + labelBox.width) < _this.el.width()) {
+        if (((prevLabelMargin == null) || prevLabelMargin >= labelBox.x + labelBox.width || (prevAngleMargin != null) && prevAngleMargin >= labelBox.x) && labelBox.x >= 0 && (labelBox.x + labelBox.width) < _this.el.width()) {
           if (_this.options.xLabelAngle !== 0) {
             margin = 1.25 * _this.options.gridTextSize / Math.sin(_this.options.xLabelAngle * Math.PI / 180.0);
             prevAngleMargin = labelBox.x - margin;
@@ -1279,14 +1272,11 @@
   })(Morris.Line);
 
   Morris.Bar = (function(_super) {
-
     __extends(Bar, _super);
 
     function Bar(options) {
       this.onHoverOut = __bind(this.onHoverOut, this);
-
       this.onHoverMove = __bind(this.onHoverMove, this);
-
       this.onGridClick = __bind(this.onGridClick, this);
       if (!(this instanceof Morris.Bar)) {
         return new Morris.Bar(options);
@@ -1372,7 +1362,7 @@
           offset = -0.5 * textBox.width * Math.cos(this.options.xLabelAngle * Math.PI / 180.0);
           label.transform("t" + offset + ",0...");
         }
-        if ((!(prevLabelMargin != null) || prevLabelMargin >= labelBox.x + labelBox.width || (prevAngleMargin != null) && prevAngleMargin >= labelBox.x) && labelBox.x >= 0 && (labelBox.x + labelBox.width) < this.el.width()) {
+        if (((prevLabelMargin == null) || prevLabelMargin >= labelBox.x + labelBox.width || (prevAngleMargin != null) && prevAngleMargin >= labelBox.x) && labelBox.x >= 0 && (labelBox.x + labelBox.width) < this.el.width()) {
           if (this.options.xLabelAngle !== 0) {
             margin = 1.25 * this.options.gridTextSize / Math.sin(this.options.xLabelAngle * Math.PI / 180.0);
             prevAngleMargin = labelBox.x - margin;
@@ -1509,7 +1499,6 @@
   })(Morris.Grid);
 
   Morris.Donut = (function(_super) {
-
     __extends(Donut, _super);
 
     Donut.prototype.defaults = {
@@ -1521,9 +1510,7 @@
 
     function Donut(options) {
       this.select = __bind(this.select, this);
-
       this.click = __bind(this.click, this);
-
       var row;
       if (!(this instanceof Morris.Donut)) {
         return new Morris.Donut(options);
@@ -1667,7 +1654,6 @@
   })(Morris.EventEmitter);
 
   Morris.DonutSegment = (function(_super) {
-
     __extends(DonutSegment, _super);
 
     function DonutSegment(cx, cy, inner, outer, p0, p1, color, backgroundColor, index, raphael) {
@@ -1680,9 +1666,7 @@
       this.index = index;
       this.raphael = raphael;
       this.deselect = __bind(this.deselect, this);
-
       this.select = __bind(this.select, this);
-
       this.sin_p0 = Math.sin(p0);
       this.cos_p0 = Math.cos(p0);
       this.sin_p1 = Math.sin(p1);
