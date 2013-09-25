@@ -303,7 +303,11 @@
           this.grid = (function() {
             var _i, _ref1, _ref2, _results;
             _results = [];
+<<<<<<< HEAD
             for (y = _i = _ref1 = this.ymin, _ref2 = this.ymax; step > 0 ? _i <= _ref2 : _i >= _ref2; y = _i += step) {
+=======
+            for (y = _i = _ref = this.ymin, _ref1 = this.ymax; step > 0 ? _i <= _ref1 : _i >= _ref1; y = _i += step) {
+>>>>>>> update build
               _results.push(y);
             }
             return _results;
