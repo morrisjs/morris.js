@@ -89,16 +89,32 @@
       this.elementWidth = null;
       this.elementHeight = null;
       this.dirty = false;
+      this.selectFrom = null;
       if (this.init) {
         this.init();
       }
       this.setData(this.options.data);
       this.el.bind('mousemove', function(evt) {
-        var offset;
+        var left, offset, right, width, x;
         offset = _this.el.offset();
-        return _this.fire('hovermove', evt.pageX - offset.left, evt.pageY - offset.top);
+        x = evt.pageX - offset.left;
+        if (_this.selectFrom) {
+          left = _this.data[_this.hitTest(Math.min(x, _this.selectFrom))]._x;
+          right = _this.data[_this.hitTest(Math.max(x, _this.selectFrom))]._x;
+          width = right - left;
+          return _this.selectionRect.attr({
+            x: left,
+            width: width
+          });
+        } else {
+          return _this.fire('hovermove', x, evt.pageY - offset.top);
+        }
       });
-      this.el.bind('mouseout', function(evt) {
+      this.el.bind('mouseleave', function(evt) {
+        if (_this.selectFrom) {
+          _this.selectionRect.hide();
+          _this.selectFrom = null;
+        }
         return _this.fire('hoverout');
       });
       this.el.bind('touchstart touchmove touchend', function(evt) {
@@ -113,6 +129,23 @@
         offset = _this.el.offset();
         return _this.fire('gridclick', evt.pageX - offset.left, evt.pageY - offset.top);
       });
+      if (this.options.rangeSelect) {
+        this.selectionRect = this.raphael.rect(0, 0, 0, this.el.innerHeight()).attr({
+          fill: this.options.rangeSelectColor,
+          stroke: false
+        }).toBack().hide();
+        this.el.bind('mousedown', function(evt) {
+          var offset;
+          offset = _this.el.offset();
+          return _this.startRange(evt.pageX - offset.left);
+        });
+        this.el.bind('mouseup', function(evt) {
+          var offset;
+          offset = _this.el.offset();
+          _this.endRange(evt.pageX - offset.left);
+          return _this.fire('hovermove', evt.pageX - offset.left, evt.pageY - offset.top);
+        });
+      }
       if (this.postInit) {
         this.postInit();
       }
@@ -143,7 +176,9 @@
       goalLineColors: ['#666633', '#999966', '#cc6666', '#663333'],
       events: [],
       eventStrokeWidth: 1.0,
-      eventLineColors: ['#005a04', '#ccffbb', '#3a5f0b', '#005502']
+      eventLineColors: ['#005a04', '#ccffbb', '#3a5f0b', '#005502'],
+      rangeSelect: null,
+      rangeSelectColor: '#eef'
     };
 
     Grid.prototype.setData = function(data, redraw) {
@@ -438,14 +473,6 @@
       }
     };
 
-    Grid.prototype.updateHover = function(x, y) {
-      var hit, _ref;
-      hit = this.hitTest(x, y);
-      if (hit != null) {
-        return (_ref = this.hover).update.apply(_ref, hit);
-      }
-    };
-
     Grid.prototype.drawGrid = function() {
       var lineY, y, _i, _len, _ref, _results;
       if (this.options.grid === false && this.options.axes === false) {
@@ -506,6 +533,28 @@
 
     Grid.prototype.drawGridLine = function(path) {
       return this.raphael.path(path).attr('stroke', this.options.gridLineColor).attr('stroke-width', this.options.gridStrokeWidth);
+    };
+
+    Grid.prototype.startRange = function(x) {
+      this.hover.hide();
+      this.selectFrom = x;
+      return this.selectionRect.attr({
+        x: x,
+        width: 0
+      }).show();
+    };
+
+    Grid.prototype.endRange = function(x) {
+      var end, start;
+      if (this.selectFrom) {
+        start = Math.min(this.selectFrom, x);
+        end = Math.max(this.selectFrom, x);
+        this.options.rangeSelect.call(this.el, {
+          start: this.data[this.hitTest(start)].x,
+          end: this.data[this.hitTest(end)].x
+        });
+        return this.selectFrom = null;
+      }
     };
 
     return Grid;
@@ -723,7 +772,7 @@
       return _results;
     };
 
-    Line.prototype.hitTest = function(x, y) {
+    Line.prototype.hitTest = function(x) {
       var index, r, _i, _len, _ref;
       if (this.data.length === 0) {
         return null;
@@ -740,13 +789,13 @@
 
     Line.prototype.onGridClick = function(x, y) {
       var index;
-      index = this.hitTest(x, y);
+      index = this.hitTest(x);
       return this.fire('click', index, this.options.data[index], x, y);
     };
 
     Line.prototype.onHoverMove = function(x, y) {
       var index;
-      index = this.hitTest(x, y);
+      index = this.hitTest(x);
       return this.displayHoverForRow(index);
     };
 
@@ -1465,7 +1514,7 @@
       }
     };
 
-    Bar.prototype.hitTest = function(x, y) {
+    Bar.prototype.hitTest = function(x) {
       if (this.data.length === 0) {
         return null;
       }
@@ -1475,13 +1524,13 @@
 
     Bar.prototype.onGridClick = function(x, y) {
       var index;
-      index = this.hitTest(x, y);
+      index = this.hitTest(x);
       return this.fire('click', index, this.options.data[index], x, y);
     };
 
     Bar.prototype.onHoverMove = function(x, y) {
       var index, _ref;
-      index = this.hitTest(x, y);
+      index = this.hitTest(x);
       return (_ref = this.hover).update.apply(_ref, this.hoverContentForRow(index));
     };
 
