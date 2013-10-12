@@ -701,12 +701,19 @@
     }
 
     Line.prototype.init = function() {
-      this.pointGrow = Raphael.animation({
-        r: this.options.pointSize + 3
-      }, 25, 'linear');
-      this.pointShrink = Raphael.animation({
-        r: this.options.pointSize
-      }, 25, 'linear');
+      var pointSize, _i, _len, _ref;
+      this.pointGrow = [];
+      this.pointShrink = [];
+      _ref = this.options.pointSizes;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        pointSize = _ref[_i];
+        this.pointGrow.push(Raphael.animation({
+          r: pointSize + 3
+        }, 25, 'linear'));
+        this.pointShrink.push(Raphael.animation({
+          r: pointSize
+        }, 25, 'linear'));
+      }
       if (this.options.hideHover !== 'always') {
         this.hover = new Morris.Hover({
           parent: this.el
@@ -719,7 +726,7 @@
 
     Line.prototype.defaults = {
       lineWidth: 3,
-      pointSize: 4,
+      pointSizes: [4],
       lineColors: ['#0b62a4', '#7A92A3', '#4da74d', '#afd8f8', '#edc240', '#cb4b4b', '#9440ed'],
       pointWidths: [1],
       pointStrokeColors: ['#ffffff'],
@@ -966,7 +973,7 @@
         row = _ref[_i];
         circle = null;
         if (row._y[index] != null) {
-          circle = this.drawLinePoint(row._x, row._y[index], this.options.pointSize, this.colorFor(row, index, 'point'), index);
+          circle = this.drawLinePoint(row._x, row._y[index], this.options.pointSizes[index % this.options.pointSizes.length], this.colorFor(row, index, 'point'), index);
         }
         _results.push(this.seriesPoints[index].push(circle));
       }
@@ -1053,14 +1060,14 @@
       if (this.prevHilight !== null && this.prevHilight !== index) {
         for (i = _i = 0, _ref = this.seriesPoints.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
           if (this.seriesPoints[i][this.prevHilight]) {
-            this.seriesPoints[i][this.prevHilight].animate(this.pointShrink);
+            this.seriesPoints[i][this.prevHilight].animate(this.pointShrink[i]);
           }
         }
       }
       if (index !== null && this.prevHilight !== index) {
         for (i = _j = 0, _ref1 = this.seriesPoints.length - 1; 0 <= _ref1 ? _j <= _ref1 : _j >= _ref1; i = 0 <= _ref1 ? ++_j : --_j) {
           if (this.seriesPoints[i][index]) {
-            this.seriesPoints[i][index].animate(this.pointGrow);
+            this.seriesPoints[i][index].animate(this.pointGrow[i]);
           }
         }
       }
