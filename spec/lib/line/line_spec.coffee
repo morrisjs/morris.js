@@ -181,6 +181,7 @@ describe 'Morris.Line', ->
       gridStrokeWidth: 0.5
       gridTextColor: '#888'
       gridTextSize: 12
+      pointSizes: [5]
 
     it 'should have circles with configured fill color', ->
       chart = Morris.Line $.extend {}, defaults
@@ -205,3 +206,7 @@ describe 'Morris.Line', ->
     it 'should have text with configured font size', ->
       chart = Morris.Line $.extend {}, defaults
       $('#graph').find("text[fill='#888888']").size().should.equal 9
+
+    it 'should have circle with configured size', ->
+      chart = Morris.Line $.extend {}, defaults
+      $('#graph').find("circle[r='5']").size().should.equal 2
