@@ -31,7 +31,7 @@ You'll need [node.js](https://nodejs.org).  I recommend using
 development environments.
 
 With node installed, install [grunt](https://github.com/cowboy/grunt) using
-`npm install -g grunt`, and then the rest of the test/build dependencies
+`npm install -g grunt-cli`, and then the rest of the test/build dependencies
 with `npm install` in the morris.js project folder.
 
 Once you're all set up, you can compile, minify and run the tests using `grunt`.
