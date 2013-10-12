@@ -701,19 +701,6 @@
     }
 
     Line.prototype.init = function() {
-      var pointSize, _i, _len, _ref;
-      this.pointGrow = [];
-      this.pointShrink = [];
-      _ref = this.options.pointSizes;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        pointSize = _ref[_i];
-        this.pointGrow.push(Raphael.animation({
-          r: pointSize + 3
-        }, 25, 'linear'));
-        this.pointShrink.push(Raphael.animation({
-          r: pointSize
-        }, 25, 'linear'));
-      }
       if (this.options.hideHover !== 'always') {
         this.hover = new Morris.Hover({
           parent: this.el
@@ -726,9 +713,9 @@
 
     Line.prototype.defaults = {
       lineWidth: 3,
-      pointSizes: [4],
+      pointSize: 4,
       lineColors: ['#0b62a4', '#7A92A3', '#4da74d', '#afd8f8', '#edc240', '#cb4b4b', '#9440ed'],
-      pointWidths: [1],
+      pointStrokeWidths: [1],
       pointStrokeColors: ['#ffffff'],
       pointFillColors: [],
       smooth: true,
@@ -973,7 +960,7 @@
         row = _ref[_i];
         circle = null;
         if (row._y[index] != null) {
-          circle = this.drawLinePoint(row._x, row._y[index], this.options.pointSizes[index % this.options.pointSizes.length], this.colorFor(row, index, 'point'), index);
+          circle = this.drawLinePoint(row._x, row._y[index], this.colorFor(row, index, 'point'), index);
         }
         _results.push(this.seriesPoints[index].push(circle));
       }
@@ -984,7 +971,7 @@
       var path;
       path = this.paths[index];
       if (path !== null) {
-        return this.drawLinePath(path, this.colorFor(null, index, 'line'));
+        return this.drawLinePath(path, this.colorFor(null, index, 'line'), index);
       }
     };
 
@@ -1060,14 +1047,14 @@
       if (this.prevHilight !== null && this.prevHilight !== index) {
         for (i = _i = 0, _ref = this.seriesPoints.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
           if (this.seriesPoints[i][this.prevHilight]) {
-            this.seriesPoints[i][this.prevHilight].animate(this.pointShrink[i]);
+            this.seriesPoints[i][this.prevHilight].animate(this.pointShrinkSeries(i));
           }
         }
       }
       if (index !== null && this.prevHilight !== index) {
         for (i = _j = 0, _ref1 = this.seriesPoints.length - 1; 0 <= _ref1 ? _j <= _ref1 : _j >= _ref1; i = 0 <= _ref1 ? ++_j : --_j) {
           if (this.seriesPoints[i][index]) {
-            this.seriesPoints[i][index].animate(this.pointGrow[i]);
+            this.seriesPoints[i][index].animate(this.pointGrowSeries(i));
           }
         }
       }
@@ -1088,20 +1075,48 @@
       return this.raphael.text(xPos, yPos, text).attr('font-size', this.options.gridTextSize).attr('font-family', this.options.gridTextFamily).attr('font-weight', this.options.gridTextWeight).attr('fill', this.options.gridTextColor);
     };
 
-    Line.prototype.drawLinePath = function(path, lineColor) {
-      return this.raphael.path(path).attr('stroke', lineColor).attr('stroke-width', this.options.lineWidth);
+    Line.prototype.drawLinePath = function(path, lineColor, lineIndex) {
+      return this.raphael.path(path).attr('stroke', lineColor).attr('stroke-width', this.lineWidthForSeries(lineIndex));
     };
 
-    Line.prototype.drawLinePoint = function(xPos, yPos, size, pointColor, lineIndex) {
-      return this.raphael.circle(xPos, yPos, size).attr('fill', pointColor).attr('stroke-width', this.strokeWidthForSeries(lineIndex)).attr('stroke', this.strokeForSeries(lineIndex));
+    Line.prototype.drawLinePoint = function(xPos, yPos, pointColor, lineIndex) {
+      return this.raphael.circle(xPos, yPos, this.pointSizeForSeries(lineIndex)).attr('fill', pointColor).attr('stroke-width', this.pointStrokeWidthForSeries(lineIndex)).attr('stroke', this.pointStrokeColorForSeries(lineIndex));
     };
 
-    Line.prototype.strokeWidthForSeries = function(index) {
-      return this.options.pointWidths[index % this.options.pointWidths.length];
+    Line.prototype.pointStrokeWidthForSeries = function(index) {
+      return this.options.pointStrokeWidths[index % this.options.pointStrokeWidths.length];
     };
 
-    Line.prototype.strokeForSeries = function(index) {
+    Line.prototype.pointStrokeColorForSeries = function(index) {
       return this.options.pointStrokeColors[index % this.options.pointStrokeColors.length];
+    };
+
+    Line.prototype.lineWidthForSeries = function(index) {
+      if (this.options.lineWidth instanceof Array) {
+        return this.options.lineWidth[index % this.options.lineWidth.length];
+      } else {
+        return this.options.lineWidth;
+      }
+    };
+
+    Line.prototype.pointSizeForSeries = function(index) {
+      if (this.options.pointSize instanceof Array) {
+        return this.options.pointSize[index % this.options.pointSize.length];
+      } else {
+        return this.options.pointSize;
+      }
+    };
+
+    Line.prototype.pointGrowSeries = function(index) {
+      return Raphael.animation({
+        r: this.pointSizeForSeries(index) + 3
+      }, 25, 'linear');
+    };
+
+    Line.prototype.pointShrinkSeries = function(index) {
+      return Raphael.animation({
+        r: this.pointSizeForSeries(index)
+      }, 25, 'linear');
     };
 
     return Line;

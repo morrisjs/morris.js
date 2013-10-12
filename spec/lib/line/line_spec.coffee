@@ -23,12 +23,12 @@ describe 'Morris.Line', ->
       ykeys: ['y']
       labels: ['dontcare']
       pointStrokeColors: [red, blue]
-      pointWidths: [1, 2]
+      pointStrokeWidths: [1, 2]
       pointFillColors: [null, red]
-    chart.strokeWidthForSeries(0).should.equal 1
-    chart.strokeForSeries(0).should.equal red
-    chart.strokeWidthForSeries(1).should.equal 2
-    chart.strokeForSeries(1).should.equal blue
+    chart.pointStrokeWidthForSeries(0).should.equal 1
+    chart.pointStrokeColorForSeries(0).should.equal red
+    chart.pointStrokeWidthForSeries(1).should.equal 2
+    chart.pointStrokeColorForSeries(1).should.equal blue
     chart.colorFor(chart.data[0], 0, 'point').should.equal chart.colorFor(chart.data[0], 0, 'line')
     chart.colorFor(chart.data[1], 1, 'point').should.equal red
 
@@ -114,6 +114,11 @@ describe 'Morris.Line', ->
       Morris.Line @defaults
       shouldHavePath /(M[\d\.]+,[\d\.]+C[\d\.]+(,[\d\.]+){5}){2}/
 
+    it 'should make line width customizable', ->
+      chart = Morris.Line $.extend(@defaults, lineWidth: [1, 2])
+      chart.lineWidthForSeries(0).should.equal 1
+      chart.lineWidthForSeries(1).should.equal 2
+
   describe '#createPath', ->
 
     it 'should generate a smooth line', ->
@@ -175,13 +180,13 @@ describe 'Morris.Line', ->
       labels: ['Y', 'Z']
       lineColors: [ '#0b62a4', '#7a92a3']
       lineWidth: 3
-      pointWidths: [5]
+      pointStrokeWidths: [5]
       pointStrokeColors: ['#ffffff']
       gridLineColor: '#aaa'
       gridStrokeWidth: 0.5
       gridTextColor: '#888'
       gridTextSize: 12
-      pointSizes: [5]
+      pointSize: [5]
 
     it 'should have circles with configured fill color', ->
       chart = Morris.Line $.extend {}, defaults
