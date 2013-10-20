@@ -25,7 +25,7 @@
     "grunt-contrib-watch": "~0.5.3"
   },
   "scripts": {
-    "test": "grunt coffee mocha"
+    "test": "grunt concat coffee mocha"
   },
   "engines": {
     "node": ">=0.8 <0.11"
