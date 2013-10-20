@@ -107,6 +107,9 @@ class Morris.Bar extends Morris.Grid
           left += sidx * (barWidth + @options.barGap) unless @options.stacked
           size = bottom - top
 
+          if @options.verticalGrid and @options.verticalGrid.condition(row.x)
+            @drawBar(left - leftPadding, @top, groupWidth, Math.abs(@top - @bottom), @options.verticalGrid.color, @options.verticalGrid.opacity)
+
           top -= lastTop if @options.stacked
           @drawBar(left, top, barWidth, size, @colorFor(row, sidx, 'bar'))
 
@@ -181,7 +184,8 @@ class Morris.Bar extends Morris.Grid
       .attr('font-weight', @options.gridTextWeight)
       .attr('fill', @options.gridTextColor)
 
-  drawBar: (xPos, yPos, width, height, barColor) ->
+  drawBar: (xPos, yPos, width, height, barColor, opacity = '1') ->
     @raphael.rect(xPos, yPos, width, height)
       .attr('fill', barColor)
       .attr('stroke-width', 0)
+      .attr('fill-opacity', opacity)
