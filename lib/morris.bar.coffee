@@ -49,6 +49,7 @@ class Morris.Bar extends Morris.Grid
   #
   draw: ->
     @drawXAxis() if @options.axes in [true, 'both', 'x']
+    @drawYAxisCaption() if @options.yCaption?
     @drawSeries()
 
   # draw the x-axis labels
@@ -177,12 +178,18 @@ class Morris.Bar extends Morris.Grid
     x = @left + (index + 0.5) * @width / @data.length
     [content, x]
 
-  drawXAxisLabel: (xPos, yPos, text) ->
+  drawXAxisLabel: (xPos, yPos, text, fColor = @options.gridTextColor, fSize = @options.gridTextSize, fFamily = @options.gridTextFamily, fWeight = @options.gridTextWeight) ->
     label = @raphael.text(xPos, yPos, text)
-      .attr('font-size', @options.gridTextSize)
-      .attr('font-family', @options.gridTextFamily)
-      .attr('font-weight', @options.gridTextWeight)
-      .attr('fill', @options.gridTextColor)
+      .attr('font-size', fSize)
+      .attr('font-family', fFamily)
+      .attr('font-weight', fWeight)
+      .attr('fill', fColor)
+
+  drawYAxisCaption: ->
+    leftPosition = @left - @options.padding / 2 + @options.yCaption.offsetX
+    verticalMiddle = (@bottom - @top) / 2
+    @drawXAxisLabel(leftPosition, verticalMiddle, @options.yCaption.text, @options.yCaption.color, @options.yCaption.fSize, @options.yCaption.fFamily,@options.yCaption.fWeight)
+      .transform('r-90')
 
   drawBar: (xPos, yPos, width, height, barColor, opacity = '1') ->
     @raphael.rect(xPos, yPos, width, height)
