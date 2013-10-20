@@ -1,4 +1,28 @@
 describe 'Morris.Bar', ->
+  describe 'when using vertical grid', ->
+    defaults =
+      element: 'graph'
+      data: [{x: 'foo', y: 2, z: 3}, {x: 'bar', y: 4, z: 6}]
+      xkey: 'x'
+      ykeys: ['y', 'z']
+      labels: ['Y', 'Z']
+      verticalGrid:
+        condition: (index) -> index % 2
+        color: '#888888'
+        opacity: '0.2'
+
+    describe 'svg structure', ->
+      it 'should contain extra rectangles for vertical grid', ->
+        chart = Morris.Bar $.extend {}, defaults
+        $('#graph').find("rect").size().should.equal 6
+
+    describe 'svg attributes', ->
+      it 'should have to bars with verticalGrid.color', ->
+        chart = Morris.Bar $.extend {}, defaults
+        $('#graph').find("rect[fill='#{defaults.verticalGrid.color}']").size().should.equal 2
+      it 'should have to bars with verticalGrid.color', ->
+        chart = Morris.Bar $.extend {}, defaults
+        $('#graph').find("rect[fill-opacity='#{defaults.verticalGrid.opacity}']").size().should.equal 2
 
   describe 'svg structure', ->
     defaults =
