@@ -72,3 +72,50 @@ describe 'Morris.Bar', ->
     it 'should have text with configured font size', ->
       chart = Morris.Bar $.extend {}, defaults
       $('#graph').find("text[font-size='12px']").size().should.equal 7
+
+  describe 'when having set yCaption', ->
+    defaults =
+      element: 'graph'
+      data: [{x: 'foo', y: 2, z: 3}, {x: 'bar', y: 4, z: 6}]
+      xkey: 'x'
+      ykeys: ['y', 'z']
+      labels: ['Y', 'Z']
+      barColors: [ '#0b62a4', '#7a92a3']
+      gridLineColor: '#aaa'
+      gridStrokeWidth: 0.5
+      gridTextColor: '#888'
+      gridTextSize: 12
+      padding: 40
+      hoverCallback: (index, options, content) -> options.data[index].percentage_value + '% - ' + 'haha'
+      yCaption:
+        offsetX: -30
+        text: 'THIS IS VERY LONG Y CAPTION'
+        fSize: 16
+        fFamily: 'Arial'
+        fWeight: 800
+        color: '#123'
+
+    describe 'svg structure', ->
+      it 'should have a caption\'s text node', ->
+        chart = Morris.Bar $.extend {}, defaults
+        $('#graph').find("text[font-size='16px']").size().should.equal 1
+      it 'should contain caption.text', ->
+        chart = Morris.Bar $.extend {}, defaults
+        $('#graph').find("text[font-size='16px']").text().should.equal 'THIS IS VERY LONG Y CAPTION'
+    describe 'svg attributes', ->
+      it 'should have attributes defined in options', ->
+        chart = Morris.Bar $.extend {}, defaults
+        $('#graph').find("text[font-size='16px']").attr('font-weight').should.equal '800'
+        $('#graph').find("text[font-size='16px']").attr('font-family').should.equal 'Arial'
+        $('#graph').find("text[font-size='16px']").attr('fill').should.equal '#112233'
+      it 'should fallback to grid text attribute, in case some are missing', ->
+        delete defaults.yCaption
+        chart = Morris.Bar $.extend {
+          yCaption:
+            offsetX: -30
+            text: 'THIS IS VERY LONG Y CAPTION'
+            fSize: 16
+            fFamily: 'Arial'
+            fWeight: 800
+        }, defaults
+        $('#graph').find("text[font-size='16px']").attr('fill').should.equal '#888888'

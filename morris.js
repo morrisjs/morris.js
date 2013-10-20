@@ -1429,6 +1429,9 @@
       if ((_ref = this.options.axes) === true || _ref === 'both' || _ref === 'x') {
         this.drawXAxis();
       }
+      if (this.options.yCaption != null) {
+        this.drawYAxisCaption();
+      }
       return this.drawSeries();
     };
 
@@ -1575,9 +1578,28 @@
       return [content, x];
     };
 
-    Bar.prototype.drawXAxisLabel = function(xPos, yPos, text) {
+    Bar.prototype.drawXAxisLabel = function(xPos, yPos, text, fColor, fSize, fFamily, fWeight) {
       var label;
-      return label = this.raphael.text(xPos, yPos, text).attr('font-size', this.options.gridTextSize).attr('font-family', this.options.gridTextFamily).attr('font-weight', this.options.gridTextWeight).attr('fill', this.options.gridTextColor);
+      if (fColor == null) {
+        fColor = this.options.gridTextColor;
+      }
+      if (fSize == null) {
+        fSize = this.options.gridTextSize;
+      }
+      if (fFamily == null) {
+        fFamily = this.options.gridTextFamily;
+      }
+      if (fWeight == null) {
+        fWeight = this.options.gridTextWeight;
+      }
+      return label = this.raphael.text(xPos, yPos, text).attr('font-size', fSize).attr('font-family', fFamily).attr('font-weight', fWeight).attr('fill', fColor);
+    };
+
+    Bar.prototype.drawYAxisCaption = function() {
+      var leftPosition, verticalMiddle;
+      leftPosition = this.left - this.options.padding / 2 + this.options.yCaption.offsetX;
+      verticalMiddle = (this.bottom - this.top) / 2;
+      return this.drawXAxisLabel(leftPosition, verticalMiddle, this.options.yCaption.text, this.options.yCaption.color, this.options.yCaption.fSize, this.options.yCaption.fFamily, this.options.yCaption.fWeight).transform('r-90');
     };
 
     Bar.prototype.drawBar = function(xPos, yPos, width, height, barColor, opacity) {
