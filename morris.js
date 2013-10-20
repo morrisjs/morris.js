@@ -1499,6 +1499,9 @@
                   left += sidx * (barWidth + this.options.barGap);
                 }
                 size = bottom - top;
+                if (this.options.verticalGrid && this.options.verticalGrid.condition(row.x)) {
+                  this.drawBar(left - leftPadding, this.top, groupWidth, Math.abs(this.top - this.bottom), this.options.verticalGrid.color, this.options.verticalGrid.opacity);
+                }
                 if (this.options.stacked) {
                   top -= lastTop;
                 }
@@ -1581,8 +1584,11 @@
       return label = this.raphael.text(xPos, yPos, text).attr('font-size', this.options.gridTextSize).attr('font-family', this.options.gridTextFamily).attr('font-weight', this.options.gridTextWeight).attr('fill', this.options.gridTextColor);
     };
 
-    Bar.prototype.drawBar = function(xPos, yPos, width, height, barColor) {
-      return this.raphael.rect(xPos, yPos, width, height).attr('fill', barColor).attr('stroke-width', 0);
+    Bar.prototype.drawBar = function(xPos, yPos, width, height, barColor, opacity) {
+      if (opacity == null) {
+        opacity = '1';
+      }
+      return this.raphael.rect(xPos, yPos, width, height).attr('fill', barColor).attr('stroke-width', 0).attr('fill-opacity', opacity);
     };
 
     return Bar;
