@@ -107,6 +107,8 @@ class Morris.Bar extends Morris.Grid
           left += sidx * (barWidth + @options.barGap) unless @options.stacked
           size = bottom - top
 
+          if opts = @options?.staticLabels
+            @drawXAxisLabel(left + barWidth / 2, top - (opts.margin or 0), @labelContentForRow(idx))
           top -= lastTop if @options.stacked
           @drawBar(left, top, barWidth, size, @colorFor(row, sidx, 'bar'))
 
@@ -173,6 +175,15 @@ class Morris.Bar extends Morris.Grid
       content = @options.hoverCallback(index, @options, content)
     x = @left + (index + 0.5) * @width / @data.length
     [content, x]
+
+  labelContentForRow: (index) ->
+    row = @data[index]
+    content = ''
+    for y, j in row.y
+      content += "#{@options.labels[j]}:#{@yLabelFormat(y)} "
+    if typeof @options.staticLabels.labelCallback is 'function'
+      content = @options.staticLabels.labelCallback(index, @options, content)
+    content
 
   drawXAxisLabel: (xPos, yPos, text) ->
     label = @raphael.text(xPos, yPos, text)
