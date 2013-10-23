@@ -136,25 +136,25 @@ class Morris.Bar extends Morris.Grid
 
   # hit test - returns the index of the row at the given x-coordinate
   #
-  hitTest: (x) ->
-    return null if @data.length == 0
-    x = Math.max(Math.min(x, @right), @left)
-    Math.min(@data.length - 1,
-      Math.floor((x - @left) / (@width / @data.length)))
+  hitTest: (x, y) ->
+    return null if @data?.length is 0 or x <= @left or x > @left + @width
+    x = Math.max(Math.min(x, @right - @options.padding), @left + @options.padding)
+    Math.min(@data.length - 1, Math.floor((x - @left) / (@width / @data.length)))
 
   # click on grid event handler
   #
   # @private
   onGridClick: (x, y) =>
-    index = @hitTest(x)
-    @fire 'click', index, @options.data[index], x, y
+    if (index = @hitTest(x, y))?
+      @fire 'click', index, @options.data[index], x, y
 
   # hover movement event handler
   #
   # @private
   onHoverMove: (x, y) =>
-    index = @hitTest(x)
-    @hover.update(@hoverContentForRow(index)...)
+    if (index = @hitTest(x, y))?
+      console.log('index=',index)
+      @hover.update(@hoverContentForRow(index, x, y)...)
 
   # hover out event handler
   #
@@ -166,7 +166,8 @@ class Morris.Bar extends Morris.Grid
   # hover content for a point
   #
   # @private
-  hoverContentForRow: (index) ->
+  hoverContentForRow: (index, eventX, eventY) ->
+    res = []
     row = @data[index]
     content = "<div class='morris-hover-row-label'>#{row.label}</div>"
     for y, j in row.y
@@ -178,8 +179,31 @@ class Morris.Bar extends Morris.Grid
       """
     if typeof @options.hoverCallback is 'function'
       content = @options.hoverCallback(index, @options, content)
-    x = @left + (index + 0.5) * @width / @data.length
-    [content, x]
+    res.push content
+    switch @options.stickyHover
+      when 'pointer'
+        res.push [eventX + 30, eventY + 60]...
+      when 'bar'
+        # TODO: remove addressing @data directyl
+        padding = @width / @data.length * (1 - @options.barSizeRatio) / 2
+        left = @left + index * @width / @data.length
+        right = left + @width / @data.length
+        top = @data[index]._y[0]
+        bottom = @bottom
+        res.push [@normalize(eventX, left + padding, right - padding),@normalize(eventY, top, bottom)]...
+      when 'corner'
+        res.push [@right, 0]...
+      else
+        x = @left + (index + 0.5) * @width / @data.length
+        res.push x
+    res
+
+  normalize: (value, min, max) ->
+    res = if min < value < max
+       value
+    else
+      if value > max then max else min
+    res
 
   labelContentForRow: (index) ->
     row = @data[index]
