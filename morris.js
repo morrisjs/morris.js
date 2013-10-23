@@ -1536,24 +1536,28 @@
       }
     };
 
-    Bar.prototype.hitTest = function(x) {
-      if (this.data.length === 0) {
+    Bar.prototype.hitTest = function(x, y) {
+      var _ref;
+      if (((_ref = this.data) != null ? _ref.length : void 0) === 0 || x <= this.left || x > this.left + this.width) {
         return null;
       }
-      x = Math.max(Math.min(x, this.right), this.left);
+      x = Math.max(Math.min(x, this.right - this.options.padding), this.left + this.options.padding);
       return Math.min(this.data.length - 1, Math.floor((x - this.left) / (this.width / this.data.length)));
     };
 
     Bar.prototype.onGridClick = function(x, y) {
       var index;
-      index = this.hitTest(x);
-      return this.fire('click', index, this.options.data[index], x, y);
+      if ((index = this.hitTest(x, y)) != null) {
+        return this.fire('click', index, this.options.data[index], x, y);
+      }
     };
 
     Bar.prototype.onHoverMove = function(x, y) {
       var index, _ref;
-      index = this.hitTest(x);
-      return (_ref = this.hover).update.apply(_ref, this.hoverContentForRow(index));
+      if ((index = this.hitTest(x, y)) != null) {
+        console.log('index=', index);
+        return (_ref = this.hover).update.apply(_ref, this.hoverContentForRow(index, x, y));
+      }
     };
 
     Bar.prototype.onHoverOut = function() {
@@ -1562,8 +1566,9 @@
       }
     };
 
-    Bar.prototype.hoverContentForRow = function(index) {
-      var content, j, row, x, y, _i, _len, _ref;
+    Bar.prototype.hoverContentForRow = function(index, eventX, eventY) {
+      var bottom, content, j, left, padding, res, right, row, top, x, y, _i, _len, _ref;
+      res = [];
       row = this.data[index];
       content = "<div class='morris-hover-row-label'>" + row.label + "</div>";
       _ref = row.y;
@@ -1574,8 +1579,33 @@
       if (typeof this.options.hoverCallback === 'function') {
         content = this.options.hoverCallback(index, this.options, content);
       }
-      x = this.left + (index + 0.5) * this.width / this.data.length;
-      return [content, x];
+      res.push(content);
+      switch (this.options.stickyHover) {
+        case 'pointer':
+          res.push.apply(res, [eventX + 30, eventY + 60]);
+          break;
+        case 'bar':
+          padding = this.width / this.data.length * (1 - this.options.barSizeRatio) / 2;
+          left = this.left + index * this.width / this.data.length;
+          right = left + this.width / this.data.length;
+          top = this.data[index]._y[0];
+          bottom = this.bottom;
+          res.push.apply(res, [this.normalize(eventX, left + padding, right - padding), this.normalize(eventY, top, bottom)]);
+          break;
+        case 'corner':
+          res.push.apply(res, [this.right, 0]);
+          break;
+        default:
+          x = this.left + (index + 0.5) * this.width / this.data.length;
+          res.push(x);
+      }
+      return res;
+    };
+
+    Bar.prototype.normalize = function(value, min, max) {
+      var res;
+      res = (min < value && value < max) ? value : value > max ? max : min;
+      return res;
     };
 
     Bar.prototype.drawXAxisLabel = function(xPos, yPos, text, fColor, fSize, fFamily, fWeight) {
