@@ -52,7 +52,7 @@ class Morris.Line extends Morris.Grid
       row._x = @transX(row.x)
       row._y = for y in row.y
         if y? then @transY(y) else y
-      row._ymax = Math.min.apply(null, [@bottom].concat(y for y in row._y when y?))
+      row._ymax = Math.min [@bottom].concat(y for y in row._y when y?)...
 
   # hit test - returns the index of the row at the given x-coordinate
   #
