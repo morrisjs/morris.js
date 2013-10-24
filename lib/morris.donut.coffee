@@ -29,15 +29,13 @@ class Morris.Donut extends Morris.EventEmitter
   # Create and render a donut chart.
   #
   constructor: (options) ->
-    if not (this instanceof Morris.Donut)
-      return new Morris.Donut(options)
+    return new Morris.Donut(options) unless (@ instanceof Morris.Donut)
+    @options = $.extend {}, @defaults, options
 
     if typeof options.element is 'string'
       @el = $ document.getElementById(options.element)
     else
       @el = $ options.element
-
-    @options = $.extend {}, @defaults, options
 
     if @el == null || @el.length == 0
       throw new Error("Graph placeholder not found.")
@@ -88,7 +86,7 @@ class Morris.Donut extends Morris.EventEmitter
     @text1 = @drawEmptyDonutLabel(cx, cy - 10, @options.labelColor, 15, 800)
     @text2 = @drawEmptyDonutLabel(cx, cy + 10, @options.labelColor, 14)
 
-    max_value = Math.max.apply(null, value for value in @values)
+    max_value = Math.max @values...
     idx = 0
     for value in @values
       if value == max_value
