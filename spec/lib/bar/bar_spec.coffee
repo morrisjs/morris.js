@@ -149,3 +149,26 @@ describe 'Morris.Bar', ->
               margin: 20
           }, defaults
           $('#graph').find("text").filter($("#graph").find("text").filter (index, el) -> $(el).text().match /Y\:\d\sZ\:\d/).size().should.equal 4
+
+  describe 'when setting bar radius', ->
+    describe 'svg structure', ->
+    defaults =
+      element: 'graph'
+      data: [{x: 'foo', y: 2, z: 3}, {x: 'bar', y: 4, z: 6}]
+      xkey: 'x'
+      ykeys: ['y', 'z']
+      labels: ['Y', 'Z']
+      barStyle: {
+        radius: [5, 5, 0, 0]
+      }
+    it 'should contain a path for each bar', ->
+      chart = Morris.Bar $.extend {}, defaults
+      $('#graph').find("path").size().should.equal 9
+
+    it 'should use rects if radius is too big', ->
+      delete defaults.barStyle
+      chart = Morris.Bar $.extend {
+        barStyle:
+          radius: [300, 300, 0, 0]
+        }, defaults
+      $('#graph').find("rect").size().should.equal 4

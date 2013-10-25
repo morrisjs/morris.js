@@ -115,7 +115,7 @@ class Morris.Bar extends Morris.Grid
             @drawXAxisLabel(left + barWidth / 2, top - (opts.margin or 0), @labelContentForRow(idx), opts.color, opts.size)
 
           top -= lastTop if @options.stacked
-          @drawBar(left, top, barWidth, size, @colorFor(row, sidx, 'bar'))
+          @drawBar(left, top, barWidth, size, @colorFor(row, sidx, 'bar'), @options.barStyle?.opacity, @options.barStyle?.radius)
 
           lastTop += size
         else
@@ -227,8 +227,20 @@ class Morris.Bar extends Morris.Grid
     @drawXAxisLabel(leftPosition, verticalMiddle, @options.yCaption.text, @options.yCaption.color, @options.yCaption.fSize, @options.yCaption.fFamily,@options.yCaption.fWeight)
       .transform('r-90')
 
-  drawBar: (xPos, yPos, width, height, barColor, opacity = '1') ->
-    @raphael.rect(xPos, yPos, width, height)
+  drawBar: (xPos, yPos, width, height, barColor, opacity = '1', radius = [0,0,0,0]) ->
+    if Math.max(radius...) > height or (r for r in radius when r is 0).length is 4
+      path = @raphael.rect(xPos, yPos, width, height)
+    else
+      path = @raphael.path @roundedRect(xPos, yPos, width, height, radius)
+    path
       .attr('fill', barColor)
       .attr('stroke-width', 0)
       .attr('fill-opacity', opacity)
+
+  roundedRect: (x, y, w, h, r = [0,0,0,0]) ->
+    [].
+    concat(["M", x, r[0] + y, "Q", x, y, x + r[0], y]).
+    concat(["L", x + w - r[1], y, "Q", x + w, y, x + w, y + r[1]]).
+    concat(["L", x + w, y + h - r[2], "Q", x + w, y + h, x + w - r[2], y + h]).
+    concat(["L", x + r[3], y + h, "Q", x, y + h, x, y + h - r[3], "Z"])
+
