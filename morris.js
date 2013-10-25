@@ -1437,7 +1437,7 @@
 
     Bar.prototype.drawXAxis = function() {
       var i, label, labelBox, margin, offset, prevAngleMargin, prevLabelMargin, row, textBox, ypos, _i, _ref, _results;
-      ypos = this.bottom + this.options.padding / 2;
+      ypos = this.bottom + (this.options.xAxisLabelTopPadding || this.options.padding / 2);
       prevLabelMargin = null;
       prevAngleMargin = null;
       _results = [];
