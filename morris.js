@@ -1466,7 +1466,7 @@
     };
 
     Bar.prototype.drawSeries = function() {
-      var barWidth, bottom, groupWidth, idx, lastTop, left, leftPadding, numBars, row, sidx, size, top, ypos, zeroPos;
+      var barWidth, bottom, groupWidth, idx, lastTop, left, leftPadding, numBars, opts, row, sidx, size, top, ypos, zeroPos;
       groupWidth = this.width / this.options.data.length;
       numBars = this.options.stacked != null ? 1 : this.options.ykeys.length;
       barWidth = (groupWidth * this.options.barSizeRatio - this.options.barGap * (numBars - 1)) / numBars;
@@ -1480,7 +1480,7 @@
           row = _ref[idx];
           lastTop = 0;
           _results.push((function() {
-            var _j, _len1, _ref1, _results1;
+            var _j, _len1, _ref1, _ref2, _ref3, _ref4, _results1;
             _ref1 = row._y;
             _results1 = [];
             for (sidx = _j = 0, _len1 = _ref1.length; _j < _len1; sidx = ++_j) {
@@ -1501,10 +1501,13 @@
                 if (this.options.verticalGrid && this.options.verticalGrid.condition(row.x)) {
                   this.drawBar(left - leftPadding, this.top, groupWidth, Math.abs(this.top - this.bottom), this.options.verticalGrid.color, this.options.verticalGrid.opacity);
                 }
+                if (opts = (_ref2 = this.options) != null ? _ref2.staticLabels : void 0) {
+                  this.drawXAxisLabel(left + barWidth / 2, top - (opts.margin || 0), this.labelContentForRow(idx), opts.color, opts.size);
+                }
                 if (this.options.stacked) {
                   top -= lastTop;
                 }
-                this.drawBar(left, top, barWidth, size, this.colorFor(row, sidx, 'bar'));
+                this.drawBar(left, top, barWidth, size, this.colorFor(row, sidx, 'bar'), (_ref3 = this.options.barStyle) != null ? _ref3.opacity : void 0, (_ref4 = this.options.barStyle) != null ? _ref4.radius : void 0);
                 _results1.push(lastTop += size);
               } else {
                 _results1.push(null);
@@ -1608,6 +1611,21 @@
       return res;
     };
 
+    Bar.prototype.labelContentForRow = function(index) {
+      var content, j, row, y, _i, _len, _ref;
+      row = this.data[index];
+      content = '';
+      _ref = row.y;
+      for (j = _i = 0, _len = _ref.length; _i < _len; j = ++_i) {
+        y = _ref[j];
+        content += "" + this.options.labels[j] + ":" + (this.yLabelFormat(y)) + " ";
+      }
+      if (typeof this.options.staticLabels.labelCallback === 'function') {
+        content = this.options.staticLabels.labelCallback(index, this.options, content);
+      }
+      return content;
+    };
+
     Bar.prototype.drawXAxisLabel = function(xPos, yPos, text, fColor, fSize, fFamily, fWeight) {
       var label;
       if (fColor == null) {
@@ -1632,11 +1650,37 @@
       return this.drawXAxisLabel(leftPosition, verticalMiddle, this.options.yCaption.text, this.options.yCaption.color, this.options.yCaption.fSize, this.options.yCaption.fFamily, this.options.yCaption.fWeight).transform('r-90');
     };
 
-    Bar.prototype.drawBar = function(xPos, yPos, width, height, barColor, opacity) {
+    Bar.prototype.drawBar = function(xPos, yPos, width, height, barColor, opacity, radius) {
+      var path, r;
       if (opacity == null) {
         opacity = '1';
       }
-      return this.raphael.rect(xPos, yPos, width, height).attr('fill', barColor).attr('stroke-width', 0).attr('fill-opacity', opacity);
+      if (radius == null) {
+        radius = [0, 0, 0, 0];
+      }
+      if (Math.max.apply(Math, radius) > height || ((function() {
+        var _i, _len, _results;
+        _results = [];
+        for (_i = 0, _len = radius.length; _i < _len; _i++) {
+          r = radius[_i];
+          if (r === 0) {
+            _results.push(r);
+          }
+        }
+        return _results;
+      })()).length === 4) {
+        path = this.raphael.rect(xPos, yPos, width, height);
+      } else {
+        path = this.raphael.path(this.roundedRect(xPos, yPos, width, height, radius));
+      }
+      return path.attr('fill', barColor).attr('stroke-width', 0).attr('fill-opacity', opacity);
+    };
+
+    Bar.prototype.roundedRect = function(x, y, w, h, r) {
+      if (r == null) {
+        r = [0, 0, 0, 0];
+      }
+      return [].concat(["M", x, r[0] + y, "Q", x, y, x + r[0], y]).concat(["L", x + w - r[1], y, "Q", x + w, y, x + w, y + r[1]]).concat(["L", x + w, y + h - r[2], "Q", x + w, y + h, x + w - r[2], y + h]).concat(["L", x + r[3], y + h, "Q", x, y + h, x, y + h - r[3], "Z"]);
     };
 
     return Bar;
