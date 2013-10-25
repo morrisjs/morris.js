@@ -56,7 +56,7 @@ class Morris.Bar extends Morris.Grid
   # @private
   drawXAxis: ->
     # draw x axis labels
-    ypos = @bottom + @options.padding / 2
+    ypos = @bottom + (@options.xAxisLabelPadding || @options.padding / 2)
     prevLabelMargin = null
     prevAngleMargin = null
     for i in [0...@data.length]
