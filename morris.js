@@ -267,17 +267,21 @@
       this.xmin = this.data[0].x;
       this.xmax = this.data[this.data.length - 1].x;
       this.events = [];
-      if (this.options.parseTime && this.options.events.length > 0) {
-        this.events = (function() {
-          var _i, _len, _ref, _results;
-          _ref = this.options.events;
-          _results = [];
-          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-            e = _ref[_i];
-            _results.push(Morris.parseDate(e));
-          }
-          return _results;
-        }).call(this);
+      if (this.options.events.length > 0) {
+        if (this.options.parseTime) {
+          this.events = (function() {
+            var _i, _len, _ref, _results;
+            _ref = this.options.events;
+            _results = [];
+            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+              e = _ref[_i];
+              _results.push(Morris.parseDate(e));
+            }
+            return _results;
+          }).call(this);
+        } else {
+          this.events = this.options.events;
+        }
         this.xmax = Math.max(this.xmax, Math.max.apply(null, this.events));
         this.xmin = Math.min(this.xmin, Math.min.apply(null, this.events));
       }

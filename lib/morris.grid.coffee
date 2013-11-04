@@ -186,8 +186,11 @@ class Morris.Grid extends Morris.EventEmitter
     @xmax = @data[@data.length - 1].x
 
     @events = []
-    if @options.parseTime and @options.events.length > 0
-      @events = (Morris.parseDate(e) for e in @options.events)
+    if @options.events.length > 0
+      if @options.parseTime
+        @events = (Morris.parseDate(e) for e in @options.events)
+      else
+        @events = @options.events
       @xmax = Math.max(@xmax, Math.max.apply(null, @events))
       @xmin = Math.min(@xmin, Math.min.apply(null, @events))
 
