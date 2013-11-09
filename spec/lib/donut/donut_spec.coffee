@@ -19,7 +19,6 @@ describe 'Morris.Donut', ->
 
   describe 'svg attributes', ->
     defaults =
-    defaults =
       element: 'graph'
       data: [ {label: 'Jam', value: 25 },
         {label: 'Frosted', value: 40 },
@@ -59,3 +58,19 @@ describe 'Morris.Donut', ->
     it 'should have a path with stroke-width 2', ->
       chart = Morris.Donut $.extend {}, defaults
       $('#graph').find("path[stroke-width='2']").size().should.equal 4
+
+  describe 'setData', ->
+    defaults =
+      element: 'graph'
+      data: [ {label: 'One', value: 25 }, {label: "Two", value: 30} ]
+      colors: ['#ff0000', '#00ff00', '#0000ff']
+
+    it 'should update the chart', ->
+      chart = Morris.Donut $.extend {}, defaults
+      $('#graph').find("path[stroke='#0000ff']").size().should.equal 0
+      chart.setData [
+        { label: 'One', value: 25 }
+        { label: 'Two', value: 30 }
+        { label: 'Three', value: 35 }
+      ]
+      $('#graph').find("path[stroke='#0000ff']").size().should.equal 1

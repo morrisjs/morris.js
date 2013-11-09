@@ -1636,8 +1636,7 @@
       this.resizeHandler = __bind(this.resizeHandler, this);
       this.select = __bind(this.select, this);
       this.click = __bind(this.click, this);
-      var row,
-        _this = this;
+      var _this = this;
       if (!(this instanceof Morris.Donut)) {
         return new Morris.Donut(options);
       }
@@ -1653,17 +1652,6 @@
       if (options.data === void 0 || options.data.length === 0) {
         return;
       }
-      this.data = options.data;
-      this.values = (function() {
-        var _i, _len, _ref, _results;
-        _ref = this.data;
-        _results = [];
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          row = _ref[_i];
-          _results.push(parseFloat(row.value));
-        }
-        return _results;
-      }).call(this);
       this.raphael = new Raphael(this.el[0]);
       if (this.options.resize) {
         $(window).bind('resize', function(evt) {
@@ -1673,7 +1661,7 @@
           return _this.timeoutId = window.setTimeout(_this.resizeHandler, 100);
         });
       }
-      this.redraw();
+      this.setData(options.data);
     }
 
     Donut.prototype.redraw = function() {
@@ -1720,6 +1708,22 @@
         _results.push(idx += 1);
       }
       return _results;
+    };
+
+    Donut.prototype.setData = function(data) {
+      var row;
+      this.data = data;
+      this.values = (function() {
+        var _i, _len, _ref, _results;
+        _ref = this.data;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          row = _ref[_i];
+          _results.push(parseFloat(row.value));
+        }
+        return _results;
+      }).call(this);
+      return this.redraw();
     };
 
     Donut.prototype.click = function(idx) {

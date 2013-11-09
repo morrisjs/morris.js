@@ -44,8 +44,6 @@ class Morris.Donut extends Morris.EventEmitter
     # bail if there's no data
     if options.data is undefined or options.data.length is 0
       return
-    @data = options.data
-    @values = (parseFloat(row.value) for row in @data)
 
     @raphael = new Raphael(@el[0])
 
@@ -55,7 +53,7 @@ class Morris.Donut extends Morris.EventEmitter
           window.clearTimeout @timeoutId
         @timeoutId = window.setTimeout @resizeHandler, 100
 
-    @redraw()
+    @setData options.data
 
   # Clear and redraw the chart.
   redraw: ->
@@ -98,6 +96,11 @@ class Morris.Donut extends Morris.EventEmitter
         break
       idx += 1
 
+  setData: (data) ->
+    @data = data
+    @values = (parseFloat(row.value) for row in @data)
+    @redraw()
+
   # @private
   click: (idx) =>
     @fire 'click', idx, @data[idx]
@@ -109,6 +112,8 @@ class Morris.Donut extends Morris.EventEmitter
     segment.select()
     row = @data[idx]
     @setLabels(row.label, @options.formatter(row.value, row))
+
+
 
   # @private
   setLabels: (label1, label2) ->
