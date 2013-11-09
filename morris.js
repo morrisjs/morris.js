@@ -216,7 +216,9 @@
         _results = [];
         for (index = _i = 0, _len = data.length; _i < _len; index = ++_i) {
           row = data[index];
-          ret = {};
+          ret = {
+            src: row
+          };
           ret.label = row[this.options.xkey];
           if (this.options.parseTime) {
             ret.x = Morris.parseDate(ret.label);
@@ -799,7 +801,7 @@
     Line.prototype.onGridClick = function(x, y) {
       var index;
       index = this.hitTest(x);
-      return this.fire('click', index, this.options.data[index], x, y);
+      return this.fire('click', index, this.data[index].src, x, y);
     };
 
     Line.prototype.onHoverMove = function(x, y) {
@@ -835,7 +837,7 @@
         content += "<div class='morris-hover-point' style='color: " + (this.colorFor(row, j, 'label')) + "'>\n  " + this.options.labels[j] + ":\n  " + (this.yLabelFormat(y)) + "\n</div>";
       }
       if (typeof this.options.hoverCallback === 'function') {
-        content = this.options.hoverCallback(index, this.options, content);
+        content = this.options.hoverCallback(index, this.options, content, row.src);
       }
       return [content, row._x, row._ymax];
     };
@@ -1563,7 +1565,7 @@
     Bar.prototype.onGridClick = function(x, y) {
       var index;
       index = this.hitTest(x);
-      return this.fire('click', index, this.options.data[index], x, y);
+      return this.fire('click', index, this.data[index].src, x, y);
     };
 
     Bar.prototype.onHoverMove = function(x, y) {
@@ -1588,7 +1590,7 @@
         content += "<div class='morris-hover-point' style='color: " + (this.colorFor(row, j, 'label')) + "'>\n  " + this.options.labels[j] + ":\n  " + (this.yLabelFormat(y)) + "\n</div>";
       }
       if (typeof this.options.hoverCallback === 'function') {
-        content = this.options.hoverCallback(index, this.options, content);
+        content = this.options.hoverCallback(index, this.options, content, row.src);
       }
       x = this.left + (index + 0.5) * this.width / this.data.length;
       return [content, x];

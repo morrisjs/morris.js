@@ -152,7 +152,7 @@ class Morris.Grid extends Morris.EventEmitter
       ymax = if ymax? then Math.max(ymax, maxGoal) else maxGoal
 
     @data = for row, index in data
-      ret = {}
+      ret = {src: row}
 
       ret.label = row[@options.xkey]
       if @options.parseTime

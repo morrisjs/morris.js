@@ -143,7 +143,7 @@ class Morris.Bar extends Morris.Grid
   # @private
   onGridClick: (x, y) =>
     index = @hitTest(x)
-    @fire 'click', index, @options.data[index], x, y
+    @fire 'click', index, @data[index].src, x, y
 
   # hover movement event handler
   #
@@ -173,7 +173,7 @@ class Morris.Bar extends Morris.Grid
         </div>
       """
     if typeof @options.hoverCallback is 'function'
-      content = @options.hoverCallback(index, @options, content)
+      content = @options.hoverCallback(index, @options, content, row.src)
     x = @left + (index + 0.5) * @width / @data.length
     [content, x]
 

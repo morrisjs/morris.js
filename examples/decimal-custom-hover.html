@@ -27,8 +27,7 @@ window.m = Morris.Line({
   ykeys: ['y'],
   labels: ['sin(x)'],
   parseTime: false,
-  hoverCallback: function (index, options, default_content) {
-    var row = options.data[index];
+  hoverCallback: function (index, options, default_content, row) {
     return default_content.replace("sin(x)", "1.5 + 1.5 sin(" + row.x + ")");
   },
   xLabelMargin: 10,
