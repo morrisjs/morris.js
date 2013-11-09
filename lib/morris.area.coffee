@@ -29,7 +29,7 @@ class Morris.Area extends Morris.Line
         else
           total += (y || 0)
           @transY(total)
-      row._ymax = Math.max.apply Math, row._y
+      row._ymax = Math.max row._y...
 
   # draw the data series
   #

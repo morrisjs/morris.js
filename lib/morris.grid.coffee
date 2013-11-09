@@ -139,8 +139,8 @@ class Morris.Grid extends Morris.EventEmitter
     ymin = if @cumulative then 0 else null
 
     if @options.goals.length > 0
-      minGoal = Math.min.apply(null, @options.goals)
-      maxGoal = Math.max.apply(null, @options.goals)
+      minGoal = Math.min @options.goals...
+      maxGoal = Math.max @options.goals...
       ymin = if ymin? then Math.min(ymin, minGoal) else minGoal
       ymax = if ymax? then Math.max(ymax, maxGoal) else maxGoal
 
@@ -191,8 +191,8 @@ class Morris.Grid extends Morris.EventEmitter
         @events = (Morris.parseDate(e) for e in @options.events)
       else
         @events = @options.events
-      @xmax = Math.max(@xmax, Math.max.apply(null, @events))
-      @xmin = Math.min(@xmin, Math.min.apply(null, @events))
+      @xmax = Math.max(@xmax, Math.max(@events...))
+      @xmin = Math.min(@xmin, Math.min(@events...))
 
     if @xmin is @xmax
       @xmin -= 1
