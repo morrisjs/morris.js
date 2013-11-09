@@ -25,7 +25,9 @@ class Morris.Bar extends Morris.Grid
       '#edc240'
       '#cb4b4b'
       '#9440ed'
-    ]
+    ],
+    barOpacity: 1.0
+    barRadius: [0, 0, 0, 0]
     xLabelMargin: 50
 
   # Do any size-related calculations
@@ -108,7 +110,8 @@ class Morris.Bar extends Morris.Grid
           size = bottom - top
 
           top -= lastTop if @options.stacked
-          @drawBar(left, top, barWidth, size, @colorFor(row, sidx, 'bar'), @options.barStyle?.opacity, @options.barStyle?.radius)
+          @drawBar(left, top, barWidth, size, @colorFor(row, sidx, 'bar'),
+              @options.barOpacity, @options.barRadius)
 
           lastTop += size
         else
@@ -181,23 +184,20 @@ class Morris.Bar extends Morris.Grid
       .attr('font-weight', @options.gridTextWeight)
       .attr('fill', @options.gridTextColor)
 
-
-  drawBar: (xPos, yPos, width, height, barColor, opacity = '1', radius = [0,0,0,0]) ->
-    if Math.max(radius...) > height or (r for r in radius when r is 0).length is 4
+  drawBar: (xPos, yPos, width, height, barColor, opacity, radiusArray) ->
+    maxRadius = Math.max(radiusArray...)
+    if maxRadius == 0 or maxRadius > height
       path = @raphael.rect(xPos, yPos, width, height)
     else
-      path = @raphael.path @roundedRect(xPos, yPos, width, height, radius)
-
-
+      path = @raphael.path @roundedRect(xPos, yPos, width, height, radiusArray)
     path
       .attr('fill', barColor)
       .attr('stroke-width', 0)
       .attr('fill-opacity', opacity)
 
   roundedRect: (x, y, w, h, r = [0,0,0,0]) ->
-    [].
-    concat(["M", x, r[0] + y, "Q", x, y, x + r[0], y]).
-    concat(["L", x + w - r[1], y, "Q", x + w, y, x + w, y + r[1]]).
-    concat(["L", x + w, y + h - r[2], "Q", x + w, y + h, x + w - r[2], y + h]).
-    concat(["L", x + r[3], y + h, "Q", x, y + h, x, y + h - r[3], "Z"])
+    [ "M", x, r[0] + y, "Q", x, y, x + r[0], y,
+      "L", x + w - r[1], y, "Q", x + w, y, x + w, y + r[1],
+      "L", x + w, y + h - r[2], "Q", x + w, y + h, x + w - r[2], y + h,
+      "L", x + r[3], y + h, "Q", x, y + h, x, y + h - r[3], "Z" ]
 
