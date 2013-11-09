@@ -81,6 +81,12 @@ class Morris.Grid extends Morris.EventEmitter
         @endRange evt.pageX - offset.left
         @fire 'hovermove', evt.pageX - offset.left, evt.pageY - offset.top
 
+    if @options.resize
+      $(window).bind 'resize', (evt) =>
+        if @timeoutId?
+          window.clearTimeout @timeoutId
+        @timeoutId = window.setTimeout @resizeHandler, 100
+
     @postInit() if @postInit
 
   # Default options
@@ -123,6 +129,7 @@ class Morris.Grid extends Morris.EventEmitter
     ]
     rangeSelect: null
     rangeSelectColor: '#eef'
+    resize: false
 
   # Update the data series and redraw the chart.
   #
@@ -395,6 +402,11 @@ class Morris.Grid extends Morris.EventEmitter
         start: @data[@hitTest(start)].x
         end: @data[@hitTest(end)].x
       @selectFrom = null
+
+  resizeHandler: =>
+    @timeoutId = null
+    @raphael.setSize @el.width(), @el.height()
+    @redraw()
 
 # Parse a date into a javascript timestamp
 #

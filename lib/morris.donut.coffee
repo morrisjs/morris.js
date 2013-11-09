@@ -25,6 +25,7 @@ class Morris.Donut extends Morris.EventEmitter
     backgroundColor: '#FFFFFF', 
     labelColor: '#000000',
     formatter: Morris.commas
+    resize: false
 
   # Create and render a donut chart.
   #
@@ -46,16 +47,19 @@ class Morris.Donut extends Morris.EventEmitter
     @data = options.data
     @values = (parseFloat(row.value) for row in @data)
 
+    @raphael = new Raphael(@el[0])
+
+    if @options.resize
+      $(window).bind 'resize', (evt) =>
+        if @timeoutId?
+          window.clearTimeout @timeoutId
+        @timeoutId = window.setTimeout @resizeHandler, 100
+
     @redraw()
 
   # Clear and redraw the chart.
-  #
-  # If you need to re-size your charts, call this method after changing the
-  # size of the container element.
   redraw: ->
-    @el.empty()
-
-    @raphael = new Raphael(@el[0])
+    @raphael.clear()
 
     cx = @el.width() / 2
     cy = @el.height() / 2
@@ -127,6 +131,11 @@ class Morris.Donut extends Morris.EventEmitter
       .attr('fill', color)
     text.attr('font-weight', fontWeight) if fontWeight?
     return text
+
+  resizeHandler: =>
+    @timeoutId = null
+    @raphael.setSize @el.width(), @el.height()
+    @redraw()
 
 
 # A segment within a donut chart.

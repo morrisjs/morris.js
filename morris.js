@@ -1,9 +1,9 @@
 (function() {
   var $, Morris, minutesSpecHelper, secondsSpecHelper,
     __slice = [].slice,
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   Morris = window.Morris = {};
@@ -67,6 +67,7 @@
     __extends(Grid, _super);
 
     function Grid(options) {
+      this.resizeHandler = __bind(this.resizeHandler, this);
       var _this = this;
       if (typeof options.element === 'string') {
         this.el = $(document.getElementById(options.element));
@@ -144,6 +145,14 @@
           return _this.fire('hovermove', evt.pageX - offset.left, evt.pageY - offset.top);
         });
       }
+      if (this.options.resize) {
+        $(window).bind('resize', function(evt) {
+          if (_this.timeoutId != null) {
+            window.clearTimeout(_this.timeoutId);
+          }
+          return _this.timeoutId = window.setTimeout(_this.resizeHandler, 100);
+        });
+      }
       if (this.postInit) {
         this.postInit();
       }
@@ -176,7 +185,8 @@
       eventStrokeWidth: 1.0,
       eventLineColors: ['#005a04', '#ccffbb', '#3a5f0b', '#005502'],
       rangeSelect: null,
-      rangeSelectColor: '#eef'
+      rangeSelectColor: '#eef',
+      resize: false
     };
 
     Grid.prototype.setData = function(data, redraw) {
@@ -196,8 +206,8 @@
       ymax = this.cumulative ? 0 : null;
       ymin = this.cumulative ? 0 : null;
       if (this.options.goals.length > 0) {
-        minGoal = Math.min.apply(null, this.options.goals);
-        maxGoal = Math.max.apply(null, this.options.goals);
+        minGoal = Math.min.apply(Math, this.options.goals);
+        maxGoal = Math.max.apply(Math, this.options.goals);
         ymin = ymin != null ? Math.min(ymin, minGoal) : minGoal;
         ymax = ymax != null ? Math.max(ymax, maxGoal) : maxGoal;
       }
@@ -282,8 +292,8 @@
         } else {
           this.events = this.options.events;
         }
-        this.xmax = Math.max(this.xmax, Math.max.apply(null, this.events));
-        this.xmin = Math.min(this.xmin, Math.min.apply(null, this.events));
+        this.xmax = Math.max(this.xmax, Math.max.apply(Math, this.events));
+        this.xmin = Math.min(this.xmin, Math.min.apply(Math, this.events));
       }
       if (this.xmin === this.xmax) {
         this.xmin -= 1;
@@ -561,6 +571,12 @@
       }
     };
 
+    Grid.prototype.resizeHandler = function() {
+      this.timeoutId = null;
+      this.raphael.setSize(this.el.width(), this.el.height());
+      return this.redraw();
+    };
+
     return Grid;
 
   })(Morris.EventEmitter);
@@ -749,7 +765,7 @@
           }
           return _results1;
         }).call(this);
-        _results.push(row._ymax = Math.min.apply(null, [this.bottom].concat((function() {
+        _results.push(row._ymax = Math.min.apply(Math, [this.bottom].concat((function() {
           var _j, _len1, _ref1, _results1;
           _ref1 = row._y;
           _results1 = [];
@@ -1392,6 +1408,8 @@
       barSizeRatio: 0.75,
       barGap: 3,
       barColors: ['#0b62a4', '#7a92a3', '#4da74d', '#afd8f8', '#edc240', '#cb4b4b', '#9440ed'],
+      barOpacity: 1.0,
+      barRadius: [0, 0, 0, 0],
       xLabelMargin: 50
     };
 
@@ -1438,7 +1456,7 @@
 
     Bar.prototype.drawXAxis = function() {
       var i, label, labelBox, margin, offset, prevAngleMargin, prevLabelMargin, row, textBox, ypos, _i, _ref, _results;
-      ypos = this.bottom + this.options.padding / 2;
+      ypos = this.bottom + (this.options.xAxisLabelTopPadding || this.options.padding / 2);
       prevLabelMargin = null;
       prevAngleMargin = null;
       _results = [];
@@ -1502,7 +1520,7 @@
                 if (this.options.stacked) {
                   top -= lastTop;
                 }
-                this.drawBar(left, top, barWidth, size, this.colorFor(row, sidx, 'bar'));
+                this.drawBar(left, top, barWidth, size, this.colorFor(row, sidx, 'bar'), this.options.barOpacity, this.options.barRadius);
                 _results1.push(lastTop += size);
               } else {
                 _results1.push(null);
@@ -1581,8 +1599,22 @@
       return label = this.raphael.text(xPos, yPos, text).attr('font-size', this.options.gridTextSize).attr('font-family', this.options.gridTextFamily).attr('font-weight', this.options.gridTextWeight).attr('fill', this.options.gridTextColor);
     };
 
-    Bar.prototype.drawBar = function(xPos, yPos, width, height, barColor) {
-      return this.raphael.rect(xPos, yPos, width, height).attr('fill', barColor).attr('stroke-width', 0);
+    Bar.prototype.drawBar = function(xPos, yPos, width, height, barColor, opacity, radiusArray) {
+      var maxRadius, path;
+      maxRadius = Math.max.apply(Math, radiusArray);
+      if (maxRadius === 0 || maxRadius > height) {
+        path = this.raphael.rect(xPos, yPos, width, height);
+      } else {
+        path = this.raphael.path(this.roundedRect(xPos, yPos, width, height, radiusArray));
+      }
+      return path.attr('fill', barColor).attr('stroke-width', 0).attr('fill-opacity', opacity);
+    };
+
+    Bar.prototype.roundedRect = function(x, y, w, h, r) {
+      if (r == null) {
+        r = [0, 0, 0, 0];
+      }
+      return ["M", x, r[0] + y, "Q", x, y, x + r[0], y, "L", x + w - r[1], y, "Q", x + w, y, x + w, y + r[1], "L", x + w, y + h - r[2], "Q", x + w, y + h, x + w - r[2], y + h, "L", x + r[3], y + h, "Q", x, y + h, x, y + h - r[3], "Z"];
     };
 
     return Bar;
@@ -1596,22 +1628,25 @@
       colors: ['#0B62A4', '#3980B5', '#679DC6', '#95BBD7', '#B0CCE1', '#095791', '#095085', '#083E67', '#052C48', '#042135'],
       backgroundColor: '#FFFFFF',
       labelColor: '#000000',
-      formatter: Morris.commas
+      formatter: Morris.commas,
+      resize: false
     };
 
     function Donut(options) {
+      this.resizeHandler = __bind(this.resizeHandler, this);
       this.select = __bind(this.select, this);
       this.click = __bind(this.click, this);
-      var row;
+      var row,
+        _this = this;
       if (!(this instanceof Morris.Donut)) {
         return new Morris.Donut(options);
       }
+      this.options = $.extend({}, this.defaults, options);
       if (typeof options.element === 'string') {
         this.el = $(document.getElementById(options.element));
       } else {
         this.el = $(options.element);
       }
-      this.options = $.extend({}, this.defaults, options);
       if (this.el === null || this.el.length === 0) {
         throw new Error("Graph placeholder not found.");
       }
@@ -1629,13 +1664,21 @@
         }
         return _results;
       }).call(this);
+      this.raphael = new Raphael(this.el[0]);
+      if (this.options.resize) {
+        $(window).bind('resize', function(evt) {
+          if (_this.timeoutId != null) {
+            window.clearTimeout(_this.timeoutId);
+          }
+          return _this.timeoutId = window.setTimeout(_this.resizeHandler, 100);
+        });
+      }
       this.redraw();
     }
 
     Donut.prototype.redraw = function() {
       var C, cx, cy, i, idx, last, max_value, min, next, seg, total, value, w, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _results;
-      this.el.empty();
-      this.raphael = new Raphael(this.el[0]);
+      this.raphael.clear();
       cx = this.el.width() / 2;
       cy = this.el.height() / 2;
       w = (Math.min(cx, cy) - 10) / 3;
@@ -1664,16 +1707,7 @@
       }
       this.text1 = this.drawEmptyDonutLabel(cx, cy - 10, this.options.labelColor, 15, 800);
       this.text2 = this.drawEmptyDonutLabel(cx, cy + 10, this.options.labelColor, 14);
-      max_value = Math.max.apply(null, (function() {
-        var _k, _len2, _ref2, _results;
-        _ref2 = this.values;
-        _results = [];
-        for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
-          value = _ref2[_k];
-          _results.push(value);
-        }
-        return _results;
-      }).call(this));
+      max_value = Math.max.apply(Math, this.values);
       idx = 0;
       _ref2 = this.values;
       _results = [];
@@ -1738,6 +1772,12 @@
         text.attr('font-weight', fontWeight);
       }
       return text;
+    };
+
+    Donut.prototype.resizeHandler = function() {
+      this.timeoutId = null;
+      this.raphael.setSize(this.el.width(), this.el.height());
+      return this.redraw();
     };
 
     return Donut;
