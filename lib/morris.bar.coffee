@@ -192,8 +192,8 @@ class Morris.Bar extends Morris.Grid
       path = @raphael.path @roundedRect(xPos, yPos, width, height, radiusArray)
     path
       .attr('fill', barColor)
-      .attr('stroke-width', 0)
       .attr('fill-opacity', opacity)
+      .attr('stroke', 'none')
 
   roundedRect: (x, y, w, h, r = [0,0,0,0]) ->
     [ "M", x, r[0] + y, "Q", x, y, x + r[0], y,

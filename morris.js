@@ -1372,7 +1372,7 @@
     };
 
     Area.prototype.drawFilledPath = function(path, fill) {
-      return this.raphael.path(path).attr('fill', fill).attr('fill-opacity', this.options.fillOpacity).attr('stroke-width', 0);
+      return this.raphael.path(path).attr('fill', fill).attr('fill-opacity', this.options.fillOpacity).attr('stroke', 'none');
     };
 
     return Area;
@@ -1609,7 +1609,7 @@
       } else {
         path = this.raphael.path(this.roundedRect(xPos, yPos, width, height, radiusArray));
       }
-      return path.attr('fill', barColor).attr('stroke-width', 0).attr('fill-opacity', opacity);
+      return path.attr('fill', barColor).attr('fill-opacity', opacity).attr('stroke', 'none');
     };
 
     Bar.prototype.roundedRect = function(x, y, w, h, r) {

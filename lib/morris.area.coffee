@@ -63,4 +63,4 @@ class Morris.Area extends Morris.Line
     @raphael.path(path)
       .attr('fill', fill)
       .attr('fill-opacity', @options.fillOpacity)
-      .attr('stroke-width', 0)
+      .attr('stroke', 'none')

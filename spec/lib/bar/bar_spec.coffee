@@ -37,9 +37,9 @@ describe 'Morris.Bar', ->
       chart = Morris.Bar $.extend {}, defaults
       $('#graph').find("rect[fill='#0b62a4']").size().should.equal 2
 
-    it 'should have a bar with stroke width 0', ->
+    it 'should have a bar with no stroke', ->
       chart = Morris.Bar $.extend {}, defaults
-      $('#graph').find("rect[stroke-width='0']").size().should.equal 4
+      $('#graph').find("rect[stroke='none']").size().should.equal 4
 
     it 'should have text with configured fill color', ->
       chart = Morris.Bar $.extend {}, defaults

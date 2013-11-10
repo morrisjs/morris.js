@@ -58,7 +58,18 @@ module.exports = function (grunt) {
         tasks: ['concat:build/morris.coffee', 'coffee:lib']
       }
     },
+    shell: {
+      visual_spec: {
+        command: './run.sh',
+        options: {
+          stdout: true,
+          execOptions: {
+            cwd: 'spec/viz'
+          }
+        }
+      }
+    }
   });
 
-  grunt.registerTask('default', ['concat', 'coffee', 'less', 'uglify', 'mocha']);
+  grunt.registerTask('default', ['concat', 'coffee', 'less', 'uglify', 'mocha', 'shell:visual_spec']);
 };
