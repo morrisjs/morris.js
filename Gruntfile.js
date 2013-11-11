@@ -63,6 +63,7 @@ module.exports = function (grunt) {
         command: './run.sh',
         options: {
           stdout: true,
+          failOnError: true,
           execOptions: {
             cwd: 'spec/viz'
           }
