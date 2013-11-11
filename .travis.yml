@@ -4,5 +4,3 @@ node_js:
 before_script:
   - "npm install -g grunt-cli"
   - "npm install"
-  - "sudo apt-get update --quiet=2"
-  - "sudo apt-get --quiet=2 install perceptualdiff"
