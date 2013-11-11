@@ -42,6 +42,26 @@ tests currently *only* pass on OS X.
 
 ## Changelog
 
+### 0.5.0 - TBC
+
+- Update grunt dependency [#288](https://github.com/oesmith/morris.js/issues/228)
+- Donut segment color config in data objects [#281](https://github.com/oesmith/morris.js/issues/281)
+- Customisable line widths and point drawing [#272](https://github.com/oesmith/morris.js/issues/272)
+- Bugfix for @options.smooth [#266](https://github.com/oesmith/morris.js/issues/266)
+- Option to disable axes individually [#253](https://github.com/oesmith/morris.js/issues/253)
+- Range selection [#252](https://github.com/oesmith/morris.js/issues/252)
+- Week format for x-labels [#250](https://github.com/oesmith/morris.js/issues/250)
+- Update developer quickstart instructions [#243](https://github.com/oesmith/morris.js/issues/243)
+- Experimenting with perceptual diffs.
+- Add original data row to hover callback [#264](https://github.com/oesmith/morris.js/issues/264)
+- setData method for donut charts [#211](https://github.com/oesmith/morris.js/issues/211)
+- Automatic resizing [#111](https://github.com/oesmith/morris.js/issues/111)
+- Fix travis builds [#298](https://github.com/oesmith/morris.js/issues/298)
+- Option for rounded corners on bar charts [#305](https://github.com/oesmith/morris.js/issues/305)
+- Option to set padding for X axis labels [#306](https://github.com/oesmith/morris.js/issues/306)
+- Use local javascript for examples.
+- Events on non-time series [#314](https://github.com/oesmith/morris.js/issues/314)
+
 ### 0.4.3 - 12th May 2013
 
 - Fix flickering hover box [#186](https://github.com/oesmith/morris.js/issues/186)
