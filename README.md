@@ -36,6 +36,10 @@ with `npm install` in the morris.js project folder.
 
 Once you're all set up, you can compile, minify and run the tests using `grunt`.
 
+Note: I'm experimenting with using perceptual diffs to catch rendering
+regressions. Due to font rendering differences between platforms, the pdiff
+tests currently *only* pass on OS X.
+
 ## Changelog
 
 ### 0.4.3 - 12th May 2013
