@@ -109,6 +109,9 @@ class Morris.Bar extends Morris.Grid
           left += sidx * (barWidth + @options.barGap) unless @options.stacked
           size = bottom - top
 
+          if @options.verticalGridCondition and @options.verticalGridCondition(row.x)
+            @drawBar(@left + idx * groupWidth, @top, groupWidth, Math.abs(@top - @bottom), @options.verticalGridColor, @options.verticalGridOpacity, @options.barRadius)
+
           top -= lastTop if @options.stacked
           @drawBar(left, top, barWidth, size, @colorFor(row, sidx, 'bar'),
               @options.barOpacity, @options.barRadius)
