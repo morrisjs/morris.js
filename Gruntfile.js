@@ -50,12 +50,27 @@ module.exports = function (grunt) {
     },
     watch: {
       all: {
+        options: {
+          livereload: 35729
+        },
         files: ['lib/**/*.coffee', 'spec/lib/**/*.coffee', 'spec/support/**/*.coffee', 'less/**/*.less'],
         tasks: 'default'
       },
       dev: {
-        files:  'lib/*.coffee' ,
+        options: {
+          livereload: 35729
+        },
+        files:  ['lib/*.coffee', 'index.html'],
         tasks: ['concat:build/morris.coffee', 'coffee:lib']
+      }
+    },
+    connect: {
+      server: {
+        options: {
+          open: true,
+          port: 8080,
+          livereload: 35729
+        }
       }
     },
     shell: {
@@ -72,5 +87,6 @@ module.exports = function (grunt) {
     }
   });
 
+  grunt.registerTask('dev', ['connect', 'watch:dev'])
   grunt.registerTask('default', ['concat', 'coffee', 'less', 'uglify', 'mocha', 'shell:visual_spec']);
 };

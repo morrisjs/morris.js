@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+  <head>
+  <script src='third_party/jquery-1.8.2.min.js'></script>
+  <script src='third_party/raphael-2.1.0.min.js'></script>
+  <script src='examples/lib/prettify.js'></script>
+  <script src='morris.js'></script>
+
+
+  <link rel="stylesheet" href="examples/lib/example.css">
+  <link rel="stylesheet" href="examples/lib/prettify.css">
+  <link rel="stylesheet" href="morris.css">
+  </head>
+  <body>
+  <h1>Demo page to check latest build</h1>
+    <div id="graph"></div>
+    <pre id="code" contenteditable class="prettyprint">
+    /* Use Morris.Area k instead of Morris.Line */
+    Morris.Area({
+      element: 'graph',
+      data: [
+        {x: '2012 Q1', y: 3, z: 3},
+        {x: '2011 Q4', y: 4, z: 5}
+      ],
+      xkey: 'x',
+      ykeys: ['y', 'z'],
+      labels: ['Y', 'Z']
+    }).on('click', function(i, row){
+      console.log(i, row);
+    });
+    </pre>
+
+  <script>
+    $(function () {
+      function runCode(){
+        $('#graph').html('')
+        eval($('#code').text());
+      }
+      runCode()
+      $('body').on('blur keyup paste', '[contenteditable]', runCode);
+    });
+  </script>
+  </body>
+</html>
