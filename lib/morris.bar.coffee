@@ -51,6 +51,7 @@ class Morris.Bar extends Morris.Grid
   #
   draw: ->
     @drawXAxis() if @options.axes in [true, 'both', 'x']
+    @drawYAxisCaption(@options.yCaptionText) if @options.yCaptionText?
     @drawSeries()
 
   # draw the x-axis labels
@@ -177,12 +178,25 @@ class Morris.Bar extends Morris.Grid
     x = @left + (index + 0.5) * @width / @data.length
     [content, x]
 
-  drawXAxisLabel: (xPos, yPos, text) ->
+  drawXAxisLabel: (xPos, yPos, text, fColor = @options.gridTextColor, fSize = @options.gridTextSize, fFamily = @options.gridTextFamily, fWeight = @options.gridTextWeight) ->
     label = @raphael.text(xPos, yPos, text)
-      .attr('font-size', @options.gridTextSize)
-      .attr('font-family', @options.gridTextFamily)
-      .attr('font-weight', @options.gridTextWeight)
-      .attr('fill', @options.gridTextColor)
+      .attr('font-size', fSize)
+      .attr('font-family', fFamily)
+      .attr('font-weight', fWeight)
+      .attr('fill', fColor)
+
+  drawYAxisCaption: (text) ->
+    textBox = @measureText text
+    if textBox.width > @bottom - @top
+      originalText = text
+      text = text.slice(0, Math.ceil((@bottom - @top) / textBox.width * text.length) - 1) + '...'
+
+    leftPosition = @left - (@options.yCaptionOffsetX + textBox.height)
+    bottomWithPadding = @top + ((@bottom - @top) - textBox.height) / 2
+    title = @drawXAxisLabel(leftPosition, bottomWithPadding, text, @options.yCaptionColor, @options.yCaptionFSize, @options.yCaptionFFamily,@options.yCaptionFWeight)
+      .transform('r-90')
+
+    title.attr({ title: originalText }) if originalText?
 
   drawBar: (xPos, yPos, width, height, barColor, opacity, radiusArray) ->
     maxRadius = Math.max(radiusArray...)
