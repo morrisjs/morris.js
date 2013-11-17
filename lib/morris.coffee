@@ -1,6 +1,4 @@
-Morris = window.Morris = {}
-
-$ = jQuery
+Morris = {}
 
 # Very simple event-emitter class.
 #
