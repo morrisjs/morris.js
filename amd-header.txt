@@ -1,0 +1,10 @@
+(function (root, factory) {
+    if (typeof exports === "object") {
+        module.exports = factory();
+    } else if (typeof define === "function" && define.amd) {
+        define([ "raphael", "jquery" ], factory);
+    } else {
+        root.Morris = factory(root.Raphael, root.jQuery);
+    }
+})(this, function (Raphael, $) {
+

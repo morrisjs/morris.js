@@ -4,9 +4,9 @@ module.exports = function (grunt) {
   grunt.initConfig({
     coffee: {
       lib: {
-        options: { bare: false },
+        options: { bare: true },
         files: {
-          'morris.js': ['build/morris.coffee']
+          'morris-bare.js': ['build/morris.coffee']
         }
       },
       spec: {
@@ -17,16 +17,30 @@ module.exports = function (grunt) {
       },
     },
     concat: {
-      'build/morris.coffee': [
-        'lib/morris.coffee',
-        'lib/morris.grid.coffee',
-        'lib/morris.hover.coffee',
-        'lib/morris.line.coffee',
-        'lib/morris.area.coffee',
-        'lib/morris.bar.coffee',
-        'lib/morris.donut.coffee'
-      ],
-      'build/spec.coffee': ['spec/support/**/*.coffee', 'spec/lib/**/*.coffee']
+      coffee: {
+        src: [
+          'lib/morris.coffee',
+          'lib/morris.grid.coffee',
+          'lib/morris.hover.coffee',
+          'lib/morris.line.coffee',
+          'lib/morris.area.coffee',
+          'lib/morris.bar.coffee',
+          'lib/morris.donut.coffee'
+        ],
+        dest: 'build/morris.coffee'
+      },
+      spec: {
+        src: ['spec/support/**/*.coffee', 'spec/lib/**/*.coffee'],
+        dest: 'build/spec.coffee'
+      },
+      wrap: {
+        src: [
+          'amd-header.txt',
+          'morris-bare.js',
+          'amd-footer.txt'
+        ],
+        dest: 'morris.js'
+      }
     },
     less: {
       all: {
@@ -72,5 +86,5 @@ module.exports = function (grunt) {
     }
   });
 
-  grunt.registerTask('default', ['concat', 'coffee', 'less', 'uglify', 'mocha', 'shell:visual_spec']);
+  grunt.registerTask('default', ['concat:coffee', 'concat:spec', 'coffee', 'concat:wrap', 'less', 'uglify', 'mocha', 'shell:visual_spec']);
 };
