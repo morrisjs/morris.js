@@ -9,6 +9,12 @@ Cheers!
 
 \- Olly (olly@oesmith.co.uk)
 
+## Contributors wanted
+
+I'm unfortunately not able to actively support Morris.js any more. I keep an eye on the issues, but I rarely have the time to fix bugs or review pull requests.
+
+If you're interested in actively contributing to Morris.js, please contact me on the email address above.
+
 ## Requirements
 
 - [jQuery](http://jquery.com/) (>= 1.7 recommended, but it'll probably work with older versions)
