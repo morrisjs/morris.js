@@ -168,6 +168,7 @@
       gridTextSize: 12,
       gridTextFamily: 'sans-serif',
       gridTextWeight: 'normal',
+      gridIntegers: false,
       hideHover: false,
       yLabelFormat: null,
       xLabelAngle: 0,
@@ -316,6 +317,9 @@
           this.ymax = Math.max(this.ymax, this.grid[this.grid.length - 1]);
         } else {
           step = (this.ymax - this.ymin) / (this.options.numLines - 1);
+          if (this.options.gridIntegers) {
+            step = Math.round(step);
+          }
           this.grid = (function() {
             var _i, _ref1, _ref2, _results;
             _results = [];
