@@ -318,7 +318,7 @@
         } else {
           step = (this.ymax - this.ymin) / (this.options.numLines - 1);
           if (this.options.gridIntegers) {
-            step = Math.round(step);
+            step = Math.max(1, Math.round(step));
           }
           this.grid = (function() {
             var _i, _ref1, _ref2, _results;
