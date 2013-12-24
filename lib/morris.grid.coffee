@@ -101,6 +101,7 @@ class Morris.Grid extends Morris.EventEmitter
     gridTextSize: 12
     gridTextFamily: 'sans-serif'
     gridTextWeight: 'normal'
+    gridIntegers: false
     hideHover: false
     yLabelFormat: null
     xLabelAngle: 0
@@ -221,6 +222,10 @@ class Morris.Grid extends Morris.EventEmitter
         @ymax = Math.max(@ymax, @grid[@grid.length - 1])
       else
         step = (@ymax - @ymin) / (@options.numLines - 1)
+        
+        if @options.gridIntegers is true
+          step = Math.min(1, Math.round(step))
+        
         @grid = (y for y in [@ymin..@ymax] by step)
 
     @dirty = true
