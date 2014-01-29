@@ -68,3 +68,31 @@ describe 'Morris.Bar', ->
         chart = Morris.Bar $.extend {}, defaults,
             barRadius: [300, 300, 0, 0]
         $('#graph').find("rect").size().should.equal 4
+
+  describe 'barSize option', ->
+    describe 'svg attributes', ->
+      defaults =
+        element: 'graph'
+        barSize: 20
+        data: [
+          {x: '2011 Q1', y: 3, z: 2, a: 3}
+          {x: '2011 Q2', y: 2, z: null, a: 1}
+          {x: '2011 Q3', y: 0, z: 2, a: 4}
+          {x: '2011 Q4', y: 2, z: 4, a: 3}
+        ],
+        xkey: 'x'
+        ykeys: ['y', 'z', 'a']
+        labels: ['Y', 'Z', 'A']
+
+      it 'should calc the width if too narrow for barSize', ->
+        $('#graph').width('200px')
+        chart = Morris.Bar $.extend {}, defaults
+        $('#graph').find("rect").filter((i) ->
+          parseFloat($(@).attr('width'), 10) < 10
+        ).size().should.equal 11
+
+      it 'should set width to @options.barSize if possible', ->
+        chart = Morris.Bar $.extend {}, defaults
+        $('#graph').find("rect[width='#{defaults.barSize}']").size().should.equal 11
+
+
