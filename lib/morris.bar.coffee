@@ -92,7 +92,9 @@ class Morris.Bar extends Morris.Grid
     groupWidth = @width / @options.data.length
     numBars = if @options.stacked? then 1 else @options.ykeys.length
     barWidth = (groupWidth * @options.barSizeRatio - @options.barGap * (numBars - 1)) / numBars
-    leftPadding = groupWidth * (1 - @options.barSizeRatio) / 2
+    barWidth = Math.min(barWidth, @options.barSize) if @options.barSize
+    spaceLeft = groupWidth - barWidth * numBars - @options.barGap * (numBars - 1)
+    leftPadding = spaceLeft / 2
     zeroPos = if @ymin <= 0 and @ymax >= 0 then @transY(0) else null
     @bars = for row, idx in @data
       lastTop = 0
