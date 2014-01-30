@@ -2,6 +2,7 @@ module.exports = function (grunt) {
   require('matchdep').filterDev('grunt-*').forEach(grunt.loadNpmTasks);
 
   grunt.initConfig({
+    pkg: grunt.file.readJSON('package.json'),
     coffee: {
       lib: {
         options: { bare: false },
@@ -17,15 +18,25 @@ module.exports = function (grunt) {
       },
     },
     concat: {
-      'build/morris.coffee': [
-        'lib/morris.coffee',
-        'lib/morris.grid.coffee',
-        'lib/morris.hover.coffee',
-        'lib/morris.line.coffee',
-        'lib/morris.area.coffee',
-        'lib/morris.bar.coffee',
-        'lib/morris.donut.coffee'
-      ],
+      'build/morris.coffee': {
+        options: {
+          banner: "### @license\n"+
+                  "<%= pkg.name %> v<%= pkg.version %>\n"+
+                  "Copyright <%= (new Date()).getFullYear() %> <%= pkg.author.name %> All rights reserved.\n" +
+                  "Licensed under the <%= pkg.license %> License.\n" +
+                  "###\n",
+        },
+        src: [
+          'lib/morris.coffee',
+          'lib/morris.grid.coffee',
+          'lib/morris.hover.coffee',
+          'lib/morris.line.coffee',
+          'lib/morris.area.coffee',
+          'lib/morris.bar.coffee',
+          'lib/morris.donut.coffee'
+        ],
+        dest: 'build/morris.coffee'
+      },
       'build/spec.coffee': ['spec/support/**/*.coffee', 'spec/lib/**/*.coffee']
     },
     less: {
@@ -39,6 +50,9 @@ module.exports = function (grunt) {
     },
     uglify: {
       build: {
+        options: {
+          preserveComments: 'some'
+        },
         files: {
           'morris.min.js': 'morris.js'
         }
