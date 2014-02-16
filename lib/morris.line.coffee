@@ -31,6 +31,7 @@ class Morris.Line extends Morris.Grid
     pointStrokeColors: ['#ffffff']
     pointFillColors: []
     smooth: true
+    lineType: {}
     xLabels: 'auto'
     xLabelFormat: null
     xLabelMargin: 24
@@ -118,12 +119,21 @@ class Morris.Line extends Morris.Grid
   # @private
   generatePaths: ->
     @paths = for i in [0...@options.ykeys.length]
+      # Keep 'smooth' option handling for compatibility
       smooth = if typeof @options.smooth is "boolean" then @options.smooth else @options.ykeys[i] in @options.smooth
+      lineType = if smooth then 'smooth' else 'jagged'
+      # Handle 'lineType' option
+      if typeof @options.lineType is "string"
+        lineType = @options.lineType
+      else
+        # Expect something like lineType: {"key1":"jagged","key2":"smooth","key3":"step","key4":"stepNoRiser",}
+        if @options.lineType[@options.ykeys[i]] isnt undefined
+          lineType = @options.lineType[@options.ykeys[i]]
       coords = ({x: r._x, y: r._y[i]} for r in @data when r._y[i] isnt undefined)
       coords = (c for c in coords when c.y isnt null) if @options.continuousLine
 
       if coords.length > 1
-        Morris.Line.createPath coords, smooth, @bottom
+        Morris.Line.createPath coords, lineType, @bottom
       else
         null
 
@@ -206,15 +216,15 @@ class Morris.Line extends Morris.Grid
   # create a path for a data series
   #
   # @private
-  @createPath: (coords, smooth, bottom) ->
+  @createPath: (coords, lineType, bottom) ->
     path = ""
-    grads = Morris.Line.gradients(coords) if smooth
+    grads = Morris.Line.gradients(coords) if lineType == 'smooth'
 
     prevCoord = {y: null}
     for coord, i in coords
       if coord.y?
         if prevCoord.y?
-          if smooth
+          if lineType == 'smooth'
             g = grads[i]
             lg = grads[i - 1]
             ix = (coord.x - prevCoord.x) / 4
@@ -223,10 +233,16 @@ class Morris.Line extends Morris.Grid
             x2 = coord.x - ix
             y2 = Math.min(bottom, coord.y - ix * g)
             path += "C#{x1},#{y1},#{x2},#{y2},#{coord.x},#{coord.y}"
-          else
+          else if lineType == 'jagged'
             path += "L#{coord.x},#{coord.y}"
+          else if  lineType == 'step'
+            path += "L#{coord.x},#{prevCoord.y}"
+            path += "L#{coord.x},#{coord.y}"
+          else if  lineType == 'stepNoRiser'
+            path += "L#{coord.x},#{prevCoord.y}"
+            path += "M#{coord.x},#{coord.y}"
         else
-          if not smooth or grads[i]?
+          if lineType != 'smooth' or grads[i]?
             path += "M#{coord.x},#{coord.y}"
       prevCoord = coord
     return path

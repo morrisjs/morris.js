@@ -734,6 +734,7 @@
       pointStrokeColors: ['#ffffff'],
       pointFillColors: [],
       smooth: true,
+      lineType: {},
       xLabels: 'auto',
       xLabelFormat: null,
       xLabelMargin: 24,
@@ -843,12 +844,20 @@
     };
 
     Line.prototype.generatePaths = function() {
-      var c, coords, i, r, smooth;
+      var c, coords, i, lineType, r, smooth;
       return this.paths = (function() {
         var _i, _ref, _ref1, _results;
         _results = [];
         for (i = _i = 0, _ref = this.options.ykeys.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
           smooth = typeof this.options.smooth === "boolean" ? this.options.smooth : (_ref1 = this.options.ykeys[i], __indexOf.call(this.options.smooth, _ref1) >= 0);
+          lineType = smooth ? 'smooth' : 'jagged';
+          if (typeof this.options.lineType === "string") {
+            lineType = this.options.lineType;
+          } else {
+            if (this.options.lineType[this.options.ykeys[i]] !== void 0) {
+              lineType = this.options.lineType[this.options.ykeys[i]];
+            }
+          }
           coords = (function() {
             var _j, _len, _ref2, _results1;
             _ref2 = this.data;
@@ -878,7 +887,7 @@
             })();
           }
           if (coords.length > 1) {
-            _results.push(Morris.Line.createPath(coords, smooth, this.bottom));
+            _results.push(Morris.Line.createPath(coords, lineType, this.bottom));
           } else {
             _results.push(null);
           }
@@ -990,10 +999,10 @@
       }
     };
 
-    Line.createPath = function(coords, smooth, bottom) {
+    Line.createPath = function(coords, lineType, bottom) {
       var coord, g, grads, i, ix, lg, path, prevCoord, x1, x2, y1, y2, _i, _len;
       path = "";
-      if (smooth) {
+      if (lineType === 'smooth') {
         grads = Morris.Line.gradients(coords);
       }
       prevCoord = {
@@ -1003,7 +1012,7 @@
         coord = coords[i];
         if (coord.y != null) {
           if (prevCoord.y != null) {
-            if (smooth) {
+            if (lineType === 'smooth') {
               g = grads[i];
               lg = grads[i - 1];
               ix = (coord.x - prevCoord.x) / 4;
@@ -1012,11 +1021,17 @@
               x2 = coord.x - ix;
               y2 = Math.min(bottom, coord.y - ix * g);
               path += "C" + x1 + "," + y1 + "," + x2 + "," + y2 + "," + coord.x + "," + coord.y;
-            } else {
+            } else if (lineType === 'jagged') {
               path += "L" + coord.x + "," + coord.y;
+            } else if (lineType === 'step') {
+              path += "L" + coord.x + "," + prevCoord.y;
+              path += "L" + coord.x + "," + coord.y;
+            } else if (lineType === 'stepNoRiser') {
+              path += "L" + coord.x + "," + prevCoord.y;
+              path += "M" + coord.x + "," + coord.y;
             }
           } else {
-            if (!smooth || (grads[i] != null)) {
+            if (lineType !== 'smooth' || (grads[i] != null)) {
               path += "M" + coord.x + "," + coord.y;
             }
           }
