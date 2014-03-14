@@ -1469,13 +1469,21 @@ Licensed under the BSD-2-Clause License.
       prevLabelMargin = null;
       prevAngleMargin = null;
       _results = [];
+      var addHeight=0; // the height added to the SVG after we draw the axis labels
+      var maxAxisHeight=0; // the normal height for the axis
       for (i = _i = 0, _ref = this.data.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
         row = this.data[this.data.length - 1 - i];
         label = this.drawXAxisLabel(row._x, ypos, row.label);
         textBox = label.getBBox();
+        // look how height is the text before any rotation
+        if (maxAxisHeight < textBox.height) maxAxisHeight = textBox.height;
         label.transform("r" + (-this.options.xLabelAngle));
         labelBox = label.getBBox();
         label.transform("t0," + (labelBox.height / 2) + "...");
+        // check if the label is too hight to be fit into the axis zone
+        if (labelBox.height > maxAxisHeight && labelBox.height-maxAxisHeight > addHeight)
+          addHeight = labelBox.height-maxAxisHeight;
+
         if (this.options.xLabelAngle !== 0) {
           offset = -0.5 * textBox.width * Math.cos(this.options.xLabelAngle * Math.PI / 180.0);
           label.transform("t" + offset + ",0...");
@@ -1490,6 +1498,8 @@ Licensed under the BSD-2-Clause License.
           _results.push(label.remove());
         }
       }
+      // check if we need to make the draw higher
+      if (addHeight>0) this.raphael.setSize(this.el.width(), this.el.height()+addHeight)
       return _results;
     };
 
