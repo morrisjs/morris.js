@@ -1,6 +1,6 @@
 ---
 layout: default
-morris_version: 0.4.3
+morris_version: 0.5.0
 ---
 <div class="row">
   <div class="span12">
@@ -33,6 +33,12 @@ morris_version: 0.4.3
               be initially selected.  You can change the selection using
               the </em><code>select(<em>index</em>)</code><em> method on
               the object returned by </em><code>Morris.Donut</code><em>.
+            </em>
+            <br>
+            <em>
+              Note 2: as for line charts, if you need to update the plot, use
+              the <code>setData</code> method on the object that
+              <code>Morris.Donut</code> returns.
             </em>
           </td>
         </tr>
@@ -67,6 +73,16 @@ morris_version: 0.4.3
               Note: if required, the method is also passed an optional second
               argument, which is the complete data row for the given value.
             </em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>resize</code></td>
+          <td>
+            Set to <code>true</code> to enable automatic resizing when the
+            containing element resizes. (default: false).
+            <br>
+            This has a significant performance impact, so is disabled by
+            default.
           </td>
         </tr>
       </tbody>

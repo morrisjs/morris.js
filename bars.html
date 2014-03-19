@@ -1,6 +1,6 @@
 ---
 layout: default
-morris_version: 0.4.3
+morris_version: 0.5.0
 ---
 <div class="row">
   <div class="span12">
@@ -101,12 +101,12 @@ morris_version: 0.4.3
             <br>
             The function will be called with the index of the row under
             the hover legend, the options object passed to the constructor
-            as arguments, and a string containing the default generated
-            hover legend content HTML.
+            as arguments, a string containing the default generated hover legend
+            content HTML, and an object containing the original data for the
+            row as passed in the <code>data</code> option.
             <br>
             <em>eg:</em>
-            <pre>hoverCallback: function (index, options, content) {
-  var row = options.data[index];
+            <pre>hoverCallback: function (index, options, content, row) {
   return "sin(" + row.x + ") = " + row.y;
 }</pre>
           </td>
@@ -147,6 +147,16 @@ morris_version: 0.4.3
           <td><code>gridTextWeight</code></td>
           <td>
             Set the font weight of the axis labels (default: normal).
+          </td>
+        </tr>
+        <tr>
+          <td><code>resize</code></td>
+          <td>
+            Set to <code>true</code> to enable automatic resizing when the
+            containing element resizes. (default: false).
+            <br>
+            This has a significant performance impact, so is disabled by
+            default.
           </td>
         </tr>
       </tbody>
