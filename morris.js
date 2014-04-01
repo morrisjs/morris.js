@@ -663,9 +663,13 @@ Licensed under the BSD-2-Clause License.
     }
 
     Hover.prototype.update = function(html, x, y) {
-      this.html(html);
-      this.show();
-      return this.moveTo(x, y);
+      if (!html) {
+        return this.hide();
+      } else {
+        this.html(html);
+        this.show();
+        return this.moveTo(x, y);
+      }
     };
 
     Hover.prototype.html = function(content) {
