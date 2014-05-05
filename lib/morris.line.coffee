@@ -34,7 +34,6 @@ class Morris.Line extends Morris.Grid
     xLabels: 'auto'
     xLabelFormat: null
     xLabelMargin: 24
-    continuousLine: true
     hideHover: false
 
   # Do any size-related calculations
@@ -120,7 +119,6 @@ class Morris.Line extends Morris.Grid
     @paths = for i in [0...@options.ykeys.length]
       smooth = if typeof @options.smooth is "boolean" then @options.smooth else @options.ykeys[i] in @options.smooth
       coords = ({x: r._x, y: r._y[i]} for r in @data when r._y[i] isnt undefined)
-      coords = (c for c in coords when c.y isnt null) if @options.continuousLine
 
       if coords.length > 1
         Morris.Line.createPath coords, smooth, @bottom

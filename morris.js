@@ -744,7 +744,6 @@ Licensed under the BSD-2-Clause License.
       xLabels: 'auto',
       xLabelFormat: null,
       xLabelMargin: 24,
-      continuousLine: true,
       hideHover: false
     };
 
@@ -850,7 +849,7 @@ Licensed under the BSD-2-Clause License.
     };
 
     Line.prototype.generatePaths = function() {
-      var c, coords, i, r, smooth;
+      var coords, i, r, smooth;
       return this.paths = (function() {
         var _i, _ref, _ref1, _results;
         _results = [];
@@ -871,19 +870,6 @@ Licensed under the BSD-2-Clause License.
             }
             return _results1;
           }).call(this);
-          if (this.options.continuousLine) {
-            coords = (function() {
-              var _j, _len, _results1;
-              _results1 = [];
-              for (_j = 0, _len = coords.length; _j < _len; _j++) {
-                c = coords[_j];
-                if (c.y !== null) {
-                  _results1.push(c);
-                }
-              }
-              return _results1;
-            })();
-          }
           if (coords.length > 1) {
             _results.push(Morris.Line.createPath(coords, smooth, this.bottom));
           } else {

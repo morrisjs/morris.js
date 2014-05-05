@@ -77,7 +77,6 @@ describe 'Morris.Line', ->
         labels: ['y', 'z']
         lineColors: ['#abcdef', '#fedcba']
         smooth: true
-        continuousLine: false
 
     shouldHavePath = (regex, color = '#abcdef') ->
       # Matches an SVG path element within the rendered chart.
@@ -104,12 +103,7 @@ describe 'Morris.Line', ->
       Morris.Line @defaults
       shouldHavePath /M[\d\.]+,[\d\.]+(C[\d\.]+(,[\d\.]+){5}){3}/
 
-    it 'should ignore null values when options.continuousLine is true', ->
-      @defaults.data[2].y = null
-      Morris.Line $.extend(@defaults, continuousLine: true)
-      shouldHavePath /M[\d\.]+,[\d\.]+(C[\d\.]+(,[\d\.]+){5}){3}/
-
-    it 'should break the line at null values when options.continuousLine is false', ->
+    it 'should break the line at null values', ->
       @defaults.data[2].y = null
       Morris.Line @defaults
       shouldHavePath /(M[\d\.]+,[\d\.]+C[\d\.]+(,[\d\.]+){5}){2}/
