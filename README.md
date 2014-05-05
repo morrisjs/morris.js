@@ -51,7 +51,7 @@ tests currently *only* pass on OS X.
 
 ## Changelog
 
-### 0.5.0 - TBC
+### 0.5.0 - 19th March 2014
 
 - Update grunt dependency [#288](https://github.com/morrisjs/morris.js/issues/228)
 - Donut segment color config in data objects [#281](https://github.com/morrisjs/morris.js/issues/281)
