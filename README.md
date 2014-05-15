@@ -33,6 +33,11 @@ Very daring.
 
 Fork, hack, possibly even add some tests, then send a pull request :)
 
+### Online Demo Animated Bar Chart & Line Chart
+
+[Animated Chart] (http://jsfiddle.net/chavdaamit1/BTHWT/)
+
+
 ### Developer quick-start
 
 You'll need [node.js](https://nodejs.org).  I recommend using
