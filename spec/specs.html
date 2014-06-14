@@ -4,7 +4,9 @@
   <title>morris.js tests</title>
   <link rel="stylesheet" href="../bower_components/mocha/mocha.css" type="text/css" media="screen" />
   <link rel="stylesheet" href="../morris.css" type="text/css" media="screen" />
-  <script src="../bower_components/jquery/dist/jquery.min.js"></script>
+  <!-- jQuery packaging changed for 2.1.0, so try to load both paths, one will work. -->
+  <script src="../bower_components/jquery/dist/jquery.js"></script>
+  <script src="../bower_components/jquery/jquery.js"></script>
   <script type="text/javascript" src="../bower_components/raphael/raphael-min.js"></script>
 </head>
 <body>
