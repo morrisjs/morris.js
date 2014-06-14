@@ -11,9 +11,12 @@ class Morris.Hover
     @options.parent.append(@el)
 
   update: (html, x, y) ->
-    @html(html)
-    @show()
-    @moveTo(x, y)
+    if not html
+      @hide()
+    else
+      @html(html)
+      @show()
+      @moveTo(x, y)
 
   html: (content) ->
     @el.html(content)
