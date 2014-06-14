@@ -1486,7 +1486,7 @@ Licensed under the BSD-2-Clause License.
     Bar.prototype.drawSeries = function() {
       var barWidth, bottom, groupWidth, idx, lastTop, left, leftPadding, numBars, row, sidx, size, spaceLeft, top, ypos, zeroPos;
       groupWidth = this.width / this.options.data.length;
-      numBars = this.options.stacked != null ? 1 : this.options.ykeys.length;
+      numBars = this.options.stacked ? 1 : this.options.ykeys.length;
       barWidth = (groupWidth * this.options.barSizeRatio - this.options.barGap * (numBars - 1)) / numBars;
       if (this.options.barSize) {
         barWidth = Math.min(barWidth, this.options.barSize);

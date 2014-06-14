@@ -90,7 +90,7 @@ class Morris.Bar extends Morris.Grid
   # @private
   drawSeries: ->
     groupWidth = @width / @options.data.length
-    numBars = if @options.stacked? then 1 else @options.ykeys.length
+    numBars = if @options.stacked then 1 else @options.ykeys.length
     barWidth = (groupWidth * @options.barSizeRatio - @options.barGap * (numBars - 1)) / numBars
     barWidth = Math.min(barWidth, @options.barSize) if @options.barSize
     spaceLeft = groupWidth - barWidth * numBars - @options.barGap * (numBars - 1)
