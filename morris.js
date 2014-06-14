@@ -1520,6 +1520,9 @@ Licensed under the BSD-2-Clause License.
                   left += sidx * (barWidth + this.options.barGap);
                 }
                 size = bottom - top;
+                if (this.options.verticalGridCondition && this.options.verticalGridCondition(row.x)) {
+                  this.drawBar(this.left + idx * groupWidth, this.top, groupWidth, Math.abs(this.top - this.bottom), this.options.verticalGridColor, this.options.verticalGridOpacity, this.options.barRadius);
+                }
                 if (this.options.stacked) {
                   top -= lastTop;
                 }
