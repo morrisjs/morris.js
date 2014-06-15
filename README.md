@@ -55,6 +55,13 @@ tests currently *only* pass on OS X.
 
 ## Changelog
 
+### 0.5.1 - 15th June 2014
+
+- Fix touch event handling.
+- Fix stacked=false in bar chart [#275](https://github.com/morrisjs/morris.js/issues/275)
+- Configurable vertical segments [#297](https://github.com/morrisjs/morris.js/issues/297)
+- Deprecate continuousLine option.
+
 ### 0.5.0 - 19th March 2014
 
 - Update grunt dependency [#288](https://github.com/morrisjs/morris.js/issues/228)
