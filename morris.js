@@ -127,8 +127,7 @@ Licensed under the BSD-2-Clause License.
         var offset, touch;
         touch = evt.originalEvent.touches[0] || evt.originalEvent.changedTouches[0];
         offset = _this.el.offset();
-        _this.fire('hover', touch.pageX - offset.left, touch.pageY - offset.top);
-        return touch;
+        return _this.fire('hovermove', touch.pageX - offset.left, touch.pageY - offset.top);
       });
       this.el.bind('click', function(evt) {
         var offset;
@@ -160,6 +159,7 @@ Licensed under the BSD-2-Clause License.
           return _this.timeoutId = window.setTimeout(_this.resizeHandler, 100);
         });
       }
+      this.el.css('-webkit-tap-highlight-color', 'rgba(0,0,0,0)');
       if (this.postInit) {
         this.postInit();
       }

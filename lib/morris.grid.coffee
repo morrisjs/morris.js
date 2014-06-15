@@ -59,8 +59,7 @@ class Morris.Grid extends Morris.EventEmitter
     @el.bind 'touchstart touchmove touchend', (evt) =>
       touch = evt.originalEvent.touches[0] or evt.originalEvent.changedTouches[0]
       offset = @el.offset()
-      @fire 'hover', touch.pageX - offset.left, touch.pageY - offset.top
-      touch
+      @fire 'hovermove', touch.pageX - offset.left, touch.pageY - offset.top
 
     @el.bind 'click', (evt) =>
       offset = @el.offset()
@@ -86,6 +85,9 @@ class Morris.Grid extends Morris.EventEmitter
         if @timeoutId?
           window.clearTimeout @timeoutId
         @timeoutId = window.setTimeout @resizeHandler, 100
+
+    # Disable tap highlight on iOS.
+    @el.css('-webkit-tap-highlight-color', 'rgba(0,0,0,0)')
 
     @postInit() if @postInit
 
