@@ -289,7 +289,7 @@ class Morris.Grid extends Morris.EventEmitter
         @left += Math.max(yLabelWidths...)
       if @options.axes in [true, 'both', 'x']
         bottomOffsets = for i in [0...@data.length]
-          @measureText(@data[i].text, -@options.xLabelAngle).height
+          @measureText(@data[i].label, -@options.xLabelAngle).height
         @bottom -= Math.max(bottomOffsets...)
       @width = Math.max(1, @right - @left)
       @height = Math.max(1, @bottom - @top)
