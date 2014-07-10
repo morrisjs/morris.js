@@ -101,6 +101,9 @@ class Morris.Line extends Morris.Grid
     row = @data[index]
     content = "<div class='morris-hover-row-label'>#{row.label}</div>"
     for y, j in row.y
+      if @options.labels[j] is false
+        continue
+
       content += """
         <div class='morris-hover-point' style='color: #{@colorFor(row, j, 'label')}'>
           #{@options.labels[j]}:
