@@ -98,7 +98,7 @@ class Morris.Grid extends Morris.EventEmitter
     axes: true
     grid: true
     gridLineColor: '#aaa'
-    gridStrokeWidth: 0.5
+    gridStrokeWidth: 1
     gridTextColor: '#888'
     gridTextSize: 12
     gridTextFamily: 'sans-serif'
@@ -370,11 +370,13 @@ class Morris.Grid extends Morris.EventEmitter
     @raphael.path("M#{@left},#{@transY(goal)}H#{@right}")
       .attr('stroke', color)
       .attr('stroke-width', @options.goalStrokeWidth)
+      .node.setAttribute('style', 'shape-rendering:crispEdges')
 
   drawEvent: (event, color) ->
     @raphael.path("M#{@transX(event)},#{@bottom}V#{@top}")
       .attr('stroke', color)
       .attr('stroke-width', @options.eventStrokeWidth)
+      .node.setAttribute('style', 'shape-rendering:crispEdges')
 
   drawYAxisLabel: (xPos, yPos, text) ->
     @raphael.text(xPos, yPos, text)
@@ -388,6 +390,7 @@ class Morris.Grid extends Morris.EventEmitter
     @raphael.path(path)
       .attr('stroke', @options.gridLineColor)
       .attr('stroke-width', @options.gridStrokeWidth)
+      .node.setAttribute('style', 'shape-rendering:crispEdges')
 
   # Range selection
   #
