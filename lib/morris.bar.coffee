@@ -29,6 +29,7 @@ class Morris.Bar extends Morris.Grid
     barOpacity: 1.0
     barRadius: [0, 0, 0, 0]
     xLabelMargin: 50
+    shown: true
 
   # Do any size-related calculations
   #
@@ -90,7 +91,14 @@ class Morris.Bar extends Morris.Grid
   # @private
   drawSeries: ->
     groupWidth = @width / @options.data.length
-    numBars = if @options.stacked then 1 else @options.ykeys.length
+    if @options.stacked
+      numBars = 1
+    else
+      numBars = 0
+      for i in [0..@options.ykeys.length]
+        if @hasToShow(i)
+          numBars += 1
+
     barWidth = (groupWidth * @options.barSizeRatio - @options.barGap * (numBars - 1)) / numBars
     barWidth = Math.min(barWidth, @options.barSize) if @options.barSize
     spaceLeft = groupWidth - barWidth * numBars - @options.barGap * (numBars - 1)
@@ -99,6 +107,8 @@ class Morris.Bar extends Morris.Grid
     @bars = for row, idx in @data
       lastTop = 0
       for ypos, sidx in row._y
+        if not @hasToShow(sidx)
+          continue
         if ypos != null
           if zeroPos
             top = Math.min(ypos, zeroPos)

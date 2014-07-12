@@ -31,6 +31,7 @@ class Morris.Line extends Morris.Grid
     pointStrokeColors: ['#ffffff']
     pointFillColors: []
     smooth: true
+    shown: true
     xLabels: 'auto'
     xLabelFormat: null
     xLabelMargin: 24
@@ -184,9 +185,12 @@ class Morris.Line extends Morris.Grid
   drawSeries: ->
     @seriesPoints = []
     for i in [@options.ykeys.length-1..0]
-      @_drawLineFor i
+      if @hasToShow(i)
+        @_drawLineFor i
+
     for i in [@options.ykeys.length-1..0]
-      @_drawPointFor i
+      if @hasToShow(i)
+        @_drawPointFor i
 
   _drawPointFor: (index) ->
     @seriesPoints[index] = []

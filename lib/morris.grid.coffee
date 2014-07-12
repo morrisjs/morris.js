@@ -172,7 +172,7 @@ class Morris.Grid extends Morris.EventEmitter
         yval = row[ykey]
         yval = parseFloat(yval) if typeof yval is 'string'
         yval = null if yval? and typeof yval isnt 'number'
-        if yval?
+        if yval? and @hasToShow(idx)
           if @cumulative
             total += yval
           else
@@ -409,6 +409,10 @@ class Morris.Grid extends Morris.EventEmitter
     @timeoutId = null
     @raphael.setSize @el.width(), @el.height()
     @redraw()
+
+  hasToShow: (i) =>
+    @options.shown is true or @options.shown[i] is true
+
 
 # Parse a date into a javascript timestamp
 #
