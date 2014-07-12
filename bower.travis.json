@@ -7,8 +7,7 @@
   ],
   "dependencies": {
     "jquery": "JQUERY",
-    "raphael": "RAPHAEL",
-    "mocha": "~1.17.1"
+    "raphael": "RAPHAEL"
   },
   "devDependencies": {
     "mocha": "~1.17.1",
