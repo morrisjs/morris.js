@@ -29,6 +29,7 @@ class Morris.Bar extends Morris.Grid
     barOpacity: 1.0
     barRadius: [0, 0, 0, 0]
     xLabelMargin: 50
+    horizontal: false
 
   # Do any size-related calculations
   #
@@ -43,7 +44,7 @@ class Morris.Bar extends Morris.Grid
   # @private
   calcBars: ->
     for row, idx in @data
-      row._x = @left + @width * (idx + 0.5) / @data.length
+      row._x = @xStart + @xSize * (idx + 0.5) / @data.length
       row._y = for y in row.y
         if y? then @transY(y) else null
 
@@ -58,39 +59,78 @@ class Morris.Bar extends Morris.Grid
   # @private
   drawXAxis: ->
     # draw x axis labels
-    ypos = @bottom + (@options.xAxisLabelTopPadding || @options.padding / 2)
+    if not @options.horizontal
+      basePos = @getXAxisLabelY()
+    else
+      basePos = @getYAxisLabelX()
+
     prevLabelMargin = null
     prevAngleMargin = null
     for i in [0...@data.length]
       row = @data[@data.length - 1 - i]
-      label = @drawXAxisLabel(row._x, ypos, row.label)
+      if not @options.horizontal
+        label = @drawXAxisLabel(row._x, basePos, row.label)
+      else
+        label = @drawYAxisLabel(basePos, row._x - 0.5 * @options.gridTextSize, row.label)
+
+
+      if not @options.horizontal
+        angle = @options.xLabelAngle
+      else
+        angle = 0
+
       textBox = label.getBBox()
-      label.transform("r#{-@options.xLabelAngle}")
+      label.transform("r#{-angle}")
       labelBox = label.getBBox()
       label.transform("t0,#{labelBox.height / 2}...")
-      if @options.xLabelAngle != 0
+
+
+      if angle != 0
         offset = -0.5 * textBox.width *
-          Math.cos(@options.xLabelAngle * Math.PI / 180.0)
+          Math.cos(angle * Math.PI / 180.0)
         label.transform("t#{offset},0...")
+
+
+      if not @options.horizontal
+        startPos = labelBox.x
+        size = labelBox.width
+        maxSize = @el.width()
+      else
+        startPos = labelBox.y
+        size = labelBox.height
+        maxSize = @el.height()
+
       # try to avoid overlaps
       if (not prevLabelMargin? or
-          prevLabelMargin >= labelBox.x + labelBox.width or
-          prevAngleMargin? and prevAngleMargin >= labelBox.x) and
-         labelBox.x >= 0 and (labelBox.x + labelBox.width) < @el.width()
-        if @options.xLabelAngle != 0
+          prevLabelMargin >= startPos + size or
+          prevAngleMargin? and prevAngleMargin >= startPos) and
+         startPos >= 0 and (startPos + size) < maxSize
+        if angle != 0
           margin = 1.25 * @options.gridTextSize /
-            Math.sin(@options.xLabelAngle * Math.PI / 180.0)
-          prevAngleMargin = labelBox.x - margin
-        prevLabelMargin = labelBox.x - @options.xLabelMargin
+            Math.sin(angle * Math.PI / 180.0)
+          prevAngleMargin = startPos - margin
+        if not @options.horizontal
+          prevLabelMargin = startPos - @options.xLabelMargin
+        else
+          prevLabelMargin = startPos
+
       else
         label.remove()
+
+  # get the Y position of a label on the X axis
+  #
+  # @private
+  getXAxisLabelY: ->
+    @bottom + (@options.xAxisLabelTopPadding || @options.padding / 2)
 
   # draw the data series
   #
   # @private
   drawSeries: ->
-    groupWidth = @width / @options.data.length
     numBars = if @options.stacked then 1 else @options.ykeys.length
+
+    groupWidth = @xSize / @options.data.length
+
     barWidth = (groupWidth * @options.barSizeRatio - @options.barGap * (numBars - 1)) / numBars
     barWidth = Math.min(barWidth, @options.barSize) if @options.barSize
     spaceLeft = groupWidth - barWidth * numBars - @options.barGap * (numBars - 1)
@@ -107,7 +147,7 @@ class Morris.Bar extends Morris.Grid
             top = ypos
             bottom = @bottom
 
-          left = @left + idx * groupWidth + leftPadding
+          left = @xStart + idx * groupWidth + leftPadding
           left += sidx * (barWidth + @options.barGap) unless @options.stacked
           size = bottom - top
 
@@ -115,10 +155,15 @@ class Morris.Bar extends Morris.Grid
             @drawBar(@left + idx * groupWidth, @top, groupWidth, Math.abs(@top - @bottom), @options.verticalGridColor, @options.verticalGridOpacity, @options.barRadius)
 
           top -= lastTop if @options.stacked
-          @drawBar(left, top, barWidth, size, @colorFor(row, sidx, 'bar'),
-              @options.barOpacity, @options.barRadius)
+          if not @options.horizontal
+            @drawBar(left, top, barWidth, size, @colorFor(row, sidx, 'bar'),
+                @options.barOpacity, @options.barRadius)
+          else
+            @drawBar(top, left, size, barWidth, @colorFor(row, sidx, 'bar'),
+                @options.barOpacity, @options.barRadius)
 
           lastTop += size
+
         else
           null
 
@@ -137,11 +182,16 @@ class Morris.Bar extends Morris.Grid
 
   # hit test - returns the index of the row at the given x-coordinate
   #
-  hitTest: (x) ->
+  hitTest: (x, y) ->
     return null if @data.length == 0
-    x = Math.max(Math.min(x, @right), @left)
+    if not @options.horizontal
+      pos = x
+    else
+      pos = y
+
+    pos = Math.max(Math.min(pos, @xEnd), @xStart)
     Math.min(@data.length - 1,
-      Math.floor((x - @left) / (@width / @data.length)))
+      Math.floor((pos - @xStart) / (@xSize / @data.length)))
 
   # click on grid event handler
   #
@@ -154,7 +204,7 @@ class Morris.Bar extends Morris.Grid
   #
   # @private
   onHoverMove: (x, y) =>
-    index = @hitTest(x)
+    index = @hitTest(x, y)
     @hover.update(@hoverContentForRow(index)...)
 
   # hover out event handler
@@ -179,8 +229,14 @@ class Morris.Bar extends Morris.Grid
       """
     if typeof @options.hoverCallback is 'function'
       content = @options.hoverCallback(index, @options, content, row.src)
-    x = @left + (index + 0.5) * @width / @data.length
-    [content, x]
+
+    if not @options.horizontal
+      x = @left + (index + 0.5) * @width / @data.length
+      [content, x]
+    else
+      x = @left + 0.5 * @width
+      y = @top + (index + 0.5) * @height / @data.length
+      [content, x, y, true]
 
   drawXAxisLabel: (xPos, yPos, text) ->
     label = @raphael.text(xPos, yPos, text)
