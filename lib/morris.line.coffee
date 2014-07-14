@@ -314,6 +314,8 @@ class Morris.Line extends Morris.Grid
 
   # @private
   pointGrowSeries: (index) ->
+    if @pointSizeForSeries(index) is 0
+      return
     Raphael.animation r: @pointSizeForSeries(index) + 3, 25, 'linear'
 
   # @private
