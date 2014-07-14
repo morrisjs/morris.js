@@ -286,25 +286,74 @@ class Morris.Grid extends Morris.EventEmitter
       if @options.axes in [true, 'both', 'y']
         yLabelWidths = for gridLine in @grid
           @measureText(@yAxisFormat(gridLine)).width
-        @left += Math.max(yLabelWidths...)
+
+        if not @options.horizontal
+          @left += Math.max(yLabelWidths...)
+        else
+          @bottom -= Math.max(yLabelWidths...)
+
       if @options.axes in [true, 'both', 'x']
+        if not @options.horizontal
+          angle = -@options.xLabelAngle
+        else
+          angle = -90
+
         bottomOffsets = for i in [0...@data.length]
-          @measureText(@data[i].text, -@options.xLabelAngle).height
-        @bottom -= Math.max(bottomOffsets...)
+          @measureText(@data[i].label, angle).height
+
+        if not @options.horizontal
+          @bottom -= Math.max(bottomOffsets...)
+        else
+          @left += Math.max(bottomOffsets...)
+
       @width = Math.max(1, @right - @left)
       @height = Math.max(1, @bottom - @top)
-      @dx = @width / (@xmax - @xmin)
-      @dy = @height / (@ymax - @ymin)
+
+      if not @options.horizontal
+        @dx = @width / (@xmax - @xmin)
+        @dy = @height / (@ymax - @ymin)
+
+        @yStart = @bottom
+        @yEnd = @top
+        @xStart = @left
+        @xEnd = @right
+
+        @xSize = @width
+        @ySize = @height
+      else
+        @dx = @height / (@xmax - @xmin)
+        @dy = @width / (@ymax - @ymin)
+
+        @yStart = @left
+        @yEnd = @right
+        @xStart = @top
+        @xEnd = @bottom
+
+        @xSize = @height
+        @ySize = @width
+
       @calc() if @calc
 
   # Quick translation helpers
   #
-  transY: (y) -> @bottom - (y - @ymin) * @dy
-  transX: (x) ->
-    if @data.length == 1
-      (@left + @right) / 2
+  transY: (y) ->
+    if not @options.horizontal
+      @bottom - (y - @ymin) * @dy
     else
-      @left + (x - @xmin) * @dx
+      @left + (y - @ymin) * @dy
+  transX: (x) ->
+    if @options.horizontal
+      start = @left
+      end = @right
+    else
+      start = @top
+      end = @bottom
+
+    if @data.length == 1
+      (start + end) / 2
+    else
+      start + (x - @xmin) * @dx
+
 
   # Draw it!
   #
@@ -342,16 +391,36 @@ class Morris.Grid extends Morris.EventEmitter
     else
       "#{@options.preUnits}#{Morris.commas(label)}#{@options.postUnits}"
 
+  # get the X position of a label on the Y axis
+  #
+  # @private
+  getYAxisLabelX: ->
+    @left - @options.padding / 2
+
+
   # draw y axis labels, horizontal lines
   #
   drawGrid: ->
     return if @options.grid is false and @options.axes not in [true, 'both', 'y']
+
+    if not @options.horizontal
+      basePos = @getYAxisLabelX()
+    else
+      basePos = @getXAxisLabelY()
+
     for lineY in @grid
-      y = @transY(lineY)
+      pos = @transY(lineY)
       if @options.axes in [true, 'both', 'y']
-        @drawYAxisLabel(@left - @options.padding / 2, y, @yAxisFormat(lineY))
+        if not @options.horizontal
+          @drawYAxisLabel(basePos, pos, @yAxisFormat(lineY))
+        else
+          @drawXAxisLabel(pos, basePos, @yAxisFormat(lineY))
+
       if @options.grid
-        @drawGridLine("M#{@left},#{y}H#{@left + @width}")
+        if not @options.horizontal
+          @drawGridLine("M#{@xStart},#{pos}H#{@xEnd}")
+        else
+          @drawGridLine("M#{pos},#{@xStart}V#{@xEnd}")
 
   # draw goals horizontal lines
   #
@@ -367,12 +436,22 @@ class Morris.Grid extends Morris.EventEmitter
       @drawEvent(event, color)
 
   drawGoal: (goal, color) ->
-    @raphael.path("M#{@left},#{@transY(goal)}H#{@right}")
+    if not @options.horizontal
+      path = "M#{@xStart},#{@transY(goal)}H#{@xEnd}"
+    else
+      path = "M#{@transY(goal)},#{@xStart}V#{@xEnd}"
+
+    @raphael.path(path)
       .attr('stroke', color)
       .attr('stroke-width', @options.goalStrokeWidth)
 
   drawEvent: (event, color) ->
-    @raphael.path("M#{@transX(event)},#{@bottom}V#{@top}")
+    if not @options.horizontal
+      path = "M#{@transX(goal)},#{@yStart}V#{@yEnd}"
+    else
+      path = "M#{@yStart},#{@transX(goal)}H#{@yEnd}"
+
+    @raphael.path(path)
       .attr('stroke', color)
       .attr('stroke-width', @options.eventStrokeWidth)
 
