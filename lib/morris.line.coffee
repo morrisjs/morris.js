@@ -35,6 +35,13 @@ class Morris.Line extends Morris.Grid
     xLabelFormat: null
     xLabelMargin: 24
     hideHover: false
+    trendLine: false
+    trendLineWidth: 2
+    trendLineColors: [
+      '#689bc3'
+      '#a2b3bf'
+      '#64b764'
+    ]
 
   # Do any size-related calculations
   #
@@ -187,6 +194,10 @@ class Morris.Line extends Morris.Grid
   drawSeries: ->
     @seriesPoints = []
     for i in [@options.ykeys.length-1..0]
+      if @options.trendLine isnt false and
+          @options.trendLine is true or @options.trendLine[i] is true
+        @_drawTrendLine i
+
       @_drawLineFor i
     for i in [@options.ykeys.length-1..0]
       @_drawPointFor i
@@ -203,6 +214,40 @@ class Morris.Line extends Morris.Grid
     path = @paths[index]
     if path isnt null
       @drawLinePath path, @colorFor(null, index, 'line'), index
+
+  _drawTrendLine: (index) ->
+    # Least squares fitting for y = x * a + b
+    sum_x = 0
+    sum_y = 0
+    sum_xx = 0
+    sum_xy = 0
+    datapoints = 0
+
+    for val in @data
+      x = val.x
+      y = val.y[index]
+      if y is undefined
+        continue
+      datapoints += 1
+      sum_x += x
+      sum_y += y
+      sum_xx += x * x
+      sum_xy += x * y
+
+    a = (datapoints*sum_xy - sum_x*sum_y) / (datapoints*sum_xx - sum_x*sum_x)
+    b = (sum_y / datapoints) - ((a * sum_x) / datapoints)
+
+    data = [{}, {}]
+    data[0].x = @transX(@data[0].x)
+    data[0].y = @transY(@data[0].x * a + b)
+    data[1].x = @transX(@data[@data.length - 1].x)
+    data[1].y = @transY(@data[@data.length - 1].x * a + b)
+
+    path = Morris.Line.createPath data, false, @bottom
+    path = @raphael.path(path)
+      .attr('stroke', @colorFor(null, index, 'trendLine'))
+      .attr('stroke-width', @options.trendLineWidth)
+
 
   # create a path for a data series
   #
@@ -269,8 +314,10 @@ class Morris.Line extends Morris.Grid
       @options.lineColors.call(@, row, sidx, type)
     else if type is 'point'
       @options.pointFillColors[sidx % @options.pointFillColors.length] || @options.lineColors[sidx % @options.lineColors.length]
-    else
+    else if type is 'line'
       @options.lineColors[sidx % @options.lineColors.length]
+    else
+      @options.trendLineColors[sidx % @options.trendLineColors.length]
 
   drawXAxisLabel: (xPos, yPos, text) ->
     @raphael.text(xPos, yPos, text)
