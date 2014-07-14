@@ -9,6 +9,7 @@ before_script:
   - 'sed -i -e "s/RAPHAEL/$RAPHAEL/" bower.json'
   - "bower install"
 env:
+  - JQUERY="~> 1.7.0" RAPHAEL="~> 2.0.0"
   - JQUERY="~> 1.8.0" RAPHAEL="~> 2.0.0"
   - JQUERY="~> 1.9.0" RAPHAEL="~> 2.0.0"
   - JQUERY="~> 2.0.0" RAPHAEL="~> 2.0.0"
