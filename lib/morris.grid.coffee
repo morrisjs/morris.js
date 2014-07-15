@@ -342,17 +342,10 @@ class Morris.Grid extends Morris.EventEmitter
     else
       @left + (y - @ymin) * @dy
   transX: (x) ->
-    if @options.horizontal
-      start = @left
-      end = @right
-    else
-      start = @top
-      end = @bottom
-
     if @data.length == 1
-      (start + end) / 2
+      (@xStart + @xEnd) / 2
     else
-      start + (x - @xmin) * @dx
+      @xStart + (x - @xmin) * @dx
 
 
   # Draw it!
