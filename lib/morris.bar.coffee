@@ -152,17 +152,22 @@ class Morris.Bar extends Morris.Grid
           size = bottom - top
 
           if @options.verticalGridCondition and @options.verticalGridCondition(row.x)
-            @drawBar(@left + idx * groupWidth, @top, groupWidth, Math.abs(@top - @bottom), @options.verticalGridColor, @options.verticalGridOpacity, @options.barRadius)
+            if not @options.horizontal
+              @drawBar(@xStart + idx * groupWidth, @yEnd, groupWidth, @ySize, @options.verticalGridColor, @options.verticalGridOpacity, @options.barRadius)
+            else
+              @drawBar(@yStart, @xStart + idx * groupWidth, @ySize, groupWidth, @options.verticalGridColor, @options.verticalGridOpacity, @options.barRadius)
+
 
           top -= lastTop if @options.stacked
           if not @options.horizontal
             @drawBar(left, top, barWidth, size, @colorFor(row, sidx, 'bar'),
                 @options.barOpacity, @options.barRadius)
+            lastTop += size
           else
             @drawBar(top, left, size, barWidth, @colorFor(row, sidx, 'bar'),
                 @options.barOpacity, @options.barRadius)
+            lastTop -= size
 
-          lastTop += size
 
         else
           null
