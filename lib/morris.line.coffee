@@ -38,6 +38,7 @@ class Morris.Line extends Morris.Grid
     hideHover: false
     trendLine: false
     trendLineWidth: 2
+    trendLineWeight: false
     trendLineColors: [
       '#689bc3'
       '#a2b3bf'
@@ -227,16 +228,21 @@ class Morris.Line extends Morris.Grid
     sum_xy = 0
     datapoints = 0
 
-    for val in @data
+    for val, i in @data
       x = val.x
       y = val.y[index]
       if y is undefined
         continue
-      datapoints += 1
-      sum_x += x
-      sum_y += y
-      sum_xx += x * x
-      sum_xy += x * y
+      if @options.trendLineWeight is false
+        weight = 1
+      else
+        weight = @options.data[i][@options.trendLineWeight]
+      datapoints += weight
+
+      sum_x += x * weight
+      sum_y += y * weight
+      sum_xx += x * x * weight
+      sum_xy += x * y * weight
 
     a = (datapoints*sum_xy - sum_x*sum_y) / (datapoints*sum_xx - sum_x*sum_x)
     b = (sum_y / datapoints) - ((a * sum_x) / datapoints)
