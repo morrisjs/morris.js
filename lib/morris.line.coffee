@@ -323,13 +323,6 @@ class Morris.Line extends Morris.Grid
     else
       @options.trendLineColors[sidx % @options.trendLineColors.length]
 
-  drawXAxisLabel: (xPos, yPos, text) ->
-    @raphael.text(xPos, yPos, text)
-      .attr('font-size', @options.gridTextSize)
-      .attr('font-family', @options.gridTextFamily)
-      .attr('font-weight', @options.gridTextWeight)
-      .attr('fill', @options.gridTextColor)
-
   drawLinePath: (path, lineColor, lineIndex) ->
     @raphael.path(path)
       .attr('stroke', lineColor)

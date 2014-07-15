@@ -255,13 +255,6 @@ class Morris.Bar extends Morris.Grid
       y = @top + (index + 0.5) * @height / @data.length
       [content, x, y, true]
 
-  drawXAxisLabel: (xPos, yPos, text) ->
-    label = @raphael.text(xPos, yPos, text)
-      .attr('font-size', @options.gridTextSize)
-      .attr('font-family', @options.gridTextFamily)
-      .attr('font-weight', @options.gridTextWeight)
-      .attr('fill', @options.gridTextColor)
-
   drawBar: (xPos, yPos, width, height, barColor, opacity, radiusArray) ->
     maxRadius = Math.max(radiusArray...)
     if maxRadius == 0 or maxRadius > height
