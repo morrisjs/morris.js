@@ -417,6 +417,7 @@ class Morris.Grid extends Morris.EventEmitter
           @drawXAxisLabel(pos, basePos, @yAxisFormat(lineY))
 
       if @options.grid
+        pos = Math.floor(pos) + 0.5
         if not @options.horizontal
           @drawGridLine("M#{@xStart},#{pos}H#{@xEnd}")
         else
@@ -436,20 +437,22 @@ class Morris.Grid extends Morris.EventEmitter
       @drawEvent(event, color)
 
   drawGoal: (goal, color) ->
+    y = Math.floor(@transY(goal)) + 0.5
     if not @options.horizontal
-      path = "M#{@xStart},#{@transY(goal)}H#{@xEnd}"
+      path = "M#{@xStart},#{y}H#{@xEnd}"
     else
-      path = "M#{@transY(goal)},#{@xStart}V#{@xEnd}"
+      path = "M#{y},#{@xStart}V#{@xEnd}"
 
     @raphael.path(path)
       .attr('stroke', color)
       .attr('stroke-width', @options.goalStrokeWidth)
 
   drawEvent: (event, color) ->
+    x = Math.floor(@transX(goal)) + 0.5
     if not @options.horizontal
-      path = "M#{@transX(goal)},#{@yStart}V#{@yEnd}"
+      path = "M#{x},#{@yStart}V#{@yEnd}"
     else
-      path = "M#{@yStart},#{@transX(goal)}H#{@yEnd}"
+      path = "M#{@yStart},#{x}H#{@yEnd}"
 
     @raphael.path(path)
       .attr('stroke', color)
