@@ -115,7 +115,7 @@ class Morris.Line extends Morris.Grid
       content += """
         <div class='morris-hover-point' style='color: #{@colorFor(row, j, 'label')}'>
           #{@options.labels[j]}:
-          #{@yLabelFormat(y)}
+          #{@yLabelFormat(y, j)}
         </div>
       """
     if typeof @options.hoverCallback is 'function'

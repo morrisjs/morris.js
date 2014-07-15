@@ -381,13 +381,13 @@ class Morris.Grid extends Morris.EventEmitter
 
   # @private
   #
-  yAxisFormat: (label) -> @yLabelFormat(label)
+  yAxisFormat: (label) -> @yLabelFormat(label, 0)
 
   # @private
   #
-  yLabelFormat: (label) ->
+  yLabelFormat: (label, i) ->
     if typeof @options.yLabelFormat is 'function'
-      @options.yLabelFormat(label)
+      @options.yLabelFormat(label, i)
     else
       "#{@options.preUnits}#{Morris.commas(label)}#{@options.postUnits}"
 
