@@ -31,6 +31,7 @@ class Morris.Line extends Morris.Grid
     pointStrokeColors: ['#ffffff']
     pointFillColors: []
     smooth: true
+    shown: true
     xLabels: 'auto'
     xLabelFormat: null
     xLabelMargin: 24
@@ -194,13 +195,16 @@ class Morris.Line extends Morris.Grid
   drawSeries: ->
     @seriesPoints = []
     for i in [@options.ykeys.length-1..0]
-      if @options.trendLine isnt false and
-          @options.trendLine is true or @options.trendLine[i] is true
-        @_drawTrendLine i
+      if @hasToShow(i)
+        if @options.trendLine isnt false and
+            @options.trendLine is true or @options.trendLine[i] is true
+          @_drawTrendLine i
 
-      @_drawLineFor i
+        @_drawLineFor i
+
     for i in [@options.ykeys.length-1..0]
-      @_drawPointFor i
+      if @hasToShow(i)
+        @_drawPointFor i
 
   _drawPointFor: (index) ->
     @seriesPoints[index] = []
