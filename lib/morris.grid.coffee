@@ -105,6 +105,7 @@ class Morris.Grid extends Morris.EventEmitter
     gridTextWeight: 'normal'
     hideHover: false
     yLabelFormat: null
+    xAxisPosition: 'bottom'
     xLabelAngle: 0
     numLines: 5
     padding: 25
@@ -285,12 +286,19 @@ class Morris.Grid extends Morris.EventEmitter
       @bottom = @elementHeight - @options.padding
       if @options.axes in [true, 'both', 'y']
         yLabelWidths = for gridLine in @grid
-          @measureText(@yAxisFormat(gridLine)).width
+          size = @measureText(@yAxisFormat(gridLine))
+          if not @options.horizontal
+            size.width
+          else
+            size.height
+
 
         if not @options.horizontal
           @left += Math.max(yLabelWidths...)
-        else
+        else if @options.xAxisPosition == 'bottom'
           @bottom -= Math.max(yLabelWidths...)
+        else
+          @top += Math.max(yLabelWidths...)
 
       if @options.axes in [true, 'both', 'x']
         if not @options.horizontal
@@ -298,13 +306,15 @@ class Morris.Grid extends Morris.EventEmitter
         else
           angle = -90
 
-        bottomOffsets = for i in [0...@data.length]
+        xAxisOffsets = for i in [0...@data.length]
           @measureText(@data[i].label, angle).height
 
-        if not @options.horizontal
-          @bottom -= Math.max(bottomOffsets...)
+        if not @options.horizontal and @options.xAxisPosition == 'bottom'
+          @bottom -= Math.max(xAxisOffsets...)
+        else if not @options.horizontal
+          @top += Math.max(xAxisOffsets...)
         else
-          @left += Math.max(bottomOffsets...)
+          @left += Math.max(xAxisOffsets...)
 
       @width = Math.max(1, @right - @left)
       @height = Math.max(1, @bottom - @top)
