@@ -47,6 +47,9 @@ With node installed, install [grunt](https://github.com/cowboy/grunt) using
 `npm install -g grunt-cli`, and then the rest of the test/build dependencies
 with `npm install` in the morris.js project folder.
 
+Additionally, [bower](http://bower.io/) is required for for retrieving additional test dependencies.  
+Install it with `npm install -g bower` and then `bower install` in the morris project folder.
+
 Once you're all set up, you can compile, minify and run the tests using `grunt`.
 
 Note: I'm experimenting with using perceptual diffs to catch rendering

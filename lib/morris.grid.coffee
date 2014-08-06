@@ -96,6 +96,7 @@ class Morris.Grid extends Morris.EventEmitter
   gridDefaults:
     dateFormat: null
     axes: true
+    freePosition: false
     grid: true
     gridLineColor: '#aaa'
     gridStrokeWidth: 0.5
@@ -164,6 +165,10 @@ class Morris.Grid extends Morris.EventEmitter
           ret.label = @options.dateFormat ret.x
         else if typeof ret.label is 'number'
           ret.label = new Date(ret.label).toString()
+      else if @options.freePosition
+        ret.x = parseFloat(row[@options.xkey])
+        if @options.xLabelFormat
+          ret.label = @options.xLabelFormat ret
       else
         ret.x = index
         if @options.xLabelFormat
@@ -188,7 +193,7 @@ class Morris.Grid extends Morris.EventEmitter
         yval
       ret
 
-    if @options.parseTime
+    if @options.parseTime or @options.freePosition
       @data = @data.sort (a, b) -> (a.x > b.x) - (b.x > a.x)
 
     # calculate horizontal range of the graph
