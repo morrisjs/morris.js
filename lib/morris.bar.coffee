@@ -211,7 +211,7 @@ class Morris.Bar extends Morris.Grid
   #
   # @private
   onGridClick: (x, y) =>
-    index = @hitTest(x)
+    index = @hitTest(x, y)
     @fire 'click', index, @data[index].src, x, y
 
   # hover movement event handler
