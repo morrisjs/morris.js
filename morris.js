@@ -68,7 +68,7 @@ Licensed under the BSD-2-Clause License.
 
   Morris.pad2 = function(number) {
     return (number < 10 ? '0' : '') + number;
-  };ou
+  };
 
   Morris.Grid = (function(_super) {
     __extends(Grid, _super);
