@@ -581,6 +581,8 @@ Licensed under the BSD-2-Clause License.
     };
 
     Grid.prototype.resizeHandler = function() {
+      if (this.el.width()<1 || this.el.height()<1) return false;
+      
       this.timeoutId = null;
       this.raphael.setSize(this.el.width(), this.el.height());
       return this.redraw();
