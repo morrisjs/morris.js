@@ -197,11 +197,17 @@ class Morris.Grid extends Morris.EventEmitter
     @events = []
     if @options.events.length > 0
       if @options.parseTime
-        @events = (Morris.parseDate(e) for e in @options.events)
+        for e in @options.events
+          if e instanceof Array
+            [from, to] = e
+            @events.push([Morris.parseDate(from), Morris.parseDate(to)])
+          else
+            @events.push(Morris.parseDate(e))
       else
         @events = @options.events
-      @xmax = Math.max(@xmax, Math.max(@events...))
-      @xmin = Math.min(@xmin, Math.min(@events...))
+      flatEvents = $.map @events, (e) -> e
+      @xmax = Math.max(@xmax, Math.max(flatEvents...))
+      @xmin = Math.min(@xmin, Math.min(flatEvents...))
 
     if @xmin is @xmax
       @xmin -= 1
@@ -441,15 +447,30 @@ class Morris.Grid extends Morris.EventEmitter
       .attr('stroke-width', @options.goalStrokeWidth)
 
   drawEvent: (event, color) ->
-    x = Math.floor(@transX(event)) + 0.5
-    if not @options.horizontal
-      path = "M#{x},#{@yStart}V#{@yEnd}"
-    else
-      path = "M#{@yStart},#{x}H#{@yEnd}"
+    if event instanceof Array
+      [from, to] = event
+      from = Math.floor(@transX(from)) + 0.5
+      to = Math.floor(@transX(to)) + 0.5
 
-    @raphael.path(path)
-      .attr('stroke', color)
-      .attr('stroke-width', @options.eventStrokeWidth)
+      if not @options.horizontal
+        @raphael.rect(from, @yEnd, to-from, @yStart-@yEnd)
+          .attr({ fill: color, stroke: false })
+          .toBack()
+      else
+        @raphael.rect(@yStart, from, @yEnd-@yStart, to-from)
+          .attr({ fill: color, stroke: false })
+          .toBack()
+
+    else
+      x = Math.floor(@transX(event)) + 0.5
+      if not @options.horizontal
+        path = "M#{x},#{@yStart}V#{@yEnd}"
+      else
+        path = "M#{@yStart},#{x}H#{@yEnd}"
+
+      @raphael.path(path)
+        .attr('stroke', color)
+        .attr('stroke-width', @options.eventStrokeWidth)
 
   drawYAxisLabel: (xPos, yPos, text) ->
     @raphael.text(xPos, yPos, text)
