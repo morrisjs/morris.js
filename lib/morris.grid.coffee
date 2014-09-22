@@ -441,7 +441,7 @@ class Morris.Grid extends Morris.EventEmitter
       .attr('stroke-width', @options.goalStrokeWidth)
 
   drawEvent: (event, color) ->
-    x = Math.floor(@transX(goal)) + 0.5
+    x = Math.floor(@transX(event)) + 0.5
     if not @options.horizontal
       path = "M#{x},#{@yStart}V#{@yEnd}"
     else
