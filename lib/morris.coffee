@@ -41,3 +41,15 @@ Morris.commas = (num) ->
 # @example
 #   Morris.pad2(1) -> '01'
 Morris.pad2 = (number) -> (if number < 10 then '0' else '') + number
+
+# Copy all properties from objects in second argument to last onto the first
+# object given and return the first object. This should emulate jQuery's
+# $.extend().
+#
+# @example
+#   Morris.extend({}, { a:1 }, { b:2 }) -> '{ a:1, b:2 }'
+Morris.extend = (object, objects...) ->
+  for properties in objects
+    for key, val of properties
+      object[key] = val
+  object

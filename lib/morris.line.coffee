@@ -392,7 +392,7 @@ Morris.labelSeries = (dmin, dmax, pxwidth, specName, xLabelFormat) ->
     spec = Morris.LABEL_SPECS["second"]
   # check if there's a user-defined formatting function
   if xLabelFormat
-    spec = $.extend({}, spec, {fmt: xLabelFormat})
+    spec = Morris.extend({}, spec, {fmt: xLabelFormat})
   # calculate labels
   d = spec.start(d0)
   ret = []

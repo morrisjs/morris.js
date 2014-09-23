@@ -31,7 +31,7 @@ class Morris.Donut extends Morris.EventEmitter
   #
   constructor: (options) ->
     return new Morris.Donut(options) unless (@ instanceof Morris.Donut)
-    @options = $.extend {}, @defaults, options
+    @options = Morris.extend {}, @defaults, options
 
     if typeof options.element is 'string'
       @el = $ document.getElementById(options.element)

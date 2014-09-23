@@ -5,7 +5,7 @@ class Morris.Hover
     class: 'morris-hover morris-default-style'
 
   constructor: (options = {}) ->
-    @options = $.extend {}, Morris.Hover.defaults, options
+    @options = Morris.extend {}, Morris.Hover.defaults, options
     @el = $ "<div class='#{@options.class}'></div>"
     @el.hide()
     @options.parent.append(@el)

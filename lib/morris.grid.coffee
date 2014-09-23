@@ -15,7 +15,7 @@ class Morris.Grid extends Morris.EventEmitter
     if @el.css('position') == 'static'
       @el.css('position', 'relative')
 
-    @options = $.extend {}, @gridDefaults, (@defaults || {}), options
+    @options = Morris.extend {}, @gridDefaults, (@defaults || {}), options
 
     # backwards compatibility for units -> postUnits
     if typeof @options.units is 'string'
