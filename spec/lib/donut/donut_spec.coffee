@@ -87,12 +87,10 @@ describe 'Morris.Donut', ->
     it 'should has correct row value', ->
       chart = Morris.Donut $.extend {}, defaults, {formatter: (value) -> "#{value}"}
       chart.select(3)
-      $('#graph').find("svg path").last().trigger "hover"
       $('#graph').find("svg tspan").last().text().should.equal "1"
 
 
     it 'should has correct percent value', ->
       chart = Morris.Donut $.extend {}, defaults, {formatter: (value, row, total) -> "#{Math.round 100 * value / total, 2}%"}
       chart.select(3)
-      $('#graph').find("svg path").last().trigger "hover"
       $('#graph').find("svg tspan").last().text().should.equal "10%"
