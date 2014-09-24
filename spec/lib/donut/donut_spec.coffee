@@ -91,6 +91,6 @@ describe 'Morris.Donut', ->
 
 
     it 'should has correct percent value', ->
-      chart = Morris.Donut $.extend {}, defaults, {formatter: (value, row, total) -> "#{Math.round 100 * value / total, 2}%"}
+      chart = Morris.Donut $.extend {}, defaults, {formatter: (value, row, total) -> "#{Math.round 100 * value / total}%"}
       chart.select(3)
       $('#graph').find("svg tspan").last().text().should.equal "10%"
