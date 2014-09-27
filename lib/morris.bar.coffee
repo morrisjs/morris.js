@@ -95,11 +95,11 @@ class Morris.Bar extends Morris.Grid
       if not @options.horizontal
         startPos = labelBox.x
         size = labelBox.width
-        maxSize = @el.width()
+        maxSize = @el.offsetWidth
       else
         startPos = labelBox.y
         size = labelBox.height
-        maxSize = @el.height()
+        maxSize = @el.offsetHeight
 
       # try to avoid overlaps
       if (not prevLabelMargin? or

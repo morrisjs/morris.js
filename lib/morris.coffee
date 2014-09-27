@@ -1,7 +1,5 @@
 Morris = window.Morris = {}
 
-$ = jQuery
-
 # Very simple event-emitter class.
 #
 # @private
@@ -53,3 +51,12 @@ Morris.extend = (object, objects...) ->
     for key, val of properties
       object[key] = val
   object
+
+# Emulate jQuery's $el.offset() (http://youmightnotneedjquery.com/#offset)
+Morris.offset = (el) ->
+  rect = el.getBoundingClientRect()
+  top: rect.top + document.body.scrollTop,
+  left: rect.left + document.body.scrollLeft
+
+# Emulate jQuery's $el.css() (http://youmightnotneedjquery.com/#get_style)
+Morris.css = (el, ruleName) -> getComputedStyle(el)[ruleName]

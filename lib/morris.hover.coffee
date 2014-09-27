@@ -6,9 +6,10 @@ class Morris.Hover
 
   constructor: (options = {}) ->
     @options = Morris.extend {}, Morris.Hover.defaults, options
-    @el = $ "<div class='#{@options.class}'></div>"
-    @el.hide()
-    @options.parent.append(@el)
+    @el = document.createElement 'div'
+    @el.className = @options.class
+    @el.style.display = 'none'
+    (@options.parent[0] or @options.parent).appendChild @el
 
   update: (html, x, y, centre_y) ->
     if not html
@@ -19,13 +20,13 @@ class Morris.Hover
       @moveTo(x, y, centre_y)
 
   html: (content) ->
-    @el.html(content)
+    @el.innerHTML = content
 
   moveTo: (x, y, centre_y) ->
-    parentWidth  = @options.parent.innerWidth()
-    parentHeight = @options.parent.innerHeight()
-    hoverWidth   = @el.outerWidth()
-    hoverHeight  = @el.outerHeight()
+    parentWidth  = @options.parent.offsetWidth # @el.innerWidth()
+    parentHeight = @options.parent.offsetHeight # @el.innerHeight()
+    hoverWidth   = @el.offsetWidth # @el.outerWidth()
+    hoverHeight  = @el.offsetHeight # @el.outerHeight()
     left = Math.min(Math.max(0, x - hoverWidth / 2), parentWidth - hoverWidth)
     if y?
       if centre_y is true
@@ -40,10 +41,11 @@ class Morris.Hover
             top = parentHeight / 2 - hoverHeight / 2
     else
       top = parentHeight / 2 - hoverHeight / 2
-    @el.css(left: left + "px", top: parseInt(top) + "px")
+    @el.style.left = parseInt(left) + "px"
+    @el.style.top = parseInt(top) + "px"
 
   show: ->
-    @el.show()
+    @el.style.display = ''
 
   hide: ->
-    @el.hide()
+    @el.style.display = 'none'

@@ -34,18 +34,18 @@ class Morris.Donut extends Morris.EventEmitter
     @options = Morris.extend {}, @defaults, options
 
     if typeof options.element is 'string'
-      @el = $ document.getElementById(options.element)
+      @el = document.getElementById(options.element)
     else
-      @el = $ options.element
+      @el = options.element
 
-    if @el == null || @el.length == 0
+    if @el == null
       throw new Error("Graph placeholder not found.")
 
     # bail if there's no data
     if options.data is undefined or options.data.length is 0
       return
 
-    @raphael = new Raphael(@el[0])
+    @raphael = new Raphael(@el)
 
     if @options.resize
       $(window).bind 'resize', (evt) =>
@@ -59,8 +59,8 @@ class Morris.Donut extends Morris.EventEmitter
   redraw: ->
     @raphael.clear()
 
-    cx = @el.width() / 2
-    cy = @el.height() / 2
+    cx = @el.offsetWidth / 2
+    cy = @el.offsetHeight / 2
     w = (Math.min(cx, cy) - 10) / 3
 
     total = 0
@@ -117,7 +117,7 @@ class Morris.Donut extends Morris.EventEmitter
 
   # @private
   setLabels: (label1, label2) ->
-    inner = (Math.min(@el.width() / 2, @el.height() / 2) - 10) * 2 / 3
+    inner = (Math.min(@el.offsetWidth / 2, @el.offsetHeight / 2) - 10) * 2 / 3
     maxWidth = 1.8 * inner
     maxHeightTop = inner / 2
     maxHeightBottom = inner / 3
@@ -139,7 +139,7 @@ class Morris.Donut extends Morris.EventEmitter
 
   resizeHandler: =>
     @timeoutId = null
-    @raphael.setSize @el.width(), @el.height()
+    @raphael.setSize @el.offsetWidth, @el.offsetHeight
     @redraw()
 
 
