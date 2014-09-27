@@ -6,10 +6,10 @@
     "./morris.css"
   ],
   "dependencies": {
-    "jquery": ">= 1.7.0",
     "raphael": ">= 2.0"
   },
   "devDependencies": {
+    "jquery": ">= 1.7.0",
     "mocha": "~1.17.1",
     "chai": "~1.9.0",
     "chai-jquery": "~1.2.1",
