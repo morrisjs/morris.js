@@ -36,7 +36,7 @@ class Morris.Donut extends Morris.EventEmitter
     if typeof options.element is 'string'
       @el = document.getElementById(options.element)
     else
-      @el = options.element
+      @el = options.element[0] or options.element
 
     if @el == null
       throw new Error("Graph placeholder not found.")

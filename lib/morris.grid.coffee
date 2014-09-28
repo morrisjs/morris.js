@@ -8,7 +8,7 @@ class Morris.Grid extends Morris.EventEmitter
     if typeof options.element is 'string'
       @el = document.getElementById(options.element)
     else
-      @el = options.element
+      @el = options.element[0] or options.element
     if not @el?
       throw new Error("Graph container element not found")
 
