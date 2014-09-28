@@ -55,9 +55,9 @@ Morris.pad2 = (number) -> (if number < 10 then '0' else '') + number
 #
 # @example
 #   Morris.extend({}, { a:1 }, { b:2 }) -> '{ a:1, b:2 }'
-Morris.extend = (object, objects...) ->
-  for properties in objects
-    for key, val of properties
+Morris.extend = (object={}, objects...) ->
+  for properties in objects when properties?
+    for key, val of properties when properties.hasOwnProperty key
       object[key] = val
   object
 
