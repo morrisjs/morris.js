@@ -9,7 +9,7 @@ class Morris.Hover
     @el = document.createElement 'div'
     @el.className = @options.class
     @el.style.display = 'none'
-    (@options.parent[0] or @options.parent).appendChild @el
+    (@options.parent = @options.parent[0] or @options.parent).appendChild @el
 
   update: (html, x, y, centre_y) ->
     if not html
@@ -23,10 +23,10 @@ class Morris.Hover
     @el.innerHTML = content
 
   moveTo: (x, y, centre_y) ->
-    parentWidth  = @options.parent.offsetWidth # @el.innerWidth()
-    parentHeight = @options.parent.offsetHeight # @el.innerHeight()
-    hoverWidth   = @el.offsetWidth # @el.outerWidth()
-    hoverHeight  = @el.offsetHeight # @el.outerHeight()
+    {width:parentWidth, height:parentHeight} =
+      Morris.innerDimensions @options.parent
+    hoverWidth  = @el.offsetWidth
+    hoverHeight = @el.offsetHeight
     left = Math.min(Math.max(0, x - hoverWidth / 2), parentWidth - hoverWidth)
     if y?
       if centre_y is true

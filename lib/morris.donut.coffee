@@ -59,8 +59,9 @@ class Morris.Donut extends Morris.EventEmitter
   redraw: ->
     @raphael.clear()
 
-    cx = @el.offsetWidth / 2
-    cy = @el.offsetHeight / 2
+    {width, height} = Morris.dimensions @el
+    cx = width / 2
+    cy = height / 2
     w = (Math.min(cx, cy) - 10) / 3
 
     total = 0
@@ -117,7 +118,8 @@ class Morris.Donut extends Morris.EventEmitter
 
   # @private
   setLabels: (label1, label2) ->
-    inner = (Math.min(@el.offsetWidth / 2, @el.offsetHeight / 2) - 10) * 2 / 3
+    {width, height} = Morris.dimensions(@el)
+    inner = (Math.min(width / 2, height / 2) - 10) * 2 / 3
     maxWidth = 1.8 * inner
     maxHeightTop = inner / 2
     maxHeightBottom = inner / 3
@@ -139,7 +141,8 @@ class Morris.Donut extends Morris.EventEmitter
 
   resizeHandler: =>
     @timeoutId = null
-    @raphael.setSize @el.offsetWidth, @el.offsetHeight
+    {width, height} =  Morris.dimensions @el
+    @raphael.setSize width, height
     @redraw()
 
 

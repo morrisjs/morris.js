@@ -91,15 +91,15 @@ class Morris.Bar extends Morris.Grid
           Math.cos(angle * Math.PI / 180.0)
         label.transform("t#{offset},0...")
 
-
+      {width, height} = Morris.dimensions @el
       if not @options.horizontal
         startPos = labelBox.x
         size = labelBox.width
-        maxSize = @el.offsetWidth
+        maxSize = width
       else
         startPos = labelBox.y
         size = labelBox.height
-        maxSize = @el.offsetHeight
+        maxSize = height
 
       # try to avoid overlaps
       if (not prevLabelMargin? or

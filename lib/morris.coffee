@@ -1,5 +1,14 @@
 Morris = window.Morris = {}
 
+# Compute element style
+compStyle = (el) ->
+  if getComputedStyle # standard (includes ie9)
+    getComputedStyle(el, null)
+  else if el.currentStyle # IE older
+    el.currentStyle
+  else # inline style
+    el.style
+
 # Very simple event-emitter class.
 #
 # @private
@@ -59,4 +68,27 @@ Morris.offset = (el) ->
   left: rect.left + document.body.scrollLeft
 
 # Emulate jQuery's $el.css() (http://youmightnotneedjquery.com/#get_style)
-Morris.css = (el, ruleName) -> getComputedStyle(el)[ruleName]
+Morris.css = (el, prop) -> compStyle(el)[prop]
+
+# Emulate jQuery's $el.on()
+Morris.on = (el, eventName, fn) ->
+  if el.addEventListener
+    el.addEventListener(eventName, fn)
+  else
+    el.attachEvent('on'+eventName, fn)
+
+# Emulate jQuery's $el.width() and $el.height()
+Morris.dimensions = (el) ->
+  style = compStyle el
+  width: parseInt(style.width),
+  height: parseInt(style.height)
+
+# Emulate jQuery's $el.innerWidth() and $el.innerHeight()
+Morris.innerDimensions = (el) ->
+  style = compStyle el
+  width: parseInt(style.width) +
+    parseInt(style.paddingLeft) +
+    parseInt(style.paddingRight),
+  height: parseInt(style.height) +
+    parseInt(style.paddingTop) +
+    parseInt(style.paddingBottom)

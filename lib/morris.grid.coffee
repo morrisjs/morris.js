@@ -39,7 +39,7 @@ class Morris.Grid extends Morris.EventEmitter
     @setData @options.data
 
     # hover
-    @el.addEventListener 'mousemove', (evt) =>
+    Morris.on @el, 'mousemove', (evt) =>
       offset = Morris.offset(@el)
       x = evt.pageX - offset.left
       if @selectFrom
@@ -50,38 +50,38 @@ class Morris.Grid extends Morris.EventEmitter
       else
         @fire 'hovermove', x, evt.pageY - offset.top
 
-    @el.addEventListener 'mouseleave', (evt) =>
+    Morris.on @el, 'mouseleave', (evt) =>
       if @selectFrom
         @selectionRect.hide()
         @selectFrom = null
       @fire 'hoverout'
 
-    @el.addEventListener 'touchstart touchmove touchend', (evt) =>
+    Morris.on @el, 'touchstart touchmove touchend', (evt) =>
       touch = evt.originalEvent.touches[0] or evt.originalEvent.changedTouches[0]
       offset = Morris.offset(@el)
       @fire 'hovermove', touch.pageX - offset.left, touch.pageY - offset.top
 
-    @el.addEventListener 'click', (evt) =>
+    Morris.on @el, 'click', (evt) =>
       offset = Morris.offset(@el)
       @fire 'gridclick', evt.pageX - offset.left, evt.pageY - offset.top
 
     if @options.rangeSelect
-      @selectionRect = @raphael.rect(0, 0, 0, @el.offsetHeight) # @el.innerHeight()
+      @selectionRect = @raphael.rect(0, 0, 0, Morris.innerDimensions(@el).height)
         .attr({ fill: @options.rangeSelectColor, stroke: false })
         .toBack()
         .hide()
 
-      @el.addEventListener 'mousedown', (evt) =>
+      Morris.on @el, 'mousedown', (evt) =>
         offset = Morris.offset(@el)
         @startRange evt.pageX - offset.left
 
-      @el.addEventListener 'mouseup', (evt) =>
+      Morris.on @el, 'mouseup', (evt) =>
         offset = Morris.offset(@el)
         @endRange evt.pageX - offset.left
         @fire 'hovermove', evt.pageX - offset.left, evt.pageY - offset.top
 
     if @options.resize
-      window.addEventListener 'resize', (evt) =>
+      Morris.on window, 'resize', (evt) =>
         if @timeoutId?
           window.clearTimeout @timeoutId
         @timeoutId = window.setTimeout @resizeHandler, 100
@@ -271,8 +271,7 @@ class Morris.Grid extends Morris.EventEmitter
     grid
 
   _calc: ->
-    w = @el.offsetWidth
-    h = @el.offsetHeight
+    {width:w, height:h} = Morris.dimensions @el
 
     if @elementWidth != w or @elementHeight != h or @dirty
       @elementWidth = w
@@ -482,7 +481,8 @@ class Morris.Grid extends Morris.EventEmitter
 
   resizeHandler: =>
     @timeoutId = null
-    @raphael.setSize @el.offsetWidth, @el.offsetHeight
+    {width, height} = Morris.dimensions @el
+    @raphael.setSize width, height
     @redraw()
 
   hasToShow: (i) =>

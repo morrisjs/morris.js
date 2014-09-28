@@ -167,7 +167,8 @@ class Morris.Line extends Morris.Grid
       if (not prevLabelMargin? or
           prevLabelMargin >= labelBox.x + labelBox.width or
           prevAngleMargin? and prevAngleMargin >= labelBox.x) and
-         labelBox.x >= 0 and (labelBox.x + labelBox.width) < @el.offsetWidth
+          labelBox.x >= 0 and
+          (labelBox.x + labelBox.width) < Morris.dimensions(@el).width
         if @options.xLabelAngle != 0
           margin = 1.25 * @options.gridTextSize /
             Math.sin(@options.xLabelAngle * Math.PI / 180.0)
