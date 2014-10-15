@@ -233,7 +233,8 @@ class Morris.Bar extends Morris.Grid
   # @private
   hoverContentForRow: (index) ->
     row = @data[index]
-    content = "<div class='morris-hover-row-label'>#{row.label}</div>"
+    content = $("<div class='morris-hover-row-label'>").text(row.label)
+    content = content.prop('outerHTML')
     for y, j in row.y
       if @options.labels[j] is false
         continue
