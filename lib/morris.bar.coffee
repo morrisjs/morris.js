@@ -181,6 +181,10 @@ class Morris.Bar extends Morris.Grid
         else
           null
 
+    @flat_bars = $.map @bars, (n) -> return n
+    @flat_bars = $.grep @flat_bars, (n) -> return n?
+    @bar_els = $($.map @flat_bars, (n) -> return n[0])
+
   # @private
   #
   # @param row  [Object] row data
@@ -207,12 +211,14 @@ class Morris.Bar extends Morris.Grid
     Math.min(@data.length - 1,
       Math.floor((pos - @xStart) / (@xSize / @data.length)))
 
+
   # click on grid event handler
   #
   # @private
   onGridClick: (x, y) =>
     index = @hitTest(x, y)
-    @fire 'click', index, @data[index].src, x, y
+    bar_hit = !!@bar_els.filter(() -> $(@).is(':hover')).length
+    @fire 'click', index, @data[index].src, x, y, bar_hit
 
   # hover movement event handler
   #
