@@ -24,6 +24,7 @@ class Morris.Donut extends Morris.EventEmitter
     ],
     backgroundColor: '#FFFFFF', 
     labelColor: '#000000',
+    fontFamily: 'Arial',
     formatter: Morris.commas
     resize: false
 
@@ -85,8 +86,8 @@ class Morris.Donut extends Morris.EventEmitter
       last = next
       idx += 1
 
-    @text1 = @drawEmptyDonutLabel(cx, cy - 10, @options.labelColor, 15, 800)
-    @text2 = @drawEmptyDonutLabel(cx, cy + 10, @options.labelColor, 14)
+    @text1 = @drawEmptyDonutLabel(cx, cy - 10, @options.labelColor, @options.fontFamily, 15, 800)
+    @text2 = @drawEmptyDonutLabel(cx, cy + 10, @options.labelColor, @options.fontFamily, 14)
 
     max_value = Math.max @values...
     idx = 0
@@ -130,8 +131,9 @@ class Morris.Donut extends Morris.EventEmitter
     text2scale = Math.min(maxWidth / text2bbox.width, maxHeightBottom / text2bbox.height)
     @text2.attr(transform: "S#{text2scale},#{text2scale},#{text2bbox.x + text2bbox.width / 2},#{text2bbox.y}")
 
-  drawEmptyDonutLabel: (xPos, yPos, color, fontSize, fontWeight) ->
+  drawEmptyDonutLabel: (xPos, yPos, color, fontFamily, fontSize, fontWeight) ->
     text = @raphael.text(xPos, yPos, '')
+      .attr('font-family', fontFamily)
       .attr('font-size', fontSize)
       .attr('fill', color)
     text.attr('font-weight', fontWeight) if fontWeight?
