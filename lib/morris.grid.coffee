@@ -142,6 +142,10 @@ class Morris.Grid extends Morris.EventEmitter
       @data = []
       @raphael.clear()
       @hover.hide() if @hover?
+      tt = @raphael.text(@el.width()/2, @el.height()/2, 'No Data')
+        .attr('font-size', 14)
+        .attr('font-family', @options.gridTextFamily)
+        .attr('font-weight', @options.gridTextWeight)
       return
 
     ymax = if @cumulative then 0 else null
