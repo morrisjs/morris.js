@@ -1,3 +1,2 @@
-auto: true
 safe: true
-pygments: true
+highlighter: pygments
