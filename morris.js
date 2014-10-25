@@ -198,7 +198,7 @@ Licensed under the BSD-2-Clause License.
     };
 
     Grid.prototype.setData = function(data, redraw) {
-      var e, idx, index, maxGoal, minGoal, ret, row, step, total, y, ykey, ymax, ymin, yval, _ref;
+      var e, flatEvents, from, idx, index, maxGoal, minGoal, ret, row, step, to, total, y, ykey, ymax, ymin, yval, _i, _len, _ref, _ref1;
       if (redraw == null) {
         redraw = true;
       }
@@ -289,21 +289,24 @@ Licensed under the BSD-2-Clause License.
       this.events = [];
       if (this.options.events.length > 0) {
         if (this.options.parseTime) {
-          this.events = (function() {
-            var _i, _len, _ref, _results;
-            _ref = this.options.events;
-            _results = [];
-            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-              e = _ref[_i];
-              _results.push(Morris.parseDate(e));
+          _ref = this.options.events;
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            e = _ref[_i];
+            if (e instanceof Array) {
+              from = e[0], to = e[1];
+              this.events.push([Morris.parseDate(from), Morris.parseDate(to)]);
+            } else {
+              this.events.push(Morris.parseDate(e));
             }
-            return _results;
-          }).call(this);
+          }
         } else {
           this.events = this.options.events;
         }
-        this.xmax = Math.max(this.xmax, Math.max.apply(Math, this.events));
-        this.xmin = Math.min(this.xmin, Math.min.apply(Math, this.events));
+        flatEvents = $.map(this.events, function(e) {
+          return e;
+        });
+        this.xmax = Math.max(this.xmax, Math.max.apply(Math, flatEvents));
+        this.xmin = Math.min(this.xmin, Math.min.apply(Math, flatEvents));
       }
       if (this.xmin === this.xmax) {
         this.xmin -= 1;
@@ -317,7 +320,7 @@ Licensed under the BSD-2-Clause License.
         }
         this.ymax += 1;
       }
-      if (((_ref = this.options.axes) === true || _ref === 'both' || _ref === 'y') || this.options.grid === true) {
+      if (((_ref1 = this.options.axes) === true || _ref1 === 'both' || _ref1 === 'y') || this.options.grid === true) {
         if (this.options.ymax === this.gridDefaults.ymax && this.options.ymin === this.gridDefaults.ymin) {
           this.grid = this.autoGridLines(this.ymin, this.ymax, this.options.numLines);
           this.ymin = Math.min(this.ymin, this.grid[0]);
@@ -325,9 +328,9 @@ Licensed under the BSD-2-Clause License.
         } else {
           step = (this.ymax - this.ymin) / (this.options.numLines - 1);
           this.grid = (function() {
-            var _i, _ref1, _ref2, _results;
+            var _j, _ref2, _ref3, _results;
             _results = [];
-            for (y = _i = _ref1 = this.ymin, _ref2 = this.ymax; step > 0 ? _i <= _ref2 : _i >= _ref2; y = _i += step) {
+            for (y = _j = _ref2 = this.ymin, _ref3 = this.ymax; step > 0 ? _j <= _ref3 : _j >= _ref3; y = _j += step) {
               _results.push(y);
             }
             return _results;
@@ -607,14 +610,31 @@ Licensed under the BSD-2-Clause License.
     };
 
     Grid.prototype.drawEvent = function(event, color) {
-      var path, x;
-      x = Math.floor(this.transX(goal)) + 0.5;
-      if (!this.options.horizontal) {
-        path = "M" + x + "," + this.yStart + "V" + this.yEnd;
+      var from, path, to, x;
+      if (event instanceof Array) {
+        from = event[0], to = event[1];
+        from = Math.floor(this.transX(from)) + 0.5;
+        to = Math.floor(this.transX(to)) + 0.5;
+        if (!this.options.horizontal) {
+          return this.raphael.rect(from, this.yEnd, to - from, this.yStart - this.yEnd).attr({
+            fill: color,
+            stroke: false
+          }).toBack();
+        } else {
+          return this.raphael.rect(this.yStart, from, this.yEnd - this.yStart, to - from).attr({
+            fill: color,
+            stroke: false
+          }).toBack();
+        }
       } else {
-        path = "M" + this.yStart + "," + x + "H" + this.yEnd;
+        x = Math.floor(this.transX(event)) + 0.5;
+        if (!this.options.horizontal) {
+          path = "M" + x + "," + this.yStart + "V" + this.yEnd;
+        } else {
+          path = "M" + this.yStart + "," + x + "H" + this.yEnd;
+        }
+        return this.raphael.path(path).attr('stroke', color).attr('stroke-width', this.options.eventStrokeWidth);
       }
-      return this.raphael.path(path).attr('stroke', color).attr('stroke-width', this.options.eventStrokeWidth);
     };
 
     Grid.prototype.drawYAxisLabel = function(xPos, yPos, text) {
@@ -922,7 +942,8 @@ Licensed under the BSD-2-Clause License.
     Line.prototype.hoverContentForRow = function(index) {
       var content, j, row, y, _i, _len, _ref;
       row = this.data[index];
-      content = "<div class='morris-hover-row-label'>" + row.label + "</div>";
+      content = $("<div class='morris-hover-row-label'>").text(row.label);
+      content = content.prop('outerHTML');
       _ref = row.y;
       for (j = _i = 0, _len = _ref.length; _i < _len; j = ++_i) {
         y = _ref[j];
@@ -1653,7 +1674,7 @@ Licensed under the BSD-2-Clause License.
         numBars = 1;
       } else {
         numBars = 0;
-        for (i = _i = 0, _ref = this.options.ykeys.length; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
+        for (i = _i = 0, _ref = this.options.ykeys.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
           if (this.hasToShow(i)) {
             numBars += 1;
           }
@@ -1777,7 +1798,8 @@ Licensed under the BSD-2-Clause License.
     Bar.prototype.hoverContentForRow = function(index) {
       var content, j, row, x, y, _i, _len, _ref;
       row = this.data[index];
-      content = "<div class='morris-hover-row-label'>" + row.label + "</div>";
+      content = $("<div class='morris-hover-row-label'>").text(row.label);
+      content = content.prop('outerHTML');
       _ref = row.y;
       for (j = _i = 0, _len = _ref.length; _i < _len; j = ++_i) {
         y = _ref[j];
