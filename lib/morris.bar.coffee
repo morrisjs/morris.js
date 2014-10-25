@@ -134,7 +134,7 @@ class Morris.Bar extends Morris.Grid
       numBars = 1
     else
       numBars = 0
-      for i in [0..@options.ykeys.length]
+      for i in [0..@options.ykeys.length-1]
         if @hasToShow(i)
           numBars += 1
 
