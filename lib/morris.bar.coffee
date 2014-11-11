@@ -169,13 +169,13 @@ class Morris.Bar extends Morris.Grid
 
           top -= lastTop if @options.stacked
           if not @options.horizontal
+            lastTop += size
             @drawBar(left, top, barWidth, size, @colorFor(row, sidx, 'bar'),
                 @options.barOpacity, @options.barRadius)
-            lastTop += size
           else
+            lastTop -= size
             @drawBar(top, left, size, barWidth, @colorFor(row, sidx, 'bar'),
                 @options.barOpacity, @options.barRadius)
-            lastTop -= size
 
 
         else
