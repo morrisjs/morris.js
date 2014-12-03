@@ -174,7 +174,10 @@ class Morris.Grid extends Morris.EventEmitter
         yval = null if yval? and typeof yval isnt 'number'
         if yval? and @hasToShow(idx)
           if @cumulative
-            total += yval
+            if total < 0 and yval > 0
+              total = yval
+            else
+              total += yval
           else
             if ymax?
               ymax = Math.max(yval, ymax)
