@@ -1,6 +1,6 @@
 /* @license
 morris.js v0.5.1
-Copyright 2014 Olly Smith All rights reserved.
+Copyright 2015 Olly Smith All rights reserved.
 Licensed under the BSD-2-Clause License.
 */
 
@@ -1228,7 +1228,11 @@ Licensed under the BSD-2-Clause License.
       } else if (type === 'line') {
         return this.options.lineColors[sidx % this.options.lineColors.length];
       } else {
-        return this.options.trendLineColors[sidx % this.options.trendLineColors.length];
+        if (this.options.trendLine) {
+          return this.options.trendLineColors[sidx % this.options.trendLineColors.length];
+        } else {
+          return this.options.lineColors[sidx % this.options.lineColors.length];
+        }
       }
     };
 

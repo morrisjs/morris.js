@@ -322,7 +322,10 @@ class Morris.Line extends Morris.Grid
     else if type is 'line'
       @options.lineColors[sidx % @options.lineColors.length]
     else
-      @options.trendLineColors[sidx % @options.trendLineColors.length]
+      if @options.trendLine
+        @options.trendLineColors[sidx % @options.trendLineColors.length]
+      else
+        @options.lineColors[sidx % @options.lineColors.length]
 
   drawXAxisLabel: (xPos, yPos, text) ->
     @raphael.text(xPos, yPos, text)
