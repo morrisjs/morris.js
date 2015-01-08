@@ -350,10 +350,10 @@ class Morris.Line extends Morris.Grid
       @options.lineColors.call(@, row, sidx, type)
     else if type is 'point'
       @options.pointFillColors[sidx % @options.pointFillColors.length] || @options.lineColors[sidx % @options.lineColors.length]
-    else if type is 'line'
-      @options.lineColors[sidx % @options.lineColors.length]
-    else
+    else if type is 'trendLine'
       @options.trendLineColors[sidx % @options.trendLineColors.length]
+    else
+      @options.lineColors[sidx % @options.lineColors.length]
 
   drawLinePath: (path, lineColor, lineIndex) ->
     @raphael.path(path)
