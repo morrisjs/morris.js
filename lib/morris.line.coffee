@@ -35,6 +35,9 @@ class Morris.Line extends Morris.Grid
     xLabels: 'auto'
     xLabelFormat: null
     xLabelMargin: 24
+    verticalGrid: false
+    verticalGridHeight: 'full'
+    verticalGridStartOffset: 0
     hideHover: false
     trendLine: false
     trendLineWidth: 2
@@ -153,6 +156,7 @@ class Morris.Line extends Morris.Grid
     ypos = @bottom + @options.padding / 2
     prevLabelMargin = null
     prevAngleMargin = null
+
     drawLabel = (labelText, xpos) =>
       label = @drawXAxisLabel(@transX(xpos), ypos, labelText)
       textBox = label.getBBox()
@@ -174,8 +178,12 @@ class Morris.Line extends Morris.Grid
             Math.sin(@options.xLabelAngle * Math.PI / 180.0)
           prevAngleMargin = labelBox.x - margin
         prevLabelMargin = labelBox.x - @options.xLabelMargin
+        if @options.verticalGrid is true
+          @drawVerticalGridLine(xpos)
+
       else
         label.remove()
+
     if @options.parseTime
       if @data.length == 1 and @options.xLabels == 'auto'
         # where there's only one value in the series, we can't make a
@@ -189,6 +197,23 @@ class Morris.Line extends Morris.Grid
     labels.reverse()
     for l in labels
       drawLabel(l[0], l[1])
+
+    if typeof @options.verticalGrid is 'string'
+      lines = Morris.labelSeries(@xmin, @xmax, @width, @options.verticalGrid)
+      for l in lines
+        @drawVerticalGridLine(l[1])
+
+  # Draw a vertical grid line
+  #
+  # @private
+  drawVerticalGridLine: (xpos) ->
+    xpos = Math.floor(@transX(xpos)) + 0.5
+    yStart = @yStart + @options.verticalGridStartOffset
+    if @options.verticalGridHeight is 'full'
+      yEnd = @yEnd
+    else
+      yEnd = @yStart - @options.verticalGridHeight
+    @drawGridLine("M#{xpos},#{yStart}V#{yEnd}")
 
   # draw the data series
   #
