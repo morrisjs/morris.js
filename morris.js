@@ -1225,14 +1225,10 @@ Licensed under the BSD-2-Clause License.
         return this.options.lineColors.call(this, row, sidx, type);
       } else if (type === 'point') {
         return this.options.pointFillColors[sidx % this.options.pointFillColors.length] || this.options.lineColors[sidx % this.options.lineColors.length];
-      } else if (type === 'line') {
-        return this.options.lineColors[sidx % this.options.lineColors.length];
+      } else if (type === 'trendLine') {
+        return this.options.trendLineColors[sidx % this.options.trendLineColors.length];
       } else {
-        if (this.options.trendLine) {
-          return this.options.trendLineColors[sidx % this.options.trendLineColors.length];
-        } else {
-          return this.options.lineColors[sidx % this.options.lineColors.length];
-        }
+        return this.options.lineColors[sidx % this.options.lineColors.length];
       }
     };
 
