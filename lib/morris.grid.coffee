@@ -105,6 +105,7 @@ class Morris.Grid extends Morris.EventEmitter
     gridTextWeight: 'normal'
     hideHover: false
     yLabelFormat: null
+    yLabelAlign: 'right'
     xLabelAngle: 0
     numLines: 5
     padding: 25
@@ -394,7 +395,10 @@ class Morris.Grid extends Morris.EventEmitter
   #
   # @private
   getYAxisLabelX: ->
-    @left - @options.padding / 2
+    if @options.yLabelAlign is 'right'
+      @left - @options.padding / 2
+    else
+      @options.padding / 2
 
 
   # draw y axis labels, horizontal lines
@@ -473,12 +477,22 @@ class Morris.Grid extends Morris.EventEmitter
         .attr('stroke-width', @options.eventStrokeWidth)
 
   drawYAxisLabel: (xPos, yPos, text) ->
+    label = @raphael.text(xPos, yPos, text)
+      .attr('font-size', @options.gridTextSize)
+      .attr('font-family', @options.gridTextFamily)
+      .attr('font-weight', @options.gridTextWeight)
+      .attr('fill', @options.gridTextColor)
+    if @options.yLabelAlign == 'right'
+      label.attr('text-anchor', 'end')
+    else
+      label.attr('text-anchor', 'start')
+
+  drawXAxisLabel: (xPos, yPos, text) ->
     @raphael.text(xPos, yPos, text)
       .attr('font-size', @options.gridTextSize)
       .attr('font-family', @options.gridTextFamily)
       .attr('font-weight', @options.gridTextWeight)
       .attr('fill', @options.gridTextColor)
-      .attr('text-anchor', 'end')
 
   drawGridLine: (path) ->
     @raphael.path(path)
