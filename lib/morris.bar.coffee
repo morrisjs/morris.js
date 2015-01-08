@@ -173,13 +173,13 @@ class Morris.Bar extends Morris.Grid
 
           top -= lastTop if @options.stacked
           if not @options.horizontal
+            lastTop += size
             @drawBar(left, top, barWidth, size, @colorFor(row, sidx, 'bar'),
                 @options.barOpacity, @options.barRadius)
-            lastTop += size
           else
+            lastTop -= size
             @drawBar(top, left, size, barWidth, @colorFor(row, sidx, 'bar'),
                 @options.barOpacity, @options.barRadius)
-            lastTop -= size
 
             if @options.inBarValue and
                 barWidth > @options.gridTextSize + 2*@options.inBarValueMinTopMargin
@@ -193,6 +193,10 @@ class Morris.Bar extends Morris.Grid
 
         else
           null
+
+    @flat_bars = $.map @bars, (n) -> return n
+    @flat_bars = $.grep @flat_bars, (n) -> return n?
+    @bar_els = $($.map @flat_bars, (n) -> return n[0])
 
   # @private
   #
@@ -220,12 +224,14 @@ class Morris.Bar extends Morris.Grid
     Math.min(@data.length - 1,
       Math.floor((pos - @xStart) / (@xSize / @data.length)))
 
+
   # click on grid event handler
   #
   # @private
   onGridClick: (x, y) =>
     index = @hitTest(x, y)
-    @fire 'click', index, @data[index].src, x, y
+    bar_hit = !!@bar_els.filter(() -> $(@).is(':hover')).length
+    @fire 'click', index, @data[index].src, x, y, bar_hit
 
   # hover movement event handler
   #
