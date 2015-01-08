@@ -201,7 +201,7 @@ class Morris.Bar extends Morris.Grid
   # @param type [String] "bar", "hover" or "label"
   colorFor: (row, sidx, type) ->
     if typeof @options.barColors is 'function'
-      r = { x: row.x, y: row.y[sidx], label: row.label }
+      r = { x: row.x, y: row.y[sidx], label: row.label, src: row.src}
       s = { index: sidx, key: @options.ykeys[sidx], label: @options.labels[sidx] }
       @options.barColors.call(@, r, s, type)
     else
