@@ -238,7 +238,10 @@ class Morris.Bar extends Morris.Grid
   # @private
   onHoverMove: (x, y) =>
     index = @hitTest(x, y)
-    @hover.update(@hoverContentForRow(index)...)
+    if index?
+      @hover.update(@hoverContentForRow(index)...)
+    else
+      @hover.hide()
 
   # hover out event handler
   #
