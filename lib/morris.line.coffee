@@ -337,11 +337,11 @@ class Morris.Line extends Morris.Grid
   hilight: (index) =>
     if @prevHilight isnt null and @prevHilight isnt index
       for i in [0..@seriesPoints.length-1]
-        if @seriesPoints[i][@prevHilight]
+        if @hasToShow(i) and @seriesPoints[i][@prevHilight]
           @seriesPoints[i][@prevHilight].animate @pointShrinkSeries(i)
     if index isnt null and @prevHilight isnt index
       for i in [0..@seriesPoints.length-1]
-        if @seriesPoints[i][index]
+        if @hasToShow(i) and @seriesPoints[i][index]
           @seriesPoints[i][index].animate @pointGrowSeries(i)
     @prevHilight = index
 
