@@ -193,6 +193,8 @@ class Morris.Line extends Morris.Grid
         labels = [[@data[0].label, @data[0].x]]
       else
         labels = Morris.labelSeries(@xmin, @xmax, @width, @options.xLabels, @options.xLabelFormat)
+    else if @options.customLabels
+      labels = ([row.label, row.x] for row in @options.customLabels)
     else
       labels = ([row.label, row.x] for row in @data)
     labels.reverse()
