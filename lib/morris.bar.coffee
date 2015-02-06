@@ -35,7 +35,8 @@ class Morris.Bar extends Morris.Grid
     inBarValueTextColor: 'white'
     inBarValueMinTopMargin: 1
     inBarValueRightMargin: 4
-
+    barAnimated: false
+    barAnimateDuration: 1000
   # Do any size-related calculations
   #
   # @private
@@ -166,20 +167,20 @@ class Morris.Bar extends Morris.Grid
 
           if @options.verticalGridCondition and @options.verticalGridCondition(row.x)
             if not @options.horizontal
-              @drawBar(@xStart + idx * groupWidth, @yEnd, groupWidth, @ySize, @options.verticalGridColor, @options.verticalGridOpacity, @options.barRadius)
+              @drawBar(@xStart + idx * groupWidth, @yEnd, groupWidth, @ySize, @options.verticalGridColor, @options.verticalGridOpacity, @options.barRadius, @options.barAnimated,@options.barAnimateDuration)
             else
-              @drawBar(@yStart, @xStart + idx * groupWidth, @ySize, groupWidth, @options.verticalGridColor, @options.verticalGridOpacity, @options.barRadius)
+              @drawBar(@yStart, @xStart + idx * groupWidth, @ySize, groupWidth, @options.verticalGridColor, @options.verticalGridOpacity, @options.barRadius, @options.barAnimated,@options.barAnimateDuration)
 
 
           top -= lastTop if @options.stacked
           if not @options.horizontal
             lastTop += size
             @drawBar(left, top, barWidth, size, @colorFor(row, sidx, 'bar'),
-                @options.barOpacity, @options.barRadius)
+                @options.barOpacity, @options.barRadius, @options.barAnimated,@options.barAnimateDuration)
           else
             lastTop -= size
             @drawBar(top, left, size, barWidth, @colorFor(row, sidx, 'bar'),
-                @options.barOpacity, @options.barRadius)
+                @options.barOpacity, @options.barRadius, @options.barAnimated,@options.barAnimateDuration)
 
             if @options.inBarValue and
                 barWidth > @options.gridTextSize + 2*@options.inBarValueMinTopMargin
@@ -278,12 +279,18 @@ class Morris.Bar extends Morris.Grid
       y = @top + (index + 0.5) * @height / @data.length
       [content, x, y, true]
 
-  drawBar: (xPos, yPos, width, height, barColor, opacity, radiusArray) ->
+  drawBar: (xPos, yPos, width, height, barColor, opacity, radiusArray,animated,duration) ->
     maxRadius = Math.max(radiusArray...)
-    if maxRadius == 0 or maxRadius > height
-      path = @raphael.rect(xPos, yPos, width, height)
+    if animated and duration > 0
+      if maxRadius == 0 or maxRadius > height
+        path = @raphael.rect(xPos, yPos+height, width, 0).animate({y:yPos,height:height}, duration)
+      else
+        path = @raphael.path @roundedRect(xPos, yPos+height, width, 0, radiusArray).animate({y:yPos,height:height}, duration)
     else
-      path = @raphael.path @roundedRect(xPos, yPos, width, height, radiusArray)
+      if maxRadius == 0 or maxRadius > height
+        path = @raphael.rect(xPos, yPos, width, height)
+      else
+        path = @raphael.path @roundedRect(xPos, yPos, width, height, radiusArray)
     path
       .attr('fill', barColor)
       .attr('fill-opacity', opacity)
