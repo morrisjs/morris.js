@@ -100,8 +100,8 @@ tests currently *only* pass on OS X.
 - Fix DST handling [#191](https://github.com/morrisjs/morris.js/issues/191)
 - Parse data values from strings in Morris.Donut [#189](https://github.com/morrisjs/morris.js/issues/189)
 - Non-cumulative area charts [#199](https://github.com/morrisjs/morris.js/issues/199)
-- Round Y-axis labels to significant numbers [#162](https://github.com/morrisjs/morris.js/162)
-- Customising default hover content [#179](https://github.com/morrisjs/morris.js/179)
+- Round Y-axis labels to significant numbers [#162](https://github.com/morrisjs/morris.js/issues/162)
+- Customising default hover content [#179](https://github.com/morrisjs/morris.js/issues/179)
 
 ### 0.4.1 - 8th February 2013
 
