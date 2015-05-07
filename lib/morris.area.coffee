@@ -4,6 +4,7 @@ class Morris.Area extends Morris.Line
   areaDefaults = 
     fillOpacity: 'auto'
     behaveLikeLine: false
+    fillToZero: false
 
   constructor: (options) ->
     return new Morris.Area(options) unless (@ instanceof Morris.Area)
@@ -49,7 +50,10 @@ class Morris.Area extends Morris.Line
   _drawFillFor: (index) ->
     path = @paths[index]
     if path isnt null
-      path = path + "L#{@transX(@xmax)},#{@bottom}L#{@transX(@xmin)},#{@bottom}Z"
+      if @options.fillToZero
+        path = path + "L#{@transX(@xmax)},#{@transY(0)}L#{@transX(@xmin)},#{@transY(0)}Z"
+      else
+        path = path + "L#{@transX(@xmax)},#{@bottom}L#{@transX(@xmin)},#{@bottom}Z"
       @drawFilledPath path, @fillForSeries(index)
 
   fillForSeries: (i) ->
