@@ -27,6 +27,8 @@ class Morris.Bar extends Morris.Grid
       '#9440ed'
     ],
     barOpacity: 1.0
+    barHighlightOpacity: 1.0
+    highlightSpeed: 150
     barRadius: [0, 0, 0, 0]
     xLabelMargin: 50
     horizontal: false
@@ -132,6 +134,7 @@ class Morris.Bar extends Morris.Grid
   #
   # @private
   drawSeries: ->
+    @seriesBars = []
     groupWidth = @xSize / @options.data.length
 
     if @options.stacked
@@ -148,6 +151,7 @@ class Morris.Bar extends Morris.Grid
     leftPadding = spaceLeft / 2
     zeroPos = if @ymin <= 0 and @ymax >= 0 then @transY(0) else null
     @bars = for row, idx in @data
+      @seriesBars[idx] = []
       lastTop = 0
       for ypos, sidx in row._y
         if not @hasToShow(sidx)
@@ -174,11 +178,11 @@ class Morris.Bar extends Morris.Grid
           top -= lastTop if @options.stacked
           if not @options.horizontal
             lastTop += size
-            @drawBar(left, top, barWidth, size, @colorFor(row, sidx, 'bar'),
+            @seriesBars[idx][sidx] = @drawBar(left, top, barWidth, size, @colorFor(row, sidx, 'bar'),
                 @options.barOpacity, @options.barRadius)
           else
             lastTop -= size
-            @drawBar(top, left, size, barWidth, @colorFor(row, sidx, 'bar'),
+            @seriesBars[idx][sidx] = @drawBar(top, left, size, barWidth, @colorFor(row, sidx, 'bar'),
                 @options.barOpacity, @options.barRadius)
 
             if @options.inBarValue and
@@ -197,6 +201,22 @@ class Morris.Bar extends Morris.Grid
     @flat_bars = $.map @bars, (n) -> return n
     @flat_bars = $.grep @flat_bars, (n) -> return n?
     @bar_els = $($.map @flat_bars, (n) -> return n[0])
+
+  # hightlight the bar on hover
+  #
+  # @private
+  hilight: (index) ->
+    if @seriesBars && @seriesBars[@prevHilight] && @prevHilight != null && @prevHilight != index
+      for y,i in @seriesBars[@prevHilight]
+        if y
+          y.animate({'fill-opacity': @options.barOpacity}, @options.highlightSpeed)
+
+    if @seriesBars && @seriesBars[index] && index != null && @prevHilight != index
+      for y,i in @seriesBars[index]
+        if y
+          y.animate({'fill-opacity': @options.barHighlightOpacity}, @options.highlightSpeed)
+
+    @prevHilight = index
 
   # @private
   #
@@ -238,6 +258,7 @@ class Morris.Bar extends Morris.Grid
   # @private
   onHoverMove: (x, y) =>
     index = @hitTest(x, y)
+    @hilight(index)
     if index?
       @hover.update(@hoverContentForRow(index)...)
     else
@@ -247,6 +268,7 @@ class Morris.Bar extends Morris.Grid
   #
   # @private
   onHoverOut: =>
+    @hilight(-1)
     if @options.hideHover isnt false
       @hover.hide()
 
