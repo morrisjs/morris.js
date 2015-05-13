@@ -37,6 +37,7 @@ class Morris.Bar extends Morris.Grid
     inBarValueTextColor: 'white'
     inBarValueMinTopMargin: 1
     inBarValueRightMargin: 4
+    disableGroups: false
 
   # Do any size-related calculations
   #
@@ -137,7 +138,7 @@ class Morris.Bar extends Morris.Grid
     @seriesBars = []
     groupWidth = @xSize / @options.data.length
 
-    if @options.stacked
+    if @options.stacked or @options.disableGroups
       numBars = 1
     else
       numBars = 0
@@ -165,7 +166,7 @@ class Morris.Bar extends Morris.Grid
             bottom = @bottom
 
           left = @xStart + idx * groupWidth + leftPadding
-          left += sidx * (barWidth + @options.barGap) unless @options.stacked
+          left += sidx * (barWidth + @options.barGap) unless @options.stacked or @options.disableGroups
           size = bottom - top
 
           if @options.verticalGridCondition and @options.verticalGridCondition(row.x)
