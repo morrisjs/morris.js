@@ -1629,7 +1629,8 @@ Licensed under the BSD-2-Clause License.
       inBarValueTextColor: 'white',
       inBarValueMinTopMargin: 1,
       inBarValueRightMargin: 4,
-      disableGroups: false
+      disableGroups: false,
+      hoverLabelFormatter: null
     };
 
     Bar.prototype.calc = function() {
@@ -1916,9 +1917,14 @@ Licensed under the BSD-2-Clause License.
     };
 
     Bar.prototype.hoverContentForRow = function(index) {
-      var content, j, row, x, y, _i, _len, _ref;
+      var content, j, lable, row, x, y, _i, _len, _ref;
       row = this.data[index];
-      content = $("<div class='morris-hover-row-label'>").text(row.label);
+      if (typeof this.options.hoverLabelFormatter === 'function') {
+        lable = this.options.hoverLabelFormatter(row);
+      } else {
+        lable = row.label;
+      }
+      content = $("<div class='morris-hover-row-label'>").text(lable);
       content = content.prop('outerHTML');
       _ref = row.y;
       for (j = _i = 0, _len = _ref.length; _i < _len; j = ++_i) {

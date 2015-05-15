@@ -38,6 +38,7 @@ class Morris.Bar extends Morris.Grid
     inBarValueMinTopMargin: 1
     inBarValueRightMargin: 4
     disableGroups: false
+    hoverLabelFormatter: null
 
   # Do any size-related calculations
   #
@@ -278,7 +279,11 @@ class Morris.Bar extends Morris.Grid
   # @private
   hoverContentForRow: (index) ->
     row = @data[index]
-    content = $("<div class='morris-hover-row-label'>").text(row.label)
+    if typeof @options.hoverLabelFormatter is 'function'
+      lable = @options.hoverLabelFormatter(row)
+    else
+      lable = row.label
+    content = $("<div class='morris-hover-row-label'>").text(lable)
     content = content.prop('outerHTML')
     for y, j in row.y
       if @options.labels[j] is false
