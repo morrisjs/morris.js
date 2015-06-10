@@ -1,6 +1,5 @@
 {
   "name": "morris.js",
-  "version": "0.5.1",
   "main": [
     "./morris.js",
     "./morris.css"
