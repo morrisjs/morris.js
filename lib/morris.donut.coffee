@@ -24,6 +24,8 @@ class Morris.Donut extends Morris.EventEmitter
     ],
     backgroundColor: '#FFFFFF', 
     labelColor: '#000000',
+    labelMainSize: 15,
+    labelValueSize: 14,
     formatter: Morris.commas
     resize: false
 
@@ -85,8 +87,8 @@ class Morris.Donut extends Morris.EventEmitter
       last = next
       idx += 1
 
-    @text1 = @drawEmptyDonutLabel(cx, cy - 10, @options.labelColor, 15, 800)
-    @text2 = @drawEmptyDonutLabel(cx, cy + 10, @options.labelColor, 14)
+    @text1 = @drawEmptyDonutLabel(cx, cy - 10, @options.labelColor, @options.labelMainSize, 800)
+    @text2 = @drawEmptyDonutLabel(cx, cy + 10, @options.labelColor, @options.labelValueSize)
 
     max_value = Math.max @values...
     idx = 0

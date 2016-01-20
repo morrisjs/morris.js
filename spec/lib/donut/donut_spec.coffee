@@ -74,3 +74,18 @@ describe 'Morris.Donut', ->
         { label: 'Three', value: 35 }
       ]
       $('#graph').find("path[stroke='#0000ff']").size().should.equal 1
+
+  describe 'changeLabelSizes', ->
+    defaults =
+      element: 'graph'
+      data: [ {label: 'One', value: 25 }, {label: "Two", value: 75} ]
+      labelMainSize: 8
+      labelValueSize: 10
+
+    it 'should have a label with font size 8', ->
+      chart = Morris.Donut $.extend {}, defaults
+      $('#graph').find("text[font-size='8px']").size().should.equal 1
+
+    it 'should have a label with font size 10', ->
+      chart = Morris.Donut $.extend {}, defaults
+      $('#graph').find("text[font-size='10px']").size().should.equal 1
