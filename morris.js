@@ -1967,10 +1967,10 @@ Licensed under the BSD-2-Clause License.
       segment = this.segments[idx];
       segment.select();
       row = this.data[idx];
-      return this.setLabels(row.label, this.options.formatter(row.value, row));
+      return this.setLabels(row.label, this.options.formatter(row.value, row), row.label2);
     };
 
-    Donut.prototype.setLabels = function(label1, label2) {
+    Donut.prototype.setLabels = function(label1, label2, label3) {
       var inner, maxHeightBottom, maxHeightTop, maxWidth, text1bbox, text1scale, text2bbox, text2scale;
       inner = (Math.min(this.el.width() / 2, this.el.height() / 2) - 10) * 2 / 3;
       maxWidth = 1.8 * inner;
@@ -1985,6 +1985,9 @@ Licensed under the BSD-2-Clause License.
       this.text1.attr({
         transform: "S" + text1scale + "," + text1scale + "," + (text1bbox.x + text1bbox.width / 2) + "," + (text1bbox.y + text1bbox.height)
       });
+      if (typeof label3 != 'undefined') {
+        label2 = label3;
+      }
       this.text2.attr({
         text: label2,
         transform: ''
