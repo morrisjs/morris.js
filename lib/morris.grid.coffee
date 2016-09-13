@@ -150,8 +150,16 @@ class Morris.Grid extends Morris.EventEmitter
     ymin = if @cumulative then 0 else null
 
     if @options.goals.length > 0
-      minGoal = Math.min @options.goals...
-      maxGoal = Math.max @options.goals...
+      flatGoals = []
+      for g in @options.goals
+        if g instanceof Array
+          [from, to] = g
+          flatGoals.push(from)
+          flatGoals.push(to)
+        else
+          flatGoals.push(e)
+      minGoal = Math.min flatGoals...
+      maxGoal = Math.max flatGoals...
       ymin = if ymin? then Math.min(ymin, minGoal) else minGoal
       ymax = if ymax? then Math.max(ymax, maxGoal) else maxGoal
 
@@ -445,11 +453,22 @@ class Morris.Grid extends Morris.EventEmitter
       @drawEvent(event, color)
 
   drawGoal: (goal, color) ->
-    y = Math.floor(@transY(goal)) + 0.5
-    if not @options.horizontal
-      path = "M#{@xStart},#{y}H#{@xEnd}"
+    if goal instanceof Array
+      [from, to] = goal
+      from = Math.floor(@transY(from)) + 0.5
+      to = Math.floor(@transY(to)) + 0.5
+
+      if not @options.horizontal
+        path = "M#{@xStart},#{from}L#{@xEnd},#{to}"
+      else
+        path = "M#{from},#{@xStart}L#{to},#{@xEnd}"
+
     else
-      path = "M#{y},#{@xStart}V#{@xEnd}"
+      y = Math.floor(@transY(goal)) + 0.5
+      if not @options.horizontal
+        path = "M#{@xStart},#{y}H#{@xEnd}"
+      else
+        path = "M#{y},#{@xStart}V#{@xEnd}"
 
     @raphael.path(path)
       .attr('stroke', color)
