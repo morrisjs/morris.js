@@ -24,6 +24,7 @@ class Morris.Donut extends Morris.EventEmitter
     ],
     backgroundColor: '#FFFFFF', 
     labelColor: '#000000',
+    rotate: 0,
     formatter: Morris.commas
     resize: false
 
@@ -69,7 +70,7 @@ class Morris.Donut extends Morris.EventEmitter
     min = 5 / (2 * w)
     C = 1.9999 * Math.PI - min * @data.length
 
-    last = 0
+    last = (this.options.rotate / 180) / Math.PI
     idx = 0
     @segments = []
     for value, i in @values
