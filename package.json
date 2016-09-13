@@ -8,6 +8,7 @@
     "name": "Olly Smith",
     "email": "olly@oesmith.co.uk"
   },
+  "main": "morris.min.js",
   "repository": {
     "type": "git",
     "url": "git://github.com/morrisjs/morris.js.git"
