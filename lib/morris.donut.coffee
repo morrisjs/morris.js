@@ -111,7 +111,9 @@ class Morris.Donut extends Morris.EventEmitter
     segment = @segments[idx]
     segment.select()
     row = @data[idx]
-    @setLabels(row.label, @options.formatter(row.value, row))
+    total = 0
+    total = total + parseFloat item.value for item in @data
+    @setLabels(row.label, @options.formatter(row.value, row, total))
 
 
 

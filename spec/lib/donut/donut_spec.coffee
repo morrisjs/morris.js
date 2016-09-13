@@ -74,3 +74,23 @@ describe 'Morris.Donut', ->
         { label: 'Three', value: 35 }
       ]
       $('#graph').find("path[stroke='#0000ff']").size().should.equal 1
+
+
+  describe 'formatter callback', ->
+    defaults =
+      element: 'graph'
+      data: [ {label: 'Jam', value: 2.5 },
+        {label: 'Frosted', value: 4.5 },
+        {label: 'Custard', value: 2 },
+        {label: 'Sugar', value: 1 } ]
+
+    it 'should has correct row value', ->
+      chart = Morris.Donut $.extend {}, defaults, {formatter: (value) -> "#{value}"}
+      chart.select(3)
+      $('#graph').find("svg tspan").last().text().should.equal "1"
+
+
+    it 'should has correct percent value', ->
+      chart = Morris.Donut $.extend {}, defaults, {formatter: (value, row, total) -> "#{Math.round 100 * value / total}%"}
+      chart.select(3)
+      $('#graph').find("svg tspan").last().text().should.equal "10%"
