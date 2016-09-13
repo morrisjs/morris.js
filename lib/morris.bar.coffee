@@ -37,6 +37,8 @@ class Morris.Bar extends Morris.Grid
     inBarValueTextColor: 'white'
     inBarValueMinTopMargin: 1
     inBarValueRightMargin: 4
+    disableGroups: false
+    hoverLabelFormatter: null
 
   # Do any size-related calculations
   #
@@ -137,7 +139,7 @@ class Morris.Bar extends Morris.Grid
     @seriesBars = []
     groupWidth = @xSize / @options.data.length
 
-    if @options.stacked
+    if @options.stacked or @options.disableGroups
       numBars = 1
     else
       numBars = 0
@@ -165,7 +167,7 @@ class Morris.Bar extends Morris.Grid
             bottom = @bottom
 
           left = @xStart + idx * groupWidth + leftPadding
-          left += sidx * (barWidth + @options.barGap) unless @options.stacked
+          left += sidx * (barWidth + @options.barGap) unless @options.stacked or @options.disableGroups
           size = bottom - top
 
           if @options.verticalGridCondition and @options.verticalGridCondition(row.x)
@@ -277,7 +279,11 @@ class Morris.Bar extends Morris.Grid
   # @private
   hoverContentForRow: (index) ->
     row = @data[index]
-    content = $("<div class='morris-hover-row-label'>").text(row.label)
+    if typeof @options.hoverLabelFormatter is 'function'
+      lable = @options.hoverLabelFormatter(row)
+    else
+      lable = row.label
+    content = $("<div class='morris-hover-row-label'>").text(lable)
     content = content.prop('outerHTML')
     for y, j in row.y
       if @options.labels[j] is false
