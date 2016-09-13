@@ -1,0 +1,39 @@
+<!doctype html>
+<head>
+  <script src="../third_party/jquery-1.8.2.min.js"></script>
+  <script src="../third_party/raphael-2.1.0.min.js"></script>
+  <script src="../morris.js"></script>
+  <script src="lib/prettify.js"></script>
+  <link rel="stylesheet" href="lib/example.css">
+  <link rel="stylesheet" href="lib/prettify.css">
+  <link rel="stylesheet" href="../morris.css">
+</head>
+<body>
+<h1>Bar charts</h1>
+<div id="graph"></div>
+<pre id="code" class="prettyprint linenums">
+
+// Use Morris.Bar
+Morris.Bar({
+      element: 'graph',
+      data: [
+        {x: 'foo', y: 2, z: 3},
+        {x: 'bar', y: 4, z: 6},
+        {x: 'fizz', y: 5, z: 1},
+        {x: 'buzz', y: 0, z: 5},
+        {x: 'ku', y: 2, z: 3},
+        {x: 'qu', y: 4, z: 6},
+        {x: 'lua', y: 5, z: 1},
+        {x: 'mua', y: 0, z: 5}
+      ],
+      xkey: 'x',
+      ykeys: ['y', 'z'],
+      labels: ['Y', 'Z'],
+      verticalGridCondition: function(index) {return index % 2},
+      verticalGridColor: '#888888',
+      verticalGridOpacity: '0.2'
+});
+</pre>
+<script src="lib/example.js"></script>
+
+</body>
