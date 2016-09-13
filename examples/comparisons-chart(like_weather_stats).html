@@ -1,0 +1,37 @@
+<!doctype html>
+<head>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/raphael/2.1.2/raphael-min.js"></script>
+  <script src="../morris.js"></script>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/prettify/r224/prettify.min.js"></script>
+  <script src="lib/example.js"></script>
+  <link rel="stylesheet" href="lib/example.css">
+  <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/prettify/r224/prettify.min.css">
+  <link rel="stylesheet" href="../morris.css">
+</head>
+<body>
+<h1>Area chart to Display a comparison between Temperature and Humidity</h1>
+<div id="graph"></div>
+<pre id="code" class="prettyprint linenums">
+Morris.Area({
+  element: 'graph',
+  behaveLikeLine: true,//-->to remove the additive nature which the chart has by default. This is not easily found in the documentation.
+  data: [//the data is sample
+      { y: '2014', a: 50, b: 90},
+      { y: '2015', a: 65,  b: 85},
+      { y: '2016', a: 50,  b: 50},
+      { y: '2017', a: -75,  b: 60},//can handle negative values
+      { y: '2018', a: 80,  b: 85},
+      { y: '2019', a: 90,  b: 70},
+      { y: '2020', a: -100, b: 75},
+      { y: '2021', a: 115, b: 75},
+      { y: '2022', a: 120, b: 65},
+      { y: '2023', a: 145, b: 85},
+      { y: '2024', a: 160, b: -95}
+    ],
+  xkey: 'y',
+  ykeys: ['a', 'b'],
+  labels: ['Temperature', 'Humidity']
+});
+</pre>
+</body>
