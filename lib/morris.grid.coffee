@@ -6,23 +6,23 @@ class Morris.Grid extends Morris.EventEmitter
   constructor: (options) ->
     # find the container to draw the graph in
     if typeof options.element is 'string'
-      @el = $ document.getElementById(options.element)
+      @el = document.getElementById(options.element)
     else
-      @el = $ options.element
-    if not @el? or @el.length == 0
+      @el = options.element[0] or options.element
+    if not @el?
       throw new Error("Graph container element not found")
 
-    if @el.css('position') == 'static'
-      @el.css('position', 'relative')
+    if Morris.css(@el, 'position') == 'static'
+      @el.style.position = 'relative'
 
-    @options = $.extend {}, @gridDefaults, (@defaults || {}), options
+    @options = Morris.extend {}, @gridDefaults, (@defaults || {}), options
 
     # backwards compatibility for units -> postUnits
     if typeof @options.units is 'string'
       @options.postUnits = options.units
 
     # the raphael drawing instance
-    @raphael = new Raphael(@el[0])
+    @raphael = new Raphael(@el)
 
     # some redraw stuff
     @elementWidth = null
@@ -39,8 +39,8 @@ class Morris.Grid extends Morris.EventEmitter
     @setData @options.data
 
     # hover
-    @el.bind 'mousemove', (evt) =>
-      offset = @el.offset()
+    Morris.on @el, 'mousemove', (evt) =>
+      offset = Morris.offset(@el)
       x = evt.pageX - offset.left
       if @selectFrom
         left = @data[@hitTest(Math.min(x, @selectFrom))]._x
@@ -50,44 +50,44 @@ class Morris.Grid extends Morris.EventEmitter
       else
         @fire 'hovermove', x, evt.pageY - offset.top
 
-    @el.bind 'mouseleave', (evt) =>
+    Morris.on @el, 'mouseleave', (evt) =>
       if @selectFrom
         @selectionRect.hide()
         @selectFrom = null
       @fire 'hoverout'
 
-    @el.bind 'touchstart touchmove touchend', (evt) =>
+    Morris.on @el, 'touchstart touchmove touchend', (evt) =>
       touch = evt.originalEvent.touches[0] or evt.originalEvent.changedTouches[0]
-      offset = @el.offset()
+      offset = Morris.offset(@el)
       @fire 'hovermove', touch.pageX - offset.left, touch.pageY - offset.top
 
-    @el.bind 'click', (evt) =>
-      offset = @el.offset()
+    Morris.on @el, 'click', (evt) =>
+      offset = Morris.offset(@el)
       @fire 'gridclick', evt.pageX - offset.left, evt.pageY - offset.top
 
     if @options.rangeSelect
-      @selectionRect = @raphael.rect(0, 0, 0, @el.innerHeight())
+      @selectionRect = @raphael.rect(0, 0, 0, Morris.innerDimensions(@el).height)
         .attr({ fill: @options.rangeSelectColor, stroke: false })
         .toBack()
         .hide()
 
-      @el.bind 'mousedown', (evt) =>
-        offset = @el.offset()
+      Morris.on @el, 'mousedown', (evt) =>
+        offset = Morris.offset(@el)
         @startRange evt.pageX - offset.left
 
-      @el.bind 'mouseup', (evt) =>
-        offset = @el.offset()
+      Morris.on @el, 'mouseup', (evt) =>
+        offset = Morris.offset(@el)
         @endRange evt.pageX - offset.left
         @fire 'hovermove', evt.pageX - offset.left, evt.pageY - offset.top
 
     if @options.resize
-      $(window).bind 'resize', (evt) =>
+      Morris.on window, 'resize', (evt) =>
         if @timeoutId?
           window.clearTimeout @timeoutId
         @timeoutId = window.setTimeout @resizeHandler, 100
 
     # Disable tap highlight on iOS.
-    @el.css('-webkit-tap-highlight-color', 'rgba(0,0,0,0)')
+    @el.style.webkitTapHighlightColor = 'rgba(0,0,0,0)'
 
     @postInit() if @postInit
 
@@ -283,8 +283,7 @@ class Morris.Grid extends Morris.EventEmitter
     grid
 
   _calc: ->
-    w = @el.width()
-    h = @el.height()
+    {width:w, height:h} = Morris.dimensions @el
 
     if @elementWidth != w or @elementHeight != h or @dirty
       @elementWidth = w
@@ -522,7 +521,8 @@ class Morris.Grid extends Morris.EventEmitter
 
   resizeHandler: =>
     @timeoutId = null
-    @raphael.setSize @el.width(), @el.height()
+    {width, height} = Morris.dimensions @el
+    @raphael.setSize width, height
     @redraw()
 
   hasToShow: (i) =>

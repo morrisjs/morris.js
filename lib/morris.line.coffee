@@ -173,7 +173,8 @@ class Morris.Line extends Morris.Grid
       if (not prevLabelMargin? or
           prevLabelMargin >= labelBox.x + labelBox.width or
           prevAngleMargin? and prevAngleMargin >= labelBox.x) and
-         labelBox.x >= 0 and (labelBox.x + labelBox.width) < @el.width()
+          labelBox.x >= 0 and
+          (labelBox.x + labelBox.width) < Morris.dimensions(@el).width
         if @options.xLabelAngle != 0
           margin = 1.25 * @options.gridTextSize /
             Math.sin(@options.xLabelAngle * Math.PI / 180.0)
@@ -419,7 +420,7 @@ Morris.labelSeries = (dmin, dmax, pxwidth, specName, xLabelFormat) ->
     spec = Morris.LABEL_SPECS["second"]
   # check if there's a user-defined formatting function
   if xLabelFormat
-    spec = $.extend({}, spec, {fmt: xLabelFormat})
+    spec = Morris.extend({}, spec, {fmt: xLabelFormat})
   # calculate labels
   d = spec.start(d0)
   ret = []

@@ -1,7 +1,7 @@
 class Morris.Bar extends Morris.Grid
   constructor: (options) ->
     return new Morris.Bar(options) unless (@ instanceof Morris.Bar)
-    super($.extend {}, options, parseTime: false)
+    super(Morris.extend {}, options, parseTime: false)
 
   init: ->
     @cumulative = @options.stacked
@@ -97,15 +97,15 @@ class Morris.Bar extends Morris.Grid
           Math.cos(angle * Math.PI / 180.0)
         label.transform("t#{offset},0...")
 
-
+      {width, height} = Morris.dimensions @el
       if not @options.horizontal
         startPos = labelBox.x
         size = labelBox.width
-        maxSize = @el.width()
+        maxSize = width
       else
         startPos = labelBox.y
         size = labelBox.height
-        maxSize = @el.height()
+        maxSize = height
 
       # try to avoid overlaps
       if (not prevLabelMargin? or
