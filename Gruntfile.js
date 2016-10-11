@@ -87,4 +87,5 @@ module.exports = function (grunt) {
   });
 
   grunt.registerTask('default', ['concat', 'coffee', 'less', 'uglify', 'mocha', 'shell:visual_spec']);
+  grunt.registerTask('build', ['concat', 'coffee', 'less', 'uglify']);
 };

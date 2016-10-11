@@ -28,7 +28,13 @@ class Morris.Bar extends Morris.Grid
     ],
     barOpacity: 1.0
     barRadius: [0, 0, 0, 0]
-    xLabelMargin: 50
+    xLabelMargin: 50,
+    dataLabels:false,
+    dataLabelsPosition:'inside',
+    dataLabelsFamily: 'sans-serif',
+    dataLabelsSize:12,
+    dataLabelsWeight:'bold',
+    dataLabelsColor:'#fff',
 
   # Do any size-related calculations
   #
@@ -114,6 +120,13 @@ class Morris.Bar extends Morris.Grid
           top -= lastTop if @options.stacked
           @drawBar(left, top, barWidth, size, @colorFor(row, sidx, 'bar'),
               @options.barOpacity, @options.barRadius)
+          if @options.dataLabels
+            if @options.stacked || @options.dataLabelsPosition=='inside'
+              depth = (size)/2
+            else
+              depth = -7
+            if size>@options.dataLabelsSize
+              @drawDataLabel(left+barWidth/2,top+depth,@yLabelFormat(row.y[sidx]))
 
           lastTop += size
         else
@@ -185,6 +198,14 @@ class Morris.Bar extends Morris.Grid
       .attr('font-family', @options.gridTextFamily)
       .attr('font-weight', @options.gridTextWeight)
       .attr('fill', @options.gridTextColor)
+
+  drawDataLabel: (xPos, yPos, text) ->
+    label = @raphael.text(xPos, yPos, text)
+      .attr('text-anchor', 'middle')
+      .attr('font-size', @options.dataLabelsSize)
+      .attr('font-family', @options.dataLabelsFamily)
+      .attr('font-weight', @options.dataLabelsWeight)
+      .attr('fill', @options.dataLabelsColor)
 
   drawBar: (xPos, yPos, width, height, barColor, opacity, radiusArray) ->
     maxRadius = Math.max(radiusArray...)

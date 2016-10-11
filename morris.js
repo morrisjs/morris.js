@@ -1,3 +1,10 @@
+/* @license
+morris.js v0.5.0
+Copyright 2016 Olly Smith All rights reserved.
+Licensed under the BSD-2-Clause License.
+*/
+
+
 (function() {
   var $, Morris, minutesSpecHelper, secondsSpecHelper,
     __slice = [].slice,
@@ -1412,7 +1419,13 @@
       barColors: ['#0b62a4', '#7a92a3', '#4da74d', '#afd8f8', '#edc240', '#cb4b4b', '#9440ed'],
       barOpacity: 1.0,
       barRadius: [0, 0, 0, 0],
-      xLabelMargin: 50
+      xLabelMargin: 50,
+      dataLabels: false,
+      dataLabelsPosition: 'outside',
+      dataLabelsFamily: 'sans-serif',
+      dataLabelsSize: 12,
+      dataLabelsWeight: 'normal',
+      dataLabelsColor: '#aaa'
     };
 
     Bar.prototype.calc = function() {
@@ -1487,11 +1500,15 @@
     };
 
     Bar.prototype.drawSeries = function() {
-      var barWidth, bottom, groupWidth, idx, lastTop, left, leftPadding, numBars, row, sidx, size, top, ypos, zeroPos;
+      var barWidth, bottom, depth, groupWidth, idx, lastTop, left, leftPadding, numBars, row, sidx, size, spaceLeft, top, ypos, zeroPos;
       groupWidth = this.width / this.options.data.length;
       numBars = this.options.stacked != null ? 1 : this.options.ykeys.length;
       barWidth = (groupWidth * this.options.barSizeRatio - this.options.barGap * (numBars - 1)) / numBars;
-      leftPadding = groupWidth * (1 - this.options.barSizeRatio) / 2;
+      if (this.options.barSize) {
+        barWidth = Math.min(barWidth, this.options.barSize);
+      }
+      spaceLeft = groupWidth - barWidth * numBars - this.options.barGap * (numBars - 1);
+      leftPadding = spaceLeft / 2;
       zeroPos = this.ymin <= 0 && this.ymax >= 0 ? this.transY(0) : null;
       return this.bars = (function() {
         var _i, _len, _ref, _results;
@@ -1523,6 +1540,16 @@
                   top -= lastTop;
                 }
                 this.drawBar(left, top, barWidth, size, this.colorFor(row, sidx, 'bar'), this.options.barOpacity, this.options.barRadius);
+                if (this.options.dataLabels) {
+                  if (this.options.stacked || this.options.dataLabelsPosition === 'inside') {
+                    depth = size / 2;
+                  } else {
+                    depth = -7;
+                  }
+                  if (size > this.options.dataLabelsSize) {
+                    this.drawDataLabel(left + barWidth / 2, top + depth, this.yLabelFormat(row.y[sidx]));
+                  }
+                }
                 _results1.push(lastTop += size);
               } else {
                 _results1.push(null);
@@ -1599,6 +1626,11 @@
     Bar.prototype.drawXAxisLabel = function(xPos, yPos, text) {
       var label;
       return label = this.raphael.text(xPos, yPos, text).attr('font-size', this.options.gridTextSize).attr('font-family', this.options.gridTextFamily).attr('font-weight', this.options.gridTextWeight).attr('fill', this.options.gridTextColor);
+    };
+
+    Bar.prototype.drawDataLabel = function(xPos, yPos, text) {
+      var label;
+      return label = this.raphael.text(xPos, yPos, text).attr('text-anchor', 'middle').attr('font-size', this.options.dataLabelsSize).attr('font-family', this.options.dataLabelsFamily).attr('font-weight', this.options.dataLabelsWeight).attr('fill', this.options.dataLabelsColor);
     };
 
     Bar.prototype.drawBar = function(xPos, yPos, width, height, barColor, opacity, radiusArray) {
