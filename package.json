@@ -4,6 +4,10 @@
   "homepage": "http://morrisjs.github.com/morris.js",
   "license": "BSD-2-Clause",
   "description": "Easy, pretty charts",
+  "main": "morris.js",
+  "dependencies":{
+    "raphael":"2.x"
+  },
   "author": {
     "name": "Olly Smith",
     "email": "olly@oesmith.co.uk"
