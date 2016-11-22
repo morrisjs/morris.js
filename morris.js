@@ -771,8 +771,8 @@ Licensed under the BSD-2-Clause License.
       var hoverHeight, hoverWidth, left, parentHeight, parentWidth, top;
       parentWidth = this.options.parent.innerWidth();
       parentHeight = this.options.parent.innerHeight();
-      hoverWidth = this.el.outerWidth();
-      hoverHeight = this.el.outerHeight();
+      hoverWidth = this.el.outerWidth(true);
+      hoverHeight = this.el.outerHeight(true);
       left = Math.min(Math.max(0, x - hoverWidth / 2), parentWidth - hoverWidth);
       if (y != null) {
         if (centre_y === true) {
