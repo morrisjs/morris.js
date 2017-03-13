@@ -50,7 +50,8 @@ Licensed under the BSD-2-Clause License.
   })();
 
   Morris.commas = function(num) {
-    var absnum, intnum, ret, strabsnum;
+    var ret='-';
+    var absnum, intnum, strabsnum;
     if (num != null) {
       ret = num < 0 ? "-" : "";
       absnum = Math.abs(num);
@@ -59,11 +60,8 @@ Licensed under the BSD-2-Clause License.
       strabsnum = absnum.toString();
       if (strabsnum.length > intnum.length) {
         ret += strabsnum.slice(intnum.length);
-      }
-      return ret;
-    } else {
-      return '-';
-    }
+      }  
+    return ret;
   };
 
   Morris.pad2 = function(number) {
