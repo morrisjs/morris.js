@@ -1,0 +1,100 @@
+<!doctype html>
+<head>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/raphael/2.1.2/raphael-min.js"></script>
+  <script src="../morris.js"></script>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/prettify/r224/prettify.min.js"></script>
+  <script src="lib/example.js"></script>
+  <link rel="stylesheet" href="lib/example.css">
+  <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/prettify/r224/prettify.min.css">
+  <link rel="stylesheet" href="../morris.css">
+</head>
+<body>
+  <h1>Trend line</h1>
+  <div id="graph"></div>
+  <div id="function"></div>
+  <pre id="code" class="prettyprint linenums">
+
+function getTrendFunction(data, key) {
+  //given a line function y = ax + b
+  n = data.length;
+
+  sum_x = 0;
+  sum_y = 0;
+  sum_xy = 0;
+  sum_x2 = 0;
+  min_y = 99999999;
+  max_y = -99999999;
+
+  for (var i = 0; i < n; i++) {
+    y = parseFloat(data[i][key]);
+    x = i + 1;
+    sum_xy += x * y;
+    sum_x += x;
+    sum_y += y;
+    sum_x2 += Math.pow(x, 2);
+    if (y < min_y) {
+      min_y = y;
+    }
+    if (y > max_y) {
+      max_y = y;
+    }
+  }
+  a = (sum_xy - (sum_x * sum_y / n)) / (sum_x2 - (Math.pow(sum_x, 2) / n));
+  b = (sum_y / n) - (a * sum_x / n);
+  return {
+    a: a,
+    b: b,
+    n: n,
+    min: min_y,
+    max: max_y
+  };
+
+}
+
+function applyTrendLine(data, s, key) {
+  for (var i = 0; i < s.n; i++) {
+    y = s.a * i + s.b;
+
+    if (y < s.min) {
+      y = null;//min_y
+    }
+    if (y > s.max) {
+      y = null;//max_y
+    }
+
+    data[i][key] = y;
+  }
+  return data;
+}
+
+
+var data = [
+  {"month": "2017-01", "earnings": 1230},
+  {"month": "2016-12", "earnings": 4784},
+  {"month": "2016-11", "earnings": 2457},
+  {"month": "2016-10", "earnings": 972},
+  {"month": "2016-09", "earnings": 1574},
+  {"month": "2016-08", "earnings": 2456},
+  {"month": "2016-07", "earnings": 1980},
+  {"month": "2016-06", "earnings": 1211},
+  {"month": "2016-05", "earnings": 944},
+  {"month": "2016-04", "earnings": 787}
+];
+
+f = getTrendFunction(data,'earnings');
+data = applyTrendLine(data, f, 'trend');
+
+m = Morris.Line({
+  element: 'graph',
+  data: data,
+  xkey: 'month',
+  ykeys: ['earnings', 'trend'],
+  labels: ['Earnings', 'Trend'],
+  smooth: false,
+  hideHover: 'auto',
+});
+
+//$('#function').html('f(x) = ' + f.a.toFixed(4) + '<i>x</i> + ' + f.b.toFixed(2));
+  </pre>
+</body>
