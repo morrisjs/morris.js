@@ -454,6 +454,11 @@ Morris.LABEL_SPECS =
     start: (d) -> new Date(d.getFullYear(), 0, 1)
     fmt: (d) -> "#{d.getFullYear()}"
     incr: (d) -> d.setFullYear(d.getFullYear() + 1)
+  "quarter":
+    span: 7884000000 # 365 * 24 * 60 * 60 * 1000 / 4
+    start: (d) -> new Date(d.getFullYear(), d.getMonth(), 1)
+    fmt: (d) -> "#{d.getFullYear()} Q#{Math.floor(d.getMonth() / 3) + 1}"
+    incr: (d) -> d.setMonth(d.getMonth() + 3)
   "month":
     span: 2419200000 # 28 * 24 * 60 * 60 * 1000
     start: (d) -> new Date(d.getFullYear(), d.getMonth(), 1)
