@@ -571,6 +571,15 @@ Licensed under the BSD-2-Clause License.
           _results.push(void 0);
         }
       }
+      if (this.options.grid) {
+        var _data = this.data;
+        for (_i = 1, _len = _data.length; _i < _len; _i++) {
+          lineX = _data[_i];
+          x = lineX._x;
+
+          _results.push(this.drawGridLine("M" + x + "," + this.top + "V" + (this.top + this.height)));
+        }
+      }
       return _results;
     };
 
