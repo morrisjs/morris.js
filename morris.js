@@ -2009,7 +2009,8 @@ Licensed under the BSD-2-Clause License.
       dataLabelsFamily: 'sans-serif',
       dataLabelsSize: 12,
       dataLabelsWeight: 'normal',
-      dataLabelsColor: '#000'
+      dataLabelsColor: '#000',
+      donutType: 'pie'
     };
 
     function Donut(options) {
@@ -2065,7 +2066,7 @@ Licensed under the BSD-2-Clause License.
       for (i = _j = 0, _len1 = _ref1.length; _j < _len1; i = ++_j) {
         value = _ref1[i];
         next = last + min + C * (value / total);
-        seg = new Morris.DonutSegment(cx, cy, w * 2, w, last, next, this.data[i].color || this.options.colors[idx % this.options.colors.length], this.options.backgroundColor, idx, this.raphael);
+        seg = new Morris.DonutSegment(cx, cy, w * 2, w, last, next, this.data[i].color || this.options.colors[idx % this.options.colors.length], this.options.backgroundColor, idx, this.raphael, this.options);
         seg.render();
         this.segments.push(seg);
         seg.on('hover', this.select);
@@ -2142,7 +2143,9 @@ Licensed under the BSD-2-Clause License.
       segment = this.segments[idx];
       segment.select();
       row = this.data[idx];
-      return this.setLabels(row.label, this.options.formatter(row.value, row));
+      if (this.options.donutType === 'donut') {
+        return this.setLabels(row.label, this.options.formatter(row.value, row));
+      }
     };
 
     Donut.prototype.setLabels = function(label1, label2) {
@@ -2193,7 +2196,7 @@ Licensed under the BSD-2-Clause License.
   Morris.DonutSegment = (function(_super) {
     __extends(DonutSegment, _super);
 
-    function DonutSegment(cx, cy, inner, outer, p0, p1, color, backgroundColor, index, raphael) {
+    function DonutSegment(cx, cy, inner, outer, p0, p1, color, backgroundColor, index, raphael, options) {
       this.cx = cx;
       this.cy = cy;
       this.inner = inner;
@@ -2202,6 +2205,7 @@ Licensed under the BSD-2-Clause License.
       this.backgroundColor = backgroundColor;
       this.index = index;
       this.raphael = raphael;
+      this.options = options;
       this.deselect = __bind(this.deselect, this);
       this.select = __bind(this.select, this);
       this.sin_p0 = Math.sin(p0);
@@ -2222,7 +2226,11 @@ Licensed under the BSD-2-Clause License.
       var ix0, ix1, iy0, iy1, ox0, ox1, oy0, oy1, _ref, _ref1;
       _ref = this.calcArcPoints(r1), ix0 = _ref[0], iy0 = _ref[1], ix1 = _ref[2], iy1 = _ref[3];
       _ref1 = this.calcArcPoints(r2), ox0 = _ref1[0], oy0 = _ref1[1], ox1 = _ref1[2], oy1 = _ref1[3];
-      return ("M" + ix0 + "," + iy0) + ("A" + r1 + "," + r1 + ",0," + this.is_long + ",0," + ix1 + "," + iy1) + ("L" + ox1 + "," + oy1) + ("A" + r2 + "," + r2 + ",0," + this.is_long + ",1," + ox0 + "," + oy0) + "Z";
+      if (this.options.donutType === 'pie') {
+        return ("M" + ox0 + "," + oy0) + ("A" + r2 + "," + r2 + ",0," + this.is_long + ",0," + ox1 + "," + oy1) + ("L" + this.cx + "," + this.cy) + "Z";
+      } else {
+        return ("M" + ix0 + "," + iy0) + ("A" + r1 + "," + r1 + ",0," + this.is_long + ",0," + ix1 + "," + iy1) + ("L" + ox1 + "," + oy1) + ("A" + r2 + "," + r2 + ",0," + this.is_long + ",1," + ox0 + "," + oy0) + "Z";
+      }
     };
 
     DonutSegment.prototype.calcArc = function(r) {
@@ -2258,14 +2266,16 @@ Licensed under the BSD-2-Clause License.
     };
 
     DonutSegment.prototype.select = function() {
-      if (!this.selected) {
-        this.seg.animate({
-          path: this.selectedPath
-        }, 150, '<>');
-        this.arc.animate({
-          opacity: 1
-        }, 150, '<>');
-        return this.selected = true;
+      if (this.options.donutType === 'donut') {
+        if (!this.selected) {
+          this.seg.animate({
+            path: this.selectedPath
+          }, 150, '<>');
+          this.arc.animate({
+            opacity: 1
+          }, 150, '<>');
+          return this.selected = true;
+        }
       }
     };
 

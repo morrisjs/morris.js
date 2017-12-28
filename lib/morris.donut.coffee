@@ -31,7 +31,8 @@ class Morris.Donut extends Morris.EventEmitter
     dataLabelsFamily: 'sans-serif',
     dataLabelsSize: 12,
     dataLabelsWeight: 'normal',
-    dataLabelsColor: '#000'
+    dataLabelsColor: '#000',
+    donutType: 'pie'
 
   # Create and render a donut chart.
   #
@@ -142,7 +143,8 @@ class Morris.Donut extends Morris.EventEmitter
     segment = @segments[idx]
     segment.select()
     row = @data[idx]
-    @setLabels(row.label, @options.formatter(row.value, row))
+    if @options.donutType == 'donut' 
+      @setLabels(row.label, @options.formatter(row.value, row))
 
 
 
@@ -198,12 +200,19 @@ class Morris.DonutSegment extends Morris.EventEmitter
   calcSegment: (r1, r2) ->
     [ix0, iy0, ix1, iy1] = @calcArcPoints(r1)
     [ox0, oy0, ox1, oy1] = @calcArcPoints(r2)
-    return (
-      "M#{ix0},#{iy0}" +
-      "A#{r1},#{r1},0,#{@is_long},0,#{ix1},#{iy1}" +
-      "L#{ox1},#{oy1}" +
-      "A#{r2},#{r2},0,#{@is_long},1,#{ox0},#{oy0}" +
-      "Z")
+    if @options.donutType == 'pie'
+      return (
+        "M#{ox0},#{oy0}" +
+        "A#{r2},#{r2},0,#{@is_long},0,#{ox1},#{oy1}" +
+        "L#{@cx},#{@cy}" +
+        "Z")
+    else
+      return (
+        "M#{ix0},#{iy0}" +
+        "A#{r1},#{r1},0,#{@is_long},0,#{ix1},#{iy1}" +
+        "L#{ox1},#{oy1}" +
+        "A#{r2},#{r2},0,#{@is_long},1,#{ox0},#{oy0}" +
+        "Z")
 
   calcArc: (r) ->
     [ix0, iy0, ix1, iy1] = @calcArcPoints(r)
@@ -232,10 +241,11 @@ class Morris.DonutSegment extends Morris.EventEmitter
       .click(clickFunction)
 
   select: =>
-    unless @selected
-      @seg.animate(path: @selectedPath, 150, '<>')
-      @arc.animate(opacity: 1, 150, '<>')
-      @selected = true
+    if @options.donutType == 'donut'
+      unless @selected
+        @seg.animate(path: @selectedPath, 150, '<>')
+        @arc.animate(opacity: 1, 150, '<>')
+        @selected = true
 
   deselect: =>
     if @selected
