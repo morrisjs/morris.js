@@ -139,7 +139,8 @@ class Morris.Grid extends Morris.EventEmitter
     dataLabelsFamily: 'sans-serif',
     dataLabelsSize: 12,
     dataLabelsWeight: 'normal',
-    dataLabelsColor: '#000'
+    dataLabelsColor: '#000',
+    animate: true
 
   # Update the data series and redraw the chart.
   #

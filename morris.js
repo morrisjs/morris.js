@@ -202,7 +202,8 @@ Licensed under the BSD-2-Clause License.
       dataLabelsFamily: 'sans-serif',
       dataLabelsSize: 12,
       dataLabelsWeight: 'normal',
-      dataLabelsColor: '#000'
+      dataLabelsColor: '#000',
+      animate: true
     };
 
     Grid.prototype.setData = function(data, redraw) {
@@ -1310,7 +1311,33 @@ Licensed under the BSD-2-Clause License.
     };
 
     Line.prototype.drawLinePath = function(path, lineColor, lineIndex) {
-      return this.raphael.path(path).attr('stroke', lineColor).attr('stroke-width', this.lineWidthForSeries(lineIndex));
+      var average, rPath, straightDots, straightPath,
+        _this = this;
+      if (this.options.animate) {
+        straightPath = path;
+        straightPath = path.replace('A', ',');
+        straightPath = straightPath.replace('M', '');
+        straightPath = straightPath.replace('C', ',');
+        straightDots = straightPath.split(',');
+        average = (parseFloat(straightDots[1]) + parseFloat(straightDots[straightDots.length - 1])) / 2;
+        straightPath = 'M' + straightDots[0] + ',' + average + ',' + straightDots[straightDots.length - 2] + ',' + average;
+        rPath = this.raphael.path(straightPath).attr('stroke', lineColor).attr('stroke-width', this.lineWidthForSeries(lineIndex));
+        if (this.options.cumulative) {
+          return (function(rPath, path) {
+            return rPath.animate({
+              path: path
+            }, 600, '<>');
+          })(rPath, path);
+        } else {
+          return (function(rPath, path) {
+            return rPath.animate({
+              path: path
+            }, 500, '<>');
+          })(rPath, path);
+        }
+      } else {
+        return this.raphael.path(path).attr('stroke', lineColor).attr('stroke-width', this.lineWidthForSeries(lineIndex));
+      }
     };
 
     Line.prototype.drawLinePoint = function(xPos, yPos, pointColor, lineIndex) {
@@ -2066,7 +2093,7 @@ Licensed under the BSD-2-Clause License.
       for (i = _j = 0, _len1 = _ref1.length; _j < _len1; i = ++_j) {
         value = _ref1[i];
         next = last + min + C * (value / total);
-        seg = new Morris.DonutSegment(cx, cy, w * 2, w, last, next, this.data[i].color || this.options.colors[idx % this.options.colors.length], this.options.backgroundColor, idx, this.raphael, this.options);
+        seg = new Morris.DonutSegment(cx, cy, w * 2, w, last, next, this.data[i].color || this.options.colors[idx % this.options.colors.length], this.options.backgroundColor, idx, this.raphael);
         seg.render();
         this.segments.push(seg);
         seg.on('hover', this.select);
@@ -2196,7 +2223,7 @@ Licensed under the BSD-2-Clause License.
   Morris.DonutSegment = (function(_super) {
     __extends(DonutSegment, _super);
 
-    function DonutSegment(cx, cy, inner, outer, p0, p1, color, backgroundColor, index, raphael, options) {
+    function DonutSegment(cx, cy, inner, outer, p0, p1, color, backgroundColor, index, raphael) {
       this.cx = cx;
       this.cy = cy;
       this.inner = inner;
@@ -2205,7 +2232,6 @@ Licensed under the BSD-2-Clause License.
       this.backgroundColor = backgroundColor;
       this.index = index;
       this.raphael = raphael;
-      this.options = options;
       this.deselect = __bind(this.deselect, this);
       this.select = __bind(this.select, this);
       this.sin_p0 = Math.sin(p0);

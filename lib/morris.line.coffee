@@ -368,9 +368,27 @@ class Morris.Line extends Morris.Grid
                     .attr('fill', @options.dataLabelsColor)
 
   drawLinePath: (path, lineColor, lineIndex) ->
-    @raphael.path(path)
-      .attr('stroke', lineColor)
-      .attr('stroke-width', @lineWidthForSeries(lineIndex))
+    if @options.animate
+      straightPath = path;
+      straightPath = path.replace('A', ',');
+      straightPath = straightPath.replace('M', '');
+      straightPath = straightPath.replace('C', ',');
+      straightDots = straightPath.split(',');
+      average = (parseFloat(straightDots[1])+parseFloat(straightDots[straightDots.length-1]))/2
+      straightPath = 'M'+straightDots[0]+','+average+','+straightDots[straightDots.length-2]+','+average;
+      rPath = @raphael.path(straightPath)
+                      .attr('stroke', lineColor)
+                      .attr('stroke-width', this.lineWidthForSeries(lineIndex))
+      if @options.cumulative
+        do (rPath, path) =>
+          rPath.animate {path}, 600, '<>'
+      else
+        do (rPath, path) =>
+          rPath.animate {path}, 500, '<>'
+    else
+      @raphael.path(path)
+        .attr('stroke', lineColor)
+        .attr('stroke-width', @lineWidthForSeries(lineIndex))
 
   drawLinePoint: (xPos, yPos, pointColor, lineIndex) ->
     @raphael.circle(xPos, yPos, @pointSizeForSeries(lineIndex))
