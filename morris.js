@@ -2045,7 +2045,7 @@ Licensed under the BSD-2-Clause License.
     }
 
     Donut.prototype.redraw = function() {
-      var C, cx, cy, i, idx, last, max_value, min, next, p_cos_p0, p_sin_p0, seg, total, value, w, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _results;
+      var C, cx, cy, i, idx, label_x, label_y, last, max_value, min, next, p_cos_p0, p_sin_p0, seg, total, value, w, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _results;
       this.raphael.clear();
       cx = this.el.width() / 2;
       cy = this.el.height() / 2;
@@ -2070,8 +2070,23 @@ Licensed under the BSD-2-Clause License.
         this.segments.push(seg);
         seg.on('hover', this.select);
         seg.on('click', this.click);
-        p_sin_p0 = Math.sin((last + next) / 2);
-        p_cos_p0 = Math.cos((last + next) / 2);
+        if (this.options.dataLabels && this.values.length > 1) {
+          p_sin_p0 = Math.sin((last + next) / 2);
+          p_cos_p0 = Math.cos((last + next) / 2);
+          if (this.options.dataLabelsPosition === 'inside') {
+            if (this.options.donutType === 'pie') {
+              label_x = parseFloat(cx) + parseFloat(seg.raphael.height * 0.30 * p_sin_p0);
+              label_y = parseFloat(cy) + parseFloat(seg.raphael.height * 0.30 * p_cos_p0);
+            } else {
+              label_x = parseFloat(cx) + parseFloat(seg.raphael.height * 0.37 * p_sin_p0);
+              label_y = parseFloat(cy) + parseFloat(seg.raphael.height * 0.37 * p_cos_p0);
+            }
+          } else {
+            label_x = parseFloat(cx) + parseFloat((seg.raphael.height - 9) * 0.5 * p_sin_p0);
+            label_y = parseFloat(cy) + parseFloat((seg.raphael.height - 9) * 0.5 * p_cos_p0);
+          }
+          this.drawDataLabel(label_x, label_y, value);
+        }
         last = next;
         idx += 1;
       }

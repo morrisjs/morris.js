@@ -25,7 +25,13 @@ class Morris.Donut extends Morris.EventEmitter
     backgroundColor: '#FFFFFF', 
     labelColor: '#000000',
     formatter: Morris.commas
-    resize: false
+    resize: false,
+    dataLabels: true,
+    dataLabelsPosition: 'outside',
+    dataLabelsFamily: 'sans-serif',
+    dataLabelsSize: 12,
+    dataLabelsWeight: 'normal',
+    dataLabelsColor: '#000'
 
   # Create and render a donut chart.
   #
@@ -82,6 +88,23 @@ class Morris.Donut extends Morris.EventEmitter
       @segments.push seg
       seg.on 'hover', @select
       seg.on 'click', @click
+
+      if @options.dataLabels && @values.length > 1
+        p_sin_p0 = Math.sin((last + next)/2);
+        p_cos_p0 = Math.cos((last + next)/2);
+        if @options.dataLabelsPosition == 'inside'
+          if @options.donutType == 'pie'
+            label_x = parseFloat(cx) + parseFloat((seg.raphael.height) * 0.30 * p_sin_p0);
+            label_y = parseFloat(cy) + parseFloat((seg.raphael.height) * 0.30 * p_cos_p0);
+          else
+            label_x = parseFloat(cx) + parseFloat((seg.raphael.height) * 0.37 * p_sin_p0);
+            label_y = parseFloat(cy) + parseFloat((seg.raphael.height) * 0.37 * p_cos_p0);
+        else
+          label_x = parseFloat(cx) + parseFloat((seg.raphael.height - 9) * 0.5 * p_sin_p0);
+          label_y = parseFloat(cy) + parseFloat((seg.raphael.height - 9) * 0.5 * p_cos_p0);
+        
+         @drawDataLabel(label_x,label_y,value)
+
       last = next
       idx += 1
 
@@ -100,6 +123,14 @@ class Morris.Donut extends Morris.EventEmitter
     @data = data
     @values = (parseFloat(row.value) for row in @data)
     @redraw()
+
+  drawDataLabel: (xPos, yPos, text) ->
+    label = @raphael.text(xPos, yPos, text)
+                    .attr('text-anchor', 'middle')
+                    .attr('font-size', @options.dataLabelsSize)
+                    .attr('font-family', @options.dataLabelsFamily)
+                    .attr('font-weight', @options.dataLabelsWeight)
+                    .attr('fill', @options.dataLabelsColor)
 
   # @private
   click: (idx) =>
