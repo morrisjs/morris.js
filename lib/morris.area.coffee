@@ -60,7 +60,25 @@ class Morris.Area extends Morris.Line
       Math.min(0.98, if @options.behaveLikeLine then color.l * 1.2 else color.l * 1.25))
 
   drawFilledPath: (path, fill) ->
-    @raphael.path(path)
-      .attr('fill', fill)
-      .attr('fill-opacity', @options.fillOpacity)
-      .attr('stroke', 'none')
+    if @options.animate
+      straightPath = path.replace('A', ',')
+      straightPath = straightPath.replace('M', '')
+      straightPath = straightPath.replace('C', ',')
+      straightPath = straightPath.replace('L', ',')
+      straightPath = straightPath.replace('L', ',')
+      straightPath = straightPath.replace('Z', '')
+      straightDots = straightPath.split(',')
+      average = (parseFloat(straightDots[straightDots.length-4])+parseFloat(straightDots[straightDots.length-2]))/2
+
+      straightPath = 'M'+average+','+straightDots[straightDots.length-1]+',L'+straightDots[straightDots.length-2]+','+straightDots[straightDots.length-1]+'Z'
+      rPath = @raphael.path(straightPath)
+                      .attr('fill', fill)
+                      .attr('fill-opacity', this.options.fillOpacity)
+                      .attr('stroke', 'none')
+      do (rPath, path) =>
+        rPath.animate {path}, 500, '<>'
+    else
+      @raphael.path(path)
+        .attr('fill', fill)
+        .attr('fill-opacity', @options.fillOpacity)
+        .attr('stroke', 'none')

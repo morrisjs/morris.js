@@ -1621,7 +1621,27 @@ Licensed under the BSD-2-Clause License.
     };
 
     Area.prototype.drawFilledPath = function(path, fill) {
-      return this.raphael.path(path).attr('fill', fill).attr('fill-opacity', this.options.fillOpacity).attr('stroke', 'none');
+      var average, rPath, straightDots, straightPath,
+        _this = this;
+      if (this.options.animate) {
+        straightPath = path.replace('A', ',');
+        straightPath = straightPath.replace('M', '');
+        straightPath = straightPath.replace('C', ',');
+        straightPath = straightPath.replace('L', ',');
+        straightPath = straightPath.replace('L', ',');
+        straightPath = straightPath.replace('Z', '');
+        straightDots = straightPath.split(',');
+        average = (parseFloat(straightDots[straightDots.length - 4]) + parseFloat(straightDots[straightDots.length - 2])) / 2;
+        straightPath = 'M' + average + ',' + straightDots[straightDots.length - 1] + ',L' + straightDots[straightDots.length - 2] + ',' + straightDots[straightDots.length - 1] + 'Z';
+        rPath = this.raphael.path(straightPath).attr('fill', fill).attr('fill-opacity', this.options.fillOpacity).attr('stroke', 'none');
+        return (function(rPath, path) {
+          return rPath.animate({
+            path: path
+          }, 500, '<>');
+        })(rPath, path);
+      } else {
+        return this.raphael.path(path).attr('fill', fill).attr('fill-opacity', this.options.fillOpacity).attr('stroke', 'none');
+      }
     };
 
     return Area;
