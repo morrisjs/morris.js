@@ -180,6 +180,13 @@ class Morris.Bar extends Morris.Grid
             lastTop += size
             @seriesBars[idx][sidx] = @drawBar(left, top, barWidth, size, @colorFor(row, sidx, 'bar'),
                 @options.barOpacity, @options.barRadius)
+            if @options.dataLabels
+              if @options.stacked || @options.dataLabelsPosition=='inside'
+                depth = (size)/2
+              else
+                depth = -7
+              if size>@options.dataLabelsSize || !@options.stacked
+                @drawDataLabel(left+barWidth/2,top+depth,@yLabelFormat(row.y[sidx]))
           else
             lastTop -= size
             @seriesBars[idx][sidx] = @drawBar(top, left, size, barWidth, @colorFor(row, sidx, 'bar'),
@@ -299,6 +306,14 @@ class Morris.Bar extends Morris.Grid
       x = @left + 0.5 * @width
       y = @top + (index + 0.5) * @height / @data.length
       [content, x, y, true]
+
+  drawDataLabel: (xPos, yPos, text) ->
+    label = @raphael.text(xPos, yPos, text)
+                    .attr('text-anchor', 'middle')
+                    .attr('font-size', @options.dataLabelsSize)
+                    .attr('font-family', @options.dataLabelsFamily)
+                    .attr('font-weight', @options.dataLabelsWeight)
+                    .attr('fill', @options.dataLabelsColor)
 
   drawBar: (xPos, yPos, width, height, barColor, opacity, radiusArray) ->
     maxRadius = Math.max(radiusArray...)

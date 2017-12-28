@@ -133,7 +133,13 @@ class Morris.Grid extends Morris.EventEmitter
     ]
     rangeSelect: null
     rangeSelectColor: '#eef'
-    resize: false
+    resize: false,
+    dataLabels: true,
+    dataLabelsPosition: 'outside',
+    dataLabelsFamily: 'sans-serif',
+    dataLabelsSize: 12,
+    dataLabelsWeight: 'normal',
+    dataLabelsColor: '#000'
 
   # Update the data series and redraw the chart.
   #
