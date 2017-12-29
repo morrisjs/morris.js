@@ -2024,10 +2024,38 @@ Licensed under the BSD-2-Clause License.
     Bar.prototype.drawBar = function(xPos, yPos, width, height, barColor, opacity, radiusArray) {
       var maxRadius, path;
       maxRadius = Math.max.apply(Math, radiusArray);
-      if (maxRadius === 0 || maxRadius > height) {
-        path = this.raphael.rect(xPos, yPos, width, height);
+      if (this.options.animate) {
+        if (this.options.horizontal) {
+          if (maxRadius === 0 || maxRadius > height) {
+            path = this.raphael.rect(xPos, yPos, 0, height).animate({
+              x: xPos,
+              width: width
+            }, 500);
+          } else {
+            path = this.raphael.path(this.roundedRect(xPos, yPos + height, width, 0, radiusArray).animate({
+              y: yPos,
+              height: height
+            }, 500));
+          }
+        } else {
+          if (maxRadius === 0 || maxRadius > height) {
+            path = this.raphael.rect(xPos, yPos + height, width, 0).animate({
+              y: yPos,
+              height: height
+            }, 500);
+          } else {
+            path = this.raphael.path(this.roundedRect(xPos, yPos + height, width, 0, radiusArray).animate({
+              y: yPos,
+              height: height
+            }, 500));
+          }
+        }
       } else {
-        path = this.raphael.path(this.roundedRect(xPos, yPos, width, height, radiusArray));
+        if (maxRadius === 0 || maxRadius > height) {
+          path = this.raphael.rect(xPos, yPos, width, height);
+        } else {
+          path = this.raphael.path(this.roundedRect(xPos, yPos, width, height, radiusArray));
+        }
       }
       return path.attr('fill', barColor).attr('fill-opacity', opacity).attr('stroke', 'none');
     };

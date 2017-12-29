@@ -318,10 +318,22 @@ class Morris.Bar extends Morris.Grid
 
   drawBar: (xPos, yPos, width, height, barColor, opacity, radiusArray) ->
     maxRadius = Math.max(radiusArray...)
-    if maxRadius == 0 or maxRadius > height
-      path = @raphael.rect(xPos, yPos, width, height)
+    if @options.animate
+      if @options.horizontal
+        if maxRadius == 0 or maxRadius > height
+          path = @raphael.rect(xPos, yPos, 0, height).animate({x:xPos,width:width}, 500)
+        else
+          path = @raphael.path @roundedRect(xPos, yPos+height, width, 0, radiusArray).animate({y: yPos, height: height}, 500)
+      else
+        if maxRadius == 0 or maxRadius > height
+          path = @raphael.rect(xPos, yPos+height, width, 0).animate({y:yPos, height:height}, 500)
+        else
+          path = @raphael.path @roundedRect(xPos, yPos+height, width, 0, radiusArray).animate({y: yPos, height: height}, 500)
     else
-      path = @raphael.path @roundedRect(xPos, yPos, width, height, radiusArray)
+      if maxRadius == 0 or maxRadius > height
+        path = @raphael.rect(xPos, yPos, width, height)
+      else
+        path = @raphael.path @roundedRect(xPos, yPos, width, height, radiusArray)
     path
       .attr('fill', barColor)
       .attr('fill-opacity', opacity)
