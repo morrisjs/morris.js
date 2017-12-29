@@ -251,7 +251,7 @@ class Morris.Bar extends Morris.Grid
     Math.min(@data.length - 1,
       Math.floor((pos - @xStart) / (@xSize / @data.length)))
 
-
+  #/
   # click on grid event handler
   #
   # @private
@@ -286,7 +286,8 @@ class Morris.Bar extends Morris.Grid
     row = @data[index]
     content = $("<div class='morris-hover-row-label'>").text(row.label)
     content = content.prop('outerHTML')
-    for y, j in row.y
+    for y, jj in row.y
+      j = row.y.length - 1 - jj
       if @options.labels[j] is false
         continue
 
