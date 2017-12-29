@@ -972,13 +972,14 @@ Licensed under the BSD-2-Clause License.
     };
 
     Line.prototype.hoverContentForRow = function(index) {
-      var content, j, row, y, _i, _len, _ref;
+      var content, j, jj, row, y, _i, _len, _ref;
       row = this.data[index];
       content = $("<div class='morris-hover-row-label'>").text(row.label);
       content = content.prop('outerHTML');
       _ref = row.y;
-      for (j = _i = 0, _len = _ref.length; _i < _len; j = ++_i) {
-        y = _ref[j];
+      for (jj = _i = 0, _len = _ref.length; _i < _len; jj = ++_i) {
+        y = _ref[jj];
+        j = row.y.length - 1 - jj;
         if (this.options.labels[j] === false) {
           continue;
         }
