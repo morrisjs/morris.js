@@ -2308,18 +2308,18 @@ Licensed under the BSD-2-Clause License.
     DonutSegment.prototype.drawDonutSegment = function(path, fillColor, strokeColor, hoverFunction, clickFunction) {
       var rPath, straightDots, straightPath,
         _this = this;
-      straightPath = path;
-      straightPath = path.replace('A', ',');
-      straightPath = straightPath.replace('M', '');
-      straightPath = straightPath.replace('C', ',');
-      straightPath = straightPath.replace('Z', '');
-      straightDots = straightPath.split(',');
-      if (this.options.donutType === 'pie') {
-        straightPath = 'M' + straightDots[0] + ',' + straightDots[1] + ',' + straightDots[straightDots.length - 2] + ',' + straightDots[straightDots.length - 1] + ',' + straightDots[straightDots.length - 2] + ',' + straightDots[straightDots.length - 1] + 'Z';
-      } else {
-        straightPath = 'M' + straightDots[0] + ',' + straightDots[1] + ',' + straightDots[straightDots.length - 2] + ',' + straightDots[straightDots.length - 1] + 'Z';
-      }
       if (this.options.animate && this.options.donutType === 'pie') {
+        straightPath = path;
+        straightPath = path.replace('A', ',');
+        straightPath = straightPath.replace('M', '');
+        straightPath = straightPath.replace('C', ',');
+        straightPath = straightPath.replace('Z', '');
+        straightDots = straightPath.split(',');
+        if (this.options.donutType === 'pie') {
+          straightPath = 'M' + straightDots[0] + ',' + straightDots[1] + ',' + straightDots[straightDots.length - 2] + ',' + straightDots[straightDots.length - 1] + ',' + straightDots[straightDots.length - 2] + ',' + straightDots[straightDots.length - 1] + 'Z';
+        } else {
+          straightPath = 'M' + straightDots[0] + ',' + straightDots[1] + ',' + straightDots[straightDots.length - 2] + ',' + straightDots[straightDots.length - 1] + 'Z';
+        }
         rPath = this.raphael.path(straightPath).attr({
           fill: fillColor,
           stroke: strokeColor,

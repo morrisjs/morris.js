@@ -236,19 +236,19 @@ class Morris.DonutSegment extends Morris.EventEmitter
       .attr(stroke: color, 'stroke-width': 2, opacity: 0)
 
   drawDonutSegment: (path, fillColor, strokeColor, hoverFunction, clickFunction) ->
-    straightPath = path;
-    straightPath = path.replace('A', ',');
-    straightPath = straightPath.replace('M', '');
-    straightPath = straightPath.replace('C', ',');
-    straightPath = straightPath.replace('Z', '');
-    straightDots = straightPath.split(',');
-
-    if @options.donutType == 'pie'
-      straightPath = 'M'+straightDots[0]+','+straightDots[1]+','+straightDots[straightDots.length-2]+','+straightDots[straightDots.length-1]+','+straightDots[straightDots.length-2]+','+straightDots[straightDots.length-1]+'Z'
-    else
-      straightPath = 'M'+straightDots[0]+','+straightDots[1]+','+straightDots[straightDots.length-2]+','+straightDots[straightDots.length-1]+'Z'
-    
     if @options.animate && @options.donutType == 'pie'
+      straightPath = path;
+      straightPath = path.replace('A', ',');
+      straightPath = straightPath.replace('M', '');
+      straightPath = straightPath.replace('C', ',');
+      straightPath = straightPath.replace('Z', '');
+      straightDots = straightPath.split(',');
+
+      if @options.donutType == 'pie'
+        straightPath = 'M'+straightDots[0]+','+straightDots[1]+','+straightDots[straightDots.length-2]+','+straightDots[straightDots.length-1]+','+straightDots[straightDots.length-2]+','+straightDots[straightDots.length-1]+'Z'
+      else
+        straightPath = 'M'+straightDots[0]+','+straightDots[1]+','+straightDots[straightDots.length-2]+','+straightDots[straightDots.length-1]+'Z'
+    
       rPath = @raphael.path(straightPath)
         .attr(fill: fillColor, stroke: strokeColor, 'stroke-width': 3)
         .hover(hoverFunction)
