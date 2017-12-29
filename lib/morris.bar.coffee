@@ -291,7 +291,10 @@ class Morris.Bar extends Morris.Grid
     content = $("<div class='morris-hover-row-label'>").text(row.label)
     content = content.prop('outerHTML')
     for y, jj in row.y
-      j = row.y.length - 1 - jj
+      if @options.horizontal
+        j = jj
+      else
+        j = row.y.length - 1 - jj
       if @options.labels[j] is false
         continue
 

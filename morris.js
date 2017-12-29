@@ -2004,7 +2004,11 @@ Licensed under the BSD-2-Clause License.
       _ref = row.y;
       for (jj = _i = 0, _len = _ref.length; _i < _len; jj = ++_i) {
         y = _ref[jj];
-        j = row.y.length - 1 - jj;
+        if (this.options.horizontal) {
+          j = jj;
+        } else {
+          j = row.y.length - 1 - jj;
+        }
         if (this.options.labels[j] === false) {
           continue;
         }
