@@ -2,6 +2,20 @@
 
 As morris.js project seems no more updated and as I have been asked many times to bring several changes to this plugin on my past but yet active projects, I decided to dig in it and add these requirements myself ^^
 
+## Changelog
+
+### 29th December 2017
+
+- Pie chart type added
+- Animation for every chart, based on [PR #62](https://github.com/morrisjs/morris.js/pull/62) for line chart and [PR #559](https://github.com/morrisjs/morris.js/pull/559) and for bar chart
+- Labels for every chart, based on [PR #688](https://github.com/morrisjs/morris.js/pull/688)
+- Orders of label in hover [Issue #534](https://github.com/morrisjs/morris.js/issues/534)
+- Remove null values from computation of trend line
+
+## To do
+- Animation for donut chart
+- Combo Charts - Bar and Line together
+
 ## Requirements
 
 - [jQuery](http://jquery.com/) (>= 1.7 recommended, but it'll probably work with
@@ -36,14 +50,6 @@ Additionally, [bower](http://bower.io/) is required for for retrieving additiona
 Install it with `npm install -g bower` and then `bower install` in the morris project folder.
 
 Once you're all set up, you can compile, minify and run the tests using `grunt`.
-
-## Changelog
-
-### 29th December 2017
-
-- Pie chart type added
-- Animation
-- Labels
 
 
 ## License
