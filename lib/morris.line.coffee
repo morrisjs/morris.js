@@ -262,18 +262,18 @@ class Morris.Line extends Morris.Grid
     for val, i in @data
       x = val.x
       y = val.y[index]
-      if y is undefined
-        continue
-      if @options.trendLineWeight is false
-        weight = 1
-      else
-        weight = @options.data[i][@options.trendLineWeight]
-      datapoints += weight
 
-      sum_x += x * weight
-      sum_y += y * weight
-      sum_xx += x * x * weight
-      sum_xy += x * y * weight
+      if y?
+        if @options.trendLineWeight is false
+          weight = 1
+        else
+          weight = @options.data[i][@options.trendLineWeight]
+        datapoints += weight
+
+        sum_x += x * weight
+        sum_y += y * weight
+        sum_xx += x * x * weight
+        sum_xy += x * y * weight
 
     a = (datapoints*sum_xy - sum_x*sum_y) / (datapoints*sum_xx - sum_x*sum_x)
     b = (sum_y / datapoints) - ((a * sum_x) / datapoints)

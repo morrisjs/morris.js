@@ -1183,19 +1183,18 @@ Licensed under the BSD-2-Clause License.
         val = _ref[i];
         x = val.x;
         y = val.y[index];
-        if (y === void 0) {
-          continue;
+        if (y != null) {
+          if (this.options.trendLineWeight === false) {
+            weight = 1;
+          } else {
+            weight = this.options.data[i][this.options.trendLineWeight];
+          }
+          datapoints += weight;
+          sum_x += x * weight;
+          sum_y += y * weight;
+          sum_xx += x * x * weight;
+          sum_xy += x * y * weight;
         }
-        if (this.options.trendLineWeight === false) {
-          weight = 1;
-        } else {
-          weight = this.options.data[i][this.options.trendLineWeight];
-        }
-        datapoints += weight;
-        sum_x += x * weight;
-        sum_y += y * weight;
-        sum_xx += x * x * weight;
-        sum_xy += x * y * weight;
       }
       a = (datapoints * sum_xy - sum_x * sum_y) / (datapoints * sum_xx - sum_x * sum_x);
       b = (sum_y / datapoints) - ((a * sum_x) / datapoints);
