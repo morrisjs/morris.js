@@ -1874,6 +1874,13 @@ Licensed under the BSD-2-Clause License.
                 } else {
                   lastTop -= size;
                   this.seriesBars[idx][sidx] = this.drawBar(top, left, size, barWidth, this.colorFor(row, sidx, 'bar'), this.options.barOpacity, this.options.barRadius);
+                  if (this.options.dataLabels) {
+                    if (this.options.stacked || this.options.dataLabelsPosition === 'inside') {
+                      this.drawDataLabel(top + size / 2, left + barWidth / 2, this.yLabelFormat(row.y[sidx]));
+                    } else {
+                      this.drawDataLabel(top + size + 5, left + barWidth / 2, this.yLabelFormat(row.y[sidx]));
+                    }
+                  }
                   if (this.options.inBarValue && barWidth > this.options.gridTextSize + 2 * this.options.inBarValueMinTopMargin) {
                     barMiddle = left + 0.5 * barWidth;
                     _results1.push(this.raphael.text(bottom - this.options.inBarValueRightMargin, barMiddle, this.yLabelFormat(row.y[sidx], sidx)).attr('font-size', this.options.gridTextSize).attr('font-family', this.options.gridTextFamily).attr('font-weight', this.options.gridTextWeight).attr('fill', this.options.inBarValueTextColor).attr('text-anchor', 'end'));

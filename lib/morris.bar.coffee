@@ -191,7 +191,11 @@ class Morris.Bar extends Morris.Grid
             lastTop -= size
             @seriesBars[idx][sidx] = @drawBar(top, left, size, barWidth, @colorFor(row, sidx, 'bar'),
                 @options.barOpacity, @options.barRadius)
-
+            if @options.dataLabels
+              if @options.stacked || @options.dataLabelsPosition=='inside'
+                  @drawDataLabel(top + size / 2, left + barWidth / 2,@yLabelFormat(row.y[sidx]))
+                else
+                  @drawDataLabel(top + size + 5, left + barWidth / 2,@yLabelFormat(row.y[sidx]))
             if @options.inBarValue and
                 barWidth > @options.gridTextSize + 2*@options.inBarValueMinTopMargin
               barMiddle = left + 0.5 * barWidth
