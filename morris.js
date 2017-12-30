@@ -1,5 +1,5 @@
 /* @license
-morris.js v0.5.1
+morris.js v0.6
 Copyright 2017 Olly Smith All rights reserved.
 Licensed under the BSD-2-Clause License.
 */
@@ -1689,7 +1689,8 @@ Licensed under the BSD-2-Clause License.
       inBarValue: false,
       inBarValueTextColor: 'white',
       inBarValueMinTopMargin: 1,
-      inBarValueRightMargin: 4
+      inBarValueRightMargin: 4,
+      nbLines: 0
     };
 
     Bar.prototype.calc = function() {
@@ -1730,7 +1731,59 @@ Licensed under the BSD-2-Clause License.
       if ((_ref = this.options.axes) === true || _ref === 'both' || _ref === 'x') {
         this.drawXAxis();
       }
-      return this.drawSeries();
+      this.drawSeries();
+      this.drawBarLine();
+      return this.drawBarPoints();
+    };
+
+    Bar.prototype.drawBarLine = function() {
+      var dim, idx, ii, nb, path, rPath, row, _i, _j, _len, _len1, _ref, _ref1, _results;
+      nb = this.options.ykeys.length - this.options.nbLines;
+      _ref = this.options.ykeys.slice(nb, this.options.ykeys.length);
+      _results = [];
+      for (ii = _i = 0, _len = _ref.length; _i < _len; ii = _i += 1) {
+        dim = _ref[ii];
+        path = "";
+        _ref1 = this.data;
+        for (idx = _j = 0, _len1 = _ref1.length; _j < _len1; idx = ++_j) {
+          row = _ref1[idx];
+          if (path === "") {
+            path += "M" + row._x + "," + row._y[nb + ii];
+          } else {
+            path += "L" + row._x + "," + row._y[nb + ii];
+          }
+        }
+        _results.push(rPath = this.raphael.path(path).attr('stroke', this.options.barColors[nb + ii]).attr('stroke-width', 3));
+      }
+      return _results;
+    };
+
+    Bar.prototype.drawBarPoints = function() {
+      var dim, idx, ii, nb, row, _i, _len, _ref, _results;
+      nb = this.options.ykeys.length - this.options.nbLines;
+      _ref = this.options.ykeys.slice(nb, this.options.ykeys.length);
+      _results = [];
+      for (ii = _i = 0, _len = _ref.length; _i < _len; ii = _i += 1) {
+        dim = _ref[ii];
+        _results.push((function() {
+          var _j, _len1, _ref1, _results1;
+          _ref1 = this.data;
+          _results1 = [];
+          for (idx = _j = 0, _len1 = _ref1.length; _j < _len1; idx = ++_j) {
+            row = _ref1[idx];
+            if (row._y[nb + ii] != null) {
+              if (this.options.dataLabels) {
+                this.drawDataLabel(row._x, row._y[nb + ii] - 10, this.yLabelFormat(row.y[nb + ii]));
+              }
+              _results1.push(this.raphael.circle(row._x, row._y[nb + ii], 4).attr('fill', this.options.barColors[nb + ii]).attr('stroke-width', 1).attr('stroke', '#ffffff'));
+            } else {
+              _results1.push(void 0);
+            }
+          }
+          return _results1;
+        }).call(this));
+      }
+      return _results;
     };
 
     Bar.prototype.drawXAxis = function() {
@@ -1794,7 +1847,7 @@ Licensed under the BSD-2-Clause License.
     };
 
     Bar.prototype.drawSeries = function() {
-      var barMiddle, barWidth, bottom, depth, groupWidth, i, idx, lastTop, left, leftPadding, numBars, row, sidx, size, spaceLeft, top, ypos, zeroPos, _i, _ref;
+      var barMiddle, barWidth, bottom, depth, groupWidth, i, idx, lastTop, left, leftPadding, nb, numBars, row, sidx, size, spaceLeft, top, ypos, zeroPos, _i, _ref;
       this.seriesBars = [];
       groupWidth = this.xSize / this.options.data.length;
       if (this.options.stacked) {
@@ -1807,6 +1860,7 @@ Licensed under the BSD-2-Clause License.
           }
         }
       }
+      numBars = numBars - this.options.nbLines;
       barWidth = (groupWidth * this.options.barSizeRatio - this.options.barGap * (numBars - 1)) / numBars;
       if (this.options.barSize) {
         barWidth = Math.min(barWidth, this.options.barSize);
@@ -1822,9 +1876,10 @@ Licensed under the BSD-2-Clause License.
           row = _ref1[idx];
           this.seriesBars[idx] = [];
           lastTop = 0;
+          nb = row._y.length - this.options.nbLines;
           _results.push((function() {
             var _k, _len1, _ref2, _results1;
-            _ref2 = row._y;
+            _ref2 = row._y.slice(0, nb);
             _results1 = [];
             for (sidx = _k = 0, _len1 = _ref2.length; _k < _len1; sidx = ++_k) {
               ypos = _ref2[sidx];

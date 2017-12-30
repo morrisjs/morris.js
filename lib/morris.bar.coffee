@@ -36,7 +36,8 @@ class Morris.Bar extends Morris.Grid
     inBarValue: false
     inBarValueTextColor: 'white'
     inBarValueMinTopMargin: 1
-    inBarValueRightMargin: 4
+    inBarValueRightMargin: 4,
+    nbLines: 0
 
   # Do any size-related calculations
   #
@@ -60,7 +61,34 @@ class Morris.Bar extends Morris.Grid
   draw: ->
     @drawXAxis() if @options.axes in [true, 'both', 'x']
     @drawSeries()
+    @drawBarLine()
+    @drawBarPoints()
 
+  drawBarLine: ->
+    nb = @options.ykeys.length - this.options.nbLines
+    for dim, ii in @options.ykeys[nb...@options.ykeys.length] by 1
+      path = ""
+      for row, idx in @data
+        if path == ""
+          path += "M#{row._x},#{row._y[nb+ii]}"
+        else
+          path += "L#{row._x},#{row._y[nb+ii]}"
+    
+      rPath = @raphael.path(path)
+                      .attr('stroke', @options.barColors[nb+ii])
+                      .attr('stroke-width', 3)
+
+  drawBarPoints: ->
+    nb = @options.ykeys.length - this.options.nbLines
+    for dim, ii in @options.ykeys[nb...@options.ykeys.length] by 1
+      for row, idx in @data
+        if row._y[nb+ii]?
+          if @options.dataLabels
+            @drawDataLabel(row._x, row._y[nb+ii] - 10, @yLabelFormat(row.y[nb+ii]))
+          @raphael.circle(row._x, row._y[nb+ii], 4)
+            .attr('fill', @options.barColors[nb+ii])
+            .attr('stroke-width', 1)
+            .attr('stroke', '#ffffff')
   # draw the x-axis labels
   #
   # @private
@@ -145,6 +173,7 @@ class Morris.Bar extends Morris.Grid
         if @hasToShow(i)
           numBars += 1
 
+    numBars = numBars - this.options.nbLines
     barWidth = (groupWidth * @options.barSizeRatio - @options.barGap * (numBars - 1)) / numBars
     barWidth = Math.min(barWidth, @options.barSize) if @options.barSize
     spaceLeft = groupWidth - barWidth * numBars - @options.barGap * (numBars - 1)
@@ -153,7 +182,8 @@ class Morris.Bar extends Morris.Grid
     @bars = for row, idx in @data
       @seriesBars[idx] = []
       lastTop = 0
-      for ypos, sidx in row._y
+      nb = row._y.length - this.options.nbLines
+      for ypos, sidx in row._y[0...nb]
         if not @hasToShow(sidx)
           continue
         if ypos != null
