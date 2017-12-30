@@ -11,16 +11,18 @@
 class Morris.Donut extends Morris.EventEmitter
   defaults:
     colors: [
-      '#0B62A4'
-      '#3980B5'
-      '#679DC6'
-      '#95BBD7'
-      '#B0CCE1'
-      '#095791'
-      '#095085'
-      '#083E67'
-      '#052C48'
-      '#042135'
+      '#2f7df6'
+      '#53a351'
+      '#4aa0b5'
+      '#f6c244'
+      '#cb444a'
+      '#222529'
+      '#44a1f8'
+      '#81d453'
+      '#f0bb40'
+      '#eb3f25'
+      '#b45184'
+      '#5f5f5f'
     ],
     backgroundColor: '#FFFFFF', 
     labelColor: '#000000',

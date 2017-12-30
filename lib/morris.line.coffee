@@ -19,13 +19,12 @@ class Morris.Line extends Morris.Grid
     lineWidth: 3
     pointSize: 4
     lineColors: [
-      '#0b62a4'
-      '#7A92A3'
-      '#4da74d'
-      '#afd8f8'
-      '#edc240'
-      '#cb4b4b'
-      '#9440ed'
+      '#2f7df6'
+      '#53a351'
+      '#4aa0b5'
+      '#f6c244'
+      '#cb444a'
+      '#222529'
     ]
     pointStrokeWidths: [1]
     pointStrokeColors: ['#ffffff']

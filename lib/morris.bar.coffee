@@ -18,13 +18,12 @@ class Morris.Bar extends Morris.Grid
     barSizeRatio: 0.75
     barGap: 3
     barColors: [
-      '#0b62a4'
-      '#7a92a3'
-      '#4da74d'
-      '#afd8f8'
-      '#edc240'
-      '#cb4b4b'
-      '#9440ed'
+      '#2f7df6'
+      '#53a351'
+      '#4aa0b5'
+      '#f6c244'
+      '#cb444a'
+      '#222529'
     ],
     barOpacity: 1.0
     barHighlightOpacity: 1.0
