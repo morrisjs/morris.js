@@ -4,17 +4,18 @@ As morris.js project seems no more updated and as I have been asked many times t
 
 ## Changelog
 
-### 29th December 2017
+### 30th December 2017
 
+- Combo Charts - Bar and Line together
 - Pie chart type added
 - Animation for every chart, based on [PR #62](https://github.com/morrisjs/morris.js/pull/62) for line chart and [PR #559](https://github.com/morrisjs/morris.js/pull/559) and for bar chart
 - Labels for every chart, based on [PR #688](https://github.com/morrisjs/morris.js/pull/688)
 - Orders of label in hover [Issue #534](https://github.com/morrisjs/morris.js/issues/534)
 - Remove null values from computation of trend line
+- Color scheme changed to Bootstrap 4's default theme
 
 ## To do
 - Animation for donut chart
-- Combo Charts - Bar and Line together
 
 ## Requirements
 
