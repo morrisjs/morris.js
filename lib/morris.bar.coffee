@@ -52,8 +52,13 @@ class Morris.Bar extends Morris.Grid
   calcBars: ->
     for row, idx in @data
       row._x = @xStart + @xSize * (idx + 0.5) / @data.length
-      row._y = for y in row.y
-        if y? then @transY(y) else null
+      row._y = for y, ii in row.y
+        console.log(ii+' '+@options.ykeys.length+' '+@options.nbLines)
+        if ii < @options.ykeys.length - @options.nbLines
+          if y? then @transY(y) else null
+      row._y2 = for y, ii in row.y
+        if ii >= @options.ykeys.length - @options.nbLines
+          if y? then @transY2(y) else null
 
   # Draws the bar chart.
   #
@@ -68,10 +73,11 @@ class Morris.Bar extends Morris.Grid
     for dim, ii in @options.ykeys[nb...@options.ykeys.length] by 1
       path = ""
       for row, idx in @data
+        console.log(row)
         if path == ""
-          path += "M#{row._x},#{row._y[nb+ii]}"
+          path += "M#{row._x},#{row._y2[nb+ii]}"
         else
-          path += "L#{row._x},#{row._y[nb+ii]}"
+          path += "L#{row._x},#{row._y2[nb+ii]}"
     
       rPath = @raphael.path(path)
                       .attr('stroke', @options.barColors[nb+ii])
@@ -81,10 +87,10 @@ class Morris.Bar extends Morris.Grid
     nb = @options.ykeys.length - this.options.nbLines
     for dim, ii in @options.ykeys[nb...@options.ykeys.length] by 1
       for row, idx in @data
-        if row._y[nb+ii]?
+        if row._y2[nb+ii]?
           if @options.dataLabels
-            @drawDataLabel(row._x, row._y[nb+ii] - 10, @yLabelFormat(row.y[nb+ii]))
-          @raphael.circle(row._x, row._y[nb+ii], 4)
+            @drawDataLabel(row._x, row._y2[nb+ii] - 10, @yLabelFormat(row.y[nb+ii]))
+          @raphael.circle(row._x, row._y2[nb+ii], 4)
             .attr('fill', @options.barColors[nb+ii])
             .attr('stroke-width', 1)
             .attr('stroke', '#ffffff')

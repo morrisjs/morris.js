@@ -115,6 +115,8 @@ class Morris.Grid extends Morris.EventEmitter
     preUnits: ''
     ymax: 'auto'
     ymin: 'auto 0'
+    y2max: 'auto'
+    y2min: 'auto 0'
     goals: []
     goalStrokeWidth: 1.0
     goalLineColors: [
@@ -141,6 +143,7 @@ class Morris.Grid extends Morris.EventEmitter
     dataLabelsWeight: 'normal',
     dataLabelsColor: '#000',
     animate: true
+    nbLines: 0
 
   # Update the data series and redraw the chart.
   #
@@ -185,18 +188,32 @@ class Morris.Grid extends Morris.EventEmitter
         yval = row[ykey]
         yval = parseFloat(yval) if typeof yval is 'string'
         yval = null if yval? and typeof yval isnt 'number'
-        if yval? and @hasToShow(idx)
-          if @cumulative
-            total += yval
-          else
-            if ymax?
-              ymax = Math.max(yval, ymax)
-              ymin = Math.min(yval, ymin)
+        if idx < @options.ykeys.length - @options.nbLines
+          if yval? and @hasToShow(idx)
+            if @cumulative
+              total += yval
             else
-              ymax = ymin = yval
-        if @cumulative and total?
-          ymax = Math.max(total, ymax)
-          ymin = Math.min(total, ymin)
+              if ymax?
+                ymax = Math.max(yval, ymax)
+                ymin = Math.min(yval, ymin)
+              else
+                ymax = ymin = yval
+          if @cumulative and total?
+            ymax = Math.max(total, ymax)
+            ymin = Math.min(total, ymin)
+        else 
+          if yval? and @hasToShow(idx)
+            if @cumulative
+              total += yval
+            else
+              if ymax2?
+                ymax2 = Math.max(yval, ymax2)
+                ymin2 = Math.min(yval, ymin2)
+              else
+                ymax2 = ymin2 = yval
+          if @cumulative and total?
+            ymax2 = Math.max(total, ymax2)
+            ymin2 = Math.min(total, ymin2)
         yval
       ret
 
@@ -228,10 +245,16 @@ class Morris.Grid extends Morris.EventEmitter
 
     @ymin = @yboundary('min', ymin)
     @ymax = @yboundary('max', ymax)
+    @ymin2 = @yboundary('min', ymin2)
+    @ymax2 = @yboundary('max', ymax2)
 
     if @ymin is @ymax
       @ymin -= 1 if ymin
       @ymax += 1
+
+    if @ymin2 is @ymax2
+      @ymin2 -= 1 if ymin2
+      @ymax2 += 1
 
     if @options.axes in [true, 'both', 'y'] or @options.grid is true
       if (@options.ymax == @gridDefaults.ymax and
@@ -331,6 +354,7 @@ class Morris.Grid extends Morris.EventEmitter
       if not @options.horizontal
         @dx = @width / (@xmax - @xmin)
         @dy = @height / (@ymax - @ymin)
+        @dy2 = @height / (@ymax2 - @ymin2)
 
         @yStart = @bottom
         @yEnd = @top
@@ -360,6 +384,11 @@ class Morris.Grid extends Morris.EventEmitter
       @bottom - (y - @ymin) * @dy
     else
       @left + (y - @ymin) * @dy
+  transY2: (y) ->
+    if not @options.horizontal
+      @bottom - (y - @ymin2) * @dy2
+    else
+      @left + (y - @ymin2) * @dy2
   transX: (x) ->
     if @data.length == 1
       (@xStart + @xEnd) / 2
