@@ -144,6 +144,7 @@ class Morris.Grid extends Morris.EventEmitter
     dataLabelsColor: '#000',
     animate: true
     nbLines: 0
+    smooth: true
 
   # Update the data series and redraw the chart.
   #

@@ -206,7 +206,8 @@ Licensed under the BSD-2-Clause License.
       dataLabelsWeight: 'normal',
       dataLabelsColor: '#000',
       animate: true,
-      nbLines: 0
+      nbLines: 0,
+      smooth: true
     };
 
     Grid.prototype.setData = function(data, redraw) {
@@ -1753,7 +1754,6 @@ Licensed under the BSD-2-Clause License.
           _results1 = [];
           for (ii = _j = 0, _len1 = _ref1.length; _j < _len1; ii = ++_j) {
             y = _ref1[ii];
-            console.log(ii + ' ' + this.options.ykeys.length + ' ' + this.options.nbLines);
             if (ii < this.options.ykeys.length - this.options.nbLines) {
               if (y != null) {
                 _results1.push(this.transY(y));
@@ -1799,22 +1799,57 @@ Licensed under the BSD-2-Clause License.
     };
 
     Bar.prototype.drawBarLine = function() {
-      var dim, idx, ii, nb, path, rPath, row, _i, _j, _len, _len1, _ref, _ref1, _results;
+      var coord, coords, dim, g, grads, i, ii, ix, lg, nb, path, prevCoord, r, rPath, x1, x2, y1, y2, _i, _j, _len, _len1, _ref, _results;
       nb = this.options.ykeys.length - this.options.nbLines;
       _ref = this.options.ykeys.slice(nb, this.options.ykeys.length);
       _results = [];
       for (ii = _i = 0, _len = _ref.length; _i < _len; ii = _i += 1) {
         dim = _ref[ii];
         path = "";
-        _ref1 = this.data;
-        for (idx = _j = 0, _len1 = _ref1.length; _j < _len1; idx = ++_j) {
-          row = _ref1[idx];
-          console.log(row);
-          if (path === "") {
-            path += "M" + row._x + "," + row._y2[nb + ii];
-          } else {
-            path += "L" + row._x + "," + row._y2[nb + ii];
+        coords = (function() {
+          var _j, _len1, _ref1, _results1;
+          _ref1 = this.data;
+          _results1 = [];
+          for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+            r = _ref1[_j];
+            if (r._y2[nb + ii] !== void 0) {
+              _results1.push({
+                x: r._x,
+                y: r._y2[nb + ii]
+              });
+            }
           }
+          return _results1;
+        }).call(this);
+        if (this.options.smooth) {
+          grads = Morris.Line.gradients(coords);
+        }
+        prevCoord = {
+          y: null
+        };
+        for (i = _j = 0, _len1 = coords.length; _j < _len1; i = ++_j) {
+          coord = coords[i];
+          if (coord.y != null) {
+            if (prevCoord.y != null) {
+              if (this.options.smooth) {
+                g = grads[i];
+                lg = grads[i - 1];
+                ix = (coord.x - prevCoord.x) / 4;
+                x1 = prevCoord.x + ix;
+                y1 = Math.min(this.bottom, prevCoord.y + ix * lg);
+                x2 = coord.x - ix;
+                y2 = Math.min(this.bottom, coord.y - ix * g);
+                path += "C" + x1 + "," + y1 + "," + x2 + "," + y2 + "," + coord.x + "," + coord.y;
+              } else {
+                path += "L" + coord.x + "," + coord.y;
+              }
+            } else {
+              if (!this.options.smooth || (grads[i] != null)) {
+                path += "M" + coord.x + "," + coord.y;
+              }
+            }
+          }
+          prevCoord = coord;
         }
         _results.push(rPath = this.raphael.path(path).attr('stroke', this.options.barColors[nb + ii]).attr('stroke-width', 3));
       }

@@ -53,7 +53,6 @@ class Morris.Bar extends Morris.Grid
     for row, idx in @data
       row._x = @xStart + @xSize * (idx + 0.5) / @data.length
       row._y = for y, ii in row.y
-        console.log(ii+' '+@options.ykeys.length+' '+@options.nbLines)
         if ii < @options.ykeys.length - @options.nbLines
           if y? then @transY(y) else null
       row._y2 = for y, ii in row.y
@@ -72,13 +71,28 @@ class Morris.Bar extends Morris.Grid
     nb = @options.ykeys.length - this.options.nbLines
     for dim, ii in @options.ykeys[nb...@options.ykeys.length] by 1
       path = ""
-      for row, idx in @data
-        console.log(row)
-        if path == ""
-          path += "M#{row._x},#{row._y2[nb+ii]}"
-        else
-          path += "L#{row._x},#{row._y2[nb+ii]}"
-    
+      coords = ({x: r._x, y: r._y2[nb+ii]} for r in @data when r._y2[nb+ii] isnt undefined)
+      grads = Morris.Line.gradients(coords) if @options.smooth
+      prevCoord = {y: null}
+      for coord, i in coords
+        if coord.y?
+          if prevCoord.y?
+            if @options.smooth
+              g = grads[i]
+              lg = grads[i - 1]
+              ix = (coord.x - prevCoord.x) / 4
+              x1 = prevCoord.x + ix
+              y1 = Math.min(@bottom, prevCoord.y + ix * lg)
+              x2 = coord.x - ix
+              y2 = Math.min(@bottom, coord.y - ix * g)
+              path += "C#{x1},#{y1},#{x2},#{y2},#{coord.x},#{coord.y}"
+            else
+              path += "L#{coord.x},#{coord.y}"
+          else
+            if not @options.smooth or grads[i]?
+              path += "M#{coord.x},#{coord.y}"
+        prevCoord = coord
+
       rPath = @raphael.path(path)
                       .attr('stroke', @options.barColors[nb+ii])
                       .attr('stroke-width', 3)
