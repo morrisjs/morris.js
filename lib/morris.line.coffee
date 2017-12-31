@@ -21,9 +21,9 @@ class Morris.Line extends Morris.Grid
     lineColors: [
       '#2f7df6'
       '#53a351'
-      '#4aa0b5'
       '#f6c244'
       '#cb444a'
+      '#4aa0b5'
       '#222529'
     ]
     pointStrokeWidths: [1]

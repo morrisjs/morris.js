@@ -866,7 +866,7 @@ Licensed under the BSD-2-Clause License.
     Line.prototype.defaults = {
       lineWidth: 3,
       pointSize: 4,
-      lineColors: ['#2f7df6', '#53a351', '#4aa0b5', '#f6c244', '#cb444a', '#222529'],
+      lineColors: ['#2f7df6', '#53a351', '#f6c244', '#cb444a', '#4aa0b5', '#222529'],
       pointStrokeWidths: [1],
       pointStrokeColors: ['#ffffff'],
       pointFillColors: [],
@@ -1678,7 +1678,7 @@ Licensed under the BSD-2-Clause License.
     Bar.prototype.defaults = {
       barSizeRatio: 0.75,
       barGap: 3,
-      barColors: ['#2f7df6', '#53a351', '#4aa0b5', '#f6c244', '#cb444a', '#222529'],
+      barColors: ['#2f7df6', '#53a351', '#f6c244', '#cb444a', '#4aa0b5', '#222529'],
       barOpacity: 1.0,
       barHighlightOpacity: 1.0,
       highlightSpeed: 150,
@@ -2141,7 +2141,7 @@ Licensed under the BSD-2-Clause License.
     __extends(Donut, _super);
 
     Donut.prototype.defaults = {
-      colors: ['#2f7df6', '#53a351', '#4aa0b5', '#f6c244', '#cb444a', '#222529', '#44a1f8', '#81d453', '#f0bb40', '#eb3f25', '#b45184', '#5f5f5f'],
+      colors: ['#2f7df6', '#53a351', '#f6c244', '#cb444a', '#4aa0b5', '#222529', '#44a1f8', '#81d453', '#f0bb40', '#eb3f25', '#b45184', '#5f5f5f'],
       backgroundColor: '#FFFFFF',
       labelColor: '#000000',
       formatter: Morris.commas,

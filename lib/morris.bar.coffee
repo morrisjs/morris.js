@@ -20,9 +20,9 @@ class Morris.Bar extends Morris.Grid
     barColors: [
       '#2f7df6'
       '#53a351'
-      '#4aa0b5'
       '#f6c244'
       '#cb444a'
+      '#4aa0b5'
       '#222529'
     ],
     barOpacity: 1.0
