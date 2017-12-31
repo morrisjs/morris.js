@@ -93,9 +93,23 @@ class Morris.Bar extends Morris.Grid
               path += "M#{coord.x},#{coord.y}"
         prevCoord = coord
 
-      rPath = @raphael.path(path)
-                      .attr('stroke', @options.barColors[nb+ii])
-                      .attr('stroke-width', 3)
+      if @options.animate
+        straightPath = path;
+        straightPath = path.replace('A', ',');
+        straightPath = straightPath.replace('M', '');
+        straightPath = straightPath.replace('C', ',');
+        straightDots = straightPath.split(',');
+        average = (parseFloat(straightDots[1])+parseFloat(straightDots[straightDots.length-1]))/2
+        straightPath = 'M'+straightDots[0]+','+average+','+straightDots[straightDots.length-2]+','+average;
+        rPath = @raphael.path(straightPath)
+                        .attr('stroke', @options.barColors[nb+ii])
+                        .attr('stroke-width', 3)
+        do (rPath, path) =>
+          rPath.animate {path}, 500, '<>'
+      else
+        rPath = @raphael.path(path)
+                        .attr('stroke', @options.barColors[nb+ii])
+                        .attr('stroke-width', 3)
 
   drawBarPoints: ->
     nb = @options.ykeys.length - this.options.nbLines

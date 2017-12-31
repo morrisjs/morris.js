@@ -1799,7 +1799,8 @@ Licensed under the BSD-2-Clause License.
     };
 
     Bar.prototype.drawBarLine = function() {
-      var coord, coords, dim, g, grads, i, ii, ix, lg, nb, path, prevCoord, r, rPath, x1, x2, y1, y2, _i, _j, _len, _len1, _ref, _results;
+      var average, coord, coords, dim, g, grads, i, ii, ix, lg, nb, path, prevCoord, r, rPath, straightDots, straightPath, x1, x2, y1, y2, _i, _j, _len, _len1, _ref, _results,
+        _this = this;
       nb = this.options.ykeys.length - this.options.nbLines;
       _ref = this.options.ykeys.slice(nb, this.options.ykeys.length);
       _results = [];
@@ -1851,7 +1852,23 @@ Licensed under the BSD-2-Clause License.
           }
           prevCoord = coord;
         }
-        _results.push(rPath = this.raphael.path(path).attr('stroke', this.options.barColors[nb + ii]).attr('stroke-width', 3));
+        if (this.options.animate) {
+          straightPath = path;
+          straightPath = path.replace('A', ',');
+          straightPath = straightPath.replace('M', '');
+          straightPath = straightPath.replace('C', ',');
+          straightDots = straightPath.split(',');
+          average = (parseFloat(straightDots[1]) + parseFloat(straightDots[straightDots.length - 1])) / 2;
+          straightPath = 'M' + straightDots[0] + ',' + average + ',' + straightDots[straightDots.length - 2] + ',' + average;
+          rPath = this.raphael.path(straightPath).attr('stroke', this.options.barColors[nb + ii]).attr('stroke-width', 3);
+          _results.push((function(rPath, path) {
+            return rPath.animate({
+              path: path
+            }, 500, '<>');
+          })(rPath, path));
+        } else {
+          _results.push(rPath = this.raphael.path(path).attr('stroke', this.options.barColors[nb + ii]).attr('stroke-width', 3));
+        }
       }
       return _results;
     };
