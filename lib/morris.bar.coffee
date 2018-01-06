@@ -71,13 +71,16 @@ class Morris.Bar extends Morris.Grid
     nb = @options.ykeys.length - @options.nbLines
     for dim, ii in @options.ykeys[nb...@options.ykeys.length] by 1
       path = ""
-      coords = ({x: r._x, y: r._y2[nb+ii]} for r in @data when r._y2[nb+ii] isnt undefined)
+      if @options.horizontal is not true
+        coords = ({x: r._x, y: r._y2[nb+ii]} for r in @data when r._y2[nb+ii] isnt undefined)
+      else
+        coords = ({x: r._y2[nb+ii], y: r._x} for r in @data when r._y2[nb+ii] isnt undefined)
       grads = Morris.Line.gradients(coords) if @options.smooth
       prevCoord = {y: null}
       for coord, i in coords
         if coord.y?
           if prevCoord.y?
-            if @options.smooth
+            if @options.smooth and @options.horizontal is not true
               g = grads[i]
               lg = grads[i - 1]
               ix = (coord.x - prevCoord.x) / 4
@@ -116,12 +119,23 @@ class Morris.Bar extends Morris.Grid
     for dim, ii in @options.ykeys[nb...@options.ykeys.length] by 1
       for row, idx in @data
         if row._y2[nb+ii]?
+          if @options.horizontal is not true
+            @raphael.circle(row._x, row._y2[nb+ii], 4)
+              .attr('fill', @options.barColors[nb+ii])
+              .attr('stroke-width', 1)
+              .attr('stroke', '#ffffff')
+          else
+            @raphael.circle(row._y2[nb+ii], row._x, 4)
+              .attr('fill', @options.barColors[nb+ii])
+              .attr('stroke-width', 1)
+              .attr('stroke', '#ffffff')
+
           if @options.dataLabels
-            @drawDataLabel(row._x, row._y2[nb+ii] - 10, @yLabelFormat(row.y[nb+ii]))
-          @raphael.circle(row._x, row._y2[nb+ii], 4)
-            .attr('fill', @options.barColors[nb+ii])
-            .attr('stroke-width', 1)
-            .attr('stroke', '#ffffff')
+            if @options.horizontal is not true
+              @drawDataLabel(row._x, row._y2[nb+ii], @yLabelFormat(row.y[nb+ii]))
+            else
+              @drawDataLabelExt(row._y2[nb+ii] + 10, row._x, @yLabelFormat(row.y[nb+ii]), 'start')
+              
   # draw the x-axis labels
   #
   # @private
@@ -361,10 +375,8 @@ class Morris.Bar extends Morris.Grid
       inv.unshift(y)
 
     for y, jj in inv
-      if @options.horizontal
-        j = jj
-      else
-        j = row.y.length - 1 - jj
+
+      j = row.y.length - 1 - jj
       if @options.labels[j] is false
         continue
 
@@ -388,6 +400,14 @@ class Morris.Bar extends Morris.Grid
   drawDataLabel: (xPos, yPos, text) ->
     label = @raphael.text(xPos, yPos, text)
                     .attr('text-anchor', 'middle')
+                    .attr('font-size', @options.dataLabelsSize)
+                    .attr('font-family', @options.dataLabelsFamily)
+                    .attr('font-weight', @options.dataLabelsWeight)
+                    .attr('fill', @options.dataLabelsColor)
+
+  drawDataLabelExt: (xPos, yPos, text, anchor) ->
+    label = @raphael.text(xPos, yPos, text)
+                    .attr('text-anchor', anchor)
                     .attr('font-size', @options.dataLabelsSize)
                     .attr('font-family', @options.dataLabelsFamily)
                     .attr('font-weight', @options.dataLabelsWeight)

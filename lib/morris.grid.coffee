@@ -335,7 +335,6 @@ class Morris.Grid extends Morris.EventEmitter
           @measureText(@yAxisFormat(gridLine)).width
 
         if @options.nbLines > 0
-          console.log(this)
           yLabelWidths2 = for gridLine in @grid2
             @measureText(@yAxisFormat(gridLine)).width
 
@@ -378,6 +377,7 @@ class Morris.Grid extends Morris.EventEmitter
       else
         @dx = @height / (@xmax - @xmin)
         @dy = @width / (@ymax - @ymin)
+        @dy2 = @width / (@ymax2 - @ymin2)
 
         @yStart = @left
         @yEnd = @right
@@ -464,6 +464,7 @@ class Morris.Grid extends Morris.EventEmitter
       basePos2 = @right + @options.padding
     else
       basePos = @getXAxisLabelY()
+      basePos2 = @top - (@options.xAxisLabelTopPadding || @options.padding / 2)
 
     for lineY in @grid
       pos = @transY(lineY)
@@ -487,7 +488,7 @@ class Morris.Grid extends Morris.EventEmitter
           if not @options.horizontal
             @drawYAxisLabel(basePos2, pos, @yAxisFormat(lineY))
           else
-            @drawXAxisLabel(pos, basePos, @yAxisFormat(lineY))
+            @drawXAxisLabel(pos, basePos2, @yAxisFormat(lineY))
 
   # draw goals horizontal lines
   #

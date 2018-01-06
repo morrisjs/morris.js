@@ -482,7 +482,6 @@ Licensed under the BSD-2-Clause License.
             return _results;
           }).call(this);
           if (this.options.nbLines > 0) {
-            console.log(this);
             yLabelWidths2 = (function() {
               var _i, _len, _ref1, _results;
               _ref1 = this.grid2;
@@ -538,6 +537,7 @@ Licensed under the BSD-2-Clause License.
         } else {
           this.dx = this.height / (this.xmax - this.xmin);
           this.dy = this.width / (this.ymax - this.ymin);
+          this.dy2 = this.width / (this.ymax2 - this.ymin2);
           this.yStart = this.left;
           this.yEnd = this.right;
           this.xStart = this.top;
@@ -627,6 +627,7 @@ Licensed under the BSD-2-Clause License.
         basePos2 = this.right + this.options.padding;
       } else {
         basePos = this.getXAxisLabelY();
+        basePos2 = this.top - (this.options.xAxisLabelTopPadding || this.options.padding / 2);
       }
       _ref1 = this.grid;
       for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
@@ -658,7 +659,7 @@ Licensed under the BSD-2-Clause License.
             if (!this.options.horizontal) {
               _results.push(this.drawYAxisLabel(basePos2, pos, this.yAxisFormat(lineY)));
             } else {
-              _results.push(this.drawXAxisLabel(pos, basePos, this.yAxisFormat(lineY)));
+              _results.push(this.drawXAxisLabel(pos, basePos2, this.yAxisFormat(lineY)));
             }
           } else {
             _results.push(void 0);
@@ -1890,21 +1891,39 @@ Licensed under the BSD-2-Clause License.
       for (ii = _i = 0, _len = _ref.length; _i < _len; ii = _i += 1) {
         dim = _ref[ii];
         path = "";
-        coords = (function() {
-          var _j, _len1, _ref1, _results1;
-          _ref1 = this.data;
-          _results1 = [];
-          for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-            r = _ref1[_j];
-            if (r._y2[nb + ii] !== void 0) {
-              _results1.push({
-                x: r._x,
-                y: r._y2[nb + ii]
-              });
+        if (this.options.horizontal === !true) {
+          coords = (function() {
+            var _j, _len1, _ref1, _results1;
+            _ref1 = this.data;
+            _results1 = [];
+            for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+              r = _ref1[_j];
+              if (r._y2[nb + ii] !== void 0) {
+                _results1.push({
+                  x: r._x,
+                  y: r._y2[nb + ii]
+                });
+              }
             }
-          }
-          return _results1;
-        }).call(this);
+            return _results1;
+          }).call(this);
+        } else {
+          coords = (function() {
+            var _j, _len1, _ref1, _results1;
+            _ref1 = this.data;
+            _results1 = [];
+            for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+              r = _ref1[_j];
+              if (r._y2[nb + ii] !== void 0) {
+                _results1.push({
+                  x: r._y2[nb + ii],
+                  y: r._x
+                });
+              }
+            }
+            return _results1;
+          }).call(this);
+        }
         if (this.options.smooth) {
           grads = Morris.Line.gradients(coords);
         }
@@ -1915,7 +1934,7 @@ Licensed under the BSD-2-Clause License.
           coord = coords[i];
           if (coord.y != null) {
             if (prevCoord.y != null) {
-              if (this.options.smooth) {
+              if (this.options.smooth && this.options.horizontal === !true) {
                 g = grads[i];
                 lg = grads[i - 1];
                 ix = (coord.x - prevCoord.x) / 4;
@@ -1970,10 +1989,20 @@ Licensed under the BSD-2-Clause License.
           for (idx = _j = 0, _len1 = _ref1.length; _j < _len1; idx = ++_j) {
             row = _ref1[idx];
             if (row._y2[nb + ii] != null) {
-              if (this.options.dataLabels) {
-                this.drawDataLabel(row._x, row._y2[nb + ii] - 10, this.yLabelFormat(row.y[nb + ii]));
+              if (this.options.horizontal === !true) {
+                this.raphael.circle(row._x, row._y2[nb + ii], 4).attr('fill', this.options.barColors[nb + ii]).attr('stroke-width', 1).attr('stroke', '#ffffff');
+              } else {
+                this.raphael.circle(row._y2[nb + ii], row._x, 4).attr('fill', this.options.barColors[nb + ii]).attr('stroke-width', 1).attr('stroke', '#ffffff');
               }
-              _results1.push(this.raphael.circle(row._x, row._y2[nb + ii], 4).attr('fill', this.options.barColors[nb + ii]).attr('stroke-width', 1).attr('stroke', '#ffffff'));
+              if (this.options.dataLabels) {
+                if (this.options.horizontal === !true) {
+                  _results1.push(this.drawDataLabel(row._x, row._y2[nb + ii], this.yLabelFormat(row.y[nb + ii])));
+                } else {
+                  _results1.push(this.drawDataLabelExt(row._y2[nb + ii] + 10, row._x, this.yLabelFormat(row.y[nb + ii]), 'start'));
+                }
+              } else {
+                _results1.push(void 0);
+              }
             } else {
               _results1.push(void 0);
             }
@@ -2270,11 +2299,7 @@ Licensed under the BSD-2-Clause License.
       }
       for (jj = _j = 0, _len1 = inv.length; _j < _len1; jj = ++_j) {
         y = inv[jj];
-        if (this.options.horizontal) {
-          j = jj;
-        } else {
-          j = row.y.length - 1 - jj;
-        }
+        j = row.y.length - 1 - jj;
         if (this.options.labels[j] === false) {
           continue;
         }
@@ -2296,6 +2321,11 @@ Licensed under the BSD-2-Clause License.
     Bar.prototype.drawDataLabel = function(xPos, yPos, text) {
       var label;
       return label = this.raphael.text(xPos, yPos, text).attr('text-anchor', 'middle').attr('font-size', this.options.dataLabelsSize).attr('font-family', this.options.dataLabelsFamily).attr('font-weight', this.options.dataLabelsWeight).attr('fill', this.options.dataLabelsColor);
+    };
+
+    Bar.prototype.drawDataLabelExt = function(xPos, yPos, text, anchor) {
+      var label;
+      return label = this.raphael.text(xPos, yPos, text).attr('text-anchor', anchor).attr('font-size', this.options.dataLabelsSize).attr('font-family', this.options.dataLabelsFamily).attr('font-weight', this.options.dataLabelsWeight).attr('fill', this.options.dataLabelsColor);
     };
 
     Bar.prototype.drawBar = function(xPos, yPos, width, height, barColor, opacity, radiusArray) {
