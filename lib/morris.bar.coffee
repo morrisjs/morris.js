@@ -242,6 +242,7 @@ class Morris.Bar extends Morris.Grid
           top -= lastTop if @options.stacked
           if not @options.horizontal
             lastTop += size
+            if size == 0 then size = 1
             @seriesBars[idx][sidx] = @drawBar(left, top, barWidth, size, @colorFor(row, sidx, 'bar'),
                 @options.barOpacity, @options.barRadius)
             if @options.dataLabels
@@ -253,6 +254,7 @@ class Morris.Bar extends Morris.Grid
                 @drawDataLabel(left+barWidth/2,top+depth,@yLabelFormat(row.y[sidx]))
           else
             lastTop -= size
+            if size == 0 then size = 1
             @seriesBars[idx][sidx] = @drawBar(top, left, size, barWidth, @colorFor(row, sidx, 'bar'),
                 @options.barOpacity, @options.barRadius)
             if @options.dataLabels

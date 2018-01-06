@@ -1830,7 +1830,6 @@ Licensed under the BSD-2-Clause License.
       _results = [];
       for (idx = _i = 0, _len = _ref.length; _i < _len; idx = ++_i) {
         row = _ref[idx];
-        console.log('@xSize: ' + this.xSize);
         row._x = this.xStart + this.xSize * (idx + 0.5) / this.data.length;
         row._y = (function() {
           var _j, _len1, _ref1, _results1;
@@ -2059,7 +2058,6 @@ Licensed under the BSD-2-Clause License.
           }
         }
       }
-      console.log('numBars: ' + numBars);
       if (this.options.stacked === !true) {
         numBars = numBars - this.options.nbLines;
       }
@@ -2068,7 +2066,6 @@ Licensed under the BSD-2-Clause License.
         barWidth = Math.min(barWidth, this.options.barSize);
       }
       spaceLeft = groupWidth - barWidth * numBars - this.options.barGap * (numBars - 1);
-      console.log('barWidth: ' + barWidth);
       leftPadding = spaceLeft / 2;
       zeroPos = this.ymin <= 0 && this.ymax >= 0 ? this.transY(0) : null;
       this.bars = (function() {
@@ -2114,6 +2111,9 @@ Licensed under the BSD-2-Clause License.
                 }
                 if (!this.options.horizontal) {
                   lastTop += size;
+                  if (size === 0) {
+                    size = 1;
+                  }
                   this.seriesBars[idx][sidx] = this.drawBar(left, top, barWidth, size, this.colorFor(row, sidx, 'bar'), this.options.barOpacity, this.options.barRadius);
                   if (this.options.dataLabels) {
                     if (this.options.stacked || this.options.dataLabelsPosition === 'inside') {
@@ -2131,6 +2131,9 @@ Licensed under the BSD-2-Clause License.
                   }
                 } else {
                   lastTop -= size;
+                  if (size === 0) {
+                    size = 1;
+                  }
                   this.seriesBars[idx][sidx] = this.drawBar(top, left, size, barWidth, this.colorFor(row, sidx, 'bar'), this.options.barOpacity, this.options.barRadius);
                   if (this.options.dataLabels) {
                     if (this.options.stacked || this.options.dataLabelsPosition === 'inside') {
