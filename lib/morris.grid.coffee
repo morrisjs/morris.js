@@ -159,6 +159,8 @@ class Morris.Grid extends Morris.EventEmitter
 
     ymax = if @cumulative then 0 else null
     ymin = if @cumulative then 0 else null
+    ymax2 = if @cumulative then 0 else null
+    ymin2 = if @cumulative then 0 else null
 
     if @options.goals.length > 0
       minGoal = Math.min @options.goals...
@@ -332,12 +334,15 @@ class Morris.Grid extends Morris.EventEmitter
         yLabelWidths = for gridLine in @grid
           @measureText(@yAxisFormat(gridLine)).width
 
-        yLabelWidths2 = for gridLine in @grid2
-          @measureText(@yAxisFormat(gridLine)).width
+        if @options.nbLines > 0
+          console.log(this)
+          yLabelWidths2 = for gridLine in @grid2
+            @measureText(@yAxisFormat(gridLine)).width
 
         if not @options.horizontal
           @left += Math.max(yLabelWidths...)
-          @right -= Math.max(yLabelWidths2...)
+          if @options.nbLines > 0
+            @right -= Math.max(yLabelWidths2...)
         else
           @bottom -= Math.max(yLabelWidths...)
 
