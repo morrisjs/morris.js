@@ -931,7 +931,7 @@ Licensed under the BSD-2-Clause License.
     };
 
     Line.prototype.calcPoints = function() {
-      var i, row, y, _i, _len, _ref, _results;
+      var i, ii, row, y, _i, _len, _ref, _results;
       _ref = this.data;
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -941,12 +941,34 @@ Licensed under the BSD-2-Clause License.
           var _j, _len1, _ref1, _results1;
           _ref1 = row.y;
           _results1 = [];
-          for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-            y = _ref1[_j];
-            if (y != null) {
-              _results1.push(this.transY(y));
+          for (ii = _j = 0, _len1 = _ref1.length; _j < _len1; ii = ++_j) {
+            y = _ref1[ii];
+            if (ii < this.options.ykeys.length - this.options.nbLines) {
+              if (y != null) {
+                _results1.push(this.transY(y));
+              } else {
+                _results1.push(y);
+              }
             } else {
-              _results1.push(y);
+              _results1.push(void 0);
+            }
+          }
+          return _results1;
+        }).call(this);
+        row._y2 = (function() {
+          var _j, _len1, _ref1, _results1;
+          _ref1 = row.y;
+          _results1 = [];
+          for (ii = _j = 0, _len1 = _ref1.length; _j < _len1; ii = ++_j) {
+            y = _ref1[ii];
+            if (ii >= this.options.ykeys.length - this.options.nbLines) {
+              if (y != null) {
+                _results1.push(this.transY2(y));
+              } else {
+                _results1.push(null);
+              }
+            } else {
+              _results1.push(void 0);
             }
           }
           return _results1;
@@ -1032,27 +1054,46 @@ Licensed under the BSD-2-Clause License.
     };
 
     Line.prototype.generatePaths = function() {
-      var coords, i, r, smooth;
+      var coords, i, nb, r, smooth;
       return this.paths = (function() {
         var _i, _ref, _ref1, _results;
         _results = [];
         for (i = _i = 0, _ref = this.options.ykeys.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
           smooth = typeof this.options.smooth === "boolean" ? this.options.smooth : (_ref1 = this.options.ykeys[i], __indexOf.call(this.options.smooth, _ref1) >= 0);
-          coords = (function() {
-            var _j, _len, _ref2, _results1;
-            _ref2 = this.data;
-            _results1 = [];
-            for (_j = 0, _len = _ref2.length; _j < _len; _j++) {
-              r = _ref2[_j];
-              if (r._y[i] !== void 0) {
-                _results1.push({
-                  x: r._x,
-                  y: r._y[i]
-                });
+          nb = this.options.ykeys.length - this.options.nbLines;
+          if (i < nb) {
+            coords = (function() {
+              var _j, _len, _ref2, _results1;
+              _ref2 = this.data;
+              _results1 = [];
+              for (_j = 0, _len = _ref2.length; _j < _len; _j++) {
+                r = _ref2[_j];
+                if (r._y[i] !== void 0) {
+                  _results1.push({
+                    x: r._x,
+                    y: r._y[i]
+                  });
+                }
               }
-            }
-            return _results1;
-          }).call(this);
+              return _results1;
+            }).call(this);
+          } else {
+            coords = (function() {
+              var _j, _len, _ref2, _results1;
+              _ref2 = this.data;
+              _results1 = [];
+              for (_j = 0, _len = _ref2.length; _j < _len; _j++) {
+                r = _ref2[_j];
+                if (r._y2[i] !== void 0) {
+                  _results1.push({
+                    x: r._x,
+                    y: r._y2[i]
+                  });
+                }
+              }
+              return _results1;
+            }).call(this);
+          }
           if (coords.length > 1) {
             _results.push(Morris.Line.createPath(coords, smooth, this.bottom));
           } else {
@@ -1196,6 +1237,12 @@ Licensed under the BSD-2-Clause License.
           circle = this.drawLinePoint(row._x, row._y[index], this.colorFor(row, index, 'point'), index);
           if (this.options.dataLabels) {
             this.drawDataLabel(row._x, row._y[index] - 10, this.yLabelFormat(row.y[index]));
+          }
+        }
+        if (row._y2[index] != null) {
+          circle = this.drawLinePoint(row._x, row._y2[index], this.colorFor(row, index, 'point'), index);
+          if (this.options.dataLabels) {
+            this.drawDataLabel(row._x, row._y2[index] - 10, this.yLabelFormat(row.y[index]));
           }
         }
         _results.push(this.seriesPoints[index].push(circle));
@@ -2207,7 +2254,7 @@ Licensed under the BSD-2-Clause License.
       maxRadius = Math.max.apply(Math, radiusArray);
       if (this.options.animate) {
         if (this.options.horizontal) {
-          if (maxRadius === 0 || maxRadius > width) {
+          if (maxRadius === 0 || maxRadius > height) {
             path = this.raphael.rect(this.transY(0), yPos, 0, height).animate({
               x: xPos,
               width: width

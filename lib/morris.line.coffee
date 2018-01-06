@@ -60,8 +60,12 @@ class Morris.Line extends Morris.Grid
   calcPoints: ->
     for row in @data
       row._x = @transX(row.x)
-      row._y = for y in row.y
-        if y? then @transY(y) else y
+      row._y = for y, ii in row.y
+        if ii < @options.ykeys.length - @options.nbLines
+          if y? then @transY(y) else y
+      row._y2 = for y, ii in row.y
+        if ii >= @options.ykeys.length - @options.nbLines
+          if y? then @transY2(y) else null
       row._ymax = Math.min [@bottom].concat(y for y, i in row._y when y? and @hasToShow(i))...
 
   # hit test - returns the index of the row at the given x-coordinate
@@ -134,7 +138,11 @@ class Morris.Line extends Morris.Grid
   generatePaths: ->
     @paths = for i in [0...@options.ykeys.length]
       smooth = if typeof @options.smooth is "boolean" then @options.smooth else @options.ykeys[i] in @options.smooth
-      coords = ({x: r._x, y: r._y[i]} for r in @data when r._y[i] isnt undefined)
+      nb = @options.ykeys.length - this.options.nbLines
+      if i < nb
+        coords = ({x: r._x, y: r._y[i]} for r in @data when r._y[i] isnt undefined)
+      else
+        coords = ({x: r._x, y: r._y2[i]} for r in @data when r._y2[i] isnt undefined)
 
       if coords.length > 1
         Morris.Line.createPath coords, smooth, @bottom
@@ -243,6 +251,12 @@ class Morris.Line extends Morris.Grid
         circle = @drawLinePoint(row._x, row._y[index], @colorFor(row, index, 'point'), index)
         if @options.dataLabels
           @drawDataLabel(row._x, row._y[index] - 10, this.yLabelFormat(row.y[index]))
+      
+      if row._y2[index]?
+        circle = @drawLinePoint(row._x, row._y2[index], @colorFor(row, index, 'point'), index)
+        if @options.dataLabels
+          @drawDataLabel(row._x, row._y2[index] - 10, this.yLabelFormat(row.y[index]))
+
       @seriesPoints[index].push(circle)
 
   _drawLineFor: (index) ->
