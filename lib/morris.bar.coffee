@@ -68,7 +68,7 @@ class Morris.Bar extends Morris.Grid
     @drawBarPoints()
 
   drawBarLine: ->
-    nb = @options.ykeys.length - this.options.nbLines
+    nb = @options.ykeys.length - @options.nbLines
     for dim, ii in @options.ykeys[nb...@options.ykeys.length] by 1
       path = ""
       coords = ({x: r._x, y: r._y2[nb+ii]} for r in @data when r._y2[nb+ii] isnt undefined)
@@ -112,7 +112,7 @@ class Morris.Bar extends Morris.Grid
                         .attr('stroke-width', 3)
 
   drawBarPoints: ->
-    nb = @options.ykeys.length - this.options.nbLines
+    nb = @options.ykeys.length - @options.nbLines
     for dim, ii in @options.ykeys[nb...@options.ykeys.length] by 1
       for row, idx in @data
         if row._y2[nb+ii]?
@@ -206,7 +206,8 @@ class Morris.Bar extends Morris.Grid
         if @hasToShow(i)
           numBars += 1
 
-    numBars = numBars - this.options.nbLines
+    if @options.stacked is not true
+      numBars = numBars - @options.nbLines
     barWidth = (groupWidth * @options.barSizeRatio - @options.barGap * (numBars - 1)) / numBars
     barWidth = Math.min(barWidth, @options.barSize) if @options.barSize
     spaceLeft = groupWidth - barWidth * numBars - @options.barGap * (numBars - 1)
@@ -215,7 +216,7 @@ class Morris.Bar extends Morris.Grid
     @bars = for row, idx in @data
       @seriesBars[idx] = []
       lastTop = 0
-      nb = row._y.length - this.options.nbLines
+      nb = row._y.length - @options.nbLines
       for ypos, sidx in row._y[0...nb]
         if not @hasToShow(sidx)
           continue
