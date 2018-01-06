@@ -391,14 +391,14 @@ class Morris.Bar extends Morris.Grid
     if @options.animate
       if @options.horizontal
         if maxRadius == 0 or maxRadius > height
-          path = @raphael.rect(xPos, yPos, 0, height).animate({x:xPos,width:width}, 500)
+          path = @raphael.rect(@transY(0), yPos, 0, height).animate({x:xPos,width:width}, 500)
         else
-          path = @raphael.path @roundedRect(xPos, yPos+height, width, 0, radiusArray).animate({y: yPos, height: height}, 500)
+          path = @raphael.path @roundedRect(@transY(0), yPos+height, width, 0, radiusArray).animate({y: yPos, height: height}, 500)
       else
         if maxRadius == 0 or maxRadius > height
-          path = @raphael.rect(xPos, yPos+height, width, 0).animate({y:yPos, height:height}, 500)
+          path = @raphael.rect(xPos, @transY(0), width, 0).animate({y:yPos, height:height}, 500)
         else
-          path = @raphael.path @roundedRect(xPos, yPos+height, width, 0, radiusArray).animate({y: yPos, height: height}, 500)
+          path = @raphael.path @roundedRect(xPos, @transY(0), width, 0, radiusArray).animate({y: yPos, height: height}, 500)
     else
       if maxRadius == 0 or maxRadius > height
         path = @raphael.rect(xPos, yPos, width, height)

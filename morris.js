@@ -2207,25 +2207,25 @@ Licensed under the BSD-2-Clause License.
       maxRadius = Math.max.apply(Math, radiusArray);
       if (this.options.animate) {
         if (this.options.horizontal) {
-          if (maxRadius === 0 || maxRadius > height) {
-            path = this.raphael.rect(xPos, yPos, 0, height).animate({
+          if (maxRadius === 0 || maxRadius > width) {
+            path = this.raphael.rect(this.transY(0), yPos, 0, height).animate({
               x: xPos,
               width: width
             }, 500);
           } else {
-            path = this.raphael.path(this.roundedRect(xPos, yPos + height, width, 0, radiusArray).animate({
+            path = this.raphael.path(this.roundedRect(this.transY(0), yPos + height, width, 0, radiusArray).animate({
               y: yPos,
               height: height
             }, 500));
           }
         } else {
           if (maxRadius === 0 || maxRadius > height) {
-            path = this.raphael.rect(xPos, yPos + height, width, 0).animate({
+            path = this.raphael.rect(xPos, this.transY(0), width, 0).animate({
               y: yPos,
               height: height
             }, 500);
           } else {
-            path = this.raphael.path(this.roundedRect(xPos, yPos + height, width, 0, radiusArray).animate({
+            path = this.raphael.path(this.roundedRect(xPos, this.transY(0), width, 0, radiusArray).animate({
               y: yPos,
               height: height
             }, 500));
