@@ -4,9 +4,10 @@ As morris.js project seems no more updated and as I have been asked many times t
 
 ## Changelog
 
-### 30th December 2017
+### 6th January 2018
 
 - Combo Charts - Bar and Line together
+- Right Y-axis [Issue #113](https://github.com/morrisjs/morris.js/issues/113)
 - Pie chart type added
 - Animation for every chart, based on [PR #62](https://github.com/morrisjs/morris.js/pull/62) for line chart and [PR #559](https://github.com/morrisjs/morris.js/pull/559) and for bar chart
 - Labels for every chart, based on [PR #688](https://github.com/morrisjs/morris.js/pull/688)
@@ -16,6 +17,7 @@ As morris.js project seems no more updated and as I have been asked many times t
 
 ## To do
 - Animation for donut chart
+- Remove jQuery depency
 
 ## Requirements
 
@@ -25,7 +27,7 @@ As morris.js project seems no more updated and as I have been asked many times t
 
 ## Usage
 
-See [the website](http://morrisjs.github.com/morris.js/).
+See [the website](http://pierresh.github.com/morris.js/).
 
 ## Development
 
