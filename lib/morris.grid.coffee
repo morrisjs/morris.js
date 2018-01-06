@@ -262,6 +262,8 @@ class Morris.Grid extends Morris.EventEmitter
           @options.ymin == @gridDefaults.ymin)
         # calculate 'magic' grid placement
         @grid = @autoGridLines(@ymin, @ymax, @options.numLines)
+        if @options.nbLines > 0
+          @grid2 = @autoGridLines(@ymin2, @ymax2, @options.numLines)
         @ymin = Math.min(@ymin, @grid[0])
         @ymax = Math.max(@ymax, @grid[@grid.length - 1])
       else
@@ -330,8 +332,12 @@ class Morris.Grid extends Morris.EventEmitter
         yLabelWidths = for gridLine in @grid
           @measureText(@yAxisFormat(gridLine)).width
 
+        yLabelWidths2 = for gridLine in @grid2
+          @measureText(@yAxisFormat(gridLine)).width
+
         if not @options.horizontal
           @left += Math.max(yLabelWidths...)
+          @right -= Math.max(yLabelWidths2...)
         else
           @bottom -= Math.max(yLabelWidths...)
 
@@ -450,6 +456,7 @@ class Morris.Grid extends Morris.EventEmitter
 
     if not @options.horizontal
       basePos = @getYAxisLabelX()
+      basePos2 = @right + @options.padding
     else
       basePos = @getXAxisLabelY()
 
@@ -467,6 +474,15 @@ class Morris.Grid extends Morris.EventEmitter
           @drawGridLine("M#{@xStart},#{pos}H#{@xEnd}")
         else
           @drawGridLine("M#{pos},#{@xStart}V#{@xEnd}")
+
+    if @options.nbLines > 0
+      for lineY in @grid2
+        pos = @transY2(lineY)
+        if @options.axes in [true, 'both', 'y']
+          if not @options.horizontal
+            @drawYAxisLabel(basePos2, pos, @yAxisFormat(lineY))
+          else
+            @drawXAxisLabel(pos, basePos, @yAxisFormat(lineY))
 
   # draw goals horizontal lines
   #

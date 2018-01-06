@@ -368,6 +368,9 @@ Licensed under the BSD-2-Clause License.
       if (((_ref1 = this.options.axes) === true || _ref1 === 'both' || _ref1 === 'y') || this.options.grid === true) {
         if (this.options.ymax === this.gridDefaults.ymax && this.options.ymin === this.gridDefaults.ymin) {
           this.grid = this.autoGridLines(this.ymin, this.ymax, this.options.numLines);
+          if (this.options.nbLines > 0) {
+            this.grid2 = this.autoGridLines(this.ymin2, this.ymax2, this.options.numLines);
+          }
           this.ymin = Math.min(this.ymin, this.grid[0]);
           this.ymax = Math.max(this.ymax, this.grid[this.grid.length - 1]);
         } else {
@@ -454,7 +457,7 @@ Licensed under the BSD-2-Clause License.
     };
 
     Grid.prototype._calc = function() {
-      var angle, bottomOffsets, gridLine, h, i, w, yLabelWidths, _ref, _ref1;
+      var angle, bottomOffsets, gridLine, h, i, w, yLabelWidths, yLabelWidths2, _ref, _ref1;
       w = this.el.width();
       h = this.el.height();
       if (this.elementWidth !== w || this.elementHeight !== h || this.dirty) {
@@ -476,8 +479,19 @@ Licensed under the BSD-2-Clause License.
             }
             return _results;
           }).call(this);
+          yLabelWidths2 = (function() {
+            var _i, _len, _ref1, _results;
+            _ref1 = this.grid2;
+            _results = [];
+            for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+              gridLine = _ref1[_i];
+              _results.push(this.measureText(this.yAxisFormat(gridLine)).width);
+            }
+            return _results;
+          }).call(this);
           if (!this.options.horizontal) {
             this.left += Math.max.apply(Math, yLabelWidths);
+            this.right -= Math.max.apply(Math, yLabelWidths2);
           } else {
             this.bottom -= Math.max.apply(Math, yLabelWidths);
           }
@@ -597,17 +611,17 @@ Licensed under the BSD-2-Clause License.
     };
 
     Grid.prototype.drawGrid = function() {
-      var basePos, lineY, pos, _i, _len, _ref, _ref1, _ref2, _results;
+      var basePos, basePos2, lineY, pos, _i, _j, _len, _len1, _ref, _ref1, _ref2, _ref3, _ref4, _results;
       if (this.options.grid === false && ((_ref = this.options.axes) !== true && _ref !== 'both' && _ref !== 'y')) {
         return;
       }
       if (!this.options.horizontal) {
         basePos = this.getYAxisLabelX();
+        basePos2 = this.right + this.options.padding;
       } else {
         basePos = this.getXAxisLabelY();
       }
       _ref1 = this.grid;
-      _results = [];
       for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
         lineY = _ref1[_i];
         pos = this.transY(lineY);
@@ -621,15 +635,30 @@ Licensed under the BSD-2-Clause License.
         if (this.options.grid) {
           pos = Math.floor(pos) + 0.5;
           if (!this.options.horizontal) {
-            _results.push(this.drawGridLine("M" + this.xStart + "," + pos + "H" + this.xEnd));
+            this.drawGridLine("M" + this.xStart + "," + pos + "H" + this.xEnd);
           } else {
-            _results.push(this.drawGridLine("M" + pos + "," + this.xStart + "V" + this.xEnd));
+            this.drawGridLine("M" + pos + "," + this.xStart + "V" + this.xEnd);
           }
-        } else {
-          _results.push(void 0);
         }
       }
-      return _results;
+      if (this.options.nbLines > 0) {
+        _ref3 = this.grid2;
+        _results = [];
+        for (_j = 0, _len1 = _ref3.length; _j < _len1; _j++) {
+          lineY = _ref3[_j];
+          pos = this.transY2(lineY);
+          if ((_ref4 = this.options.axes) === true || _ref4 === 'both' || _ref4 === 'y') {
+            if (!this.options.horizontal) {
+              _results.push(this.drawYAxisLabel(basePos2, pos, this.yAxisFormat(lineY)));
+            } else {
+              _results.push(this.drawXAxisLabel(pos, basePos, this.yAxisFormat(lineY)));
+            }
+          } else {
+            _results.push(void 0);
+          }
+        }
+        return _results;
+      }
     };
 
     Grid.prototype.drawGoals = function() {
