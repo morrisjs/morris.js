@@ -353,7 +353,11 @@ class Morris.Bar extends Morris.Grid
     row = @data[index]
     content = $("<div class='morris-hover-row-label'>").text(row.label)
     content = content.prop('outerHTML')
+    inv = []
     for y, jj in row.y
+      inv.unshift(y)
+
+    for y, jj in inv
       if @options.horizontal
         j = jj
       else
@@ -364,7 +368,7 @@ class Morris.Bar extends Morris.Grid
       content += """
         <div class='morris-hover-point' style='color: #{@colorFor(row, j, 'label')}'>
           #{@options.labels[j]}:
-          #{@yLabelFormat(y, j)}
+          #{@yLabelFormat(y, jj)}
         </div>
       """
     if typeof @options.hoverCallback is 'function'
