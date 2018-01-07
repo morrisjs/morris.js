@@ -168,6 +168,8 @@ class Morris.Grid extends Morris.EventEmitter
       ymin = if ymin? then Math.min(ymin, minGoal) else minGoal
       ymax = if ymax? then Math.max(ymax, maxGoal) else maxGoal
 
+    if @options.nbLines > @options.ykeys.length then @options.nbLines = @options.ykeys.length
+
     @data = for row, index in data
       ret = {src: row}
 

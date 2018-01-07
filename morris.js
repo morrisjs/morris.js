@@ -234,6 +234,9 @@ Licensed under the BSD-2-Clause License.
         ymin = ymin != null ? Math.min(ymin, minGoal) : minGoal;
         ymax = ymax != null ? Math.max(ymax, maxGoal) : maxGoal;
       }
+      if (this.options.nbLines > this.options.ykeys.length) {
+        this.options.nbLines = this.options.ykeys.length;
+      }
       this.data = (function() {
         var _i, _len, _results;
         _results = [];
