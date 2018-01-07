@@ -1,7 +1,7 @@
 class Morris.Bar extends Morris.Grid
   constructor: (options) ->
     return new Morris.Bar(options) unless (@ instanceof Morris.Bar)
-    super($.extend {}, options, parseTime: false)
+    super(Morris.extend {}, options, parseTime: false)
 
   init: ->
     @cumulative = @options.stacked
@@ -172,15 +172,15 @@ class Morris.Bar extends Morris.Grid
           Math.cos(angle * Math.PI / 180.0)
         label.transform("t#{offset},0...")
 
-
+      {width, height} = Morris.dimensions @el
       if not @options.horizontal
         startPos = labelBox.x
         size = labelBox.width
-        maxSize = @el.width()
+        maxSize = width
       else
         startPos = labelBox.y
         size = labelBox.height
-        maxSize = @el.height()
+        maxSize = height
 
       # try to avoid overlaps
       if (not prevLabelMargin? or
@@ -289,9 +289,9 @@ class Morris.Bar extends Morris.Grid
         else
           null
 
-    @flat_bars = $.map @bars, (n) -> return n
-    @flat_bars = $.grep @flat_bars, (n) -> return n?
-    @bar_els = $($.map @flat_bars, (n) -> return n[0])
+    #@flat_bars = $.map @bars, (n) -> return n
+    #@flat_bars = $.grep @flat_bars, (n) -> return n?
+    #@bar_els = $($.map @flat_bars, (n) -> return n[0])
 
   # hightlight the bar on hover
   #
@@ -368,8 +368,8 @@ class Morris.Bar extends Morris.Grid
   # @private
   hoverContentForRow: (index) ->
     row = @data[index]
-    content = $("<div class='morris-hover-row-label'>").text(row.label)
-    content = content.prop('outerHTML')
+    content = "<div class='morris-hover-row-label'>#{row.label}</div>"
+
     inv = []
     for y, jj in row.y
       inv.unshift(y)

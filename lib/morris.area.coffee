@@ -7,7 +7,7 @@ class Morris.Area extends Morris.Line
 
   constructor: (options) ->
     return new Morris.Area(options) unless (@ instanceof Morris.Area)
-    areaOptions = $.extend {}, areaDefaults, options
+    areaOptions = Morris.extend {}, areaDefaults, options
 
     @cumulative = not areaOptions.behaveLikeLine
 

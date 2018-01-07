@@ -6,7 +6,7 @@ Licensed under the BSD-2-Clause License.
 
 
 (function() {
-  var $, Morris, minutesSpecHelper, secondsSpecHelper,
+  var Morris, compStyle, minutesSpecHelper, secondsSpecHelper,
     __slice = [].slice,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
@@ -15,7 +15,15 @@ Licensed under the BSD-2-Clause License.
 
   Morris = window.Morris = {};
 
-  $ = jQuery;
+  compStyle = function(el) {
+    if (getComputedStyle) {
+      return getComputedStyle(el, null);
+    } else if (el.currentStyle) {
+      return el.currentStyle;
+    } else {
+      return el.style;
+    }
+  };
 
   Morris.EventEmitter = (function() {
     function EventEmitter() {}
@@ -70,6 +78,65 @@ Licensed under the BSD-2-Clause License.
     return (number < 10 ? '0' : '') + number;
   };
 
+  Morris.extend = function() {
+    var key, object, objects, properties, val, _i, _len;
+    object = arguments[0], objects = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+    if (object == null) {
+      object = {};
+    }
+    for (_i = 0, _len = objects.length; _i < _len; _i++) {
+      properties = objects[_i];
+      if (properties != null) {
+        for (key in properties) {
+          val = properties[key];
+          if (properties.hasOwnProperty(key)) {
+            object[key] = val;
+          }
+        }
+      }
+    }
+    return object;
+  };
+
+  Morris.offset = function(el) {
+    var rect;
+    rect = el.getBoundingClientRect();
+    return {
+      top: rect.top + document.body.scrollTop,
+      left: rect.left + document.body.scrollLeft
+    };
+  };
+
+  Morris.css = function(el, prop) {
+    return compStyle(el);
+  };
+
+  Morris.on = function(el, eventName, fn) {
+    if (el.addEventListener) {
+      return el.addEventListener(eventName, fn);
+    } else {
+      return el.attachEvent('on' + eventName, fn);
+    }
+  };
+
+  Morris.dimensions = function(el) {
+    var style;
+    style = compStyle(el);
+    return {
+      width: parseInt(style.width),
+      height: parseInt(style.height)
+    };
+  };
+
+  Morris.innerDimensions = function(el) {
+    var style;
+    style = compStyle(el);
+    return {
+      width: parseInt(style.width) + parseInt(style.paddingLeft) + parseInt(style.paddingRight),
+      height: parseInt(style.height) + parseInt(style.paddingTop) + parseInt(style.paddingBottom)
+    };
+  };
+
   Morris.Grid = (function(_super) {
     __extends(Grid, _super);
 
@@ -78,21 +145,21 @@ Licensed under the BSD-2-Clause License.
       this.resizeHandler = __bind(this.resizeHandler, this);
       var _this = this;
       if (typeof options.element === 'string') {
-        this.el = $(document.getElementById(options.element));
+        this.el = document.getElementById(options.element);
       } else {
-        this.el = $(options.element);
+        this.el = options.element[0] || options.element;
       }
-      if ((this.el == null) || this.el.length === 0) {
+      if (this.el == null) {
         throw new Error("Graph container element not found");
       }
-      if (this.el.css('position') === 'static') {
-        this.el.css('position', 'relative');
+      if (Morris.css(this.el, 'position') === 'static') {
+        this.el.style.position = 'relative';
       }
-      this.options = $.extend({}, this.gridDefaults, this.defaults || {}, options);
+      this.options = Morris.extend({}, this.gridDefaults, this.defaults || {}, options);
       if (typeof this.options.units === 'string') {
         this.options.postUnits = options.units;
       }
-      this.raphael = new Raphael(this.el[0]);
+      this.raphael = new Raphael(this.el);
       this.elementWidth = null;
       this.elementHeight = null;
       this.dirty = false;
@@ -101,9 +168,9 @@ Licensed under the BSD-2-Clause License.
         this.init();
       }
       this.setData(this.options.data);
-      this.el.bind('mousemove', function(evt) {
+      Morris.on(this.el, 'mousemove', function(evt) {
         var left, offset, right, width, x;
-        offset = _this.el.offset();
+        offset = Morris.offset(_this.el);
         x = evt.pageX - offset.left;
         if (_this.selectFrom) {
           left = _this.data[_this.hitTest(Math.min(x, _this.selectFrom))]._x;
@@ -117,50 +184,50 @@ Licensed under the BSD-2-Clause License.
           return _this.fire('hovermove', x, evt.pageY - offset.top);
         }
       });
-      this.el.bind('mouseleave', function(evt) {
+      Morris.on(this.el, 'mouseleave', function(evt) {
         if (_this.selectFrom) {
           _this.selectionRect.hide();
           _this.selectFrom = null;
         }
         return _this.fire('hoverout');
       });
-      this.el.bind('touchstart touchmove touchend', function(evt) {
+      Morris.on(this.el, 'touchstart touchmove touchend', function(evt) {
         var offset, touch;
         touch = evt.originalEvent.touches[0] || evt.originalEvent.changedTouches[0];
-        offset = _this.el.offset();
+        offset = Morris.offset(_this.el);
         return _this.fire('hovermove', touch.pageX - offset.left, touch.pageY - offset.top);
       });
-      this.el.bind('click', function(evt) {
+      Morris.on(this.el, 'click', function(evt) {
         var offset;
-        offset = _this.el.offset();
+        offset = Morris.offset(_this.el);
         return _this.fire('gridclick', evt.pageX - offset.left, evt.pageY - offset.top);
       });
       if (this.options.rangeSelect) {
-        this.selectionRect = this.raphael.rect(0, 0, 0, this.el.innerHeight()).attr({
+        this.selectionRect = this.raphael.rect(0, 0, 0, Morris.innerDimensions(this.el).height).attr({
           fill: this.options.rangeSelectColor,
           stroke: false
         }).toBack().hide();
-        this.el.bind('mousedown', function(evt) {
+        Morris.on(this.el, 'mousedown', function(evt) {
           var offset;
-          offset = _this.el.offset();
+          offset = Morris.offset(_this.el);
           return _this.startRange(evt.pageX - offset.left);
         });
-        this.el.bind('mouseup', function(evt) {
+        Morris.on(this.el, 'mouseup', function(evt) {
           var offset;
-          offset = _this.el.offset();
+          offset = Morris.offset(_this.el);
           _this.endRange(evt.pageX - offset.left);
           return _this.fire('hovermove', evt.pageX - offset.left, evt.pageY - offset.top);
         });
       }
       if (this.options.resize) {
-        $(window).bind('resize', function(evt) {
+        Morris.on(window, 'resize', function(evt) {
           if (_this.timeoutId != null) {
             window.clearTimeout(_this.timeoutId);
           }
           return _this.timeoutId = window.setTimeout(_this.resizeHandler, 100);
         });
       }
-      this.el.css('-webkit-tap-highlight-color', 'rgba(0,0,0,0)');
+      this.el.style.webkitTapHighlightColor = 'rgba(0,0,0,0)';
       if (this.postInit) {
         this.postInit();
       }
@@ -462,9 +529,8 @@ Licensed under the BSD-2-Clause License.
     };
 
     Grid.prototype._calc = function() {
-      var angle, bottomOffsets, gridLine, h, i, w, yLabelWidths, yLabelWidths2, _ref, _ref1;
-      w = this.el.width();
-      h = this.el.height();
+      var angle, bottomOffsets, gridLine, h, i, w, yLabelWidths, yLabelWidths2, _ref, _ref1, _ref2;
+      _ref = Morris.dimensions(this.el), w = _ref.width, h = _ref.height;
       if (this.elementWidth !== w || this.elementHeight !== h || this.dirty) {
         this.elementWidth = w;
         this.elementHeight = h;
@@ -473,24 +539,24 @@ Licensed under the BSD-2-Clause License.
         this.right = this.elementWidth - this.options.padding;
         this.top = this.options.padding;
         this.bottom = this.elementHeight - this.options.padding;
-        if ((_ref = this.options.axes) === true || _ref === 'both' || _ref === 'y') {
+        if ((_ref1 = this.options.axes) === true || _ref1 === 'both' || _ref1 === 'y') {
           yLabelWidths = (function() {
-            var _i, _len, _ref1, _results;
-            _ref1 = this.grid;
+            var _i, _len, _ref2, _results;
+            _ref2 = this.grid;
             _results = [];
-            for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-              gridLine = _ref1[_i];
+            for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+              gridLine = _ref2[_i];
               _results.push(this.measureText(this.yAxisFormat(gridLine)).width);
             }
             return _results;
           }).call(this);
           if (this.options.nbLines > 0) {
             yLabelWidths2 = (function() {
-              var _i, _len, _ref1, _results;
-              _ref1 = this.grid2;
+              var _i, _len, _ref2, _results;
+              _ref2 = this.grid2;
               _results = [];
-              for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-                gridLine = _ref1[_i];
+              for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+                gridLine = _ref2[_i];
                 _results.push(this.measureText(this.yAxisFormat(gridLine)).width);
               }
               return _results;
@@ -505,16 +571,16 @@ Licensed under the BSD-2-Clause License.
             this.bottom -= Math.max.apply(Math, yLabelWidths);
           }
         }
-        if ((_ref1 = this.options.axes) === true || _ref1 === 'both' || _ref1 === 'x') {
+        if ((_ref2 = this.options.axes) === true || _ref2 === 'both' || _ref2 === 'x') {
           if (!this.options.horizontal) {
             angle = -this.options.xLabelAngle;
           } else {
             angle = -90;
           }
           bottomOffsets = (function() {
-            var _i, _ref2, _results;
+            var _i, _ref3, _results;
             _results = [];
-            for (i = _i = 0, _ref2 = this.data.length; 0 <= _ref2 ? _i < _ref2 : _i > _ref2; i = 0 <= _ref2 ? ++_i : --_i) {
+            for (i = _i = 0, _ref3 = this.data.length; 0 <= _ref3 ? _i < _ref3 : _i > _ref3; i = 0 <= _ref3 ? ++_i : --_i) {
               _results.push(this.measureText(this.data[i].label, angle).height);
             }
             return _results;
@@ -776,8 +842,10 @@ Licensed under the BSD-2-Clause License.
     };
 
     Grid.prototype.resizeHandler = function() {
+      var height, width, _ref;
       this.timeoutId = null;
-      this.raphael.setSize(this.el.width(), this.el.height());
+      _ref = Morris.dimensions(this.el), width = _ref.width, height = _ref.height;
+      this.raphael.setSize(width, height);
       return this.redraw();
     };
 
@@ -855,10 +923,11 @@ Licensed under the BSD-2-Clause License.
       if (options == null) {
         options = {};
       }
-      this.options = $.extend({}, Morris.Hover.defaults, options);
-      this.el = $("<div class='" + this.options["class"] + "'></div>");
-      this.el.hide();
-      this.options.parent.append(this.el);
+      this.options = Morris.extend({}, Morris.Hover.defaults, options);
+      this.el = document.createElement('div');
+      this.el.className = this.options["class"];
+      this.el.style.display = 'none';
+      (this.options.parent = this.options.parent[0] || this.options.parent).appendChild(this.el);
     }
 
     Hover.prototype.update = function(html, x, y, centre_y) {
@@ -872,15 +941,14 @@ Licensed under the BSD-2-Clause License.
     };
 
     Hover.prototype.html = function(content) {
-      return this.el.html(content);
+      return this.el.innerHTML = content;
     };
 
     Hover.prototype.moveTo = function(x, y, centre_y) {
-      var hoverHeight, hoverWidth, left, parentHeight, parentWidth, top;
-      parentWidth = this.options.parent.innerWidth();
-      parentHeight = this.options.parent.innerHeight();
-      hoverWidth = this.el.outerWidth();
-      hoverHeight = this.el.outerHeight();
+      var hoverHeight, hoverWidth, left, parentHeight, parentWidth, rect, top, _ref;
+      _ref = Morris.innerDimensions(this.options.parent), parentWidth = _ref.width, parentHeight = _ref.height;
+      hoverWidth = this.el.offsetWidth;
+      hoverHeight = this.el.offsetHeight;
       left = Math.min(Math.max(0, x - hoverWidth / 2), parentWidth - hoverWidth);
       if (y != null) {
         if (centre_y === true) {
@@ -900,18 +968,18 @@ Licensed under the BSD-2-Clause License.
       } else {
         top = parentHeight / 2 - hoverHeight / 2;
       }
-      return this.el.css({
-        left: left + "px",
-        top: parseInt(top) + "px"
-      });
+      console.log('top: ' + top);
+      rect = document.getElementById(this.options.parent.id).getBoundingClientRect();
+      this.el.style.left = parseFloat(left + rect.left + window.scrollX) + "px";
+      return this.el.style.top = parseFloat(top + rect.top + window.scrollY) + "px";
     };
 
     Hover.prototype.show = function() {
-      return this.el.show();
+      return this.el.style.display = '';
     };
 
     Hover.prototype.hide = function() {
-      return this.el.hide();
+      return this.el.style.display = 'none';
     };
 
     return Hover;
@@ -1173,7 +1241,7 @@ Licensed under the BSD-2-Clause License.
           label.transform("t" + offset + ",0...");
         }
         labelBox = label.getBBox();
-        if (((prevLabelMargin == null) || prevLabelMargin >= labelBox.x + labelBox.width || (prevAngleMargin != null) && prevAngleMargin >= labelBox.x) && labelBox.x >= 0 && (labelBox.x + labelBox.width) < _this.el.width()) {
+        if (((prevLabelMargin == null) || prevLabelMargin >= labelBox.x + labelBox.width || (prevAngleMargin != null) && prevAngleMargin >= labelBox.x) && labelBox.x >= 0 && (labelBox.x + labelBox.width) < Morris.dimensions(_this.el).width) {
           if (_this.options.xLabelAngle !== 0) {
             margin = 1.25 * _this.options.gridTextSize / Math.sin(_this.options.xLabelAngle * Math.PI / 180.0);
             prevAngleMargin = labelBox.x - margin;
@@ -1534,7 +1602,7 @@ Licensed under the BSD-2-Clause License.
       spec = Morris.LABEL_SPECS["second"];
     }
     if (xLabelFormat) {
-      spec = $.extend({}, spec, {
+      spec = Morris.extend({}, spec, {
         fmt: xLabelFormat
       });
     }
@@ -1670,7 +1738,7 @@ Licensed under the BSD-2-Clause License.
       if (!(this instanceof Morris.Area)) {
         return new Morris.Area(options);
       }
-      areaOptions = $.extend({}, areaDefaults, options);
+      areaOptions = Morris.extend({}, areaDefaults, options);
       this.cumulative = !areaOptions.behaveLikeLine;
       if (areaOptions.fillOpacity === 'auto') {
         areaOptions.fillOpacity = areaOptions.behaveLikeLine ? .8 : 1;
@@ -1785,7 +1853,7 @@ Licensed under the BSD-2-Clause License.
       if (!(this instanceof Morris.Bar)) {
         return new Morris.Bar(options);
       }
-      Bar.__super__.constructor.call(this, $.extend({}, options, {
+      Bar.__super__.constructor.call(this, Morris.extend({}, options, {
         parseTime: false
       }));
     }
@@ -2017,7 +2085,7 @@ Licensed under the BSD-2-Clause License.
     };
 
     Bar.prototype.drawXAxis = function() {
-      var angle, basePos, i, label, labelBox, margin, maxSize, offset, prevAngleMargin, prevLabelMargin, row, size, startPos, textBox, _i, _ref, _results;
+      var angle, basePos, height, i, label, labelBox, margin, maxSize, offset, prevAngleMargin, prevLabelMargin, row, size, startPos, textBox, width, _i, _ref, _ref1, _results;
       if (!this.options.horizontal) {
         basePos = this.getXAxisLabelY();
       } else {
@@ -2046,14 +2114,15 @@ Licensed under the BSD-2-Clause License.
           offset = -0.5 * textBox.width * Math.cos(angle * Math.PI / 180.0);
           label.transform("t" + offset + ",0...");
         }
+        _ref1 = Morris.dimensions(this.el), width = _ref1.width, height = _ref1.height;
         if (!this.options.horizontal) {
           startPos = labelBox.x;
           size = labelBox.width;
-          maxSize = this.el.width();
+          maxSize = width;
         } else {
           startPos = labelBox.y;
           size = labelBox.height;
-          maxSize = this.el.height();
+          maxSize = height;
         }
         if (((prevLabelMargin == null) || prevLabelMargin >= startPos + size || (prevAngleMargin != null) && prevAngleMargin >= startPos) && startPos >= 0 && (startPos + size) < maxSize) {
           if (angle !== 0) {
@@ -2100,7 +2169,7 @@ Licensed under the BSD-2-Clause License.
       spaceLeft = groupWidth - barWidth * numBars - this.options.barGap * (numBars - 1);
       leftPadding = spaceLeft / 2;
       zeroPos = this.ymin <= 0 && this.ymax >= 0 ? this.transY(0) : null;
-      this.bars = (function() {
+      return this.bars = (function() {
         var _j, _len, _ref1, _results;
         _ref1 = this.data;
         _results = [];
@@ -2190,15 +2259,6 @@ Licensed under the BSD-2-Clause License.
         }
         return _results;
       }).call(this);
-      this.flat_bars = $.map(this.bars, function(n) {
-        return n;
-      });
-      this.flat_bars = $.grep(this.flat_bars, function(n) {
-        return n != null;
-      });
-      return this.bar_els = $($.map(this.flat_bars, function(n) {
-        return n[0];
-      }));
     };
 
     Bar.prototype.hilight = function(index) {
@@ -2292,8 +2352,7 @@ Licensed under the BSD-2-Clause License.
     Bar.prototype.hoverContentForRow = function(index) {
       var content, inv, j, jj, row, x, y, _i, _j, _len, _len1, _ref;
       row = this.data[index];
-      content = $("<div class='morris-hover-row-label'>").text(row.label);
-      content = content.prop('outerHTML');
+      content = "<div class='morris-hover-row-label'>" + row.label + "</div>";
       inv = [];
       _ref = row.y;
       for (jj = _i = 0, _len = _ref.length; _i < _len; jj = ++_i) {
@@ -2408,19 +2467,19 @@ Licensed under the BSD-2-Clause License.
       if (!(this instanceof Morris.Donut)) {
         return new Morris.Donut(options);
       }
-      this.options = $.extend({}, this.defaults, options);
+      this.options = Morris.extend({}, this.defaults, options);
       if (typeof options.element === 'string') {
-        this.el = $(document.getElementById(options.element));
+        this.el = document.getElementById(options.element);
       } else {
-        this.el = $(options.element);
+        this.el = options.element[0] || options.element;
       }
-      if (this.el === null || this.el.length === 0) {
+      if (this.el === null) {
         throw new Error("Graph placeholder not found.");
       }
       if (options.data === void 0 || options.data.length === 0) {
         return;
       }
-      this.raphael = new Raphael(this.el[0]);
+      this.raphael = new Raphael(this.el);
       if (this.options.resize) {
         $(window).bind('resize', function(evt) {
           if (_this.timeoutId != null) {
@@ -2433,15 +2492,16 @@ Licensed under the BSD-2-Clause License.
     }
 
     Donut.prototype.redraw = function() {
-      var C, cx, cy, i, idx, label_x, label_y, last, max_value, min, next, p_cos_p0, p_sin_p0, seg, total, value, w, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _results;
+      var C, cx, cy, height, i, idx, label_x, label_y, last, max_value, min, next, p_cos_p0, p_sin_p0, seg, total, value, w, width, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _ref3, _results;
       this.raphael.clear();
-      cx = this.el.width() / 2;
-      cy = this.el.height() / 2;
+      _ref = Morris.dimensions(this.el), width = _ref.width, height = _ref.height;
+      cx = width / 2;
+      cy = height / 2;
       w = (Math.min(cx, cy) - 10) / 3;
       total = 0;
-      _ref = this.values;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        value = _ref[_i];
+      _ref1 = this.values;
+      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+        value = _ref1[_i];
         total += value;
       }
       min = 5 / (2 * w);
@@ -2449,9 +2509,9 @@ Licensed under the BSD-2-Clause License.
       last = 0;
       idx = 0;
       this.segments = [];
-      _ref1 = this.values;
-      for (i = _j = 0, _len1 = _ref1.length; _j < _len1; i = ++_j) {
-        value = _ref1[i];
+      _ref2 = this.values;
+      for (i = _j = 0, _len1 = _ref2.length; _j < _len1; i = ++_j) {
+        value = _ref2[i];
         next = last + min + C * (value / total);
         seg = new Morris.DonutSegment(cx, cy, w * 2, w, last, next, this.data[i].color || this.options.colors[idx % this.options.colors.length], this.options.backgroundColor, idx, this.raphael, this.options);
         seg.render();
@@ -2482,10 +2542,10 @@ Licensed under the BSD-2-Clause License.
       this.text2 = this.drawEmptyDonutLabel(cx, cy + 10, this.options.labelColor, 14);
       max_value = Math.max.apply(Math, this.values);
       idx = 0;
-      _ref2 = this.values;
+      _ref3 = this.values;
       _results = [];
-      for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
-        value = _ref2[_k];
+      for (_k = 0, _len2 = _ref3.length; _k < _len2; _k++) {
+        value = _ref3[_k];
         if (value === max_value) {
           this.select(idx);
           break;
@@ -2536,8 +2596,9 @@ Licensed under the BSD-2-Clause License.
     };
 
     Donut.prototype.setLabels = function(label1, label2) {
-      var inner, maxHeightBottom, maxHeightTop, maxWidth, text1bbox, text1scale, text2bbox, text2scale;
-      inner = (Math.min(this.el.width() / 2, this.el.height() / 2) - 10) * 2 / 3;
+      var height, inner, maxHeightBottom, maxHeightTop, maxWidth, text1bbox, text1scale, text2bbox, text2scale, width, _ref;
+      _ref = Morris.dimensions(this.el), width = _ref.width, height = _ref.height;
+      inner = (Math.min(width / 2, height / 2) - 10) * 2 / 3;
       maxWidth = 1.8 * inner;
       maxHeightTop = inner / 2;
       maxHeightBottom = inner / 3;
@@ -2571,8 +2632,10 @@ Licensed under the BSD-2-Clause License.
     };
 
     Donut.prototype.resizeHandler = function() {
+      var height, width, _ref;
       this.timeoutId = null;
-      this.raphael.setSize(this.el.width(), this.el.height());
+      _ref = Morris.dimensions(this.el), width = _ref.width, height = _ref.height;
+      this.raphael.setSize(width, height);
       return this.redraw();
     };
 
