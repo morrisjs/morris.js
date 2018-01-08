@@ -131,7 +131,7 @@ class Morris.Bar extends Morris.Grid
 
           if @options.dataLabels
             if @options.horizontal is not true
-              @drawDataLabel(row._x, row._y2[nb+ii], @yLabelFormat(row.y[nb+ii]))
+              @drawDataLabel(row._x, row._y2[nb+ii] - 10, @yLabelFormat(row.y[nb+ii]))
             else
               @drawDataLabelExt(row._y2[nb+ii] + 10, row._x, @yLabelFormat(row.y[nb+ii]), 'start')
               
