@@ -446,8 +446,7 @@ class Morris.Grid extends Morris.EventEmitter
     if typeof @options.yLabelFormat is 'function'
       @options.yLabelFormat(label, i)
     else
-      if @options.nbYkeys2 == 0
-      else if i <= @options.ykeys.length - @options.nbYkeys2 - 1
+      if @options.nbYkeys2 == 0 || (i <= @options.ykeys.length - @options.nbYkeys2 - 1)
         "#{@options.preUnits}#{Morris.commas(label)}#{@options.postUnits}"
       else 
         "#{@options.preUnits2}#{Morris.commas(label)}#{@options.postUnits2}"

@@ -680,9 +680,7 @@ Licensed under the BSD-2-Clause License.
       if (typeof this.options.yLabelFormat === 'function') {
         return this.options.yLabelFormat(label, i);
       } else {
-        if (this.options.nbYkeys2 === 0) {
-
-        } else if (i <= this.options.ykeys.length - this.options.nbYkeys2 - 1) {
+        if (this.options.nbYkeys2 === 0 || (i <= this.options.ykeys.length - this.options.nbYkeys2 - 1)) {
           return "" + this.options.preUnits + (Morris.commas(label)) + this.options.postUnits;
         } else {
           return "" + this.options.preUnits2 + (Morris.commas(label)) + this.options.postUnits2;
@@ -957,7 +955,7 @@ Licensed under the BSD-2-Clause License.
     };
 
     Hover.prototype.moveTo = function(x, y, centre_y) {
-      var hoverHeight, hoverWidth, left, parentHeight, parentWidth, rect, top, _ref;
+      var hoverHeight, hoverWidth, left, parentHeight, parentWidth, top, _ref;
       _ref = Morris.innerDimensions(this.options.parent), parentWidth = _ref.width, parentHeight = _ref.height;
       hoverWidth = this.el.offsetWidth;
       hoverHeight = this.el.offsetHeight;
@@ -980,9 +978,8 @@ Licensed under the BSD-2-Clause License.
       } else {
         top = parentHeight / 2 - hoverHeight / 2;
       }
-      rect = document.getElementById(this.options.parent.id).getBoundingClientRect();
-      this.el.style.left = parseFloat(left + rect.left + window.scrollX) + "px";
-      return this.el.style.top = parseFloat(parseInt(top) + rect.top + window.scrollY) + "px";
+      this.el.style.left = parseFloat(left) + "px";
+      return this.el.style.top = parseFloat(parseInt(top)) + "px";
     };
 
     Hover.prototype.show = function() {
