@@ -31,6 +31,7 @@ class Morris.Bar extends Morris.Grid
     barRadius: [0, 0, 0, 0]
     xLabelMargin: 50
     horizontal: false
+    stacked: false
     shown: true
     inBarValue: false
     inBarValueTextColor: 'white'
