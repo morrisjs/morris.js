@@ -112,7 +112,9 @@ class Morris.Grid extends Morris.EventEmitter
     padding: 25
     parseTime: true
     postUnits: ''
+    postUnits2: ''
     preUnits: ''
+    preUnits2: ''
     ymax: 'auto'
     ymin: 'auto 0'
     y2max: 'auto'
@@ -435,7 +437,8 @@ class Morris.Grid extends Morris.EventEmitter
 
   # @private
   #
-  yAxisFormat: (label) -> @yLabelFormat(label, 0)
+  yAxisFormat: (label) -> @yLabelFormat(label, 1000)
+  yAxisFormat2: (label) -> @yLabelFormat(label, 0)
 
   # @private
   #
@@ -443,7 +446,12 @@ class Morris.Grid extends Morris.EventEmitter
     if typeof @options.yLabelFormat is 'function'
       @options.yLabelFormat(label, i)
     else
-      "#{@options.preUnits}#{Morris.commas(label)}#{@options.postUnits}"
+      if @options.nbLines == 0
+        "#{@options.preUnits}#{Morris.commas(label)}#{@options.postUnits}"
+      else if i >= @options.ykeys.length - @options.nbLines - 1
+        "#{@options.preUnits}#{Morris.commas(label)}#{@options.postUnits}"
+      else 
+        "#{@options.preUnits2}#{Morris.commas(label)}#{@options.postUnits2}"
 
   # get the X position of a label on the Y axis
   #
@@ -487,9 +495,9 @@ class Morris.Grid extends Morris.EventEmitter
         pos = @transY2(lineY)
         if @options.axes in [true, 'both', 'y']
           if not @options.horizontal
-            @drawYAxisLabel(basePos2, pos, @yAxisFormat(lineY))
+            @drawYAxisLabel(basePos2, pos, @yAxisFormat2(lineY))
           else
-            @drawXAxisLabel(pos, basePos2, @yAxisFormat(lineY))
+            @drawXAxisLabel(pos, basePos2, @yAxisFormat2(lineY))
 
   # draw goals horizontal lines
   #

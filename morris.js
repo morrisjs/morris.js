@@ -252,7 +252,9 @@ Licensed under the BSD-2-Clause License.
       padding: 25,
       parseTime: true,
       postUnits: '',
+      postUnits2: '',
       preUnits: '',
+      preUnits2: '',
       ymax: 'auto',
       ymin: 'auto 0',
       y2max: 'auto',
@@ -667,6 +669,10 @@ Licensed under the BSD-2-Clause License.
     };
 
     Grid.prototype.yAxisFormat = function(label) {
+      return this.yLabelFormat(label, 1000);
+    };
+
+    Grid.prototype.yAxisFormat2 = function(label) {
       return this.yLabelFormat(label, 0);
     };
 
@@ -674,7 +680,13 @@ Licensed under the BSD-2-Clause License.
       if (typeof this.options.yLabelFormat === 'function') {
         return this.options.yLabelFormat(label, i);
       } else {
-        return "" + this.options.preUnits + (Morris.commas(label)) + this.options.postUnits;
+        if (this.options.nbLines === 0) {
+          return "" + this.options.preUnits + (Morris.commas(label)) + this.options.postUnits;
+        } else if (i >= this.options.ykeys.length - this.options.nbLines - 1) {
+          return "" + this.options.preUnits + (Morris.commas(label)) + this.options.postUnits;
+        } else {
+          return "" + this.options.preUnits2 + (Morris.commas(label)) + this.options.postUnits2;
+        }
       }
     };
 
@@ -726,9 +738,9 @@ Licensed under the BSD-2-Clause License.
           pos = this.transY2(lineY);
           if ((_ref4 = this.options.axes) === true || _ref4 === 'both' || _ref4 === 'y') {
             if (!this.options.horizontal) {
-              _results.push(this.drawYAxisLabel(basePos2, pos, this.yAxisFormat(lineY)));
+              _results.push(this.drawYAxisLabel(basePos2, pos, this.yAxisFormat2(lineY)));
             } else {
-              _results.push(this.drawXAxisLabel(pos, basePos2, this.yAxisFormat(lineY)));
+              _results.push(this.drawXAxisLabel(pos, basePos2, this.yAxisFormat2(lineY)));
             }
           } else {
             _results.push(void 0);
@@ -968,10 +980,9 @@ Licensed under the BSD-2-Clause License.
       } else {
         top = parentHeight / 2 - hoverHeight / 2;
       }
-      console.log('top: ' + top);
       rect = document.getElementById(this.options.parent.id).getBoundingClientRect();
       this.el.style.left = parseFloat(left + rect.left + window.scrollX) + "px";
-      return this.el.style.top = parseFloat(top + rect.top + window.scrollY) + "px";
+      return this.el.style.top = parseFloat(parseInt(top) + rect.top + window.scrollY) + "px";
     };
 
     Hover.prototype.show = function() {
