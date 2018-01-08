@@ -42,10 +42,9 @@ class Morris.Hover
     else
       top = parentHeight / 2 - hoverHeight / 2
 
-    console.log('top: '+top)
     rect = document.getElementById(@options.parent.id).getBoundingClientRect()
     @el.style.left = parseFloat(left + rect.left + window.scrollX) + "px"
-    @el.style.top = parseFloat(top + rect.top + window.scrollY) + "px"
+    @el.style.top = parseFloat(parseInt(top) + rect.top + window.scrollY) + "px"
 
   show: ->
     @el.style.display = ''
