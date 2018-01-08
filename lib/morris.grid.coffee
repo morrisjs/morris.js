@@ -242,7 +242,7 @@ class Morris.Grid extends Morris.EventEmitter
             @events.push(Morris.parseDate(e))
       else
         @events = @options.events
-      flatEvents = $.map @events, (e) -> e
+      flatEvents = @events.map (e) -> e
       @xmax = Math.max(@xmax, Math.max(flatEvents...))
       @xmin = Math.min(@xmin, Math.min(flatEvents...))
 

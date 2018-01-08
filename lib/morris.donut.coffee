@@ -58,7 +58,7 @@ class Morris.Donut extends Morris.EventEmitter
     @raphael = new Raphael(@el)
 
     if @options.resize
-      $(window).bind 'resize', (evt) =>
+      Morris.on window, 'resize', (evt) =>
         if @timeoutId?
           window.clearTimeout @timeoutId
         @timeoutId = window.setTimeout @resizeHandler, 100
