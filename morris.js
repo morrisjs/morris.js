@@ -669,11 +669,11 @@ Licensed under the BSD-2-Clause License.
     };
 
     Grid.prototype.yAxisFormat = function(label) {
-      return this.yLabelFormat(label, 1000);
+      return this.yLabelFormat(label, 0);
     };
 
     Grid.prototype.yAxisFormat2 = function(label) {
-      return this.yLabelFormat(label, 0);
+      return this.yLabelFormat(label, 1000);
     };
 
     Grid.prototype.yLabelFormat = function(label, i) {
@@ -681,8 +681,8 @@ Licensed under the BSD-2-Clause License.
         return this.options.yLabelFormat(label, i);
       } else {
         if (this.options.nbYkeys2 === 0) {
-          return "" + this.options.preUnits + (Morris.commas(label)) + this.options.postUnits;
-        } else if (i >= this.options.ykeys.length - this.options.nbYkeys2 - 1) {
+
+        } else if (i <= this.options.ykeys.length - this.options.nbYkeys2 - 1) {
           return "" + this.options.preUnits + (Morris.commas(label)) + this.options.postUnits;
         } else {
           return "" + this.options.preUnits2 + (Morris.commas(label)) + this.options.postUnits2;
@@ -705,7 +705,7 @@ Licensed under the BSD-2-Clause License.
       }
       if (!this.options.horizontal) {
         basePos = this.getYAxisLabelX();
-        basePos2 = this.right + 2 * this.options.padding;
+        basePos2 = this.right + this.options.padding;
       } else {
         basePos = this.getXAxisLabelY();
         basePos2 = this.top - (this.options.xAxisLabelTopPadding || this.options.padding / 2);
@@ -1153,19 +1153,18 @@ Licensed under the BSD-2-Clause License.
     };
 
     Line.prototype.hoverContentForRow = function(index) {
-      var content, j, jj, row, y, _i, _len, _ref;
+      var content, j, row, y, _i, _len, _ref;
       row = this.data[index];
-      content = $("<div class='morris-hover-row-label'>").text(row.label);
-      content = content.prop('outerHTML');
+      content = "";
       _ref = row.y;
-      for (jj = _i = 0, _len = _ref.length; _i < _len; jj = ++_i) {
-        y = _ref[jj];
-        j = row.y.length - 1 - jj;
+      for (j = _i = 0, _len = _ref.length; _i < _len; j = ++_i) {
+        y = _ref[j];
         if (this.options.labels[j] === false) {
           continue;
         }
-        content += "<div class='morris-hover-point' style='color: " + (this.colorFor(row, j, 'label')) + "'>\n  " + this.options.labels[j] + ":\n  " + (this.yLabelFormat(y, j)) + "\n</div>";
+        content = ("<div class='morris-hover-point' style='color: " + (this.colorFor(row, j, 'label')) + "'>\n  " + this.options.labels[j] + ":\n  " + (this.yLabelFormat(y, j)) + "\n</div>") + content;
       }
+      content = ("<div class='morris-hover-row-label'>" + row.label + "</div>") + content;
       if (typeof this.options.hoverCallback === 'function') {
         content = this.options.hoverCallback(index, this.options, content, row.src);
       }
@@ -1355,13 +1354,15 @@ Licensed under the BSD-2-Clause License.
         if (row._y[index] != null) {
           circle = this.drawLinePoint(row._x, row._y[index], this.colorFor(row, index, 'point'), index);
           if (this.options.dataLabels) {
-            this.drawDataLabel(row._x, row._y[index] - 10, this.yLabelFormat(row.y[index]));
+            this.drawDataLabel(row._x, row._y[index] - 10, this.yLabelFormat(row.y[index], 0));
           }
         }
-        if (row._y2[index] != null) {
-          circle = this.drawLinePoint(row._x, row._y2[index], this.colorFor(row, index, 'point'), index);
-          if (this.options.dataLabels) {
-            this.drawDataLabel(row._x, row._y2[index] - 10, this.yLabelFormat(row.y[index]));
+        if (row._y2 != null) {
+          if (row._y2[index] != null) {
+            circle = this.drawLinePoint(row._x, row._y2[index], this.colorFor(row, index, 'point'), index);
+            if (this.options.dataLabels) {
+              this.drawDataLabel(row._x, row._y2[index] - 10, this.yLabelFormat(row.y[index], 1000));
+            }
           }
         }
         _results.push(this.seriesPoints[index].push(circle));
@@ -2077,7 +2078,7 @@ Licensed under the BSD-2-Clause License.
               }
               if (this.options.dataLabels) {
                 if (this.options.horizontal === !true) {
-                  _results1.push(this.drawDataLabel(row._x, row._y2[nb + ii], this.yLabelFormat(row.y[nb + ii])));
+                  _results1.push(this.drawDataLabel(row._x, row._y2[nb + ii] - 10, this.yLabelFormat(row.y[nb + ii])));
                 } else {
                   _results1.push(this.drawDataLabelExt(row._y2[nb + ii] + 10, row._x, this.yLabelFormat(row.y[nb + ii]), 'start'));
                 }
@@ -2233,7 +2234,7 @@ Licensed under the BSD-2-Clause License.
                       depth = -7;
                     }
                     if (size > this.options.dataLabelsSize || !this.options.stacked) {
-                      _results1.push(this.drawDataLabel(left + barWidth / 2, top + depth, this.yLabelFormat(row.y[sidx])));
+                      _results1.push(this.drawDataLabel(left + barWidth / 2, top + depth, this.yLabelFormat(row.y[sidx], 0)));
                     } else {
                       _results1.push(void 0);
                     }
@@ -2248,9 +2249,9 @@ Licensed under the BSD-2-Clause License.
                   this.seriesBars[idx][sidx] = this.drawBar(top, left, size, barWidth, this.colorFor(row, sidx, 'bar'), this.options.barOpacity, this.options.barRadius);
                   if (this.options.dataLabels) {
                     if (this.options.stacked || this.options.dataLabelsPosition === 'inside') {
-                      this.drawDataLabel(top + size / 2, left + barWidth / 2, this.yLabelFormat(row.y[sidx]));
+                      this.drawDataLabel(top + size / 2, left + barWidth / 2, this.yLabelFormat(row.y[sidx], 0));
                     } else {
-                      this.drawDataLabel(top + size + 5, left + barWidth / 2, this.yLabelFormat(row.y[sidx]));
+                      this.drawDataLabel(top + size + 5, left + barWidth / 2, this.yLabelFormat(row.y[sidx], 0));
                     }
                   }
                   if (this.options.inBarValue && barWidth > this.options.gridTextSize + 2 * this.options.inBarValueMinTopMargin) {
@@ -2375,7 +2376,7 @@ Licensed under the BSD-2-Clause License.
         if (this.options.labels[j] === false) {
           continue;
         }
-        content += "<div class='morris-hover-point' style='color: " + (this.colorFor(row, j, 'label')) + "'>\n  " + this.options.labels[j] + ":\n  " + (this.yLabelFormat(y, jj)) + "\n</div>";
+        content += "<div class='morris-hover-point' style='color: " + (this.colorFor(row, j, 'label')) + "'>\n  " + this.options.labels[j] + ":\n  " + (this.yLabelFormat(y, j)) + "\n</div>";
       }
       if (typeof this.options.hoverCallback === 'function') {
         content = this.options.hoverCallback(index, this.options, content, row.src);

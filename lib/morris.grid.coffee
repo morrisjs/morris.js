@@ -437,8 +437,8 @@ class Morris.Grid extends Morris.EventEmitter
 
   # @private
   #
-  yAxisFormat: (label) -> @yLabelFormat(label, 1000)
-  yAxisFormat2: (label) -> @yLabelFormat(label, 0)
+  yAxisFormat: (label) -> @yLabelFormat(label, 0)
+  yAxisFormat2: (label) -> @yLabelFormat(label, 1000)
 
   # @private
   #
@@ -447,12 +447,11 @@ class Morris.Grid extends Morris.EventEmitter
       @options.yLabelFormat(label, i)
     else
       if @options.nbYkeys2 == 0
-        "#{@options.preUnits}#{Morris.commas(label)}#{@options.postUnits}"
-      else if i >= @options.ykeys.length - @options.nbYkeys2 - 1
+      else if i <= @options.ykeys.length - @options.nbYkeys2 - 1
         "#{@options.preUnits}#{Morris.commas(label)}#{@options.postUnits}"
       else 
         "#{@options.preUnits2}#{Morris.commas(label)}#{@options.postUnits2}"
-
+    
   # get the X position of a label on the Y axis
   #
   # @private
@@ -470,7 +469,7 @@ class Morris.Grid extends Morris.EventEmitter
 
     if not @options.horizontal
       basePos = @getYAxisLabelX()
-      basePos2 = @right + 2 * @options.padding
+      basePos2 = @right + @options.padding
     else
       basePos = @getXAxisLabelY()
       basePos2 = @top - (@options.xAxisLabelTopPadding || @options.padding / 2)

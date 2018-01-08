@@ -264,7 +264,7 @@ class Morris.Bar extends Morris.Grid
               else
                 depth = -7
               if size>@options.dataLabelsSize || !@options.stacked
-                @drawDataLabel(left+barWidth/2,top+depth,@yLabelFormat(row.y[sidx]))
+                @drawDataLabel(left+barWidth/2,top+depth,@yLabelFormat(row.y[sidx], 0))
           else
             lastTop -= size
             if size == 0 then size = 1
@@ -272,9 +272,9 @@ class Morris.Bar extends Morris.Grid
                 @options.barOpacity, @options.barRadius)
             if @options.dataLabels
               if @options.stacked || @options.dataLabelsPosition=='inside'
-                  @drawDataLabel(top + size / 2, left + barWidth / 2,@yLabelFormat(row.y[sidx]))
+                  @drawDataLabel(top + size / 2, left + barWidth / 2,@yLabelFormat(row.y[sidx], 0))
                 else
-                  @drawDataLabel(top + size + 5, left + barWidth / 2,@yLabelFormat(row.y[sidx]))
+                  @drawDataLabel(top + size + 5, left + barWidth / 2,@yLabelFormat(row.y[sidx], 0))
             if @options.inBarValue and
                 barWidth > @options.gridTextSize + 2*@options.inBarValueMinTopMargin
               barMiddle = left + 0.5 * barWidth
@@ -382,7 +382,7 @@ class Morris.Bar extends Morris.Grid
       content += """
         <div class='morris-hover-point' style='color: #{@colorFor(row, j, 'label')}'>
           #{@options.labels[j]}:
-          #{@yLabelFormat(y, jj)}
+          #{@yLabelFormat(y, j)}
         </div>
       """
     if typeof @options.hoverCallback is 'function'

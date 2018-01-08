@@ -114,19 +114,21 @@ class Morris.Line extends Morris.Grid
   # @private
   hoverContentForRow: (index) ->
     row = @data[index]
-    content = $("<div class='morris-hover-row-label'>").text(row.label)
-    content = content.prop('outerHTML')
-    for y, jj in row.y
-      j = row.y.length - 1 - jj
+    content = ""
+
+    for y, j in row.y
       if @options.labels[j] is false
         continue
 
-      content += """
+      content = """
         <div class='morris-hover-point' style='color: #{@colorFor(row, j, 'label')}'>
           #{@options.labels[j]}:
           #{@yLabelFormat(y, j)}
         </div>
-      """
+      """ + content
+    
+    content = "<div class='morris-hover-row-label'>#{row.label}</div>" + content
+    
     if typeof @options.hoverCallback is 'function'
       content = @options.hoverCallback(index, @options, content, row.src)
     [content, row._x, row._ymax]
@@ -250,13 +252,13 @@ class Morris.Line extends Morris.Grid
       if row._y[index]?
         circle = @drawLinePoint(row._x, row._y[index], @colorFor(row, index, 'point'), index)
         if @options.dataLabels
-          @drawDataLabel(row._x, row._y[index] - 10, this.yLabelFormat(row.y[index]))
+          @drawDataLabel(row._x, row._y[index] - 10, this.yLabelFormat(row.y[index], 0))
       
       if row._y2?
         if row._y2[index]?
           circle = @drawLinePoint(row._x, row._y2[index], @colorFor(row, index, 'point'), index)
           if @options.dataLabels
-            @drawDataLabel(row._x, row._y2[index] - 10, this.yLabelFormat(row.y[index], 0))
+            @drawDataLabel(row._x, row._y2[index] - 10, this.yLabelFormat(row.y[index], 1000))
 
       @seriesPoints[index].push(circle)
 
