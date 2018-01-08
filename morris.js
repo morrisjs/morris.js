@@ -413,7 +413,7 @@ Licensed under the BSD-2-Clause License.
         } else {
           this.events = this.options.events;
         }
-        flatEvents = $.map(this.events, function(e) {
+        flatEvents = this.events.map(function(e) {
           return e;
         });
         this.xmax = Math.max(this.xmax, Math.max.apply(Math, flatEvents));
@@ -1202,7 +1202,7 @@ Licensed under the BSD-2-Clause License.
               _results1 = [];
               for (_j = 0, _len = _ref2.length; _j < _len; _j++) {
                 r = _ref2[_j];
-                if (r._y2[i] !== void 0) {
+                if (r._y2 !== void 0) {
                   _results1.push({
                     x: r._x,
                     y: r._y2[i]
@@ -2334,12 +2334,9 @@ Licensed under the BSD-2-Clause License.
     };
 
     Bar.prototype.onGridClick = function(x, y) {
-      var bar_hit, index;
+      var index;
       index = this.hitTest(x, y);
-      bar_hit = !!this.bar_els.filter(function() {
-        return $(this).is(':hover');
-      }).length;
-      return this.fire('click', index, this.data[index].src, x, y, bar_hit);
+      return this.fire('click', index, this.data[index].src, x, y);
     };
 
     Bar.prototype.onHoverMove = function(x, y) {
@@ -2492,7 +2489,7 @@ Licensed under the BSD-2-Clause License.
       }
       this.raphael = new Raphael(this.el);
       if (this.options.resize) {
-        $(window).bind('resize', function(evt) {
+        Morris.on(window, 'resize', function(evt) {
           if (_this.timeoutId != null) {
             window.clearTimeout(_this.timeoutId);
           }

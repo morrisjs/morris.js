@@ -144,7 +144,7 @@ class Morris.Line extends Morris.Grid
       if i < nb
         coords = ({x: r._x, y: r._y[i]} for r in @data when r._y[i] isnt undefined)
       else
-        coords = ({x: r._x, y: r._y2[i]} for r in @data when r._y2[i] isnt undefined)
+        coords = ({x: r._x, y: r._y2[i]} for r in @data when r._y2 isnt undefined)
 
       if coords.length > 1
         Morris.Line.createPath coords, smooth, @bottom
