@@ -252,10 +252,11 @@ class Morris.Line extends Morris.Grid
         if @options.dataLabels
           @drawDataLabel(row._x, row._y[index] - 10, this.yLabelFormat(row.y[index]))
       
-      if row._y2[index]?
-        circle = @drawLinePoint(row._x, row._y2[index], @colorFor(row, index, 'point'), index)
-        if @options.dataLabels
-          @drawDataLabel(row._x, row._y2[index] - 10, this.yLabelFormat(row.y[index]))
+      if row._y2?
+        if row._y2[index]?
+          circle = @drawLinePoint(row._x, row._y2[index], @colorFor(row, index, 'point'), index)
+          if @options.dataLabels
+            @drawDataLabel(row._x, row._y2[index] - 10, this.yLabelFormat(row.y[index], 0))
 
       @seriesPoints[index].push(circle)
 
