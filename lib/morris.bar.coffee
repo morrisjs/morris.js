@@ -35,8 +35,7 @@ class Morris.Bar extends Morris.Grid
     inBarValue: false
     inBarValueTextColor: 'white'
     inBarValueMinTopMargin: 1
-    inBarValueRightMargin: 4,
-    nbLines: 0
+    inBarValueRightMargin: 4
 
   # Do any size-related calculations
   #
@@ -53,10 +52,10 @@ class Morris.Bar extends Morris.Grid
     for row, idx in @data
       row._x = @xStart + @xSize * (idx + 0.5) / @data.length
       row._y = for y, ii in row.y
-        if ii < @options.ykeys.length - @options.nbLines
+        if ii < @options.ykeys.length - @options.nbYkeys2
           if y? then @transY(y) else null
       row._y2 = for y, ii in row.y
-        if ii >= @options.ykeys.length - @options.nbLines
+        if ii >= @options.ykeys.length - @options.nbYkeys2
           if y? then @transY2(y) else null
 
   # Draws the bar chart.
@@ -68,7 +67,7 @@ class Morris.Bar extends Morris.Grid
     @drawBarPoints()
 
   drawBarLine: ->
-    nb = @options.ykeys.length - @options.nbLines
+    nb = @options.ykeys.length - @options.nbYkeys2
     for dim, ii in @options.ykeys[nb...@options.ykeys.length] by 1
       path = ""
       if @options.horizontal is not true
@@ -115,7 +114,7 @@ class Morris.Bar extends Morris.Grid
                         .attr('stroke-width', 3)
 
   drawBarPoints: ->
-    nb = @options.ykeys.length - @options.nbLines
+    nb = @options.ykeys.length - @options.nbYkeys2
     for dim, ii in @options.ykeys[nb...@options.ykeys.length] by 1
       for row, idx in @data
         if row._y2[nb+ii]?
@@ -221,7 +220,7 @@ class Morris.Bar extends Morris.Grid
           numBars += 1
 
     if @options.stacked is not true
-      numBars = numBars - @options.nbLines
+      numBars = numBars - @options.nbYkeys2
     barWidth = (groupWidth * @options.barSizeRatio - @options.barGap * (numBars - 1)) / numBars
     barWidth = Math.min(barWidth, @options.barSize) if @options.barSize
     spaceLeft = groupWidth - barWidth * numBars - @options.barGap * (numBars - 1)
@@ -230,7 +229,7 @@ class Morris.Bar extends Morris.Grid
     @bars = for row, idx in @data
       @seriesBars[idx] = []
       lastTop = 0
-      nb = row._y.length - @options.nbLines
+      nb = row._y.length - @options.nbYkeys2
       for ypos, sidx in row._y[0...nb]
         if not @hasToShow(sidx)
           continue

@@ -145,7 +145,7 @@ class Morris.Grid extends Morris.EventEmitter
     dataLabelsWeight: 'normal',
     dataLabelsColor: '#000',
     animate: true
-    nbLines: 0
+    nbYkeys2: 0
     smooth: true
 
   # Update the data series and redraw the chart.
@@ -170,7 +170,7 @@ class Morris.Grid extends Morris.EventEmitter
       ymin = if ymin? then Math.min(ymin, minGoal) else minGoal
       ymax = if ymax? then Math.max(ymax, maxGoal) else maxGoal
 
-    if @options.nbLines > @options.ykeys.length then @options.nbLines = @options.ykeys.length
+    if @options.nbYkeys2 > @options.ykeys.length then @options.nbYkeys2 = @options.ykeys.length
 
     @data = for row, index in data
       ret = {src: row}
@@ -195,7 +195,7 @@ class Morris.Grid extends Morris.EventEmitter
         yval = row[ykey]
         yval = parseFloat(yval) if typeof yval is 'string'
         yval = null if yval? and typeof yval isnt 'number'
-        if idx < @options.ykeys.length - @options.nbLines
+        if idx < @options.ykeys.length - @options.nbYkeys2
           if yval? and @hasToShow(idx)
             if @cumulative
               total += yval
@@ -268,7 +268,7 @@ class Morris.Grid extends Morris.EventEmitter
           @options.ymin == @gridDefaults.ymin)
         # calculate 'magic' grid placement
         @grid = @autoGridLines(@ymin, @ymax, @options.numLines)
-        if @options.nbLines > 0
+        if @options.nbYkeys2 > 0
           @grid2 = @autoGridLines(@ymin2, @ymax2, @options.numLines)
         @ymin = Math.min(@ymin, @grid[0])
         @ymax = Math.max(@ymax, @grid[@grid.length - 1])
@@ -337,13 +337,13 @@ class Morris.Grid extends Morris.EventEmitter
         yLabelWidths = for gridLine in @grid
           @measureText(@yAxisFormat(gridLine)).width
 
-        if @options.nbLines > 0
+        if @options.nbYkeys2 > 0
           yLabelWidths2 = for gridLine in @grid2
-            @measureText(@yAxisFormat(gridLine)).width
+            @measureText(@yAxisFormat2(gridLine)).width
 
         if not @options.horizontal
           @left += Math.max(yLabelWidths...)
-          if @options.nbLines > 0
+          if @options.nbYkeys2 > 0
             @right -= Math.max(yLabelWidths2...)
         else
           @bottom -= Math.max(yLabelWidths...)
@@ -446,9 +446,9 @@ class Morris.Grid extends Morris.EventEmitter
     if typeof @options.yLabelFormat is 'function'
       @options.yLabelFormat(label, i)
     else
-      if @options.nbLines == 0
+      if @options.nbYkeys2 == 0
         "#{@options.preUnits}#{Morris.commas(label)}#{@options.postUnits}"
-      else if i >= @options.ykeys.length - @options.nbLines - 1
+      else if i >= @options.ykeys.length - @options.nbYkeys2 - 1
         "#{@options.preUnits}#{Morris.commas(label)}#{@options.postUnits}"
       else 
         "#{@options.preUnits2}#{Morris.commas(label)}#{@options.postUnits2}"
@@ -490,7 +490,7 @@ class Morris.Grid extends Morris.EventEmitter
         else
           @drawGridLine("M#{pos},#{@xStart}V#{@xEnd}")
 
-    if @options.nbLines > 0
+    if @options.nbYkeys2 > 0
       for lineY in @grid2
         pos = @transY2(lineY)
         if @options.axes in [true, 'both', 'y']

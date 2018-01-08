@@ -61,10 +61,10 @@ class Morris.Line extends Morris.Grid
     for row in @data
       row._x = @transX(row.x)
       row._y = for y, ii in row.y
-        if ii < @options.ykeys.length - @options.nbLines
+        if ii < @options.ykeys.length - @options.nbYkeys2
           if y? then @transY(y) else y
       row._y2 = for y, ii in row.y
-        if ii >= @options.ykeys.length - @options.nbLines
+        if ii >= @options.ykeys.length - @options.nbYkeys2
           if y? then @transY2(y) else null
       row._ymax = Math.min [@bottom].concat(y for y, i in row._y when y? and @hasToShow(i))...
 
@@ -138,7 +138,7 @@ class Morris.Line extends Morris.Grid
   generatePaths: ->
     @paths = for i in [0...@options.ykeys.length]
       smooth = if typeof @options.smooth is "boolean" then @options.smooth else @options.ykeys[i] in @options.smooth
-      nb = @options.ykeys.length - @options.nbLines
+      nb = @options.ykeys.length - @options.nbYkeys2
       if i < nb
         coords = ({x: r._x, y: r._y[i]} for r in @data when r._y[i] isnt undefined)
       else

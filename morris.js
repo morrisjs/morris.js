@@ -275,7 +275,7 @@ Licensed under the BSD-2-Clause License.
       dataLabelsWeight: 'normal',
       dataLabelsColor: '#000',
       animate: true,
-      nbLines: 0,
+      nbYkeys2: 0,
       smooth: true
     };
 
@@ -303,8 +303,8 @@ Licensed under the BSD-2-Clause License.
         ymin = ymin != null ? Math.min(ymin, minGoal) : minGoal;
         ymax = ymax != null ? Math.max(ymax, maxGoal) : maxGoal;
       }
-      if (this.options.nbLines > this.options.ykeys.length) {
-        this.options.nbLines = this.options.ykeys.length;
+      if (this.options.nbYkeys2 > this.options.ykeys.length) {
+        this.options.nbYkeys2 = this.options.ykeys.length;
       }
       this.data = (function() {
         var _i, _len, _results;
@@ -347,7 +347,7 @@ Licensed under the BSD-2-Clause License.
               if ((yval != null) && typeof yval !== 'number') {
                 yval = null;
               }
-              if (idx < this.options.ykeys.length - this.options.nbLines) {
+              if (idx < this.options.ykeys.length - this.options.nbYkeys2) {
                 if ((yval != null) && this.hasToShow(idx)) {
                   if (this.cumulative) {
                     total += yval;
@@ -442,7 +442,7 @@ Licensed under the BSD-2-Clause License.
       if (((_ref1 = this.options.axes) === true || _ref1 === 'both' || _ref1 === 'y') || this.options.grid === true) {
         if (this.options.ymax === this.gridDefaults.ymax && this.options.ymin === this.gridDefaults.ymin) {
           this.grid = this.autoGridLines(this.ymin, this.ymax, this.options.numLines);
-          if (this.options.nbLines > 0) {
+          if (this.options.nbYkeys2 > 0) {
             this.grid2 = this.autoGridLines(this.ymin2, this.ymax2, this.options.numLines);
           }
           this.ymin = Math.min(this.ymin, this.grid[0]);
@@ -552,21 +552,21 @@ Licensed under the BSD-2-Clause License.
             }
             return _results;
           }).call(this);
-          if (this.options.nbLines > 0) {
+          if (this.options.nbYkeys2 > 0) {
             yLabelWidths2 = (function() {
               var _i, _len, _ref2, _results;
               _ref2 = this.grid2;
               _results = [];
               for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
                 gridLine = _ref2[_i];
-                _results.push(this.measureText(this.yAxisFormat(gridLine)).width);
+                _results.push(this.measureText(this.yAxisFormat2(gridLine)).width);
               }
               return _results;
             }).call(this);
           }
           if (!this.options.horizontal) {
             this.left += Math.max.apply(Math, yLabelWidths);
-            if (this.options.nbLines > 0) {
+            if (this.options.nbYkeys2 > 0) {
               this.right -= Math.max.apply(Math, yLabelWidths2);
             }
           } else {
@@ -680,9 +680,9 @@ Licensed under the BSD-2-Clause License.
       if (typeof this.options.yLabelFormat === 'function') {
         return this.options.yLabelFormat(label, i);
       } else {
-        if (this.options.nbLines === 0) {
+        if (this.options.nbYkeys2 === 0) {
           return "" + this.options.preUnits + (Morris.commas(label)) + this.options.postUnits;
-        } else if (i >= this.options.ykeys.length - this.options.nbLines - 1) {
+        } else if (i >= this.options.ykeys.length - this.options.nbYkeys2 - 1) {
           return "" + this.options.preUnits + (Morris.commas(label)) + this.options.postUnits;
         } else {
           return "" + this.options.preUnits2 + (Morris.commas(label)) + this.options.postUnits2;
@@ -705,7 +705,7 @@ Licensed under the BSD-2-Clause License.
       }
       if (!this.options.horizontal) {
         basePos = this.getYAxisLabelX();
-        basePos2 = this.right + this.options.padding;
+        basePos2 = this.right + 2 * this.options.padding;
       } else {
         basePos = this.getXAxisLabelY();
         basePos2 = this.top - (this.options.xAxisLabelTopPadding || this.options.padding / 2);
@@ -730,7 +730,7 @@ Licensed under the BSD-2-Clause License.
           }
         }
       }
-      if (this.options.nbLines > 0) {
+      if (this.options.nbYkeys2 > 0) {
         _ref3 = this.grid2;
         _results = [];
         for (_j = 0, _len1 = _ref3.length; _j < _len1; _j++) {
@@ -1062,7 +1062,7 @@ Licensed under the BSD-2-Clause License.
           _results1 = [];
           for (ii = _j = 0, _len1 = _ref1.length; _j < _len1; ii = ++_j) {
             y = _ref1[ii];
-            if (ii < this.options.ykeys.length - this.options.nbLines) {
+            if (ii < this.options.ykeys.length - this.options.nbYkeys2) {
               if (y != null) {
                 _results1.push(this.transY(y));
               } else {
@@ -1080,7 +1080,7 @@ Licensed under the BSD-2-Clause License.
           _results1 = [];
           for (ii = _j = 0, _len1 = _ref1.length; _j < _len1; ii = ++_j) {
             y = _ref1[ii];
-            if (ii >= this.options.ykeys.length - this.options.nbLines) {
+            if (ii >= this.options.ykeys.length - this.options.nbYkeys2) {
               if (y != null) {
                 _results1.push(this.transY2(y));
               } else {
@@ -1179,7 +1179,7 @@ Licensed under the BSD-2-Clause License.
         _results = [];
         for (i = _i = 0, _ref = this.options.ykeys.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
           smooth = typeof this.options.smooth === "boolean" ? this.options.smooth : (_ref1 = this.options.ykeys[i], __indexOf.call(this.options.smooth, _ref1) >= 0);
-          nb = this.options.ykeys.length - this.options.nbLines;
+          nb = this.options.ykeys.length - this.options.nbYkeys2;
           if (i < nb) {
             coords = (function() {
               var _j, _len, _ref2, _results1;
@@ -1895,8 +1895,7 @@ Licensed under the BSD-2-Clause License.
       inBarValue: false,
       inBarValueTextColor: 'white',
       inBarValueMinTopMargin: 1,
-      inBarValueRightMargin: 4,
-      nbLines: 0
+      inBarValueRightMargin: 4
     };
 
     Bar.prototype.calc = function() {
@@ -1920,7 +1919,7 @@ Licensed under the BSD-2-Clause License.
           _results1 = [];
           for (ii = _j = 0, _len1 = _ref1.length; _j < _len1; ii = ++_j) {
             y = _ref1[ii];
-            if (ii < this.options.ykeys.length - this.options.nbLines) {
+            if (ii < this.options.ykeys.length - this.options.nbYkeys2) {
               if (y != null) {
                 _results1.push(this.transY(y));
               } else {
@@ -1938,7 +1937,7 @@ Licensed under the BSD-2-Clause License.
           _results1 = [];
           for (ii = _j = 0, _len1 = _ref1.length; _j < _len1; ii = ++_j) {
             y = _ref1[ii];
-            if (ii >= this.options.ykeys.length - this.options.nbLines) {
+            if (ii >= this.options.ykeys.length - this.options.nbYkeys2) {
               if (y != null) {
                 _results1.push(this.transY2(y));
               } else {
@@ -1967,7 +1966,7 @@ Licensed under the BSD-2-Clause License.
     Bar.prototype.drawBarLine = function() {
       var average, coord, coords, dim, g, grads, i, ii, ix, lg, nb, path, prevCoord, r, rPath, straightDots, straightPath, x1, x2, y1, y2, _i, _j, _len, _len1, _ref, _results,
         _this = this;
-      nb = this.options.ykeys.length - this.options.nbLines;
+      nb = this.options.ykeys.length - this.options.nbYkeys2;
       _ref = this.options.ykeys.slice(nb, this.options.ykeys.length);
       _results = [];
       for (ii = _i = 0, _len = _ref.length; _i < _len; ii = _i += 1) {
@@ -2059,7 +2058,7 @@ Licensed under the BSD-2-Clause License.
 
     Bar.prototype.drawBarPoints = function() {
       var dim, idx, ii, nb, row, _i, _len, _ref, _results;
-      nb = this.options.ykeys.length - this.options.nbLines;
+      nb = this.options.ykeys.length - this.options.nbYkeys2;
       _ref = this.options.ykeys.slice(nb, this.options.ykeys.length);
       _results = [];
       for (ii = _i = 0, _len = _ref.length; _i < _len; ii = _i += 1) {
@@ -2171,7 +2170,7 @@ Licensed under the BSD-2-Clause License.
         }
       }
       if (this.options.stacked === !true) {
-        numBars = numBars - this.options.nbLines;
+        numBars = numBars - this.options.nbYkeys2;
       }
       barWidth = (groupWidth * this.options.barSizeRatio - this.options.barGap * (numBars - 1)) / numBars;
       if (this.options.barSize) {
@@ -2188,7 +2187,7 @@ Licensed under the BSD-2-Clause License.
           row = _ref1[idx];
           this.seriesBars[idx] = [];
           lastTop = 0;
-          nb = row._y.length - this.options.nbLines;
+          nb = row._y.length - this.options.nbYkeys2;
           _results.push((function() {
             var _k, _len1, _ref2, _results1;
             _ref2 = row._y.slice(0, nb);
