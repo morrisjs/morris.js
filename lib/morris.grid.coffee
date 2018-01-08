@@ -470,7 +470,7 @@ class Morris.Grid extends Morris.EventEmitter
 
     if not @options.horizontal
       basePos = @getYAxisLabelX()
-      basePos2 = @right + @options.padding
+      basePos2 = @right + 2 * @options.padding
     else
       basePos = @getXAxisLabelY()
       basePos2 = @top - (@options.xAxisLabelTopPadding || @options.padding / 2)
