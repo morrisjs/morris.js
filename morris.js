@@ -2249,7 +2249,7 @@ Licensed under the BSD-2-Clause License.
                     if (this.options.stacked || this.options.dataLabelsPosition === 'inside') {
                       this.drawDataLabel(top + size / 2, left + barWidth / 2, this.yLabelFormat(row.y[sidx], 0));
                     } else {
-                      this.drawDataLabel(top + size + 5, left + barWidth / 2, this.yLabelFormat(row.y[sidx], 0));
+                      this.drawDataLabelExt(top + size + 5, left + barWidth / 2, this.yLabelFormat(row.y[sidx], 0), 'start');
                     }
                   }
                   if (this.options.inBarValue && barWidth > this.options.gridTextSize + 2 * this.options.inBarValueMinTopMargin) {

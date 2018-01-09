@@ -275,7 +275,7 @@ class Morris.Bar extends Morris.Grid
               if @options.stacked || @options.dataLabelsPosition=='inside'
                   @drawDataLabel(top + size / 2, left + barWidth / 2,@yLabelFormat(row.y[sidx], 0))
                 else
-                  @drawDataLabel(top + size + 5, left + barWidth / 2,@yLabelFormat(row.y[sidx], 0))
+                  @drawDataLabelExt(top + size + 5, left + barWidth / 2,@yLabelFormat(row.y[sidx], 0), 'start')
             if @options.inBarValue and
                 barWidth > @options.gridTextSize + 2*@options.inBarValueMinTopMargin
               barMiddle = left + 0.5 * barWidth
