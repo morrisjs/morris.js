@@ -108,7 +108,7 @@ Licensed under the BSD-2-Clause License.
   };
 
   Morris.css = function(el, prop) {
-    return compStyle(el);
+    return compStyle(el)[prop];
   };
 
   Morris.on = function(el, eventName, fn) {
@@ -367,7 +367,7 @@ Licensed under the BSD-2-Clause License.
               } else {
                 if ((yval != null) && this.hasToShow(idx)) {
                   if (this.cumulative) {
-                    total += yval;
+                    total = yval;
                   } else {
                     if (ymax2 != null) {
                       ymax2 = Math.max(yval, ymax2);
@@ -955,7 +955,7 @@ Licensed under the BSD-2-Clause License.
     };
 
     Hover.prototype.moveTo = function(x, y, centre_y) {
-      var hoverHeight, hoverWidth, left, parentHeight, parentWidth, rect, top, _ref;
+      var hoverHeight, hoverWidth, left, parentHeight, parentWidth, top, _ref;
       _ref = Morris.innerDimensions(this.options.parent), parentWidth = _ref.width, parentHeight = _ref.height;
       hoverWidth = this.el.offsetWidth;
       hoverHeight = this.el.offsetHeight;
@@ -978,9 +978,8 @@ Licensed under the BSD-2-Clause License.
       } else {
         top = parentHeight / 2 - hoverHeight / 2;
       }
-      rect = document.getElementById(this.options.parent.id).getBoundingClientRect();
-      this.el.style.left = parseFloat(left + rect.left + window.scrollX) + "px";
-      return this.el.style.top = parseFloat(parseInt(top) + rect.top + window.scrollY) + "px";
+      this.el.style.left = parseInt(left) + "px";
+      return this.el.style.top = parseInt(top) + "px";
     };
 
     Hover.prototype.show = function() {

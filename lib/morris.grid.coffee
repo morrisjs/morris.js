@@ -211,7 +211,7 @@ class Morris.Grid extends Morris.EventEmitter
         else 
           if yval? and @hasToShow(idx)
             if @cumulative
-              total += yval
+              total = yval
             else
               if ymax2?
                 ymax2 = Math.max(yval, ymax2)
