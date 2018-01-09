@@ -42,9 +42,8 @@ class Morris.Hover
     else
       top = parentHeight / 2 - hoverHeight / 2
 
-    rect = document.getElementById(@options.parent.id).getBoundingClientRect()
-    @el.style.left = parseFloat(left + rect.left + window.scrollX) + "px"
-    @el.style.top = parseFloat(parseInt(top) + rect.top + window.scrollY) + "px"
+    @el.style.left = parseInt(left) + "px"
+    @el.style.top = parseInt(top) + "px"
 
   show: ->
     @el.style.display = ''

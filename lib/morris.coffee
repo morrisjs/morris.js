@@ -68,7 +68,7 @@ Morris.offset = (el) ->
   left: rect.left + document.body.scrollLeft
 
 # Emulate jQuery's $el.css() (http://youmightnotneedjquery.com/#get_style)
-Morris.css = (el, prop) -> compStyle(el)
+Morris.css = (el, prop) -> compStyle(el)[prop]
 
 # Emulate jQuery's $el.on()
 Morris.on = (el, eventName, fn) ->
