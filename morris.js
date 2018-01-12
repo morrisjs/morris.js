@@ -261,7 +261,7 @@ Licensed under the BSD-2-Clause License.
       y2min: 'auto 0',
       goals: [],
       goalStrokeWidth: 1.0,
-      goalLineColors: ['#666633', '#999966', '#cc6666', '#663333'],
+      goalLineColors: ['red'],
       events: [],
       eventStrokeWidth: 1.0,
       eventLineColors: ['#005a04', '#ccffbb', '#3a5f0b', '#005502'],
@@ -650,11 +650,11 @@ Licensed under the BSD-2-Clause License.
       this.raphael.clear();
       this._calc();
       this.drawGrid();
-      this.drawGoals();
       this.drawEvents();
       if (this.draw) {
-        return this.draw();
+        this.draw();
       }
+      return this.drawGoals();
     };
 
     Grid.prototype.measureText = function(text, angle) {
@@ -1081,7 +1081,7 @@ Licensed under the BSD-2-Clause License.
               if (y != null) {
                 _results1.push(this.transY2(y));
               } else {
-                _results1.push(null);
+                _results1.push(y);
               }
             } else {
               _results1.push(void 0);
@@ -1515,16 +1515,31 @@ Licensed under the BSD-2-Clause License.
     };
 
     Line.prototype.drawLinePath = function(path, lineColor, lineIndex) {
-      var average, rPath, straightDots, straightPath,
+      var ii, rPath, row, straightPath, _i, _len, _ref,
         _this = this;
       if (this.options.animate) {
-        straightPath = path;
-        straightPath = path.replace('A', ',');
-        straightPath = straightPath.replace('M', '');
-        straightPath = straightPath.replace('C', ',');
-        straightDots = straightPath.split(',');
-        average = (parseFloat(straightDots[1]) + parseFloat(straightDots[straightDots.length - 1])) / 2;
-        straightPath = 'M' + straightDots[0] + ',' + average + ',' + straightDots[straightDots.length - 2] + ',' + average;
+        straightPath = '';
+        _ref = this.data;
+        for (ii = _i = 0, _len = _ref.length; _i < _len; ii = ++_i) {
+          row = _ref[ii];
+          if (straightPath === '') {
+            if (lineIndex >= this.options.ykeys.length - this.options.nbYkeys2) {
+              if (row._y2[lineIndex] != null) {
+                straightPath = 'M' + row._x + ',' + this.transY2(0);
+              }
+            } else if (row._y[lineIndex] != null) {
+              straightPath = 'M' + row._x + ',' + this.transY(0);
+            }
+          } else {
+            if (lineIndex >= this.options.ykeys.length - this.options.nbYkeys2) {
+              if (row._y2[lineIndex] != null) {
+                straightPath += ',' + row._x + ',' + this.transY2(0);
+              }
+            } else if (row._y[lineIndex] != null) {
+              straightPath += ',' + row._x + ',' + this.transY(0);
+            }
+          }
+        }
         rPath = this.raphael.path(straightPath).attr('stroke', lineColor).attr('stroke-width', this.lineWidthForSeries(lineIndex));
         if (this.options.cumulative) {
           return (function(rPath, path) {
@@ -1814,7 +1829,7 @@ Licensed under the BSD-2-Clause License.
       path = this.paths[index];
       if (path !== null) {
         path = path + ("L" + (this.transX(this.xmax)) + "," + this.bottom + "L" + (this.transX(this.xmin)) + "," + this.bottom + "Z");
-        return this.drawFilledPath(path, this.fillForSeries(index));
+        return this.drawFilledPath(path, this.fillForSeries(index), index);
       }
     };
 
@@ -1824,19 +1839,27 @@ Licensed under the BSD-2-Clause License.
       return Raphael.hsl(color.h, this.options.behaveLikeLine ? color.s * 0.9 : color.s * 0.75, Math.min(0.98, this.options.behaveLikeLine ? color.l * 1.2 : color.l * 1.25));
     };
 
-    Area.prototype.drawFilledPath = function(path, fill) {
-      var average, rPath, straightDots, straightPath,
+    Area.prototype.drawFilledPath = function(path, fill, areaIndex) {
+      var ii, rPath, row, straightPath, _i, _ref,
         _this = this;
       if (this.options.animate) {
-        straightPath = path.replace('A', ',');
-        straightPath = straightPath.replace('M', '');
-        straightPath = straightPath.replace('C', ',');
-        straightPath = straightPath.replace('L', ',');
-        straightPath = straightPath.replace('L', ',');
-        straightPath = straightPath.replace('Z', '');
-        straightDots = straightPath.split(',');
-        average = (parseFloat(straightDots[straightDots.length - 4]) + parseFloat(straightDots[straightDots.length - 2])) / 2;
-        straightPath = 'M' + average + ',' + straightDots[straightDots.length - 1] + ',L' + straightDots[straightDots.length - 2] + ',' + straightDots[straightDots.length - 1] + 'Z';
+        straightPath = '';
+        console.log(this.data);
+        straightPath = 'M' + this.data[0]._x + ',' + this.transY(0);
+        straightPath += ',' + this.data[this.data.length - 1]._x + ',' + this.transY(0);
+        console.log(straightPath);
+        _ref = this.data;
+        for (ii = _i = _ref.length - 1; _i >= 0; ii = _i += -1) {
+          row = _ref[ii];
+          if (straightPath === '') {
+            straightPath = 'M' + row._x + ',' + this.transY(0);
+          } else {
+            straightPath += ',' + row._x + ',' + this.transY(0);
+          }
+        }
+        straightPath += 'Z';
+        console.log(straightPath);
+        console.log(path);
         rPath = this.raphael.path(straightPath).attr('fill', fill).attr('fill-opacity', this.options.fillOpacity).attr('stroke', 'none');
         return (function(rPath, path) {
           return rPath.animate({
@@ -2455,14 +2478,15 @@ Licensed under the BSD-2-Clause License.
       labelColor: '#000000',
       formatter: Morris.commas,
       resize: false,
-      dataLabels: true,
+      dataLabels: false,
       dataLabelsPosition: 'outside',
       dataLabelsFamily: 'sans-serif',
       dataLabelsSize: 12,
       dataLabelsWeight: 'normal',
       dataLabelsColor: '#000',
-      donutType: 'pie',
-      animate: true
+      donutType: 'donut',
+      animate: true,
+      showPercentage: true
     };
 
     function Donut(options) {
@@ -2587,7 +2611,7 @@ Licensed under the BSD-2-Clause License.
     };
 
     Donut.prototype.select = function(idx) {
-      var row, s, segment, _i, _len, _ref;
+      var finalValue, index, line, row, s, segment, total, _i, _j, _len, _len1, _ref, _ref1;
       _ref = this.segments;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         s = _ref[_i];
@@ -2596,8 +2620,21 @@ Licensed under the BSD-2-Clause License.
       segment = this.segments[idx];
       segment.select();
       row = this.data[idx];
+      if (this.options.showPercentage) {
+        total = 0;
+        _ref1 = this.data;
+        for (index = _j = 0, _len1 = _ref1.length; _j < _len1; index = ++_j) {
+          line = _ref1[index];
+          total += line.value;
+        }
+        console.log(row.value + ' ' + total);
+        finalValue = Math.round(parseFloat(row.value) / parseFloat(total) * 100) + '%';
+      } else {
+        finalValue = row.value;
+      }
+      finalValue = row.value;
       if (this.options.donutType === 'donut') {
-        return this.setLabels(row.label, this.options.formatter(row.value, row));
+        return this.setLabels(row.label, this.options.formatter(finalValue, row));
       }
     };
 

@@ -122,10 +122,7 @@ class Morris.Grid extends Morris.EventEmitter
     goals: []
     goalStrokeWidth: 1.0
     goalLineColors: [
-      '#666633'
-      '#999966'
-      '#cc6666'
-      '#663333'
+      'red'
     ]
     events: []
     eventStrokeWidth: 1.0
@@ -419,9 +416,9 @@ class Morris.Grid extends Morris.EventEmitter
     @raphael.clear()
     @_calc()
     @drawGrid()
-    @drawGoals()
     @drawEvents()
     @draw() if @draw
+    @drawGoals()
 
   # @private
   #
