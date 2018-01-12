@@ -50,7 +50,7 @@ class Morris.Area extends Morris.Line
     path = @paths[index]
     if path isnt null
       path = path + "L#{@transX(@xmax)},#{@bottom}L#{@transX(@xmin)},#{@bottom}Z"
-      @drawFilledPath path, @fillForSeries(index)
+      @drawFilledPath path, @fillForSeries(index), index
 
   fillForSeries: (i) ->
     color = Raphael.rgb2hsl @colorFor(@data[i], i, 'line')
@@ -59,18 +59,23 @@ class Morris.Area extends Morris.Line
       if @options.behaveLikeLine then color.s * 0.9 else color.s * 0.75,
       Math.min(0.98, if @options.behaveLikeLine then color.l * 1.2 else color.l * 1.25))
 
-  drawFilledPath: (path, fill) ->
+  drawFilledPath: (path, fill, areaIndex) ->
     if @options.animate
-      straightPath = path.replace('A', ',')
-      straightPath = straightPath.replace('M', '')
-      straightPath = straightPath.replace('C', ',')
-      straightPath = straightPath.replace('L', ',')
-      straightPath = straightPath.replace('L', ',')
-      straightPath = straightPath.replace('Z', '')
-      straightDots = straightPath.split(',')
-      average = (parseFloat(straightDots[straightDots.length-4])+parseFloat(straightDots[straightDots.length-2]))/2
+      straightPath = ''
+      console.log(@data)
+      straightPath = 'M'+@data[0]._x+','+@transY(0)
+      straightPath += ','+@data[@data.length-1]._x+','+@transY(0)
+      console.log(straightPath)
 
-      straightPath = 'M'+average+','+straightDots[straightDots.length-1]+',L'+straightDots[straightDots.length-2]+','+straightDots[straightDots.length-1]+'Z'
+      for row, ii in @data by -1
+        if straightPath == ''
+          straightPath = 'M'+row._x+','+@transY(0)
+        else
+          straightPath += ','+row._x+','+@transY(0)
+
+      straightPath += 'Z';
+      console.log(straightPath)
+      console.log(path)
       rPath = @raphael.path(straightPath)
                       .attr('fill', fill)
                       .attr('fill-opacity', this.options.fillOpacity)

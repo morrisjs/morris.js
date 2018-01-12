@@ -65,7 +65,7 @@ class Morris.Line extends Morris.Grid
           if y? then @transY(y) else y
       row._y2 = for y, ii in row.y
         if ii >= @options.ykeys.length - @options.nbYkeys2
-          if y? then @transY2(y) else null
+          if y? then @transY2(y) else y
       row._ymax = Math.min [@bottom].concat(y for y, i in row._y when y? and @hasToShow(i))...
 
   # hit test - returns the index of the row at the given x-coordinate
@@ -386,13 +386,21 @@ class Morris.Line extends Morris.Grid
 
   drawLinePath: (path, lineColor, lineIndex) ->
     if @options.animate
-      straightPath = path;
-      straightPath = path.replace('A', ',');
-      straightPath = straightPath.replace('M', '');
-      straightPath = straightPath.replace('C', ',');
-      straightDots = straightPath.split(',');
-      average = (parseFloat(straightDots[1])+parseFloat(straightDots[straightDots.length-1]))/2
-      straightPath = 'M'+straightDots[0]+','+average+','+straightDots[straightDots.length-2]+','+average;
+      straightPath = ''
+      for row, ii in @data
+        if straightPath == ''
+          if lineIndex >= @options.ykeys.length - @options.nbYkeys2
+            if row._y2[lineIndex]?
+              straightPath = 'M'+row._x+','+@transY2(0)
+          else if row._y[lineIndex]?
+            straightPath = 'M'+row._x+','+@transY(0)
+        else
+          if lineIndex >= @options.ykeys.length - @options.nbYkeys2
+            if row._y2[lineIndex]?
+              straightPath += ','+row._x+','+@transY2(0)
+          else if row._y[lineIndex]?
+            straightPath += ','+row._x+','+@transY(0)
+
       rPath = @raphael.path(straightPath)
                       .attr('stroke', lineColor)
                       .attr('stroke-width', this.lineWidthForSeries(lineIndex))
