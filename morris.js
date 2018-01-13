@@ -2575,17 +2575,19 @@ Licensed under the BSD-2-Clause License.
       this.text2 = this.drawEmptyDonutLabel(cx, cy + 10, this.options.labelColor, 14);
       max_value = Math.max.apply(Math, this.values);
       idx = 0;
-      _ref3 = this.values;
-      _results = [];
-      for (_k = 0, _len2 = _ref3.length; _k < _len2; _k++) {
-        value = _ref3[_k];
-        if (value === max_value) {
-          this.select(idx);
-          break;
+      if (this.options.donutType === 'donut') {
+        _ref3 = this.values;
+        _results = [];
+        for (_k = 0, _len2 = _ref3.length; _k < _len2; _k++) {
+          value = _ref3[_k];
+          if (value === max_value) {
+            this.select(idx);
+            break;
+          }
+          _results.push(idx += 1);
         }
-        _results.push(idx += 1);
+        return _results;
       }
-      return _results;
     };
 
     Donut.prototype.setData = function(data) {

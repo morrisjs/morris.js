@@ -124,11 +124,13 @@ class Morris.Donut extends Morris.EventEmitter
 
     max_value = Math.max @values...
     idx = 0
-    for value in @values
-      if value == max_value
-        @select idx
-        break
-      idx += 1
+  
+    if @options.donutType == 'donut'
+      for value in @values
+        if value == max_value
+          @select idx
+          break
+        idx += 1
 
   setData: (data) ->
     @data = data
