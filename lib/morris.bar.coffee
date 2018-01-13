@@ -71,6 +71,7 @@ class Morris.Bar extends Morris.Grid
     nb = @options.ykeys.length - @options.nbYkeys2
     for dim, ii in @options.ykeys[nb...@options.ykeys.length] by 1
       path = ""
+      straightPath = ""
       if @options.horizontal is not true
         coords = ({x: r._x, y: r._y2[nb+ii]} for r in @data when r._y2[nb+ii] isnt undefined)
       else
@@ -91,19 +92,14 @@ class Morris.Bar extends Morris.Grid
               path += "C#{x1},#{y1},#{x2},#{y2},#{coord.x},#{coord.y}"
             else
               path += "L#{coord.x},#{coord.y}"
+            straightPath += 'L'+coord.x+','+@transY2(0)
           else
             if not @options.smooth or grads[i]?
               path += "M#{coord.x},#{coord.y}"
+              straightPath += 'M'+coord.x+','+@transY2(0)
         prevCoord = coord
 
       if @options.animate
-        straightPath = path;
-        straightPath = path.replace('A', ',');
-        straightPath = straightPath.replace('M', '');
-        straightPath = straightPath.replace('C', ',');
-        straightDots = straightPath.split(',');
-        average = (parseFloat(straightDots[1])+parseFloat(straightDots[straightDots.length-1]))/2
-        straightPath = 'M'+straightDots[0]+','+average+','+straightDots[straightDots.length-2]+','+average;
         rPath = @raphael.path(straightPath)
                         .attr('stroke', @options.barColors[nb+ii])
                         .attr('stroke-width', 3)

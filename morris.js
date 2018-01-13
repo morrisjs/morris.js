@@ -1986,7 +1986,7 @@ Licensed under the BSD-2-Clause License.
     };
 
     Bar.prototype.drawBarLine = function() {
-      var average, coord, coords, dim, g, grads, i, ii, ix, lg, nb, path, prevCoord, r, rPath, straightDots, straightPath, x1, x2, y1, y2, _i, _j, _len, _len1, _ref, _results,
+      var coord, coords, dim, g, grads, i, ii, ix, lg, nb, path, prevCoord, r, rPath, straightPath, x1, x2, y1, y2, _i, _j, _len, _len1, _ref, _results,
         _this = this;
       nb = this.options.ykeys.length - this.options.nbYkeys2;
       _ref = this.options.ykeys.slice(nb, this.options.ykeys.length);
@@ -1994,6 +1994,7 @@ Licensed under the BSD-2-Clause License.
       for (ii = _i = 0, _len = _ref.length; _i < _len; ii = _i += 1) {
         dim = _ref[ii];
         path = "";
+        straightPath = "";
         if (this.options.horizontal === !true) {
           coords = (function() {
             var _j, _len1, _ref1, _results1;
@@ -2049,22 +2050,18 @@ Licensed under the BSD-2-Clause License.
               } else {
                 path += "L" + coord.x + "," + coord.y;
               }
+              straightPath += 'L' + coord.x + ',' + this.transY2(0);
             } else {
               if (!this.options.smooth || (grads[i] != null)) {
                 path += "M" + coord.x + "," + coord.y;
+                straightPath += 'M' + coord.x + ',' + this.transY2(0);
               }
             }
           }
           prevCoord = coord;
         }
         if (this.options.animate) {
-          straightPath = path;
-          straightPath = path.replace('A', ',');
-          straightPath = straightPath.replace('M', '');
-          straightPath = straightPath.replace('C', ',');
-          straightDots = straightPath.split(',');
-          average = (parseFloat(straightDots[1]) + parseFloat(straightDots[straightDots.length - 1])) / 2;
-          straightPath = 'M' + straightDots[0] + ',' + average + ',' + straightDots[straightDots.length - 2] + ',' + average;
+          console.log(straightPath);
           rPath = this.raphael.path(straightPath).attr('stroke', this.options.barColors[nb + ii]).attr('stroke-width', 3);
           _results.push((function(rPath, path) {
             return rPath.animate({
