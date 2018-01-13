@@ -112,9 +112,9 @@ class Morris.Donut extends Morris.EventEmitter
         
         if @options.showPercentage
           finalValue = Math.round(parseFloat(value) / parseFloat(total) * 100) + '%'
-          @drawDataLabel(label_x,label_y, finalValue)
+          @drawDataLabelExt(label_x,label_y, finalValue)
         else
-          @drawDataLabel(label_x,label_y,value)
+          @drawDataLabelExt(label_x,label_y,value)
 
       last = next
       idx += 1
@@ -140,6 +140,22 @@ class Morris.Donut extends Morris.EventEmitter
   drawDataLabel: (xPos, yPos, text) ->
     label = @raphael.text(xPos, yPos, text)
                     .attr('text-anchor', 'middle')
+                    .attr('font-size', @options.dataLabelsSize)
+                    .attr('font-family', @options.dataLabelsFamily)
+                    .attr('font-weight', @options.dataLabelsWeight)
+                    .attr('fill', @options.dataLabelsColor)
+
+  drawDataLabelExt: (xPos, yPos, text) ->
+    if @options.dataLabelsPosition == 'inside'
+      labelAnchor = 'middle'
+    else if xPos > this.raphael.width / 2
+      labelAnchor = 'start'
+    else if xPos > this.raphael.width * 0.55 && xPos < this.raphael.width * 0.45
+      labelAnchor = 'middle'
+    else
+      labelAnchor = 'end'
+    label = @raphael.text(xPos, yPos, text)
+                    .attr('text-anchor', labelAnchor)
                     .attr('font-size', @options.dataLabelsSize)
                     .attr('font-family', @options.dataLabelsFamily)
                     .attr('font-weight', @options.dataLabelsWeight)

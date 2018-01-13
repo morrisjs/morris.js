@@ -2563,9 +2563,9 @@ Licensed under the BSD-2-Clause License.
           }
           if (this.options.showPercentage) {
             finalValue = Math.round(parseFloat(value) / parseFloat(total) * 100) + '%';
-            this.drawDataLabel(label_x, label_y, finalValue);
+            this.drawDataLabelExt(label_x, label_y, finalValue);
           } else {
-            this.drawDataLabel(label_x, label_y, value);
+            this.drawDataLabelExt(label_x, label_y, value);
           }
         }
         last = next;
@@ -2609,6 +2609,20 @@ Licensed under the BSD-2-Clause License.
     Donut.prototype.drawDataLabel = function(xPos, yPos, text) {
       var label;
       return label = this.raphael.text(xPos, yPos, text).attr('text-anchor', 'middle').attr('font-size', this.options.dataLabelsSize).attr('font-family', this.options.dataLabelsFamily).attr('font-weight', this.options.dataLabelsWeight).attr('fill', this.options.dataLabelsColor);
+    };
+
+    Donut.prototype.drawDataLabelExt = function(xPos, yPos, text) {
+      var label, labelAnchor;
+      if (this.options.dataLabelsPosition === 'inside') {
+        labelAnchor = 'middle';
+      } else if (xPos > this.raphael.width / 2) {
+        labelAnchor = 'start';
+      } else if (xPos > this.raphael.width * 0.55 && xPos < this.raphael.width * 0.45) {
+        labelAnchor = 'middle';
+      } else {
+        labelAnchor = 'end';
+      }
+      return label = this.raphael.text(xPos, yPos, text).attr('text-anchor', labelAnchor).attr('font-size', this.options.dataLabelsSize).attr('font-family', this.options.dataLabelsFamily).attr('font-weight', this.options.dataLabelsWeight).attr('fill', this.options.dataLabelsColor);
     };
 
     Donut.prototype.click = function(idx) {
