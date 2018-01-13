@@ -16,9 +16,7 @@ As morris.js project seems no more updated and as I have been asked many times t
 - Remove null values from computation of trend line
 - Show a bar for value zero in a Bar charts  [Issue #744](https://github.com/morrisjs/morris.js/issues/744)
 - Color scheme changed to Bootstrap 4's default theme
-
-## To do
-- Animation for donut chart (help needed ^^)
+- Option to display percentage in Donut and Pie charts
 
 ## Requirements
 
