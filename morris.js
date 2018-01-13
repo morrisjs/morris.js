@@ -2061,7 +2061,6 @@ Licensed under the BSD-2-Clause License.
           prevCoord = coord;
         }
         if (this.options.animate) {
-          console.log(straightPath);
           rPath = this.raphael.path(straightPath).attr('stroke', this.options.barColors[nb + ii]).attr('stroke-width', 3);
           _results.push((function(rPath, path) {
             return rPath.animate({
@@ -2476,7 +2475,7 @@ Licensed under the BSD-2-Clause License.
       formatter: Morris.commas,
       resize: false,
       dataLabels: false,
-      dataLabelsPosition: 'outside',
+      dataLabelsPosition: 'inside',
       dataLabelsFamily: 'sans-serif',
       dataLabelsSize: 12,
       dataLabelsWeight: 'normal',
@@ -2488,6 +2487,7 @@ Licensed under the BSD-2-Clause License.
 
     function Donut(options) {
       this.resizeHandler = __bind(this.resizeHandler, this);
+      this.deselect = __bind(this.deselect, this);
       this.select = __bind(this.select, this);
       this.click = __bind(this.click, this);
       var _this = this;
@@ -2519,7 +2519,7 @@ Licensed under the BSD-2-Clause License.
     }
 
     Donut.prototype.redraw = function() {
-      var C, cx, cy, height, i, idx, label_x, label_y, last, max_value, min, next, p_cos_p0, p_sin_p0, seg, total, value, w, width, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _ref3, _results;
+      var C, cx, cy, finalValue, height, i, idx, label_x, label_y, last, max_value, min, next, p_cos_p0, p_sin_p0, seg, total, value, w, width, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _ref3, _results;
       this.raphael.clear();
       _ref = Morris.dimensions(this.el), width = _ref.width, height = _ref.height;
       cx = width / 2;
@@ -2545,6 +2545,7 @@ Licensed under the BSD-2-Clause License.
         this.segments.push(seg);
         seg.on('hover', this.select);
         seg.on('click', this.click);
+        seg.on('mouseout', this.deselect);
         if (this.options.dataLabels && this.values.length > 1) {
           p_sin_p0 = Math.sin((last + next) / 2);
           p_cos_p0 = Math.cos((last + next) / 2);
@@ -2553,14 +2554,19 @@ Licensed under the BSD-2-Clause License.
               label_x = parseFloat(cx) + parseFloat(seg.raphael.height * 0.30 * p_sin_p0);
               label_y = parseFloat(cy) + parseFloat(seg.raphael.height * 0.30 * p_cos_p0);
             } else {
-              label_x = parseFloat(cx) + parseFloat(seg.raphael.height * 0.37 * p_sin_p0);
-              label_y = parseFloat(cy) + parseFloat(seg.raphael.height * 0.37 * p_cos_p0);
+              label_x = parseFloat(cx) + parseFloat(seg.raphael.height * 0.39 * p_sin_p0);
+              label_y = parseFloat(cy) + parseFloat(seg.raphael.height * 0.39 * p_cos_p0);
             }
           } else {
             label_x = parseFloat(cx) + parseFloat((seg.raphael.height - 9) * 0.5 * p_sin_p0);
             label_y = parseFloat(cy) + parseFloat((seg.raphael.height - 9) * 0.5 * p_cos_p0);
           }
-          this.drawDataLabel(label_x, label_y, value);
+          if (this.options.showPercentage) {
+            finalValue = Math.round(parseFloat(value) / parseFloat(total) * 100) + '%';
+            this.drawDataLabel(label_x, label_y, finalValue);
+          } else {
+            this.drawDataLabel(label_x, label_y, value);
+          }
         }
         last = next;
         idx += 1;
@@ -2608,7 +2614,7 @@ Licensed under the BSD-2-Clause License.
     };
 
     Donut.prototype.select = function(idx) {
-      var finalValue, index, line, row, s, segment, total, _i, _j, _len, _len1, _ref, _ref1;
+      var row, s, segment, _i, _len, _ref;
       _ref = this.segments;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         s = _ref[_i];
@@ -2617,22 +2623,20 @@ Licensed under the BSD-2-Clause License.
       segment = this.segments[idx];
       segment.select();
       row = this.data[idx];
-      if (this.options.showPercentage) {
-        total = 0;
-        _ref1 = this.data;
-        for (index = _j = 0, _len1 = _ref1.length; _j < _len1; index = ++_j) {
-          line = _ref1[index];
-          total += line.value;
-        }
-        console.log(row.value + ' ' + total);
-        finalValue = Math.round(parseFloat(row.value) / parseFloat(total) * 100) + '%';
-      } else {
-        finalValue = row.value;
-      }
-      finalValue = row.value;
       if (this.options.donutType === 'donut') {
-        return this.setLabels(row.label, this.options.formatter(finalValue, row));
+        return this.setLabels(row.label, this.options.formatter(row.value, row));
       }
+    };
+
+    Donut.prototype.deselect = function(idx) {
+      var s, _i, _len, _ref, _results;
+      _ref = this.segments;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        s = _ref[_i];
+        _results.push(s.deselect());
+      }
+      return _results;
     };
 
     Donut.prototype.setLabels = function(label1, label2) {
@@ -2736,18 +2740,35 @@ Licensed under the BSD-2-Clause License.
         return _this.fire('hover', _this.index);
       }, function() {
         return _this.fire('click', _this.index);
+      }, function() {
+        return _this.fire('mouseout', _this.index);
       });
     };
 
     DonutSegment.prototype.drawDonutArc = function(path, color) {
-      return this.raphael.path(path).attr({
-        stroke: color,
-        'stroke-width': 2,
-        opacity: 0
-      });
+      var rPath,
+        _this = this;
+      if (this.options.animate) {
+        rPath = this.raphael.path("M" + this.cx + "," + this.cy + "Z").attr({
+          stroke: color,
+          'stroke-width': 2,
+          opacity: 0
+        });
+        return (function(rPath, path) {
+          return rPath.animate({
+            path: path
+          }, 500, '<>');
+        })(rPath, path);
+      } else {
+        return this.raphael.path(path).attr({
+          stroke: color,
+          'stroke-width': 2,
+          opacity: 0
+        });
+      }
     };
 
-    DonutSegment.prototype.drawDonutSegment = function(path, fillColor, strokeColor, hoverFunction, clickFunction) {
+    DonutSegment.prototype.drawDonutSegment = function(path, fillColor, strokeColor, hoverFunction, clickFunction, leaveFunction) {
       var rPath, straightDots, straightPath,
         _this = this;
       if (this.options.animate && this.options.donutType === 'pie') {
@@ -2766,32 +2787,38 @@ Licensed under the BSD-2-Clause License.
           fill: fillColor,
           stroke: strokeColor,
           'stroke-width': 3
-        }).hover(hoverFunction).click(clickFunction);
+        }).hover(hoverFunction).click(clickFunction).mouseout(leaveFunction);
         return (function(rPath, path) {
           return rPath.animate({
             path: path
           }, 500, '<>');
         })(rPath, path);
       } else {
-        return this.raphael.path(path).attr({
-          fill: fillColor,
-          stroke: strokeColor,
-          'stroke-width': 3
-        }).hover(hoverFunction).click(clickFunction);
+        if (this.options.donutType === 'pie') {
+          return this.raphael.path(path).attr({
+            fill: fillColor,
+            stroke: strokeColor,
+            'stroke-width': 3
+          }).hover(hoverFunction).click(clickFunction).mouseout(leaveFunction);
+        } else {
+          return this.raphael.path(path).attr({
+            fill: fillColor,
+            stroke: strokeColor,
+            'stroke-width': 3
+          }).hover(hoverFunction).click(clickFunction);
+        }
       }
     };
 
     DonutSegment.prototype.select = function() {
-      if (this.options.donutType === 'donut') {
-        if (!this.selected) {
-          this.seg.animate({
-            path: this.selectedPath
-          }, 150, '<>');
-          this.arc.animate({
-            opacity: 1
-          }, 150, '<>');
-          return this.selected = true;
-        }
+      if (!this.selected) {
+        this.seg.animate({
+          path: this.selectedPath
+        }, 150, '<>');
+        this.arc.animate({
+          opacity: 1
+        }, 150, '<>');
+        return this.selected = true;
       }
     };
 

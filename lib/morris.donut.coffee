@@ -28,14 +28,15 @@ class Morris.Donut extends Morris.EventEmitter
     labelColor: '#000000',
     formatter: Morris.commas
     resize: false,
-    dataLabels: true,
-    dataLabelsPosition: 'outside',
+    dataLabels: false,
+    dataLabelsPosition: 'inside',
     dataLabelsFamily: 'sans-serif',
     dataLabelsSize: 12,
     dataLabelsWeight: 'normal',
     dataLabelsColor: '#000',
-    donutType: 'pie',
-    animate: true
+    donutType: 'donut',
+    animate: true,
+    showPercentage: true
 
   # Create and render a donut chart.
   #
@@ -93,6 +94,7 @@ class Morris.Donut extends Morris.EventEmitter
       @segments.push seg
       seg.on 'hover', @select
       seg.on 'click', @click
+      seg.on 'mouseout', @deselect
 
       if @options.dataLabels && @values.length > 1
         p_sin_p0 = Math.sin((last + next)/2);
@@ -102,13 +104,17 @@ class Morris.Donut extends Morris.EventEmitter
             label_x = parseFloat(cx) + parseFloat((seg.raphael.height) * 0.30 * p_sin_p0);
             label_y = parseFloat(cy) + parseFloat((seg.raphael.height) * 0.30 * p_cos_p0);
           else
-            label_x = parseFloat(cx) + parseFloat((seg.raphael.height) * 0.37 * p_sin_p0);
-            label_y = parseFloat(cy) + parseFloat((seg.raphael.height) * 0.37 * p_cos_p0);
+            label_x = parseFloat(cx) + parseFloat((seg.raphael.height) * 0.39 * p_sin_p0);
+            label_y = parseFloat(cy) + parseFloat((seg.raphael.height) * 0.39 * p_cos_p0);
         else
           label_x = parseFloat(cx) + parseFloat((seg.raphael.height - 9) * 0.5 * p_sin_p0);
           label_y = parseFloat(cy) + parseFloat((seg.raphael.height - 9) * 0.5 * p_cos_p0);
         
-         @drawDataLabel(label_x,label_y,value)
+        if @options.showPercentage
+          finalValue = Math.round(parseFloat(value) / parseFloat(total) * 100) + '%'
+          @drawDataLabel(label_x,label_y, finalValue)
+        else
+          @drawDataLabel(label_x,label_y,value)
 
       last = next
       idx += 1
@@ -150,7 +156,8 @@ class Morris.Donut extends Morris.EventEmitter
     if @options.donutType == 'donut' 
       @setLabels(row.label, @options.formatter(row.value, row))
 
-
+  deselect: (idx) =>
+    s.deselect() for s in @segments
 
   # @private
   setLabels: (label1, label2) ->
@@ -233,14 +240,21 @@ class Morris.DonutSegment extends Morris.EventEmitter
       @color, 
       @backgroundColor, 
       => @fire('hover', @index),
-      => @fire('click', @index)
+      => @fire('click', @index),
+      => @fire('mouseout', @index)
     )
 
   drawDonutArc: (path, color) ->
-    @raphael.path(path)
-      .attr(stroke: color, 'stroke-width': 2, opacity: 0)
+    if @options.animate
+      rPath = @raphael.path("M"+this.cx+","+this.cy+"Z")
+        .attr(stroke: color, 'stroke-width': 2, opacity: 0)
+      do (rPath, path) =>
+        rPath.animate {path}, 500, '<>'
+    else
+      @raphael.path(path)
+            .attr(stroke: color, 'stroke-width': 2, opacity: 0)
 
-  drawDonutSegment: (path, fillColor, strokeColor, hoverFunction, clickFunction) ->
+  drawDonutSegment: (path, fillColor, strokeColor, hoverFunction, clickFunction, leaveFunction) ->
     if @options.animate && @options.donutType == 'pie'
       straightPath = path;
       straightPath = path.replace('A', ',');
@@ -258,20 +272,28 @@ class Morris.DonutSegment extends Morris.EventEmitter
         .attr(fill: fillColor, stroke: strokeColor, 'stroke-width': 3)
         .hover(hoverFunction)
         .click(clickFunction)
+        .mouseout(leaveFunction)
+      
       do (rPath, path) =>
         rPath.animate {path}, 500, '<>'
     else
-      @raphael.path(path)
-        .attr(fill: fillColor, stroke: strokeColor, 'stroke-width': 3)
-        .hover(hoverFunction)
-        .click(clickFunction)
+      if @options.donutType == 'pie'
+        @raphael.path(path)
+          .attr(fill: fillColor, stroke: strokeColor, 'stroke-width': 3)
+          .hover(hoverFunction)
+          .click(clickFunction)
+          .mouseout(leaveFunction)
+      else
+        @raphael.path(path)
+          .attr(fill: fillColor, stroke: strokeColor, 'stroke-width': 3)
+          .hover(hoverFunction)
+          .click(clickFunction)
 
   select: =>
-    if @options.donutType == 'donut'
-      unless @selected
-        @seg.animate(path: @selectedPath, 150, '<>')
-        @arc.animate(opacity: 1, 150, '<>')
-        @selected = true
+    unless @selected
+      @seg.animate(path: @selectedPath, 150, '<>')
+      @arc.animate(opacity: 1, 150, '<>')
+      @selected = true
 
   deselect: =>
     if @selected
