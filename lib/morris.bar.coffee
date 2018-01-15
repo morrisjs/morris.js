@@ -33,6 +33,7 @@ class Morris.Bar extends Morris.Grid
     horizontal: false
     stacked: false
     shown: true
+    showZero: true
     inBarValue: false
     inBarValueTextColor: 'white'
     inBarValueMinTopMargin: 1
@@ -253,7 +254,7 @@ class Morris.Bar extends Morris.Grid
           top -= lastTop if @options.stacked
           if not @options.horizontal
             lastTop += size
-            if size == 0 then size = 1
+            if size == 0 && @options.showZero then size = 1
             @seriesBars[idx][sidx] = @drawBar(left, top, barWidth, size, @colorFor(row, sidx, 'bar'),
                 @options.barOpacity, @options.barRadius)
             if @options.dataLabels

@@ -1925,6 +1925,7 @@ Licensed under the BSD-2-Clause License.
       horizontal: false,
       stacked: false,
       shown: true,
+      showZero: true,
       inBarValue: false,
       inBarValueTextColor: 'white',
       inBarValueMinTopMargin: 1,
@@ -2255,7 +2256,7 @@ Licensed under the BSD-2-Clause License.
                 }
                 if (!this.options.horizontal) {
                   lastTop += size;
-                  if (size === 0) {
+                  if (size === 0 && this.options.showZero) {
                     size = 1;
                   }
                   this.seriesBars[idx][sidx] = this.drawBar(left, top, barWidth, size, this.colorFor(row, sidx, 'bar'), this.options.barOpacity, this.options.barRadius);
