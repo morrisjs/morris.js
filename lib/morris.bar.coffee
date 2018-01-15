@@ -99,16 +99,17 @@ class Morris.Bar extends Morris.Grid
               straightPath += 'M'+coord.x+','+@transY2(0)
         prevCoord = coord
 
-      if @options.animate
-        rPath = @raphael.path(straightPath)
-                        .attr('stroke', @options.barColors[nb+ii])
-                        .attr('stroke-width', 3)
-        do (rPath, path) =>
-          rPath.animate {path}, 500, '<>'
-      else
-        rPath = @raphael.path(path)
-                        .attr('stroke', @options.barColors[nb+ii])
-                        .attr('stroke-width', 3)
+      if path != ""
+        if @options.animate
+          rPath = @raphael.path(straightPath)
+                          .attr('stroke', @options.barColors[nb+ii])
+                          .attr('stroke-width', 3)
+          do (rPath, path) =>
+            rPath.animate {path}, 500, '<>'
+        else
+          rPath = @raphael.path(path)
+                          .attr('stroke', @options.barColors[nb+ii])
+                          .attr('stroke-width', 3)
 
   drawBarPoints: ->
     nb = @options.ykeys.length - @options.nbYkeys2

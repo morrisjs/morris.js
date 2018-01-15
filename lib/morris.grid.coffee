@@ -331,8 +331,9 @@ class Morris.Grid extends Morris.EventEmitter
       @top = @options.padding
       @bottom = @elementHeight - @options.padding
       if @options.axes in [true, 'both', 'y']
-        yLabelWidths = for gridLine in @grid
-          @measureText(@yAxisFormat(gridLine)).width
+        if @grid? 
+          yLabelWidths = for gridLine in @grid
+            @measureText(@yAxisFormat(gridLine)).width
 
         if @options.nbYkeys2 > 0
           yLabelWidths2 = for gridLine in @grid2
@@ -470,20 +471,23 @@ class Morris.Grid extends Morris.EventEmitter
       basePos = @getXAxisLabelY()
       basePos2 = @top - (@options.xAxisLabelTopPadding || @options.padding / 2)
 
-    for lineY in @grid
-      pos = @transY(lineY)
-      if @options.axes in [true, 'both', 'y']
-        if not @options.horizontal
-          @drawYAxisLabel(basePos, pos, @yAxisFormat(lineY))
-        else
-          @drawXAxisLabel(pos, basePos, @yAxisFormat(lineY))
+    if @grid?
+      for lineY in @grid
+        pos = @transY(lineY)
+        if @options.axes in [true, 'both', 'y']
+          if not @options.horizontal
+            @drawYAxisLabel(basePos, pos, @yAxisFormat(lineY))
+          else
+            @drawXAxisLabel(pos, basePos, @yAxisFormat(lineY))
 
-      if @options.grid
-        pos = Math.floor(pos) + 0.5
-        if not @options.horizontal
-          @drawGridLine("M#{@xStart},#{pos}H#{@xEnd}")
-        else
-          @drawGridLine("M#{pos},#{@xStart}V#{@xEnd}")
+        if @options.grid
+          pos = Math.floor(pos) + 0.5
+          if not @options.horizontal
+            if isNaN(@xEnd)
+              @xEnd = 20
+            @drawGridLine("M#{@xStart},#{pos}H#{@xEnd}")
+          else
+            @drawGridLine("M#{pos},#{@xStart}V#{@xEnd}")
 
     if @options.nbYkeys2 > 0
       for lineY in @grid2
@@ -503,9 +507,10 @@ class Morris.Grid extends Morris.EventEmitter
 
   # draw events vertical lines
   drawEvents: ->
-    for event, i in @events
-      color = @options.eventLineColors[i % @options.eventLineColors.length]
-      @drawEvent(event, color)
+    if @events?
+      for event, i in @events
+        color = @options.eventLineColors[i % @options.eventLineColors.length]
+        @drawEvent(event, color)
 
   drawGoal: (goal, color) ->
     y = Math.floor(@transY(goal)) + 0.5

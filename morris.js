@@ -542,16 +542,18 @@ Licensed under the BSD-2-Clause License.
         this.top = this.options.padding;
         this.bottom = this.elementHeight - this.options.padding;
         if ((_ref1 = this.options.axes) === true || _ref1 === 'both' || _ref1 === 'y') {
-          yLabelWidths = (function() {
-            var _i, _len, _ref2, _results;
-            _ref2 = this.grid;
-            _results = [];
-            for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-              gridLine = _ref2[_i];
-              _results.push(this.measureText(this.yAxisFormat(gridLine)).width);
-            }
-            return _results;
-          }).call(this);
+          if (this.grid != null) {
+            yLabelWidths = (function() {
+              var _i, _len, _ref2, _results;
+              _ref2 = this.grid;
+              _results = [];
+              for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+                gridLine = _ref2[_i];
+                _results.push(this.measureText(this.yAxisFormat(gridLine)).width);
+              }
+              return _results;
+            }).call(this);
+          }
           if (this.options.nbYkeys2 > 0) {
             yLabelWidths2 = (function() {
               var _i, _len, _ref2, _results;
@@ -708,23 +710,28 @@ Licensed under the BSD-2-Clause License.
         basePos = this.getXAxisLabelY();
         basePos2 = this.top - (this.options.xAxisLabelTopPadding || this.options.padding / 2);
       }
-      _ref1 = this.grid;
-      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-        lineY = _ref1[_i];
-        pos = this.transY(lineY);
-        if ((_ref2 = this.options.axes) === true || _ref2 === 'both' || _ref2 === 'y') {
-          if (!this.options.horizontal) {
-            this.drawYAxisLabel(basePos, pos, this.yAxisFormat(lineY));
-          } else {
-            this.drawXAxisLabel(pos, basePos, this.yAxisFormat(lineY));
+      if (this.grid != null) {
+        _ref1 = this.grid;
+        for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+          lineY = _ref1[_i];
+          pos = this.transY(lineY);
+          if ((_ref2 = this.options.axes) === true || _ref2 === 'both' || _ref2 === 'y') {
+            if (!this.options.horizontal) {
+              this.drawYAxisLabel(basePos, pos, this.yAxisFormat(lineY));
+            } else {
+              this.drawXAxisLabel(pos, basePos, this.yAxisFormat(lineY));
+            }
           }
-        }
-        if (this.options.grid) {
-          pos = Math.floor(pos) + 0.5;
-          if (!this.options.horizontal) {
-            this.drawGridLine("M" + this.xStart + "," + pos + "H" + this.xEnd);
-          } else {
-            this.drawGridLine("M" + pos + "," + this.xStart + "V" + this.xEnd);
+          if (this.options.grid) {
+            pos = Math.floor(pos) + 0.5;
+            if (!this.options.horizontal) {
+              if (isNaN(this.xEnd)) {
+                this.xEnd = 20;
+              }
+              this.drawGridLine("M" + this.xStart + "," + pos + "H" + this.xEnd);
+            } else {
+              this.drawGridLine("M" + pos + "," + this.xStart + "V" + this.xEnd);
+            }
           }
         }
       }
@@ -762,14 +769,16 @@ Licensed under the BSD-2-Clause License.
 
     Grid.prototype.drawEvents = function() {
       var color, event, i, _i, _len, _ref, _results;
-      _ref = this.events;
-      _results = [];
-      for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
-        event = _ref[i];
-        color = this.options.eventLineColors[i % this.options.eventLineColors.length];
-        _results.push(this.drawEvent(event, color));
+      if (this.events != null) {
+        _ref = this.events;
+        _results = [];
+        for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
+          event = _ref[i];
+          color = this.options.eventLineColors[i % this.options.eventLineColors.length];
+          _results.push(this.drawEvent(event, color));
+        }
+        return _results;
       }
-      return _results;
     };
 
     Grid.prototype.drawGoal = function(goal, color) {
@@ -1407,8 +1416,10 @@ Licensed under the BSD-2-Clause License.
       data[0].y = this.transY(this.data[0].x * a + b);
       data[1].x = this.transX(this.data[this.data.length - 1].x);
       data[1].y = this.transY(this.data[this.data.length - 1].x * a + b);
-      path = Morris.Line.createPath(data, false, this.bottom);
-      return path = this.raphael.path(path).attr('stroke', this.colorFor(null, index, 'trendLine')).attr('stroke-width', this.options.trendLineWidth);
+      if (!isNaN(a)) {
+        path = Morris.Line.createPath(data, false, this.bottom);
+        return path = this.raphael.path(path).attr('stroke', this.colorFor(null, index, 'trendLine')).attr('stroke-width', this.options.trendLineWidth);
+      }
     };
 
     Line.createPath = function(coords, smooth, bottom) {
@@ -2060,15 +2071,19 @@ Licensed under the BSD-2-Clause License.
           }
           prevCoord = coord;
         }
-        if (this.options.animate) {
-          rPath = this.raphael.path(straightPath).attr('stroke', this.options.barColors[nb + ii]).attr('stroke-width', 3);
-          _results.push((function(rPath, path) {
-            return rPath.animate({
-              path: path
-            }, 500, '<>');
-          })(rPath, path));
+        if (path !== "") {
+          if (this.options.animate) {
+            rPath = this.raphael.path(straightPath).attr('stroke', this.options.barColors[nb + ii]).attr('stroke-width', 3);
+            _results.push((function(rPath, path) {
+              return rPath.animate({
+                path: path
+              }, 500, '<>');
+            })(rPath, path));
+          } else {
+            _results.push(rPath = this.raphael.path(path).attr('stroke', this.options.barColors[nb + ii]).attr('stroke-width', 3));
+          }
         } else {
-          _results.push(rPath = this.raphael.path(path).attr('stroke', this.options.barColors[nb + ii]).attr('stroke-width', 3));
+          _results.push(void 0);
         }
       }
       return _results;

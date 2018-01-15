@@ -300,10 +300,11 @@ class Morris.Line extends Morris.Grid
     data[1].x = @transX(@data[@data.length - 1].x)
     data[1].y = @transY(@data[@data.length - 1].x * a + b)
 
-    path = Morris.Line.createPath data, false, @bottom
-    path = @raphael.path(path)
-      .attr('stroke', @colorFor(null, index, 'trendLine'))
-      .attr('stroke-width', @options.trendLineWidth)
+    if !isNaN(a)
+      path = Morris.Line.createPath data, false, @bottom
+      path = @raphael.path(path)
+        .attr('stroke', @colorFor(null, index, 'trendLine'))
+        .attr('stroke-width', @options.trendLineWidth)
 
 
   # create a path for a data series
