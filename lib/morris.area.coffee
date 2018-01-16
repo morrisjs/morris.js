@@ -62,20 +62,16 @@ class Morris.Area extends Morris.Line
   drawFilledPath: (path, fill, areaIndex) ->
     if @options.animate
       straightPath = ''
-      console.log(@data)
-      straightPath = 'M'+@data[0]._x+','+@transY(0)
-      straightPath += ','+@data[@data.length-1]._x+','+@transY(0)
-      console.log(straightPath)
+      straightPath = 'M'+@data[0]._x+','+@transY(@ymin)
+      straightPath += ','+@data[@data.length-1]._x+','+@transY(@ymin)
 
       for row, ii in @data by -1
         if straightPath == ''
-          straightPath = 'M'+row._x+','+@transY(0)
+          straightPath = 'M'+row._x+','+@transY(@ymin)
         else
-          straightPath += ','+row._x+','+@transY(0)
+          straightPath += ','+row._x+','+@transY(@ymin)
 
       straightPath += 'Z';
-      console.log(straightPath)
-      console.log(path)
       rPath = @raphael.path(straightPath)
                       .attr('fill', fill)
                       .attr('fill-opacity', this.options.fillOpacity)

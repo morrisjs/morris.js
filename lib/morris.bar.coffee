@@ -93,11 +93,11 @@ class Morris.Bar extends Morris.Grid
               path += "C#{x1},#{y1},#{x2},#{y2},#{coord.x},#{coord.y}"
             else
               path += "L#{coord.x},#{coord.y}"
-            straightPath += 'L'+coord.x+','+@transY2(0)
+            straightPath += 'L'+coord.x+','+@transY(0)
           else
             if not @options.smooth or grads[i]?
               path += "M#{coord.x},#{coord.y}"
-              straightPath += 'M'+coord.x+','+@transY2(0)
+              straightPath += 'M'+coord.x+','+@transY(0)
         prevCoord = coord
 
       if path != ""

@@ -392,15 +392,15 @@ class Morris.Line extends Morris.Grid
         if straightPath == ''
           if lineIndex >= @options.ykeys.length - @options.nbYkeys2
             if row._y2[lineIndex]?
-              straightPath = 'M'+row._x+','+@transY2(0)
+              straightPath = 'M'+row._x+','+@transY2(@ymin2)
           else if row._y[lineIndex]?
-            straightPath = 'M'+row._x+','+@transY(0)
+            straightPath = 'M'+row._x+','+@transY(@ymin)
         else
           if lineIndex >= @options.ykeys.length - @options.nbYkeys2
             if row._y2[lineIndex]?
-              straightPath += ','+row._x+','+@transY2(0)
+              straightPath += ','+row._x+','+@transY2(@ymin2)
           else if row._y[lineIndex]?
-            straightPath += ','+row._x+','+@transY(0)
+            straightPath += ','+row._x+','+@transY(@ymin)
 
       rPath = @raphael.path(straightPath)
                       .attr('stroke', lineColor)
