@@ -251,14 +251,10 @@ class Morris.Line extends Morris.Grid
       circle = null
       if row._y[index]?
         circle = @drawLinePoint(row._x, row._y[index], @colorFor(row, index, 'point'), index)
-        if @options.dataLabels
-          @drawDataLabel(row._x, row._y[index] - 10, this.yLabelFormat(row.y[index], 0))
       
       if row._y2?
         if row._y2[index]?
           circle = @drawLinePoint(row._x, row._y2[index], @colorFor(row, index, 'point'), index)
-          if @options.dataLabels
-            @drawDataLabel(row._x, row._y2[index] - 10, this.yLabelFormat(row.y[index], 1000))
 
       @seriesPoints[index].push(circle)
 
@@ -376,14 +372,6 @@ class Morris.Line extends Morris.Grid
       @options.trendLineColors[sidx % @options.trendLineColors.length]
     else
       @options.lineColors[sidx % @options.lineColors.length]
-
-  drawDataLabel: (xPos, yPos, text) ->
-    label = @raphael.text(xPos, yPos, text)
-                    .attr('text-anchor', 'middle')
-                    .attr('font-size', @options.dataLabelsSize)
-                    .attr('font-family', @options.dataLabelsFamily)
-                    .attr('font-weight', @options.dataLabelsWeight)
-                    .attr('fill', @options.dataLabelsColor)
 
   drawLinePath: (path, lineColor, lineIndex) ->
     if @options.animate

@@ -127,12 +127,6 @@ class Morris.Bar extends Morris.Grid
               .attr('fill', @options.barColors[nb+ii])
               .attr('stroke-width', 1)
               .attr('stroke', '#ffffff')
-
-          if @options.dataLabels
-            if @options.horizontal is not true
-              @drawDataLabel(row._x, row._y2[nb+ii] - 10, @yLabelFormat(row.y[nb+ii]))
-            else
-              @drawDataLabelExt(row._y2[nb+ii] + 10, row._x, @yLabelFormat(row.y[nb+ii]), 'start')
               
   # draw the x-axis labels
   #
@@ -226,6 +220,8 @@ class Morris.Bar extends Morris.Grid
     leftPadding = spaceLeft / 2
     zeroPos = if @ymin <= 0 and @ymax >= 0 then @transY(0) else null
     @bars = for row, idx in @data
+      @data[idx].label_x = []
+      @data[idx].label_y = []
       @seriesBars[idx] = []
       lastTop = 0
       nb = row._y.length - @options.nbYkeys2
@@ -263,7 +259,9 @@ class Morris.Bar extends Morris.Grid
               else
                 depth = -7
               if size>@options.dataLabelsSize || !@options.stacked
-                @drawDataLabel(left+barWidth/2,top+depth,@yLabelFormat(row.y[sidx], 0))
+                @data[idx].label_x[sidx] = left+barWidth/2;
+                @data[idx].label_y[sidx] = top+depth;
+
           else
             lastTop -= size
             if size == 0 then size = 1
@@ -271,9 +269,13 @@ class Morris.Bar extends Morris.Grid
                 @options.barOpacity, @options.barRadius)
             if @options.dataLabels
               if @options.stacked || @options.dataLabelsPosition=='inside'
-                  @drawDataLabel(top + size / 2, left + barWidth / 2,@yLabelFormat(row.y[sidx], 0))
+                  @data[idx].label_x[sidx] = top + size / 2;
+                  @data[idx].label_y[sidx] = left + barWidth / 2;
+
                 else
-                  @drawDataLabelExt(top + size + 5, left + barWidth / 2,@yLabelFormat(row.y[sidx], 0), 'start')
+                  @data[idx].label_x[sidx] = top + size + 5;
+                  @data[idx].label_y[sidx] = left + barWidth / 2;
+
             if @options.inBarValue and
                 barWidth > @options.gridTextSize + 2*@options.inBarValueMinTopMargin
               barMiddle = left + 0.5 * barWidth
@@ -394,22 +396,6 @@ class Morris.Bar extends Morris.Grid
       x = @left + 0.5 * @width
       y = @top + (index + 0.5) * @height / @data.length
       [content, x, y, true]
-
-  drawDataLabel: (xPos, yPos, text) ->
-    label = @raphael.text(xPos, yPos, text)
-                    .attr('text-anchor', 'middle')
-                    .attr('font-size', @options.dataLabelsSize)
-                    .attr('font-family', @options.dataLabelsFamily)
-                    .attr('font-weight', @options.dataLabelsWeight)
-                    .attr('fill', @options.dataLabelsColor)
-
-  drawDataLabelExt: (xPos, yPos, text, anchor) ->
-    label = @raphael.text(xPos, yPos, text)
-                    .attr('text-anchor', anchor)
-                    .attr('font-size', @options.dataLabelsSize)
-                    .attr('font-family', @options.dataLabelsFamily)
-                    .attr('font-weight', @options.dataLabelsWeight)
-                    .attr('fill', @options.dataLabelsColor)
 
   drawBar: (xPos, yPos, width, height, barColor, opacity, radiusArray) ->
     maxRadius = Math.max(radiusArray...)

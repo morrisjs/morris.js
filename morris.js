@@ -141,6 +141,7 @@ Licensed under the BSD-2-Clause License.
     __extends(Grid, _super);
 
     function Grid(options) {
+      this.setLabels = __bind(this.setLabels, this);
       this.hasToShow = __bind(this.hasToShow, this);
       this.resizeHandler = __bind(this.resizeHandler, this);
       var _this = this;
@@ -656,7 +657,8 @@ Licensed under the BSD-2-Clause License.
       if (this.draw) {
         this.draw();
       }
-      return this.drawGoals();
+      this.drawGoals();
+      return this.setLabels();
     };
 
     Grid.prototype.measureText = function(text, angle) {
@@ -870,6 +872,63 @@ Licensed under the BSD-2-Clause License.
 
     Grid.prototype.hasToShow = function(i) {
       return this.options.shown === true || this.options.shown[i] === true;
+    };
+
+    Grid.prototype.drawDataLabel = function(xPos, yPos, text) {
+      var label;
+      return label = this.raphael.text(xPos, yPos, text).attr('text-anchor', 'middle').attr('font-size', this.options.dataLabelsSize).attr('font-family', this.options.dataLabelsFamily).attr('font-weight', this.options.dataLabelsWeight).attr('fill', this.options.dataLabelsColor);
+    };
+
+    Grid.prototype.drawDataLabelExt = function(xPos, yPos, text, anchor) {
+      var label;
+      return label = this.raphael.text(xPos, yPos, text).attr('text-anchor', anchor).attr('font-size', this.options.dataLabelsSize).attr('font-family', this.options.dataLabelsFamily).attr('font-weight', this.options.dataLabelsWeight).attr('fill', this.options.dataLabelsColor);
+    };
+
+    Grid.prototype.setLabels = function() {
+      var index, row, ykey, _i, _len, _ref, _results;
+      if (this.options.dataLabels) {
+        _ref = this.data;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          row = _ref[_i];
+          _results.push((function() {
+            var _j, _len1, _ref1, _results1;
+            _ref1 = this.options.ykeys;
+            _results1 = [];
+            for (index = _j = 0, _len1 = _ref1.length; _j < _len1; index = ++_j) {
+              ykey = _ref1[index];
+              if (this.options.lineColors != null) {
+                if (row._y[index] != null) {
+                  this.drawDataLabel(row._x, row._y[index] - 10, this.yLabelFormat(row.y[index], 0));
+                }
+                if (row._y2 != null) {
+                  if (row._y2[index] != null) {
+                    _results1.push(this.drawDataLabel(row._x, row._y2[index] - 10, this.yLabelFormat(row.y[index], 1000)));
+                  } else {
+                    _results1.push(void 0);
+                  }
+                } else {
+                  _results1.push(void 0);
+                }
+              } else {
+                if (row.label_y[index] != null) {
+                  if (this.options.horizontal === !true) {
+                    _results1.push(this.drawDataLabel(row.label_x[index], row.label_y[index], this.yLabelFormat(row.y[index], index)));
+                  } else {
+                    _results1.push(this.drawDataLabelExt(row.label_x[index], row.label_y[index], this.yLabelFormat(row.y[index]), 'start'));
+                  }
+                } else if (row._y2[index] != null) {
+                  _results1.push(this.drawDataLabel(row._x, row._y2[index] - 10, this.yLabelFormat(row.y[index], index)));
+                } else {
+                  _results1.push(void 0);
+                }
+              }
+            }
+            return _results1;
+          }).call(this));
+        }
+        return _results;
+      }
     };
 
     return Grid;
@@ -1359,16 +1418,10 @@ Licensed under the BSD-2-Clause License.
         circle = null;
         if (row._y[index] != null) {
           circle = this.drawLinePoint(row._x, row._y[index], this.colorFor(row, index, 'point'), index);
-          if (this.options.dataLabels) {
-            this.drawDataLabel(row._x, row._y[index] - 10, this.yLabelFormat(row.y[index], 0));
-          }
         }
         if (row._y2 != null) {
           if (row._y2[index] != null) {
             circle = this.drawLinePoint(row._x, row._y2[index], this.colorFor(row, index, 'point'), index);
-            if (this.options.dataLabels) {
-              this.drawDataLabel(row._x, row._y2[index] - 10, this.yLabelFormat(row.y[index], 1000));
-            }
           }
         }
         _results.push(this.seriesPoints[index].push(circle));
@@ -1520,11 +1573,6 @@ Licensed under the BSD-2-Clause License.
       }
     };
 
-    Line.prototype.drawDataLabel = function(xPos, yPos, text) {
-      var label;
-      return label = this.raphael.text(xPos, yPos, text).attr('text-anchor', 'middle').attr('font-size', this.options.dataLabelsSize).attr('font-family', this.options.dataLabelsFamily).attr('font-weight', this.options.dataLabelsWeight).attr('fill', this.options.dataLabelsColor);
-    };
-
     Line.prototype.drawLinePath = function(path, lineColor, lineIndex) {
       var ii, rPath, row, straightPath, _i, _len, _ref,
         _this = this;
@@ -1536,18 +1584,18 @@ Licensed under the BSD-2-Clause License.
           if (straightPath === '') {
             if (lineIndex >= this.options.ykeys.length - this.options.nbYkeys2) {
               if (row._y2[lineIndex] != null) {
-                straightPath = 'M' + row._x + ',' + this.transY2(0);
+                straightPath = 'M' + row._x + ',' + this.transY2(this.ymin2);
               }
             } else if (row._y[lineIndex] != null) {
-              straightPath = 'M' + row._x + ',' + this.transY(0);
+              straightPath = 'M' + row._x + ',' + this.transY(this.ymin);
             }
           } else {
             if (lineIndex >= this.options.ykeys.length - this.options.nbYkeys2) {
               if (row._y2[lineIndex] != null) {
-                straightPath += ',' + row._x + ',' + this.transY2(0);
+                straightPath += ',' + row._x + ',' + this.transY2(this.ymin2);
               }
             } else if (row._y[lineIndex] != null) {
-              straightPath += ',' + row._x + ',' + this.transY(0);
+              straightPath += ',' + row._x + ',' + this.transY(this.ymin);
             }
           }
         }
@@ -1855,22 +1903,18 @@ Licensed under the BSD-2-Clause License.
         _this = this;
       if (this.options.animate) {
         straightPath = '';
-        console.log(this.data);
-        straightPath = 'M' + this.data[0]._x + ',' + this.transY(0);
-        straightPath += ',' + this.data[this.data.length - 1]._x + ',' + this.transY(0);
-        console.log(straightPath);
+        straightPath = 'M' + this.data[0]._x + ',' + this.transY(this.ymin);
+        straightPath += ',' + this.data[this.data.length - 1]._x + ',' + this.transY(this.ymin);
         _ref = this.data;
         for (ii = _i = _ref.length - 1; _i >= 0; ii = _i += -1) {
           row = _ref[ii];
           if (straightPath === '') {
-            straightPath = 'M' + row._x + ',' + this.transY(0);
+            straightPath = 'M' + row._x + ',' + this.transY(this.ymin);
           } else {
-            straightPath += ',' + row._x + ',' + this.transY(0);
+            straightPath += ',' + row._x + ',' + this.transY(this.ymin);
           }
         }
         straightPath += 'Z';
-        console.log(straightPath);
-        console.log(path);
         rPath = this.raphael.path(straightPath).attr('fill', fill).attr('fill-opacity', this.options.fillOpacity).attr('stroke', 'none');
         return (function(rPath, path) {
           return rPath.animate({
@@ -2062,11 +2106,11 @@ Licensed under the BSD-2-Clause License.
               } else {
                 path += "L" + coord.x + "," + coord.y;
               }
-              straightPath += 'L' + coord.x + ',' + this.transY2(0);
+              straightPath += 'L' + coord.x + ',' + this.transY(0);
             } else {
               if (!this.options.smooth || (grads[i] != null)) {
                 path += "M" + coord.x + "," + coord.y;
-                straightPath += 'M' + coord.x + ',' + this.transY2(0);
+                straightPath += 'M' + coord.x + ',' + this.transY(0);
               }
             }
           }
@@ -2105,18 +2149,9 @@ Licensed under the BSD-2-Clause License.
             row = _ref1[idx];
             if (row._y2[nb + ii] != null) {
               if (this.options.horizontal === !true) {
-                this.raphael.circle(row._x, row._y2[nb + ii], 4).attr('fill', this.options.barColors[nb + ii]).attr('stroke-width', 1).attr('stroke', '#ffffff');
+                _results1.push(this.raphael.circle(row._x, row._y2[nb + ii], 4).attr('fill', this.options.barColors[nb + ii]).attr('stroke-width', 1).attr('stroke', '#ffffff'));
               } else {
-                this.raphael.circle(row._y2[nb + ii], row._x, 4).attr('fill', this.options.barColors[nb + ii]).attr('stroke-width', 1).attr('stroke', '#ffffff');
-              }
-              if (this.options.dataLabels) {
-                if (this.options.horizontal === !true) {
-                  _results1.push(this.drawDataLabel(row._x, row._y2[nb + ii] - 10, this.yLabelFormat(row.y[nb + ii])));
-                } else {
-                  _results1.push(this.drawDataLabelExt(row._y2[nb + ii] + 10, row._x, this.yLabelFormat(row.y[nb + ii]), 'start'));
-                }
-              } else {
-                _results1.push(void 0);
+                _results1.push(this.raphael.circle(row._y2[nb + ii], row._x, 4).attr('fill', this.options.barColors[nb + ii]).attr('stroke-width', 1).attr('stroke', '#ffffff'));
               }
             } else {
               _results1.push(void 0);
@@ -2219,6 +2254,8 @@ Licensed under the BSD-2-Clause License.
         _results = [];
         for (idx = _j = 0, _len = _ref1.length; _j < _len; idx = ++_j) {
           row = _ref1[idx];
+          this.data[idx].label_x = [];
+          this.data[idx].label_y = [];
           this.seriesBars[idx] = [];
           lastTop = 0;
           nb = row._y.length - this.options.nbYkeys2;
@@ -2267,7 +2304,8 @@ Licensed under the BSD-2-Clause License.
                       depth = -7;
                     }
                     if (size > this.options.dataLabelsSize || !this.options.stacked) {
-                      _results1.push(this.drawDataLabel(left + barWidth / 2, top + depth, this.yLabelFormat(row.y[sidx], 0)));
+                      this.data[idx].label_x[sidx] = left + barWidth / 2;
+                      _results1.push(this.data[idx].label_y[sidx] = top + depth);
                     } else {
                       _results1.push(void 0);
                     }
@@ -2282,9 +2320,11 @@ Licensed under the BSD-2-Clause License.
                   this.seriesBars[idx][sidx] = this.drawBar(top, left, size, barWidth, this.colorFor(row, sidx, 'bar'), this.options.barOpacity, this.options.barRadius);
                   if (this.options.dataLabels) {
                     if (this.options.stacked || this.options.dataLabelsPosition === 'inside') {
-                      this.drawDataLabel(top + size / 2, left + barWidth / 2, this.yLabelFormat(row.y[sidx], 0));
+                      this.data[idx].label_x[sidx] = top + size / 2;
+                      this.data[idx].label_y[sidx] = left + barWidth / 2;
                     } else {
-                      this.drawDataLabelExt(top + size + 5, left + barWidth / 2, this.yLabelFormat(row.y[sidx], 0), 'start');
+                      this.data[idx].label_x[sidx] = top + size + 5;
+                      this.data[idx].label_y[sidx] = left + barWidth / 2;
                     }
                   }
                   if (this.options.inBarValue && barWidth > this.options.gridTextSize + 2 * this.options.inBarValueMinTopMargin) {
@@ -2419,16 +2459,6 @@ Licensed under the BSD-2-Clause License.
         y = this.top + (index + 0.5) * this.height / this.data.length;
         return [content, x, y, true];
       }
-    };
-
-    Bar.prototype.drawDataLabel = function(xPos, yPos, text) {
-      var label;
-      return label = this.raphael.text(xPos, yPos, text).attr('text-anchor', 'middle').attr('font-size', this.options.dataLabelsSize).attr('font-family', this.options.dataLabelsFamily).attr('font-weight', this.options.dataLabelsWeight).attr('fill', this.options.dataLabelsColor);
-    };
-
-    Bar.prototype.drawDataLabelExt = function(xPos, yPos, text, anchor) {
-      var label;
-      return label = this.raphael.text(xPos, yPos, text).attr('text-anchor', anchor).attr('font-size', this.options.dataLabelsSize).attr('font-family', this.options.dataLabelsFamily).attr('font-weight', this.options.dataLabelsWeight).attr('fill', this.options.dataLabelsColor);
     };
 
     Bar.prototype.drawBar = function(xPos, yPos, width, height, barColor, opacity, radiusArray) {

@@ -420,6 +420,7 @@ class Morris.Grid extends Morris.EventEmitter
     @drawEvents()
     @draw() if @draw
     @drawGoals()
+    @setLabels()
 
   # @private
   #
@@ -597,6 +598,42 @@ class Morris.Grid extends Morris.EventEmitter
   hasToShow: (i) =>
     @options.shown is true or @options.shown[i] is true
 
+  drawDataLabel: (xPos, yPos, text) ->
+    label = @raphael.text(xPos, yPos, text)
+                    .attr('text-anchor', 'middle')
+                    .attr('font-size', @options.dataLabelsSize)
+                    .attr('font-family', @options.dataLabelsFamily)
+                    .attr('font-weight', @options.dataLabelsWeight)
+                    .attr('fill', @options.dataLabelsColor)
+
+  drawDataLabelExt: (xPos, yPos, text, anchor) ->
+    label = @raphael.text(xPos, yPos, text)
+                    .attr('text-anchor', anchor)
+                    .attr('font-size', @options.dataLabelsSize)
+                    .attr('font-family', @options.dataLabelsFamily)
+                    .attr('font-weight', @options.dataLabelsWeight)
+                    .attr('fill', @options.dataLabelsColor)
+
+  setLabels: =>
+    if @options.dataLabels
+      for row in @data
+        for ykey, index in @options.ykeys
+          if @options.lineColors?
+            if row._y[index]?
+              @drawDataLabel(row._x, row._y[index] - 10, this.yLabelFormat(row.y[index], 0))
+
+            if row._y2?
+              if row._y2[index]?
+                @drawDataLabel(row._x, row._y2[index] - 10, this.yLabelFormat(row.y[index], 1000))
+
+          else
+            if row.label_y[index]?
+              if @options.horizontal is not true
+                @drawDataLabel(row.label_x[index], row.label_y[index],@yLabelFormat(row.y[index], index))
+              else
+                @drawDataLabelExt(row.label_x[index], row.label_y[index], @yLabelFormat(row.y[index]), 'start')
+            else if row._y2[index]?
+              @drawDataLabel(row._x, row._y2[index] - 10,@yLabelFormat(row.y[index], index))
 
 # Parse a date into a javascript timestamp
 #
