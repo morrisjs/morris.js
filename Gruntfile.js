@@ -57,34 +57,8 @@ module.exports = function (grunt) {
           'morris.min.js': 'morris.js'
         }
       }
-    },
-    mocha: {
-      index: ['spec/specs.html'],
-      options: {run: true}
-    },
-    watch: {
-      all: {
-        files: ['lib/**/*.coffee', 'spec/lib/**/*.coffee', 'spec/support/**/*.coffee', 'less/**/*.less'],
-        tasks: 'default'
-      },
-      dev: {
-        files:  'lib/*.coffee' ,
-        tasks: ['concat:build/morris.coffee', 'coffee:lib']
-      }
-    },
-    shell: {
-      visual_spec: {
-        command: './run.sh',
-        options: {
-          stdout: true,
-          failOnError: true,
-          execOptions: {
-            cwd: 'spec/viz'
-          }
-        }
-      }
     }
   });
 
-  grunt.registerTask('default', ['concat', 'coffee', 'less', 'uglify', 'mocha', 'shell:visual_spec']);
+  grunt.registerTask('default', ['concat', 'coffee', 'less', 'uglify']);
 };
