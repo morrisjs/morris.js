@@ -18,6 +18,15 @@ As morris.js project seems no more updated and as I have been asked many times t
 - Color scheme changed to Bootstrap 4's default theme
 - Option to display percentage in Donut and Pie charts
 
+## Installation
+You can download the latest version of Morris.js06 from the [GitHub releases](https://github.com/pierresh/morris.js/releases/latest).
+
+To install via npm:
+
+```bash
+npm install morris.js06
+```
+
 ## Requirements
 
 - [Raphael.js](http://raphaeljs.com/) (>= 2.0)
