@@ -1,4 +1,4 @@
-# Morris.js - pretty time-series line graphs
+# Morris.js06 - pretty time-series line graphs
 
 As morris.js project seems no more updated and as I have been asked many times to bring several changes to this plugin on my past but yet active projects, I decided to dig in it and add these requirements myself ^^
 
