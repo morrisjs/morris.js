@@ -449,7 +449,13 @@ class Morris.Grid extends Morris.EventEmitter
         "#{@options.preUnits}#{Morris.commas(label)}#{@options.postUnits}"
       else 
         "#{@options.preUnits2}#{Morris.commas(label)}#{@options.postUnits2}"
-    
+
+  yLabelFormat_noUnit: (label, i) ->
+    if typeof @options.yLabelFormat is 'function'
+      @options.yLabelFormat(label, i)
+    else
+      "#{Morris.commas(label)}"
+
   # get the X position of a label on the Y axis
   #
   # @private
@@ -620,20 +626,20 @@ class Morris.Grid extends Morris.EventEmitter
         for ykey, index in @options.ykeys
           if @options.lineColors?
             if row._y[index]?
-              @drawDataLabel(row._x, row._y[index] - 10, this.yLabelFormat(row.y[index], 0))
+              @drawDataLabel(row._x, row._y[index] - 10, this.yLabelFormat_noUnit(row.y[index], 0))
 
             if row._y2?
               if row._y2[index]?
-                @drawDataLabel(row._x, row._y2[index] - 10, this.yLabelFormat(row.y[index], 1000))
+                @drawDataLabel(row._x, row._y2[index] - 10, this.yLabelFormat_noUnit(row.y[index], 1000))
 
           else
             if row.label_y[index]?
               if @options.horizontal is not true
-                @drawDataLabel(row.label_x[index], row.label_y[index],@yLabelFormat(row.y[index], index))
+                @drawDataLabel(row.label_x[index], row.label_y[index],@yLabelFormat_noUnit(row.y[index], index))
               else
-                @drawDataLabelExt(row.label_x[index], row.label_y[index], @yLabelFormat(row.y[index]), 'start')
+                @drawDataLabelExt(row.label_x[index], row.label_y[index], @yLabelFormat_noUnit(row.y[index]), 'start')
             else if row._y2[index]?
-              @drawDataLabel(row._x, row._y2[index] - 10,@yLabelFormat(row.y[index], index))
+              @drawDataLabel(row._x, row._y2[index] - 10,@yLabelFormat_noUnit(row.y[index], index))
 
 # Parse a date into a javascript timestamp
 #
