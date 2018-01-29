@@ -254,11 +254,11 @@ class Morris.Bar extends Morris.Grid
             @seriesBars[idx][sidx] = @drawBar(left, top, barWidth, size, @colorFor(row, sidx, 'bar'),
                 @options.barOpacity, @options.barRadius)
             if @options.dataLabels
-              if @options.stacked || @options.dataLabelsPosition=='inside'
+              if @options.dataLabelsPosition=='inside' || (@options.stacked && @options.dataLabelsPosition!='force_outside')
                 depth = (size)/2
               else
                 depth = -7
-              if size>@options.dataLabelsSize || !@options.stacked
+              if size>@options.dataLabelsSize || !@options.stacked || @options.dataLabelsPosition=='force_outside'
                 @data[idx].label_x[sidx] = left+barWidth/2;
                 @data[idx].label_y[sidx] = top+depth;
 
