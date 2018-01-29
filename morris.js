@@ -1,5 +1,5 @@
 /* @license
-morris.js v0.6
+morris.js06 v0.6.0
 Copyright 2018 Olly Smith All rights reserved.
 Licensed under the BSD-2-Clause License.
 */
@@ -692,6 +692,14 @@ Licensed under the BSD-2-Clause License.
       }
     };
 
+    Grid.prototype.yLabelFormat_noUnit = function(label, i) {
+      if (typeof this.options.yLabelFormat === 'function') {
+        return this.options.yLabelFormat(label, i);
+      } else {
+        return "" + (Morris.commas(label));
+      }
+    };
+
     Grid.prototype.getYAxisLabelX = function() {
       if (this.options.yLabelAlign === 'right') {
         return this.left - this.options.padding / 2;
@@ -867,6 +875,7 @@ Licensed under the BSD-2-Clause License.
       this.timeoutId = null;
       _ref = Morris.dimensions(this.el), width = _ref.width, height = _ref.height;
       this.raphael.setSize(width, height);
+      this.options.animate = false;
       return this.redraw();
     };
 
@@ -899,11 +908,11 @@ Licensed under the BSD-2-Clause License.
               ykey = _ref1[index];
               if (this.options.lineColors != null) {
                 if (row._y[index] != null) {
-                  this.drawDataLabel(row._x, row._y[index] - 10, this.yLabelFormat(row.y[index], 0));
+                  this.drawDataLabel(row._x, row._y[index] - 10, this.yLabelFormat_noUnit(row.y[index], 0));
                 }
                 if (row._y2 != null) {
                   if (row._y2[index] != null) {
-                    _results1.push(this.drawDataLabel(row._x, row._y2[index] - 10, this.yLabelFormat(row.y[index], 1000)));
+                    _results1.push(this.drawDataLabel(row._x, row._y2[index] - 10, this.yLabelFormat_noUnit(row.y[index], 1000)));
                   } else {
                     _results1.push(void 0);
                   }
@@ -913,12 +922,12 @@ Licensed under the BSD-2-Clause License.
               } else {
                 if (row.label_y[index] != null) {
                   if (this.options.horizontal === !true) {
-                    _results1.push(this.drawDataLabel(row.label_x[index], row.label_y[index], this.yLabelFormat(row.y[index], index)));
+                    _results1.push(this.drawDataLabel(row.label_x[index], row.label_y[index], this.yLabelFormat_noUnit(row.y[index], index)));
                   } else {
-                    _results1.push(this.drawDataLabelExt(row.label_x[index], row.label_y[index], this.yLabelFormat(row.y[index]), 'start'));
+                    _results1.push(this.drawDataLabelExt(row.label_x[index], row.label_y[index], this.yLabelFormat_noUnit(row.y[index]), 'start'));
                   }
                 } else if (row._y2[index] != null) {
-                  _results1.push(this.drawDataLabel(row._x, row._y2[index] - 10, this.yLabelFormat(row.y[index], index)));
+                  _results1.push(this.drawDataLabel(row._x, row._y2[index] - 10, this.yLabelFormat_noUnit(row.y[index], index)));
                 } else {
                   _results1.push(void 0);
                 }
@@ -1095,6 +1104,7 @@ Licensed under the BSD-2-Clause License.
       pointStrokeColors: ['#ffffff'],
       pointFillColors: [],
       smooth: true,
+      lineType: {},
       shown: true,
       xLabels: 'auto',
       xLabelFormat: null,
@@ -1237,12 +1247,21 @@ Licensed under the BSD-2-Clause License.
     };
 
     Line.prototype.generatePaths = function() {
-      var coords, i, nb, r, smooth;
+      var coords, i, lineType, nb, r, smooth;
       return this.paths = (function() {
         var _i, _ref, _ref1, _results;
         _results = [];
         for (i = _i = 0, _ref = this.options.ykeys.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
           smooth = typeof this.options.smooth === "boolean" ? this.options.smooth : (_ref1 = this.options.ykeys[i], __indexOf.call(this.options.smooth, _ref1) >= 0);
+          lineType = smooth ? 'smooth' : 'jagged';
+          if (typeof this.options.lineType === "string") {
+            lineType = this.options.lineType;
+          } else {
+
+          }
+          if (this.options.lineType[this.options.ykeys[i]] !== void 0) {
+            lineType = this.options.lineType[this.options.ykeys[i]];
+          }
           nb = this.options.ykeys.length - this.options.nbYkeys2;
           if (i < nb) {
             coords = (function() {
@@ -1278,7 +1297,7 @@ Licensed under the BSD-2-Clause License.
             }).call(this);
           }
           if (coords.length > 1) {
-            _results.push(Morris.Line.createPath(coords, smooth, this.bottom));
+            _results.push(Morris.Line.createPath(coords, lineType, this.bottom));
           } else {
             _results.push(null);
           }
@@ -1475,10 +1494,10 @@ Licensed under the BSD-2-Clause License.
       }
     };
 
-    Line.createPath = function(coords, smooth, bottom) {
+    Line.createPath = function(coords, lineType, bottom) {
       var coord, g, grads, i, ix, lg, path, prevCoord, x1, x2, y1, y2, _i, _len;
       path = "";
-      if (smooth) {
+      if (lineType === 'smooth') {
         grads = Morris.Line.gradients(coords);
       }
       prevCoord = {
@@ -1488,7 +1507,7 @@ Licensed under the BSD-2-Clause License.
         coord = coords[i];
         if (coord.y != null) {
           if (prevCoord.y != null) {
-            if (smooth) {
+            if (lineType === 'smooth') {
               g = grads[i];
               lg = grads[i - 1];
               ix = (coord.x - prevCoord.x) / 4;
@@ -1497,11 +1516,17 @@ Licensed under the BSD-2-Clause License.
               x2 = coord.x - ix;
               y2 = Math.min(bottom, coord.y - ix * g);
               path += "C" + x1 + "," + y1 + "," + x2 + "," + y2 + "," + coord.x + "," + coord.y;
-            } else {
+            } else if (lineType === 'jagged') {
               path += "L" + coord.x + "," + coord.y;
+            } else if (lineType === 'step') {
+              path += "L" + coord.x + "," + prevCoord.y;
+              path += "L" + coord.x + "," + coord.y;
+            } else if (lineType === 'stepNoRiser') {
+              path += "L" + coord.x + "," + prevCoord.y;
+              path += "M" + coord.x + "," + coord.y;
             }
           } else {
-            if (!smooth || (grads[i] != null)) {
+            if (lineType !== 'smooth' || (grads[i] != null)) {
               path += "M" + coord.x + "," + coord.y;
             }
           }
@@ -2298,12 +2323,12 @@ Licensed under the BSD-2-Clause License.
                   }
                   this.seriesBars[idx][sidx] = this.drawBar(left, top, barWidth, size, this.colorFor(row, sidx, 'bar'), this.options.barOpacity, this.options.barRadius);
                   if (this.options.dataLabels) {
-                    if (this.options.stacked || this.options.dataLabelsPosition === 'inside') {
+                    if (this.options.dataLabelsPosition === 'inside' || (this.options.stacked && this.options.dataLabelsPosition !== 'force_outside')) {
                       depth = size / 2;
                     } else {
                       depth = -7;
                     }
-                    if (size > this.options.dataLabelsSize || !this.options.stacked) {
+                    if (size > this.options.dataLabelsSize || !this.options.stacked || this.options.dataLabelsPosition === 'force_outside') {
                       this.data[idx].label_x[sidx] = left + barWidth / 2;
                       _results1.push(this.data[idx].label_y[sidx] = top + depth);
                     } else {
