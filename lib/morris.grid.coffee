@@ -599,6 +599,7 @@ class Morris.Grid extends Morris.EventEmitter
     @timeoutId = null
     {width, height} = Morris.dimensions @el
     @raphael.setSize width, height
+    @options.animate = false
     @redraw()
 
   hasToShow: (i) =>
