@@ -252,15 +252,18 @@ class Morris.DonutSegment extends Morris.EventEmitter
       "A#{r},#{r},0,#{@is_long},0,#{ix1},#{iy1}")
 
   render: ->
-    @arc = @drawDonutArc(@hilight, @color)
-    @seg = @drawDonutSegment(
-      @path, 
-      @color, 
-      @backgroundColor, 
-      => @fire('hover', @index),
-      => @fire('click', @index),
-      => @fire('mouseout', @index)
-    )
+    if !/NaN/.test @hilight
+      @arc = @drawDonutArc(@hilight, @color)
+    
+    if !/NaN/.test @path
+      @seg = @drawDonutSegment(
+        @path, 
+        @color, 
+        @backgroundColor, 
+        => @fire('hover', @index),
+        => @fire('click', @index),
+        => @fire('mouseout', @index)
+      )
 
   drawDonutArc: (path, color) ->
     if @options.animate

@@ -2822,14 +2822,18 @@ Licensed under the BSD-2-Clause License.
 
     DonutSegment.prototype.render = function() {
       var _this = this;
-      this.arc = this.drawDonutArc(this.hilight, this.color);
-      return this.seg = this.drawDonutSegment(this.path, this.color, this.backgroundColor, function() {
-        return _this.fire('hover', _this.index);
-      }, function() {
-        return _this.fire('click', _this.index);
-      }, function() {
-        return _this.fire('mouseout', _this.index);
-      });
+      if (!/NaN/.test(this.hilight)) {
+        this.arc = this.drawDonutArc(this.hilight, this.color);
+      }
+      if (!/NaN/.test(this.path)) {
+        return this.seg = this.drawDonutSegment(this.path, this.color, this.backgroundColor, function() {
+          return _this.fire('hover', _this.index);
+        }, function() {
+          return _this.fire('click', _this.index);
+        }, function() {
+          return _this.fire('mouseout', _this.index);
+        });
+      }
     };
 
     DonutSegment.prototype.drawDonutArc = function(path, color) {
