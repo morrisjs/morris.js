@@ -120,6 +120,7 @@ class Morris.Grid extends Morris.EventEmitter
     y2max: 'auto'
     y2min: 'auto 0'
     goals: []
+    goals2: []
     goalStrokeWidth: 1.0
     goalLineColors: [
       'red'
@@ -148,6 +149,9 @@ class Morris.Grid extends Morris.EventEmitter
   # Update the data series and redraw the chart.
   #
   setData: (data, redraw = true) ->
+    if (!@options.goals2 instanceof Array)
+      @options.goals2 = [@options.goals2]
+
     @options.data = data
 
     if !data? or data.length == 0
@@ -166,6 +170,12 @@ class Morris.Grid extends Morris.EventEmitter
       maxGoal = Math.max @options.goals...
       ymin = if ymin? then Math.min(ymin, minGoal) else minGoal
       ymax = if ymax? then Math.max(ymax, maxGoal) else maxGoal
+
+    if @options.goals2.length > 0
+      minGoal = Math.min @options.goals2...
+      maxGoal = Math.max @options.goals2...
+      ymin2 = if ymin2? then Math.min(ymin2, minGoal) else minGoal
+      ymax2 = if ymax2? then Math.max(ymax2, maxGoal) else maxGoal
 
     if @options.nbYkeys2 > @options.ykeys.length then @options.nbYkeys2 = @options.ykeys.length
 
@@ -512,6 +522,11 @@ class Morris.Grid extends Morris.EventEmitter
       color = @options.goalLineColors[i % @options.goalLineColors.length]
       @drawGoal(goal, color)
 
+    for goal, i in @options.goals2
+      color = @options.goalLineColors[i % @options.goalLineColors.length]
+      console.log('eeeee')
+      @drawGoal2(goal, color)
+
   # draw events vertical lines
   drawEvents: ->
     if @events?
@@ -521,6 +536,17 @@ class Morris.Grid extends Morris.EventEmitter
 
   drawGoal: (goal, color) ->
     y = Math.floor(@transY(goal)) + 0.5
+    if not @options.horizontal
+      path = "M#{@xStart},#{y}H#{@xEnd}"
+    else
+      path = "M#{y},#{@xStart}V#{@xEnd}"
+
+    @raphael.path(path)
+      .attr('stroke', color)
+      .attr('stroke-width', @options.goalStrokeWidth)
+
+  drawGoal2: (goal, color) ->
+    y = Math.floor(@transY2(goal)) + 0.5
     if not @options.horizontal
       path = "M#{@xStart},#{y}H#{@xEnd}"
     else

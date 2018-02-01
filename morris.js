@@ -261,6 +261,7 @@ Licensed under the BSD-2-Clause License.
       y2max: 'auto',
       y2min: 'auto 0',
       goals: [],
+      goals2: [],
       goalStrokeWidth: 1.0,
       goalLineColors: ['red'],
       events: [],
@@ -285,6 +286,9 @@ Licensed under the BSD-2-Clause License.
       if (redraw == null) {
         redraw = true;
       }
+      if (!this.options.goals2 instanceof Array) {
+        this.options.goals2 = [this.options.goals2];
+      }
       this.options.data = data;
       if ((data == null) || data.length === 0) {
         this.data = [];
@@ -303,6 +307,12 @@ Licensed under the BSD-2-Clause License.
         maxGoal = Math.max.apply(Math, this.options.goals);
         ymin = ymin != null ? Math.min(ymin, minGoal) : minGoal;
         ymax = ymax != null ? Math.max(ymax, maxGoal) : maxGoal;
+      }
+      if (this.options.goals2.length > 0) {
+        minGoal = Math.min.apply(Math, this.options.goals2);
+        maxGoal = Math.max.apply(Math, this.options.goals2);
+        ymin2 = ymin2 != null ? Math.min(ymin2, minGoal) : minGoal;
+        ymax2 = ymax2 != null ? Math.max(ymax2, maxGoal) : maxGoal;
       }
       if (this.options.nbYkeys2 > this.options.ykeys.length) {
         this.options.nbYkeys2 = this.options.ykeys.length;
@@ -766,13 +776,20 @@ Licensed under the BSD-2-Clause License.
     };
 
     Grid.prototype.drawGoals = function() {
-      var color, goal, i, _i, _len, _ref, _results;
+      var color, goal, i, _i, _j, _len, _len1, _ref, _ref1, _results;
       _ref = this.options.goals;
-      _results = [];
       for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
         goal = _ref[i];
         color = this.options.goalLineColors[i % this.options.goalLineColors.length];
-        _results.push(this.drawGoal(goal, color));
+        this.drawGoal(goal, color);
+      }
+      _ref1 = this.options.goals2;
+      _results = [];
+      for (i = _j = 0, _len1 = _ref1.length; _j < _len1; i = ++_j) {
+        goal = _ref1[i];
+        color = this.options.goalLineColors[i % this.options.goalLineColors.length];
+        console.log('eeeee');
+        _results.push(this.drawGoal2(goal, color));
       }
       return _results;
     };
@@ -794,6 +811,17 @@ Licensed under the BSD-2-Clause License.
     Grid.prototype.drawGoal = function(goal, color) {
       var path, y;
       y = Math.floor(this.transY(goal)) + 0.5;
+      if (!this.options.horizontal) {
+        path = "M" + this.xStart + "," + y + "H" + this.xEnd;
+      } else {
+        path = "M" + y + "," + this.xStart + "V" + this.xEnd;
+      }
+      return this.raphael.path(path).attr('stroke', color).attr('stroke-width', this.options.goalStrokeWidth);
+    };
+
+    Grid.prototype.drawGoal2 = function(goal, color) {
+      var path, y;
+      y = Math.floor(this.transY2(goal)) + 0.5;
       if (!this.options.horizontal) {
         path = "M" + this.xStart + "," + y + "H" + this.xEnd;
       } else {
@@ -2561,7 +2589,8 @@ Licensed under the BSD-2-Clause License.
       this.deselect = __bind(this.deselect, this);
       this.select = __bind(this.select, this);
       this.click = __bind(this.click, this);
-      var _this = this;
+      var cx, cy, height, width, _ref,
+        _this = this;
       if (!(this instanceof Morris.Donut)) {
         return new Morris.Donut(options);
       }
@@ -2574,10 +2603,14 @@ Licensed under the BSD-2-Clause License.
       if (this.el === null) {
         throw new Error("Graph placeholder not found.");
       }
+      this.raphael = new Raphael(this.el);
       if (options.data === void 0 || options.data.length === 0) {
+        _ref = Morris.dimensions(this.el), width = _ref.width, height = _ref.height;
+        cx = width / 2;
+        cy = height / 2;
+        this.raphael.text(cx, cy, 'NaN').attr('text-anchor', 'middle').attr('font-size', 30).attr('font-family', this.options.dataLabelsFamily).attr('font-weight', 'bold').attr('fill', this.options.dataLabelsColor);
         return;
       }
-      this.raphael = new Raphael(this.el);
       if (this.options.resize) {
         Morris.on(window, 'resize', function(evt) {
           if (_this.timeoutId != null) {
