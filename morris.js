@@ -263,7 +263,9 @@ Licensed under the BSD-2-Clause License.
       goals: [],
       goals2: [],
       goalStrokeWidth: 1.0,
+      goalStrokeWidth2: 1.0,
       goalLineColors: ['red'],
+      goalLineColors2: ['red'],
       events: [],
       eventStrokeWidth: 1.0,
       eventLineColors: ['#005a04', '#ccffbb', '#3a5f0b', '#005502'],
@@ -285,9 +287,6 @@ Licensed under the BSD-2-Clause License.
       var e, flatEvents, from, idx, index, maxGoal, minGoal, ret, row, step, to, total, y, ykey, ymax, ymax2, ymin, ymin2, yval, _i, _len, _ref, _ref1;
       if (redraw == null) {
         redraw = true;
-      }
-      if (!this.options.goals2 instanceof Array) {
-        this.options.goals2 = [this.options.goals2];
       }
       this.options.data = data;
       if ((data == null) || data.length === 0) {
@@ -787,8 +786,7 @@ Licensed under the BSD-2-Clause License.
       _results = [];
       for (i = _j = 0, _len1 = _ref1.length; _j < _len1; i = ++_j) {
         goal = _ref1[i];
-        color = this.options.goalLineColors[i % this.options.goalLineColors.length];
-        console.log('eeeee');
+        color = this.options.goalLineColors2[i % this.options.goalLineColors2.length];
         _results.push(this.drawGoal2(goal, color));
       }
       return _results;
@@ -827,7 +825,7 @@ Licensed under the BSD-2-Clause License.
       } else {
         path = "M" + y + "," + this.xStart + "V" + this.xEnd;
       }
-      return this.raphael.path(path).attr('stroke', color).attr('stroke-width', this.options.goalStrokeWidth);
+      return this.raphael.path(path).attr('stroke', color).attr('stroke-width', this.options.goalStrokeWidth2);
     };
 
     Grid.prototype.drawEvent = function(event, color) {

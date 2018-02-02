@@ -122,7 +122,11 @@ class Morris.Grid extends Morris.EventEmitter
     goals: []
     goals2: []
     goalStrokeWidth: 1.0
+    goalStrokeWidth2: 1.0
     goalLineColors: [
+      'red'
+    ]
+    goalLineColors2: [
       'red'
     ]
     events: []
@@ -149,8 +153,6 @@ class Morris.Grid extends Morris.EventEmitter
   # Update the data series and redraw the chart.
   #
   setData: (data, redraw = true) ->
-    if (!@options.goals2 instanceof Array)
-      @options.goals2 = [@options.goals2]
 
     @options.data = data
 
@@ -523,8 +525,7 @@ class Morris.Grid extends Morris.EventEmitter
       @drawGoal(goal, color)
 
     for goal, i in @options.goals2
-      color = @options.goalLineColors[i % @options.goalLineColors.length]
-      console.log('eeeee')
+      color = @options.goalLineColors2[i % @options.goalLineColors2.length]
       @drawGoal2(goal, color)
 
   # draw events vertical lines
@@ -554,7 +555,7 @@ class Morris.Grid extends Morris.EventEmitter
 
     @raphael.path(path)
       .attr('stroke', color)
-      .attr('stroke-width', @options.goalStrokeWidth)
+      .attr('stroke-width', @options.goalStrokeWidth2)
 
   drawEvent: (event, color) ->
     if event instanceof Array
