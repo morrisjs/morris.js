@@ -284,7 +284,7 @@ Licensed under the BSD-2-Clause License.
     };
 
     Grid.prototype.setData = function(data, redraw) {
-      var e, flatEvents, from, idx, index, maxGoal, minGoal, ret, row, step, to, total, y, ykey, ymax, ymax2, ymin, ymin2, yval, _i, _len, _ref, _ref1;
+      var e, flatEvents, from, idx, index, maxGoal, minGoal, ret, row, step, step2, to, total, y, ykey, ymax, ymax2, ymin, ymin2, yval, _i, _len, _ref, _ref1;
       if (redraw == null) {
         redraw = true;
       }
@@ -463,6 +463,15 @@ Licensed under the BSD-2-Clause License.
             var _j, _ref2, _ref3, _results;
             _results = [];
             for (y = _j = _ref2 = this.ymin, _ref3 = this.ymax; step > 0 ? _j <= _ref3 : _j >= _ref3; y = _j += step) {
+              _results.push(y);
+            }
+            return _results;
+          }).call(this);
+          step2 = (this.ymax2 - this.ymin2) / (this.options.numLines - 1);
+          this.grid2 = (function() {
+            var _j, _ref2, _ref3, _results;
+            _results = [];
+            for (y = _j = _ref2 = this.ymin2, _ref3 = this.ymax2; step2 > 0 ? _j <= _ref3 : _j >= _ref3; y = _j += step2) {
               _results.push(y);
             }
             return _results;
@@ -1687,9 +1696,15 @@ Licensed under the BSD-2-Clause License.
             if (lineIndex >= this.options.ykeys.length - this.options.nbYkeys2) {
               if (row._y2[lineIndex] != null) {
                 straightPath += ',' + row._x + ',' + this.transY2(this.ymin2);
+                if (this.options.lineType === 'step') {
+                  straightPath += ',' + row._x + ',' + this.transY2(this.ymin2);
+                }
               }
             } else if (row._y[lineIndex] != null) {
               straightPath += ',' + row._x + ',' + this.transY(this.ymin);
+              if (this.options.lineType === 'step') {
+                straightPath += ',' + row._x + ',' + this.transY(this.ymin);
+              }
             }
           }
         }

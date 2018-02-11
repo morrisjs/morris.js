@@ -284,6 +284,8 @@ class Morris.Grid extends Morris.EventEmitter
       else
         step = (@ymax - @ymin) / (@options.numLines - 1)
         @grid = (y for y in [@ymin..@ymax] by step)
+        step2 = (@ymax2 - @ymin2) / (@options.numLines - 1)
+        @grid2 = (y for y in [@ymin2..@ymax2] by step2)
 
     @dirty = true
     @redraw() if redraw
