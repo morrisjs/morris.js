@@ -52,11 +52,20 @@ class Morris.Donut extends Morris.EventEmitter
     if @el == null
       throw new Error("Graph placeholder not found.")
 
+    @raphael = new Raphael(@el)
+
     # bail if there's no data
     if options.data is undefined or options.data.length is 0
+      {width, height} = Morris.dimensions @el
+      cx = width / 2
+      cy = height / 2
+      @raphael.text(cx, cy, 'NaN')
+              .attr('text-anchor', 'middle')
+              .attr('font-size', 30)
+              .attr('font-family', @options.dataLabelsFamily)
+              .attr('font-weight', 'bold')
+              .attr('fill', @options.dataLabelsColor)
       return
-
-    @raphael = new Raphael(@el)
 
     if @options.resize
       Morris.on window, 'resize', (evt) =>

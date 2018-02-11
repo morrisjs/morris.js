@@ -1,5 +1,5 @@
 /* @license
-morris.js06 v0.6.0
+morris.js06 v0.6.1
 Copyright 2018 Olly Smith All rights reserved.
 Licensed under the BSD-2-Clause License.
 */
@@ -245,7 +245,7 @@ Licensed under the BSD-2-Clause License.
       gridTextSize: 12,
       gridTextFamily: 'sans-serif',
       gridTextWeight: 'normal',
-      hideHover: false,
+      hideHover: 'auto',
       yLabelFormat: null,
       yLabelAlign: 'right',
       xLabelAngle: 0,
@@ -271,7 +271,7 @@ Licensed under the BSD-2-Clause License.
       eventLineColors: ['#005a04', '#ccffbb', '#3a5f0b', '#005502'],
       rangeSelect: null,
       rangeSelectColor: '#eef',
-      resize: false,
+      resize: true,
       dataLabels: true,
       dataLabelsPosition: 'outside',
       dataLabelsFamily: 'sans-serif',
@@ -1125,6 +1125,7 @@ Licensed under the BSD-2-Clause License.
     Line.prototype.defaults = {
       lineWidth: 3,
       pointSize: 4,
+      pointSizeGrow: 3,
       lineColors: ['#2f7df6', '#53a351', '#f6c244', '#cb444a', '#4aa0b5', '#222529'],
       pointStrokeWidths: [1],
       pointStrokeColors: ['#ffffff'],
@@ -1134,12 +1135,12 @@ Licensed under the BSD-2-Clause License.
       shown: true,
       xLabels: 'auto',
       xLabelFormat: null,
-      xLabelMargin: 24,
+      xLabelMargin: 0,
       verticalGrid: false,
       verticalGridHeight: 'full',
       verticalGridStartOffset: 0,
-      hideHover: false,
       trendLine: false,
+      trendLineType: 'linear',
       trendLineWidth: 2,
       trendLineWeight: false,
       trendLineColors: ['#689bc3', '#a2b3bf', '#64b764']
@@ -1483,18 +1484,20 @@ Licensed under the BSD-2-Clause License.
     };
 
     Line.prototype._drawTrendLine = function(index) {
-      var a, b, data, datapoints, i, path, sum_x, sum_xx, sum_xy, sum_y, val, weight, x, y, _i, _len, _ref;
+      var a, b, data, datapoints, i, path, plots, reg, sum_x, sum_xx, sum_xy, sum_y, t_off_x, t_x, t_y, val, weight, x, y, _i, _j, _k, _l, _len, _ref;
       sum_x = 0;
       sum_y = 0;
       sum_xx = 0;
       sum_xy = 0;
       datapoints = 0;
+      plots = [];
       _ref = this.data;
       for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
         val = _ref[i];
         x = val.x;
         y = val.y[index];
         if (y != null) {
+          plots.push([x, y]);
           if (this.options.trendLineWeight === false) {
             weight = 1;
           } else {
@@ -1514,8 +1517,48 @@ Licensed under the BSD-2-Clause License.
       data[0].y = this.transY(this.data[0].x * a + b);
       data[1].x = this.transX(this.data[this.data.length - 1].x);
       data[1].y = this.transY(this.data[this.data.length - 1].x * a + b);
+      if (this.options.trendLineType !== 'linear') {
+        if (typeof regression === 'function') {
+          t_off_x = (this.xmax - this.xmin) / 30;
+          data = [];
+          if (this.options.trendLineType === 'polynomial') {
+            reg = regression('polynomial', plots, 2);
+            for (i = _j = 0; _j <= 30; i = ++_j) {
+              t_x = this.xmin + i * t_off_x;
+              t_y = reg.equation[2] * t_x * t_x + reg.equation[1] * t_x + reg.equation[0];
+              data.push({
+                x: this.transX(t_x),
+                y: this.transY(t_y)
+              });
+            }
+          } else if (this.options.trendLineType === 'logarithmic') {
+            reg = regression('logarithmic', plots);
+            for (i = _k = 0; _k <= 30; i = ++_k) {
+              t_x = this.xmin + i * t_off_x;
+              t_y = reg.equation[0] + reg.equation[1] * Math.log(t_x);
+              data.push({
+                x: this.transX(t_x),
+                y: this.transY(t_y)
+              });
+            }
+          } else if (this.options.trendLineType === 'exponential') {
+            reg = regression('exponential', plots);
+            for (i = _l = 0; _l <= 30; i = ++_l) {
+              t_x = this.xmin + i * t_off_x;
+              t_y = reg.equation[0] + Math.exp(reg.equation[1] * t_x);
+              data.push({
+                x: this.transX(t_x),
+                y: this.transY(t_y)
+              });
+            }
+          }
+          console.log('Regression formula is: ' + reg.string + ', r2:' + reg.r2);
+        } else {
+          console.log('Warning: regression() is undefined, please ensure that regression.js is loaded');
+        }
+      }
       if (!isNaN(a)) {
-        path = Morris.Line.createPath(data, false, this.bottom);
+        path = Morris.Line.createPath(data, 'jagged', this.bottom);
         return path = this.raphael.path(path).attr('stroke', this.colorFor(null, index, 'trendLine')).attr('stroke-width', this.options.trendLineWidth);
       }
     };
@@ -1702,7 +1745,7 @@ Licensed under the BSD-2-Clause License.
         return;
       }
       return Raphael.animation({
-        r: this.pointSizeForSeries(index) + 3
+        r: this.pointSizeForSeries(index) + this.options.pointSizeGrow
       }, 25, 'linear');
     };
 
@@ -2016,7 +2059,7 @@ Licensed under the BSD-2-Clause License.
       barHighlightOpacity: 1.0,
       highlightSpeed: 150,
       barRadius: [0, 0, 0, 0],
-      xLabelMargin: 50,
+      xLabelMargin: 0,
       horizontal: false,
       stacked: false,
       shown: true,
@@ -2186,23 +2229,28 @@ Licensed under the BSD-2-Clause License.
     };
 
     Bar.prototype.drawBarPoints = function() {
-      var dim, idx, ii, nb, row, _i, _len, _ref, _results;
+      var circle, dim, idx, ii, nb, row, _i, _len, _ref, _results;
       nb = this.options.ykeys.length - this.options.nbYkeys2;
+      this.seriesPoints = [];
       _ref = this.options.ykeys.slice(nb, this.options.ykeys.length);
       _results = [];
       for (ii = _i = 0, _len = _ref.length; _i < _len; ii = _i += 1) {
         dim = _ref[ii];
+        this.seriesPoints[ii] = [];
         _results.push((function() {
           var _j, _len1, _ref1, _results1;
           _ref1 = this.data;
           _results1 = [];
           for (idx = _j = 0, _len1 = _ref1.length; _j < _len1; idx = ++_j) {
             row = _ref1[idx];
+            circle = null;
             if (row._y2[nb + ii] != null) {
               if (this.options.horizontal === !true) {
-                _results1.push(this.raphael.circle(row._x, row._y2[nb + ii], 4).attr('fill', this.options.barColors[nb + ii]).attr('stroke-width', 1).attr('stroke', '#ffffff'));
+                circle = this.raphael.circle(row._x, row._y2[nb + ii], 4).attr('fill', this.options.barColors[nb + ii]).attr('stroke-width', 1).attr('stroke', '#ffffff');
+                _results1.push(this.seriesPoints[ii].push(circle));
               } else {
-                _results1.push(this.raphael.circle(row._y2[nb + ii], row._x, 4).attr('fill', this.options.barColors[nb + ii]).attr('stroke-width', 1).attr('stroke', '#ffffff'));
+                circle = this.raphael.circle(row._y2[nb + ii], row._x, 4).attr('fill', this.options.barColors[nb + ii]).attr('stroke-width', 1).attr('stroke', '#ffffff');
+                _results1.push(this.seriesPoints[ii].push(circle));
               }
             } else {
               _results1.push(void 0);
@@ -2570,7 +2618,7 @@ Licensed under the BSD-2-Clause License.
       backgroundColor: '#FFFFFF',
       labelColor: '#000000',
       formatter: Morris.commas,
-      resize: false,
+      resize: true,
       dataLabels: false,
       dataLabelsPosition: 'inside',
       dataLabelsFamily: 'sans-serif',
