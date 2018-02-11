@@ -40,6 +40,7 @@ class Morris.Line extends Morris.Grid
     verticalGridHeight: 'full'
     verticalGridStartOffset: 0
     trendLine: false
+    trendLineType: 'linear'
     trendLineWidth: 2
     trendLineWeight: false
     trendLineColors: [
@@ -281,12 +282,14 @@ class Morris.Line extends Morris.Grid
     sum_xx = 0
     sum_xy = 0
     datapoints = 0
+    plots = []
 
     for val, i in @data
       x = val.x
       y = val.y[index]
 
       if y?
+        plots.push([x,y])
         if @options.trendLineWeight is false
           weight = 1
         else
@@ -306,9 +309,38 @@ class Morris.Line extends Morris.Grid
     data[0].y = @transY(@data[0].x * a + b)
     data[1].x = @transX(@data[@data.length - 1].x)
     data[1].y = @transY(@data[@data.length - 1].x * a + b)
+    
+    if @options.trendLineType != 'linear' 
+      if typeof regression is 'function'
+        t_off_x = (@xmax - @xmin)/30
+        data = []
+        if @options.trendLineType == 'polynomial'
+          reg = regression('polynomial', plots, 2);
+          for i in [0..30]
+            t_x = @xmin + i * t_off_x
+            t_y = reg.equation[2] * t_x * t_x + reg.equation[1] * t_x + reg.equation[0]
+            data.push({x: @transX(t_x), y: @transY(t_y)})
+
+        else if @options.trendLineType == 'logarithmic'
+          reg = regression('logarithmic', plots);
+          for i in [0..30]
+            t_x = @xmin + i * t_off_x
+            t_y = reg.equation[0] + reg.equation[1] * Math.log(t_x)
+            data.push({x: @transX(t_x), y: @transY(t_y)})
+
+        else if @options.trendLineType == 'exponential'
+          reg = regression('exponential', plots);
+          for i in [0..30]
+            t_x = @xmin + i * t_off_x
+            t_y = reg.equation[0] + Math.exp(reg.equation[1] * t_x)
+            data.push({x: @transX(t_x), y: @transY(t_y)})
+
+        console.log('Regression formula is: '+reg.string+', r2:'+reg.r2)
+      else 
+        console.log('Warning: regression() is undefined, please ensure that regression.js is loaded')
 
     if !isNaN(a)
-      path = Morris.Line.createPath data, false, @bottom
+      path = Morris.Line.createPath data, 'jagged', @bottom
       path = @raphael.path(path)
         .attr('stroke', @colorFor(null, index, 'trendLine'))
         .attr('stroke-width', @options.trendLineWidth)
