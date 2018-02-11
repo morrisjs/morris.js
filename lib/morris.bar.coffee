@@ -114,19 +114,24 @@ class Morris.Bar extends Morris.Grid
 
   drawBarPoints: ->
     nb = @options.ykeys.length - @options.nbYkeys2
+    @seriesPoints = []
     for dim, ii in @options.ykeys[nb...@options.ykeys.length] by 1
+      @seriesPoints[ii] = []
       for row, idx in @data
+        circle = null
         if row._y2[nb+ii]?
           if @options.horizontal is not true
-            @raphael.circle(row._x, row._y2[nb+ii], 4)
+            circle = @raphael.circle(row._x, row._y2[nb+ii], 4)
               .attr('fill', @options.barColors[nb+ii])
               .attr('stroke-width', 1)
               .attr('stroke', '#ffffff')
+            @seriesPoints[ii].push(circle)
           else
-            @raphael.circle(row._y2[nb+ii], row._x, 4)
+            circle = @raphael.circle(row._y2[nb+ii], row._x, 4)
               .attr('fill', @options.barColors[nb+ii])
               .attr('stroke-width', 1)
               .attr('stroke', '#ffffff')
+            @seriesPoints[ii].push(circle)
               
   # draw the x-axis labels
   #
