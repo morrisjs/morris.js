@@ -104,7 +104,7 @@ class Morris.Grid extends Morris.EventEmitter
     gridTextSize: 12
     gridTextFamily: 'sans-serif'
     gridTextWeight: 'normal'
-    hideHover: false
+    hideHover: 'auto'
     yLabelFormat: null
     yLabelAlign: 'right'
     xLabelAngle: 0
@@ -139,7 +139,7 @@ class Morris.Grid extends Morris.EventEmitter
     ]
     rangeSelect: null
     rangeSelectColor: '#eef'
-    resize: false,
+    resize: true,
     dataLabels: true,
     dataLabelsPosition: 'outside',
     dataLabelsFamily: 'sans-serif',

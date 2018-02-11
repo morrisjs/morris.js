@@ -27,7 +27,7 @@ class Morris.Donut extends Morris.EventEmitter
     backgroundColor: '#FFFFFF', 
     labelColor: '#000000',
     formatter: Morris.commas
-    resize: false,
+    resize: true,
     dataLabels: false,
     dataLabelsPosition: 'inside',
     dataLabelsFamily: 'sans-serif',

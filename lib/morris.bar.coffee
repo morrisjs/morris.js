@@ -29,7 +29,7 @@ class Morris.Bar extends Morris.Grid
     barHighlightOpacity: 1.0
     highlightSpeed: 150
     barRadius: [0, 0, 0, 0]
-    xLabelMargin: 50
+    xLabelMargin: 0
     horizontal: false
     stacked: false
     shown: true

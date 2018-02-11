@@ -35,11 +35,10 @@ class Morris.Line extends Morris.Grid
     shown: true
     xLabels: 'auto'
     xLabelFormat: null
-    xLabelMargin: 24
+    xLabelMargin: 0
     verticalGrid: false
     verticalGridHeight: 'full'
     verticalGridStartOffset: 0
-    hideHover: false
     trendLine: false
     trendLineWidth: 2
     trendLineWeight: false
