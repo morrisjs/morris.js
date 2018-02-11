@@ -18,6 +18,7 @@ class Morris.Line extends Morris.Grid
   defaults:
     lineWidth: 3
     pointSize: 4
+    pointSizeGrow: 3
     lineColors: [
       '#2f7df6'
       '#53a351'
@@ -453,7 +454,7 @@ class Morris.Line extends Morris.Grid
   pointGrowSeries: (index) ->
     if @pointSizeForSeries(index) is 0
       return
-    Raphael.animation r: @pointSizeForSeries(index) + 3, 25, 'linear'
+    Raphael.animation r: @pointSizeForSeries(index) + @options.pointSizeGrow, 25, 'linear'
 
   # @private
   pointShrinkSeries: (index) ->
