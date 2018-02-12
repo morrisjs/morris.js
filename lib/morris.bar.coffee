@@ -150,7 +150,7 @@ class Morris.Bar extends Morris.Grid
       if not @options.horizontal
         label = @drawXAxisLabel(row._x, basePos, row.label)
       else
-        label = @drawYAxisLabel(basePos, row._x - 0.5 * @options.gridTextSize, row.label)
+        label = @drawYAxisLabel(basePos, row._x - 0.5 * @options.gridTextSize, row.label, 1)
 
 
       if not @options.horizontal

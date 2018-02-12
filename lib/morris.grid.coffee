@@ -107,6 +107,7 @@ class Morris.Grid extends Morris.EventEmitter
     hideHover: 'auto'
     yLabelFormat: null
     yLabelAlign: 'right'
+    yLabelAlign2: 'left'
     xLabelAngle: 0
     numLines: 5
     padding: 25
@@ -487,7 +488,7 @@ class Morris.Grid extends Morris.EventEmitter
 
     if not @options.horizontal
       basePos = @getYAxisLabelX()
-      basePos2 = @right + @options.padding
+      basePos2 = @right + @options.padding / 2
     else
       basePos = @getXAxisLabelY()
       basePos2 = @top - (@options.xAxisLabelTopPadding || @options.padding / 2)
@@ -497,7 +498,7 @@ class Morris.Grid extends Morris.EventEmitter
         pos = @transY(lineY)
         if @options.axes in [true, 'both', 'y']
           if not @options.horizontal
-            @drawYAxisLabel(basePos, pos, @yAxisFormat(lineY))
+            @drawYAxisLabel(basePos, pos, @yAxisFormat(lineY), 1)
           else
             @drawXAxisLabel(pos, basePos, @yAxisFormat(lineY))
 
@@ -515,7 +516,7 @@ class Morris.Grid extends Morris.EventEmitter
         pos = @transY2(lineY)
         if @options.axes in [true, 'both', 'y']
           if not @options.horizontal
-            @drawYAxisLabel(basePos2, pos, @yAxisFormat2(lineY))
+            @drawYAxisLabel(basePos2, pos, @yAxisFormat2(lineY), 2)
           else
             @drawXAxisLabel(pos, basePos2, @yAxisFormat2(lineY))
 
@@ -585,16 +586,22 @@ class Morris.Grid extends Morris.EventEmitter
         .attr('stroke', color)
         .attr('stroke-width', @options.eventStrokeWidth)
 
-  drawYAxisLabel: (xPos, yPos, text) ->
+  drawYAxisLabel: (xPos, yPos, text, yaxis) ->
     label = @raphael.text(xPos, yPos, text)
       .attr('font-size', @options.gridTextSize)
       .attr('font-family', @options.gridTextFamily)
       .attr('font-weight', @options.gridTextWeight)
       .attr('fill', @options.gridTextColor)
-    if @options.yLabelAlign == 'right'
-      label.attr('text-anchor', 'end')
+    if yaxis == 1
+      if @options.yLabelAlign == 'right'
+        label.attr('text-anchor', 'end')
+      else
+        label.attr('text-anchor', 'start')
     else
-      label.attr('text-anchor', 'start')
+      if @options.yLabelAlign2 == 'left'
+        label.attr('text-anchor', 'start')
+      else
+        label.attr('text-anchor', 'end')
 
   drawXAxisLabel: (xPos, yPos, text) ->
     @raphael.text(xPos, yPos, text)
