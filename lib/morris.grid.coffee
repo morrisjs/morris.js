@@ -359,7 +359,7 @@ class Morris.Grid extends Morris.EventEmitter
           if @options.nbYkeys2 > 0
             @right -= Math.max(yLabelWidths2...)
         else
-          @bottom -= Math.max(yLabelWidths...)
+          @bottom -= @options.padding / 2
 
       if @options.axes in [true, 'both', 'x']
         if not @options.horizontal
