@@ -248,6 +248,7 @@ Licensed under the BSD-2-Clause License.
       hideHover: 'auto',
       yLabelFormat: null,
       yLabelAlign: 'right',
+      yLabelAlign2: 'left',
       xLabelAngle: 0,
       numLines: 5,
       padding: 25,
@@ -591,7 +592,7 @@ Licensed under the BSD-2-Clause License.
               this.right -= Math.max.apply(Math, yLabelWidths2);
             }
           } else {
-            this.bottom -= Math.max.apply(Math, yLabelWidths);
+            this.bottom -= this.options.padding / 2;
           }
         }
         if ((_ref2 = this.options.axes) === true || _ref2 === 'both' || _ref2 === 'x') {
@@ -733,7 +734,7 @@ Licensed under the BSD-2-Clause License.
       }
       if (!this.options.horizontal) {
         basePos = this.getYAxisLabelX();
-        basePos2 = this.right + this.options.padding;
+        basePos2 = this.right + this.options.padding / 2;
       } else {
         basePos = this.getXAxisLabelY();
         basePos2 = this.top - (this.options.xAxisLabelTopPadding || this.options.padding / 2);
@@ -745,7 +746,7 @@ Licensed under the BSD-2-Clause License.
           pos = this.transY(lineY);
           if ((_ref2 = this.options.axes) === true || _ref2 === 'both' || _ref2 === 'y') {
             if (!this.options.horizontal) {
-              this.drawYAxisLabel(basePos, pos, this.yAxisFormat(lineY));
+              this.drawYAxisLabel(basePos, pos, this.yAxisFormat(lineY), 1);
             } else {
               this.drawXAxisLabel(pos, basePos, this.yAxisFormat(lineY));
             }
@@ -771,7 +772,7 @@ Licensed under the BSD-2-Clause License.
           pos = this.transY2(lineY);
           if ((_ref4 = this.options.axes) === true || _ref4 === 'both' || _ref4 === 'y') {
             if (!this.options.horizontal) {
-              _results.push(this.drawYAxisLabel(basePos2, pos, this.yAxisFormat2(lineY)));
+              _results.push(this.drawYAxisLabel(basePos2, pos, this.yAxisFormat2(lineY), 2));
             } else {
               _results.push(this.drawXAxisLabel(pos, basePos2, this.yAxisFormat2(lineY)));
             }
@@ -865,13 +866,21 @@ Licensed under the BSD-2-Clause License.
       }
     };
 
-    Grid.prototype.drawYAxisLabel = function(xPos, yPos, text) {
+    Grid.prototype.drawYAxisLabel = function(xPos, yPos, text, yaxis) {
       var label;
       label = this.raphael.text(xPos, yPos, text).attr('font-size', this.options.gridTextSize).attr('font-family', this.options.gridTextFamily).attr('font-weight', this.options.gridTextWeight).attr('fill', this.options.gridTextColor);
-      if (this.options.yLabelAlign === 'right') {
-        return label.attr('text-anchor', 'end');
+      if (yaxis === 1) {
+        if (this.options.yLabelAlign === 'right') {
+          return label.attr('text-anchor', 'end');
+        } else {
+          return label.attr('text-anchor', 'start');
+        }
       } else {
-        return label.attr('text-anchor', 'start');
+        if (this.options.yLabelAlign2 === 'left') {
+          return label.attr('text-anchor', 'start');
+        } else {
+          return label.attr('text-anchor', 'end');
+        }
       }
     };
 
@@ -962,7 +971,11 @@ Licensed under the BSD-2-Clause License.
                     _results1.push(this.drawDataLabelExt(row.label_x[index], row.label_y[index], this.yLabelFormat_noUnit(row.y[index]), 'start'));
                   }
                 } else if (row._y2[index] != null) {
-                  _results1.push(this.drawDataLabel(row._x, row._y2[index] - 10, this.yLabelFormat_noUnit(row.y[index], index)));
+                  if (this.options.horizontal === !true) {
+                    _results1.push(this.drawDataLabel(row._x, row._y2[index] - 10, this.yLabelFormat_noUnit(row.y[index], index)));
+                  } else {
+                    _results1.push(this.drawDataLabelExt(row._y2[index], row._x - 10, this.yLabelFormat_noUnit(row.y[index]), 'middle'));
+                  }
                 } else {
                   _results1.push(void 0);
                 }
@@ -1464,19 +1477,25 @@ Licensed under the BSD-2-Clause License.
     };
 
     Line.prototype._drawPointFor = function(index) {
-      var circle, row, _i, _len, _ref, _results;
+      var circle, idx, row, _i, _len, _ref, _results;
       this.seriesPoints[index] = [];
       _ref = this.data;
       _results = [];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        row = _ref[_i];
+      for (idx = _i = 0, _len = _ref.length; _i < _len; idx = ++_i) {
+        row = _ref[idx];
+        this.data[idx].label_x = [];
+        this.data[idx].label_y = [];
         circle = null;
         if (row._y[index] != null) {
           circle = this.drawLinePoint(row._x, row._y[index], this.colorFor(row, index, 'point'), index);
+          this.data[idx].label_x[index] = row._x;
+          this.data[idx].label_y[index] = row._y[index] - 10;
         }
         if (row._y2 != null) {
           if (row._y2[index] != null) {
             circle = this.drawLinePoint(row._x, row._y2[index], this.colorFor(row, index, 'point'), index);
+            this.data[idx].label_x[index] = row._x;
+            this.data[idx].label_y[index] = row._y2[index] - 10;
           }
         }
         _results.push(this.seriesPoints[index].push(circle));
@@ -2292,7 +2311,7 @@ Licensed under the BSD-2-Clause License.
         if (!this.options.horizontal) {
           label = this.drawXAxisLabel(row._x, basePos, row.label);
         } else {
-          label = this.drawYAxisLabel(basePos, row._x - 0.5 * this.options.gridTextSize, row.label);
+          label = this.drawYAxisLabel(basePos, row._x - 0.5 * this.options.gridTextSize, row.label, 1);
         }
         if (!this.options.horizontal) {
           angle = this.options.xLabelAngle;
@@ -2642,7 +2661,7 @@ Licensed under the BSD-2-Clause License.
       dataLabelsColor: '#000',
       donutType: 'donut',
       animate: true,
-      showPercentage: true
+      showPercentage: false
     };
 
     function Donut(options) {
@@ -2684,7 +2703,7 @@ Licensed under the BSD-2-Clause License.
     }
 
     Donut.prototype.redraw = function() {
-      var C, cx, cy, finalValue, height, i, idx, label_x, label_y, last, max_value, min, next, p_cos_p0, p_sin_p0, seg, total, value, w, width, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _ref3, _results;
+      var C, cx, cy, dist, finalValue, height, i, idx, label_x, label_y, last, max_value, min, next, p_cos_p0, p_sin_p0, seg, total, value, w, width, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _ref3, _results;
       this.raphael.clear();
       _ref = Morris.dimensions(this.el), width = _ref.width, height = _ref.height;
       cx = width / 2;
@@ -2711,20 +2730,25 @@ Licensed under the BSD-2-Clause License.
         seg.on('hover', this.select);
         seg.on('click', this.click);
         seg.on('mouseout', this.deselect);
+        if (parseFloat(seg.raphael.height) > parseFloat(height)) {
+          dist = height;
+        } else {
+          dist = seg.raphael.height;
+        }
         if (this.options.dataLabels && this.values.length > 1) {
           p_sin_p0 = Math.sin((last + next) / 2);
           p_cos_p0 = Math.cos((last + next) / 2);
           if (this.options.dataLabelsPosition === 'inside') {
             if (this.options.donutType === 'pie') {
-              label_x = parseFloat(cx) + parseFloat(seg.raphael.height * 0.30 * p_sin_p0);
-              label_y = parseFloat(cy) + parseFloat(seg.raphael.height * 0.30 * p_cos_p0);
+              label_x = parseFloat(cx) + parseFloat(dist * 0.30 * p_sin_p0);
+              label_y = parseFloat(cy) + parseFloat(dist * 0.30 * p_cos_p0);
             } else {
-              label_x = parseFloat(cx) + parseFloat(seg.raphael.height * 0.39 * p_sin_p0);
-              label_y = parseFloat(cy) + parseFloat(seg.raphael.height * 0.39 * p_cos_p0);
+              label_x = parseFloat(cx) + parseFloat(dist * 0.39 * p_sin_p0);
+              label_y = parseFloat(cy) + parseFloat(dist * 0.39 * p_cos_p0);
             }
           } else {
-            label_x = parseFloat(cx) + parseFloat((seg.raphael.height - 9) * 0.5 * p_sin_p0);
-            label_y = parseFloat(cy) + parseFloat((seg.raphael.height - 9) * 0.5 * p_cos_p0);
+            label_x = parseFloat(cx) + parseFloat((dist - 9) * 0.5 * p_sin_p0);
+            label_y = parseFloat(cy) + parseFloat((dist - 9) * 0.5 * p_cos_p0);
           }
           if (this.options.showPercentage) {
             finalValue = Math.round(parseFloat(value) / parseFloat(total) * 100) + '%';
@@ -2861,6 +2885,7 @@ Licensed under the BSD-2-Clause License.
       this.timeoutId = null;
       _ref = Morris.dimensions(this.el), width = _ref.width, height = _ref.height;
       this.raphael.setSize(width, height);
+      this.options.animate = false;
       return this.redraw();
     };
 

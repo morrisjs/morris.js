@@ -36,7 +36,7 @@ class Morris.Donut extends Morris.EventEmitter
     dataLabelsColor: '#000',
     donutType: 'donut',
     animate: true,
-    showPercentage: true
+    showPercentage: false
 
   # Create and render a donut chart.
   #
@@ -217,6 +217,7 @@ class Morris.Donut extends Morris.EventEmitter
     @timeoutId = null
     {width, height} =  Morris.dimensions @el
     @raphael.setSize width, height
+    @options.animate = false
     @redraw()
 
 

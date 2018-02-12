@@ -1,9 +1,9 @@
 {
   "name": "morris.js06",
-  "version": "0.6",
+  "version": "0.6.1",
   "homepage": "http://pierresh.github.com/morris.js",
   "license": "BSD-2-Clause",
-  "description": "An improved work of the great plugin morrisjs with many new features and jQuery dependencies removed",
+  "description": "Fork of morrisjs: no jQuery + awesomeness, have a look!",
   "author": {
     "name": "Olly Smith",
     "email": "olly@oesmith.co.uk"
