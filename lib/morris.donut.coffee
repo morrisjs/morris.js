@@ -104,20 +104,24 @@ class Morris.Donut extends Morris.EventEmitter
       seg.on 'hover', @select
       seg.on 'click', @click
       seg.on 'mouseout', @deselect
+      if parseFloat(seg.raphael.height) > parseFloat(height)
+        dist = height
+      else
+        dist = seg.raphael.height
 
       if @options.dataLabels && @values.length > 1
         p_sin_p0 = Math.sin((last + next)/2);
         p_cos_p0 = Math.cos((last + next)/2);
         if @options.dataLabelsPosition == 'inside'
           if @options.donutType == 'pie'
-            label_x = parseFloat(cx) + parseFloat((seg.raphael.height) * 0.30 * p_sin_p0);
-            label_y = parseFloat(cy) + parseFloat((seg.raphael.height) * 0.30 * p_cos_p0);
+            label_x = parseFloat(cx) + parseFloat((dist) * 0.30 * p_sin_p0);
+            label_y = parseFloat(cy) + parseFloat((dist) * 0.30 * p_cos_p0);
           else
-            label_x = parseFloat(cx) + parseFloat((seg.raphael.height) * 0.39 * p_sin_p0);
-            label_y = parseFloat(cy) + parseFloat((seg.raphael.height) * 0.39 * p_cos_p0);
+            label_x = parseFloat(cx) + parseFloat((dist) * 0.39 * p_sin_p0);
+            label_y = parseFloat(cy) + parseFloat((dist) * 0.39 * p_cos_p0);
         else
-          label_x = parseFloat(cx) + parseFloat((seg.raphael.height - 9) * 0.5 * p_sin_p0);
-          label_y = parseFloat(cy) + parseFloat((seg.raphael.height - 9) * 0.5 * p_cos_p0);
+          label_x = parseFloat(cx) + parseFloat((dist - 9) * 0.5 * p_sin_p0);
+          label_y = parseFloat(cy) + parseFloat((dist - 9) * 0.5 * p_cos_p0);
         
         if @options.showPercentage
           finalValue = Math.round(parseFloat(value) / parseFloat(total) * 100) + '%'
