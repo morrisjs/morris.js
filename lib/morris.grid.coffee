@@ -676,7 +676,10 @@ class Morris.Grid extends Morris.EventEmitter
               else
                 @drawDataLabelExt(row.label_x[index], row.label_y[index], @yLabelFormat_noUnit(row.y[index]), 'start')
             else if row._y2[index]?
-              @drawDataLabel(row._x, row._y2[index] - 10,@yLabelFormat_noUnit(row.y[index], index))
+              if @options.horizontal is not true
+                @drawDataLabel(row._x, row._y2[index] - 10,@yLabelFormat_noUnit(row.y[index], index))
+              else
+                @drawDataLabelExt(row._y2[index], row._x - 10, @yLabelFormat_noUnit(row.y[index]), 'middle')
 
 # Parse a date into a javascript timestamp
 #

@@ -259,14 +259,20 @@ class Morris.Line extends Morris.Grid
 
   _drawPointFor: (index) ->
     @seriesPoints[index] = []
-    for row in @data
+    for row, idx in @data
+      @data[idx].label_x = []
+      @data[idx].label_y = []
       circle = null
       if row._y[index]?
         circle = @drawLinePoint(row._x, row._y[index], @colorFor(row, index, 'point'), index)
+        @data[idx].label_x[index] = row._x
+        @data[idx].label_y[index] = row._y[index] - 10
       
       if row._y2?
         if row._y2[index]?
           circle = @drawLinePoint(row._x, row._y2[index], @colorFor(row, index, 'point'), index)
+          @data[idx].label_x[index] = row._x
+          @data[idx].label_y[index] = row._y2[index] - 10
 
       @seriesPoints[index].push(circle)
 
