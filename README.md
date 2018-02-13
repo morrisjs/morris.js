@@ -3,8 +3,13 @@
 As morris.js project seems no more updated and as I have been asked many times to bring several changes to this plugin on my past but yet active projects, I decided to dig in it and add these requirements myself ^^
 
 ## Changelog
+### 0.6.1 (13th February 2018)
+- Step Line added, jaggedbased on [PR #331](https://github.com/morrisjs/morris.js/pull/331)
+- Trend line can be linear (default), polynomial, logarithmic, exponential
+- Goals options for the right Y-axis [Issue #1](https://github.com/pierresh/morris.js/issues/1)
+- Many other minor improvements
 
-### 8th January 2018
+### 0.6.0 (8th January 2018)
 
 - Combo Charts - Bar and Line together
 - Right Y-axis [Issue #113](https://github.com/morrisjs/morris.js/issues/113)
@@ -30,6 +35,7 @@ npm install morris.js06
 ## Requirements
 
 - [Raphael.js](http://raphaeljs.com/) (>= 2.0)
+- [Regression.js](https://github.com/Tom-Alexander/regression-js/releases/tag/1.4.0) (1.4.0) for trendline type polynomial, logarithmic, exponential
 
 ## Usage
 
