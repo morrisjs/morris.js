@@ -1,11 +1,12 @@
 # Morris.js06 - pretty time-series line graphs
 
-As morris.js project seems no more updated and as I have been asked many times to bring several changes to this plugin on my past but yet active projects, I decided to dig in it and add these requirements myself ^^
+This is an improved work of the great plugin [morris.js](https://github.com/morrisjs/morris.js), the simplest chart library for javascript!
+![examples](examples/image.png)
 
 ## Changelog
 ### 0.6.1 (13th February 2018)
-- Step Line added, jaggedbased on [PR #331](https://github.com/morrisjs/morris.js/pull/331)
-- Trend line can be linear (default), polynomial, logarithmic, exponential
+- Step line added, based on [PR #331](https://github.com/morrisjs/morris.js/pull/331)
+- Trend line can be non-linear (polynomial, logarithmic, exponential)
 - Goals options for the right Y-axis [Issue #1](https://github.com/pierresh/morris.js/issues/1)
 - Many other minor improvements
 
