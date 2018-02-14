@@ -17,9 +17,9 @@
         margin-top: 20px;
         margin-bottom: 20px;
       }
+      h3 { font-weight: 300; }
       .chart_morris {
         height: 250px;
-        max-width: 340px;
         background-color: #fff;
       }
       canvas { max-height: 250px; }
@@ -30,7 +30,7 @@
     <div style='background-color: #fff; color: #4E4852;'>
       <div class='container'>
         <div class='row'>
-          <div class='col-lg col-sm'>
+          <div class='col-md-4 col-sm-12 text-center'>
             <h3>Standard line chart 
               <span class='float-right'>
                 <a id='std_line' tabindex='0' class='btn btn-lg btn-link btn-sm' role='button' data-toggle='popover' data-trigger='click' data-html='true' >
@@ -40,9 +40,9 @@
             </h3>
             <div id='chart_line_1' class='chart_morris'></div>
           </div>
-          <div class='col-lg col-sm'>
+          <div class='col-md-4 col-sm-12 text-center'>
             <h3>
-              Trend line
+              Non-linear trend line
               <span class='float-right'>
                 <a tabindex='0' class='btn btn-lg btn-link btn-sm' role='button' data-toggle='popover' data-trigger='click' data-html='true' data-content="<pre><code>...<br>lineWidth: 0,<br>trendLine: true,<br>trendLineType: 'polynomial',<br>...</code></pre>">
                   <i class='fas fa-info-circle'></i>
@@ -51,7 +51,7 @@
             </h3>
             <div id='chart_line_2' class='chart_morris'></div>
           </div>
-          <div class='col-lg col-sm'>
+          <div class='col-md-4 col-sm-12 text-center'>
             <h3>
               Step chart 
               <span class='float-right'>
@@ -67,7 +67,7 @@
       <hr>
       <div class='container'>
         <div class='row'>
-          <div class='col-lg col-sm'>
+          <div class='col-md-4 col-sm-12 text-center'>
             <h3>
               Standard bar chart
               <span class='float-right'>
@@ -78,7 +78,7 @@
             </h3>
             <div id='chart_hist_1' class='chart_morris'></div>
           </div>
-          <div class='col-lg col-sm'>
+          <div class='col-md-4 col-sm-12 text-center'>
             <h3>
               Horizontal bar chart
               <span class='float-right'>
@@ -89,7 +89,7 @@
             </h3>
             <div id='chart_hist_2' class='chart_morris'></div>
           </div>
-          <div class='col-lg col-sm'>
+          <div class='col-md-4 col-sm-12 text-center'>
             <h3>
               Combo chart
               <span class='float-right'>
@@ -105,7 +105,7 @@
       <hr>
       <div class='container'>
         <div class='row' style='margin-bottom: 20px;'>
-          <div class='col-lg col-sm'>
+          <div class='col-md-4 col-sm-12 text-center'>
             <h3>
               Standard donut chart
               <span class='float-right'>
@@ -117,7 +117,7 @@
             <div id='chart_pie_1' class='chart_morris'></div>
             <div id='chart_pie_1_legend' class='text-center'></div>
           </div>
-          <div class='col-lg col-sm'>
+          <div class='col-md-4 col-sm-12 text-center'>
             <h3>
               Datalabels
               <span class='float-right'>
@@ -129,7 +129,7 @@
             <div id='chart_pie_2' class='chart_morris'></div>
             <div id='chart_pie_2_legend' class='text-center'></div>
           </div>
-          <div class='col-lg col-sm text-center'>
+          <div class='col-md-4 col-sm-12 text-center'>
             <h3>
               Pie chart
               <span class='float-right'>
@@ -166,7 +166,7 @@
       ],
       xkey: 'year',
       ykeys: ['nb'],
-      labels: ['Editions Wins'],
+      labels: ['Editions Wins']
     });
 
     Morris.Line({
