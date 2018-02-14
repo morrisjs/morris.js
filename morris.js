@@ -1152,6 +1152,7 @@ Licensed under the BSD-2-Clause License.
       pointStrokeWidths: [1],
       pointStrokeColors: ['#ffffff'],
       pointFillColors: [],
+      pointSuperimposed: true,
       smooth: true,
       lineType: {},
       shown: true,
@@ -1170,7 +1171,29 @@ Licensed under the BSD-2-Clause License.
     };
 
     Line.prototype.calc = function() {
+      var count, i, idx, point, row, v, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2;
       this.calcPoints();
+      if (this.options.pointSuperimposed === !true) {
+        _ref = this.data;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          row = _ref[_i];
+          _ref1 = row._y;
+          for (idx = _j = 0, _len1 = _ref1.length; _j < _len1; idx = ++_j) {
+            point = _ref1[idx];
+            count = 0;
+            _ref2 = row._y;
+            for (i = _k = 0, _len2 = _ref2.length; _k < _len2; i = ++_k) {
+              v = _ref2[i];
+              if (point === v && typeof point === 'number') {
+                count++;
+              }
+            }
+            if (count > 1) {
+              row._y[idx] = row._y[idx] + count * (this.options.lineWidth - 1);
+            }
+          }
+        }
+      }
       return this.generatePaths();
     };
 

@@ -30,6 +30,7 @@ class Morris.Line extends Morris.Grid
     pointStrokeWidths: [1]
     pointStrokeColors: ['#ffffff']
     pointFillColors: []
+    pointSuperimposed: true
     smooth: true
     lineType: {}
     shown: true
@@ -55,6 +56,13 @@ class Morris.Line extends Morris.Grid
   # @private
   calc: ->
     @calcPoints()
+    if @options.pointSuperimposed is not true
+      for row in @data
+        for point,idx in row._y
+          count = 0
+          for v, i in row._y
+            if point == v and typeof point is 'number' then count++
+          if count > 1 then row._y[idx] = row._y[idx] + count * (@options.lineWidth - 1)
     @generatePaths()
 
   # calculate series data point coordinates
