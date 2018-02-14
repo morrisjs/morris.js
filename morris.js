@@ -1161,6 +1161,7 @@ Licensed under the BSD-2-Clause License.
       verticalGrid: false,
       verticalGridHeight: 'full',
       verticalGridStartOffset: 0,
+      verticalGridType: '',
       trendLine: false,
       trendLineType: 'linear',
       trendLineWidth: 2,
@@ -1451,7 +1452,11 @@ Licensed under the BSD-2-Clause License.
       } else {
         yEnd = this.yStart - this.options.verticalGridHeight;
       }
-      return this.drawGridLine("M" + xpos + "," + yStart + "V" + yEnd);
+      return this.drawGridLineVert("M" + xpos + "," + yStart + "V" + yEnd);
+    };
+
+    Line.prototype.drawGridLineVert = function(path) {
+      return this.raphael.path(path).attr('stroke', this.options.gridLineColor).attr('stroke-width', this.options.gridStrokeWidth).attr('stroke-dasharray', this.options.verticalGridType);
     };
 
     Line.prototype.drawSeries = function() {

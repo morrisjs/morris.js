@@ -39,6 +39,7 @@ class Morris.Line extends Morris.Grid
     verticalGrid: false
     verticalGridHeight: 'full'
     verticalGridStartOffset: 0
+    verticalGridType: ''
     trendLine: false
     trendLineType: 'linear'
     trendLineWidth: 2
@@ -238,7 +239,13 @@ class Morris.Line extends Morris.Grid
       yEnd = @yEnd
     else
       yEnd = @yStart - @options.verticalGridHeight
-    @drawGridLine("M#{xpos},#{yStart}V#{yEnd}")
+    @drawGridLineVert("M#{xpos},#{yStart}V#{yEnd}")
+
+  drawGridLineVert: (path) ->
+    @raphael.path(path)
+      .attr('stroke', @options.gridLineColor)
+      .attr('stroke-width', @options.gridStrokeWidth)
+      .attr('stroke-dasharray', @options.verticalGridType)
 
   # draw the data series
   #
