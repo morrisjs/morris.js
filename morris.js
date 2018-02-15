@@ -952,8 +952,8 @@ Licensed under the BSD-2-Clause License.
             for (index = _j = 0, _len1 = _ref1.length; _j < _len1; index = ++_j) {
               ykey = _ref1[index];
               if (this.options.lineColors != null) {
-                if (row._y[index] != null) {
-                  this.drawDataLabel(row._x, row._y[index] - 10, this.yLabelFormat_noUnit(row.y[index], 0));
+                if (row.label_y[index] != null) {
+                  this.drawDataLabel(row._x, row.label_y[index], this.yLabelFormat_noUnit(row.y[index], 0));
                 }
                 if (row._y2 != null) {
                   if (row._y2[index] != null) {
@@ -966,12 +966,14 @@ Licensed under the BSD-2-Clause License.
                 }
               } else {
                 if (row.label_y[index] != null) {
+                  console.log('aaaaa');
                   if (this.options.horizontal === !true) {
                     _results1.push(this.drawDataLabel(row.label_x[index], row.label_y[index], this.yLabelFormat_noUnit(row.y[index], index)));
                   } else {
                     _results1.push(this.drawDataLabelExt(row.label_x[index], row.label_y[index], this.yLabelFormat_noUnit(row.y[index]), 'start'));
                   }
                 } else if (row._y2[index] != null) {
+                  console.log('eeee');
                   if (this.options.horizontal === !true) {
                     _results1.push(this.drawDataLabel(row._x, row._y2[index] - 10, this.yLabelFormat_noUnit(row.y[index], index)));
                   } else {
@@ -1174,89 +1176,119 @@ Licensed under the BSD-2-Clause License.
     };
 
     Line.prototype.calc = function() {
-      var count, i, idx, point, row, v, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2;
       this.calcPoints();
-      if (this.options.pointSuperimposed === !true) {
-        _ref = this.data;
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          row = _ref[_i];
-          _ref1 = row._y;
-          for (idx = _j = 0, _len1 = _ref1.length; _j < _len1; idx = ++_j) {
-            point = _ref1[idx];
-            count = 0;
-            _ref2 = row._y;
-            for (i = _k = 0, _len2 = _ref2.length; _k < _len2; i = ++_k) {
-              v = _ref2[i];
-              if (point === v && typeof point === 'number') {
-                count++;
-              }
-            }
-            if (count > 1) {
-              row._y[idx] = row._y[idx] + count * (this.options.lineWidth - 1);
-            }
-          }
-        }
-      }
       return this.generatePaths();
     };
 
     Line.prototype.calcPoints = function() {
-      var i, ii, row, y, _i, _len, _ref, _results;
+      var count, i, idx, ii, index, point, row, v, y, _i, _j, _k, _l, _len, _len1, _len2, _ref, _ref1, _ref2, _ref3, _results;
       _ref = this.data;
-      _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         row = _ref[_i];
         row._x = this.transX(row.x);
         row._y = (function() {
-          var _j, _len1, _ref1, _results1;
+          var _j, _len1, _ref1, _results;
           _ref1 = row.y;
-          _results1 = [];
+          _results = [];
           for (ii = _j = 0, _len1 = _ref1.length; _j < _len1; ii = ++_j) {
             y = _ref1[ii];
             if (ii < this.options.ykeys.length - this.options.nbYkeys2) {
               if (y != null) {
-                _results1.push(this.transY(y));
+                _results.push(this.transY(y));
               } else {
-                _results1.push(y);
+                _results.push(y);
               }
             } else {
-              _results1.push(void 0);
+              _results.push(void 0);
             }
           }
-          return _results1;
+          return _results;
         }).call(this);
         row._y2 = (function() {
-          var _j, _len1, _ref1, _results1;
+          var _j, _len1, _ref1, _results;
           _ref1 = row.y;
-          _results1 = [];
+          _results = [];
           for (ii = _j = 0, _len1 = _ref1.length; _j < _len1; ii = ++_j) {
             y = _ref1[ii];
             if (ii >= this.options.ykeys.length - this.options.nbYkeys2) {
               if (y != null) {
-                _results1.push(this.transY2(y));
+                _results.push(this.transY2(y));
               } else {
-                _results1.push(y);
+                _results.push(y);
               }
             } else {
-              _results1.push(void 0);
+              _results.push(void 0);
             }
           }
-          return _results1;
+          return _results;
         }).call(this);
-        _results.push(row._ymax = Math.min.apply(Math, [this.bottom].concat((function() {
-          var _j, _len1, _ref1, _results1;
+        row._ymax = Math.min.apply(Math, [this.bottom].concat((function() {
+          var _j, _len1, _ref1, _results;
           _ref1 = row._y;
-          _results1 = [];
+          _results = [];
           for (i = _j = 0, _len1 = _ref1.length; _j < _len1; i = ++_j) {
             y = _ref1[i];
             if ((y != null) && this.hasToShow(i)) {
-              _results1.push(y);
+              _results.push(y);
             }
           }
-          return _results1;
-        }).call(this))));
+          return _results;
+        }).call(this)));
       }
-      return _results;
+      _ref1 = this.data;
+      for (idx = _j = 0, _len1 = _ref1.length; _j < _len1; idx = ++_j) {
+        row = _ref1[idx];
+        this.data[idx].label_x = [];
+        this.data[idx].label_y = [];
+        for (index = _k = _ref2 = this.options.ykeys.length - 1; _ref2 <= 0 ? _k <= 0 : _k >= 0; index = _ref2 <= 0 ? ++_k : --_k) {
+          if (row._y[index] != null) {
+            this.data[idx].label_x[index] = row._x;
+            console.log(row.x + ' ' + row._y[index] - 10);
+            this.data[idx].label_y[index] = row._y[index] - 10;
+          }
+          if (row._y2 != null) {
+            if (row._y2[index] != null) {
+              this.data[idx].label_x[index] = row._x;
+              this.data[idx].label_y[index] = row._y2[index] - 10;
+            }
+          }
+        }
+      }
+      if (this.options.pointSuperimposed === !true) {
+        _ref3 = this.data;
+        _results = [];
+        for (_l = 0, _len2 = _ref3.length; _l < _len2; _l++) {
+          row = _ref3[_l];
+          _results.push((function() {
+            var _len3, _len4, _m, _n, _ref4, _ref5, _results1;
+            _ref4 = row._y;
+            _results1 = [];
+            for (idx = _m = 0, _len3 = _ref4.length; _m < _len3; idx = ++_m) {
+              point = _ref4[idx];
+              count = 0;
+              _ref5 = row._y;
+              for (i = _n = 0, _len4 = _ref5.length; _n < _len4; i = ++_n) {
+                v = _ref5[i];
+                if (point === v && typeof point === 'number') {
+                  count++;
+                }
+              }
+              if (count > 1) {
+                row._y[idx] = row._y[idx] + count * (this.lineWidthForSeries(idx));
+                if (this.lineWidthForSeries(idx) > 1) {
+                  _results1.push(row._y[idx] = row._y[idx] - 1);
+                } else {
+                  _results1.push(void 0);
+                }
+              } else {
+                _results1.push(void 0);
+              }
+            }
+            return _results1;
+          }).call(this));
+        }
+        return _results;
+      }
     };
 
     Line.prototype.hitTest = function(x) {
@@ -1542,19 +1574,13 @@ Licensed under the BSD-2-Clause License.
       _results = [];
       for (idx = _i = 0, _len = _ref.length; _i < _len; idx = ++_i) {
         row = _ref[idx];
-        this.data[idx].label_x = [];
-        this.data[idx].label_y = [];
         circle = null;
         if (row._y[index] != null) {
           circle = this.drawLinePoint(row._x, row._y[index], this.colorFor(row, index, 'point'), index);
-          this.data[idx].label_x[index] = row._x;
-          this.data[idx].label_y[index] = row._y[index] - 10;
         }
         if (row._y2 != null) {
           if (row._y2[index] != null) {
             circle = this.drawLinePoint(row._x, row._y2[index], this.colorFor(row, index, 'point'), index);
-            this.data[idx].label_x[index] = row._x;
-            this.data[idx].label_y[index] = row._y2[index] - 10;
           }
         }
         _results.push(this.seriesPoints[index].push(circle));

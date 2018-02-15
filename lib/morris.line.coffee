@@ -58,13 +58,6 @@ class Morris.Line extends Morris.Grid
   # @private
   calc: ->
     @calcPoints()
-    if @options.pointSuperimposed is not true
-      for row in @data
-        for point,idx in row._y
-          count = 0
-          for v, i in row._y
-            if point == v and typeof point is 'number' then count++
-          if count > 1 then row._y[idx] = row._y[idx] + count * (@options.lineWidth - 1)
     @generatePaths()
 
   # calculate series data point coordinates
@@ -80,6 +73,30 @@ class Morris.Line extends Morris.Grid
         if ii >= @options.ykeys.length - @options.nbYkeys2
           if y? then @transY2(y) else y
       row._ymax = Math.min [@bottom].concat(y for y, i in row._y when y? and @hasToShow(i))...
+
+    for row, idx in @data
+      @data[idx].label_x = []
+      @data[idx].label_y = []
+      for index in [@options.ykeys.length-1..0]
+        if row._y[index]?
+          @data[idx].label_x[index] = row._x
+          console.log(row.x+' '+row._y[index] - 10)
+          @data[idx].label_y[index] = row._y[index] - 10
+        
+        if row._y2?
+          if row._y2[index]?
+            @data[idx].label_x[index] = row._x
+            @data[idx].label_y[index] = row._y2[index] - 10
+
+    if @options.pointSuperimposed is not true
+      for row in @data
+        for point,idx in row._y
+          count = 0
+          for v, i in row._y
+            if point == v and typeof point is 'number' then count++
+          if count > 1
+            row._y[idx] = row._y[idx] + count * (this.lineWidthForSeries(idx))
+            if this.lineWidthForSeries(idx) > 1 then row._y[idx] = row._y[idx] - 1
 
   # hit test - returns the index of the row at the given x-coordinate
   #
@@ -294,19 +311,13 @@ class Morris.Line extends Morris.Grid
   _drawPointFor: (index) ->
     @seriesPoints[index] = []
     for row, idx in @data
-      @data[idx].label_x = []
-      @data[idx].label_y = []
       circle = null
       if row._y[index]?
         circle = @drawLinePoint(row._x, row._y[index], @colorFor(row, index, 'point'), index)
-        @data[idx].label_x[index] = row._x
-        @data[idx].label_y[index] = row._y[index] - 10
       
       if row._y2?
         if row._y2[index]?
           circle = @drawLinePoint(row._x, row._y2[index], @colorFor(row, index, 'point'), index)
-          @data[idx].label_x[index] = row._x
-          @data[idx].label_y[index] = row._y2[index] - 10
 
       @seriesPoints[index].push(circle)
 

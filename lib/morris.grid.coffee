@@ -662,8 +662,8 @@ class Morris.Grid extends Morris.EventEmitter
       for row in @data
         for ykey, index in @options.ykeys
           if @options.lineColors?
-            if row._y[index]?
-              @drawDataLabel(row._x, row._y[index] - 10, this.yLabelFormat_noUnit(row.y[index], 0))
+            if row.label_y[index]?
+              @drawDataLabel(row._x, row.label_y[index], this.yLabelFormat_noUnit(row.y[index], 0))
 
             if row._y2?
               if row._y2[index]?
