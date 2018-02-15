@@ -32,6 +32,7 @@ class Morris.Line extends Morris.Grid
     pointFillColors: []
     pointSuperimposed: true
     hoverOrdered: false
+    hoverReversed: false
     smooth: true
     lineType: {}
     shown: true
@@ -129,7 +130,7 @@ class Morris.Line extends Morris.Grid
     content = ""
 
     order = []
-    if @options.hoverOrdered is true || @options.hoverOrdered == 'reverse'
+    if @options.hoverOrdered is true
       for yy, jj in row.y
         max = null
         max_pos = -1
@@ -143,7 +144,7 @@ class Morris.Line extends Morris.Grid
       for yy, jj in row.y by -1
         order.push(jj)
 
-    if @options.hoverOrdered == 'reverse' then order = order.reverse()
+    if @options.hoverReversed is true then order = order.reverse()
 
     for j in order by -1
       if @options.labels[j] is false

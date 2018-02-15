@@ -1155,6 +1155,7 @@ Licensed under the BSD-2-Clause License.
       pointFillColors: [],
       pointSuperimposed: true,
       hoverOrdered: false,
+      hoverReversed: false,
       smooth: true,
       lineType: {},
       shown: true,
@@ -1307,7 +1308,7 @@ Licensed under the BSD-2-Clause License.
       row = this.data[index];
       content = "";
       order = [];
-      if (this.options.hoverOrdered === true || this.options.hoverOrdered === 'reverse') {
+      if (this.options.hoverOrdered === true) {
         _ref = row.y;
         for (jj = _i = 0, _len = _ref.length; _i < _len; jj = ++_i) {
           yy = _ref[jj];
@@ -1332,7 +1333,7 @@ Licensed under the BSD-2-Clause License.
           order.push(jj);
         }
       }
-      if (this.options.hoverOrdered === 'reverse') {
+      if (this.options.hoverReversed === true) {
         order = order.reverse();
       }
       for (_l = order.length - 1; _l >= 0; _l += -1) {

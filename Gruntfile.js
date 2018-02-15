@@ -21,10 +21,10 @@ module.exports = function (grunt) {
       'build/morris.coffee': {
         options: {
           banner: "### @license\n"+
-                  "<%= pkg.name %> v<%= pkg.version %>\n"+
+                  "<%= pkg.name %> v<%= pkg.version %> \n"+
+                  "https://pierresh.github.io/morris.js/\n"+
                   "Copyright <%= (new Date()).getFullYear() %> <%= pkg.author.name %> All rights reserved.\n" +
-                  "Licensed under the <%= pkg.license %> License.\n" +
-                  "###\n",
+                  "Licensed under the <%= pkg.license %> License. ###\n",
         },
         src: [
           'lib/morris.coffee',
