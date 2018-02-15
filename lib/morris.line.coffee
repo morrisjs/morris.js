@@ -31,6 +31,7 @@ class Morris.Line extends Morris.Grid
     pointStrokeColors: ['#ffffff']
     pointFillColors: []
     pointSuperimposed: true
+    hoverOrdered: false
     smooth: true
     lineType: {}
     shown: true
@@ -127,14 +128,29 @@ class Morris.Line extends Morris.Grid
     row = @data[index]
     content = ""
 
-    for y, j in row.y
+    order = []
+    if @options.hoverOrdered
+      for yy, jj in row.y
+        max = null
+        max_pos = -1
+        for y, j in row.y
+          if j not in order
+            if max <= y || max is null
+              max = y
+              max_pos = j
+        order.push(max_pos)
+    else
+      for yy, jj in row.y by -1
+        order.push(jj)
+
+    for j in order by -1
       if @options.labels[j] is false
         continue
 
       content = """
         <div class='morris-hover-point' style='color: #{@colorFor(row, j, 'label')}'>
           #{@options.labels[j]}:
-          #{@yLabelFormat(y, j)}
+          #{@yLabelFormat(row.y[j], j)}
         </div>
       """ + content
     

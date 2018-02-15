@@ -1153,6 +1153,7 @@ Licensed under the BSD-2-Clause License.
       pointStrokeColors: ['#ffffff'],
       pointFillColors: [],
       pointSuperimposed: true,
+      hoverOrdered: false,
       smooth: true,
       lineType: {},
       shown: true,
@@ -1301,16 +1302,41 @@ Licensed under the BSD-2-Clause License.
     };
 
     Line.prototype.hoverContentForRow = function(index) {
-      var content, j, row, y, _i, _len, _ref;
+      var content, j, jj, max, max_pos, order, row, y, yy, _i, _j, _k, _l, _len, _len1, _ref, _ref1, _ref2;
       row = this.data[index];
       content = "";
-      _ref = row.y;
-      for (j = _i = 0, _len = _ref.length; _i < _len; j = ++_i) {
-        y = _ref[j];
+      order = [];
+      if (this.options.hoverOrdered) {
+        _ref = row.y;
+        for (jj = _i = 0, _len = _ref.length; _i < _len; jj = ++_i) {
+          yy = _ref[jj];
+          max = null;
+          max_pos = -1;
+          _ref1 = row.y;
+          for (j = _j = 0, _len1 = _ref1.length; _j < _len1; j = ++_j) {
+            y = _ref1[j];
+            if (__indexOf.call(order, j) < 0) {
+              if (max <= y || max === null) {
+                max = y;
+                max_pos = j;
+              }
+            }
+          }
+          order.push(max_pos);
+        }
+      } else {
+        _ref2 = row.y;
+        for (jj = _k = _ref2.length - 1; _k >= 0; jj = _k += -1) {
+          yy = _ref2[jj];
+          order.push(jj);
+        }
+      }
+      for (_l = order.length - 1; _l >= 0; _l += -1) {
+        j = order[_l];
         if (this.options.labels[j] === false) {
           continue;
         }
-        content = ("<div class='morris-hover-point' style='color: " + (this.colorFor(row, j, 'label')) + "'>\n  " + this.options.labels[j] + ":\n  " + (this.yLabelFormat(y, j)) + "\n</div>") + content;
+        content = ("<div class='morris-hover-point' style='color: " + (this.colorFor(row, j, 'label')) + "'>\n  " + this.options.labels[j] + ":\n  " + (this.yLabelFormat(row.y[j], j)) + "\n</div>") + content;
       }
       content = ("<div class='morris-hover-row-label'>" + row.label + "</div>") + content;
       if (typeof this.options.hoverCallback === 'function') {
