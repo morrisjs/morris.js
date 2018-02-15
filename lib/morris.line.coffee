@@ -129,7 +129,7 @@ class Morris.Line extends Morris.Grid
     content = ""
 
     order = []
-    if @options.hoverOrdered
+    if @options.hoverOrdered is true || @options.hoverOrdered == 'reverse'
       for yy, jj in row.y
         max = null
         max_pos = -1
@@ -142,6 +142,8 @@ class Morris.Line extends Morris.Grid
     else
       for yy, jj in row.y by -1
         order.push(jj)
+
+    if @options.hoverOrdered == 'reverse' then order = order.reverse()
 
     for j in order by -1
       if @options.labels[j] is false

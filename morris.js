@@ -1,5 +1,6 @@
 /* @license
-morris.js06 v0.6.1
+morris.js06 v0.6.1 
+https://pierresh.github.io/morris.js/
 Copyright 2018 Olly Smith All rights reserved.
 Licensed under the BSD-2-Clause License.
 */
@@ -1306,7 +1307,7 @@ Licensed under the BSD-2-Clause License.
       row = this.data[index];
       content = "";
       order = [];
-      if (this.options.hoverOrdered) {
+      if (this.options.hoverOrdered === true || this.options.hoverOrdered === 'reverse') {
         _ref = row.y;
         for (jj = _i = 0, _len = _ref.length; _i < _len; jj = ++_i) {
           yy = _ref[jj];
@@ -1330,6 +1331,9 @@ Licensed under the BSD-2-Clause License.
           yy = _ref2[jj];
           order.push(jj);
         }
+      }
+      if (this.options.hoverOrdered === 'reverse') {
+        order = order.reverse();
       }
       for (_l = order.length - 1; _l >= 0; _l += -1) {
         j = order[_l];
