@@ -966,14 +966,12 @@ Licensed under the BSD-2-Clause License.
                 }
               } else {
                 if (row.label_y[index] != null) {
-                  console.log('aaaaa');
                   if (this.options.horizontal === !true) {
                     _results1.push(this.drawDataLabel(row.label_x[index], row.label_y[index], this.yLabelFormat_noUnit(row.y[index], index)));
                   } else {
                     _results1.push(this.drawDataLabelExt(row.label_x[index], row.label_y[index], this.yLabelFormat_noUnit(row.y[index]), 'start'));
                   }
                 } else if (row._y2[index] != null) {
-                  console.log('eeee');
                   if (this.options.horizontal === !true) {
                     _results1.push(this.drawDataLabel(row._x, row._y2[index] - 10, this.yLabelFormat_noUnit(row.y[index], index)));
                   } else {
@@ -2319,11 +2317,19 @@ Licensed under the BSD-2-Clause License.
               } else {
                 path += "L" + coord.x + "," + coord.y;
               }
-              straightPath += 'L' + coord.x + ',' + this.transY(0);
+              if (this.options.horizontal === true) {
+                straightPath += 'L' + this.transY(0) + ',' + coord.y;
+              } else {
+                straightPath += 'L' + coord.x + ',' + this.transY(0);
+              }
             } else {
               if (!this.options.smooth || (grads[i] != null)) {
                 path += "M" + coord.x + "," + coord.y;
-                straightPath += 'M' + coord.x + ',' + this.transY(0);
+                if (this.options.horizontal === true) {
+                  straightPath += 'M' + this.transY(0) + ',' + coord.y;
+                } else {
+                  straightPath += 'M' + coord.x + ',' + this.transY(0);
+                }
               }
             }
           }
