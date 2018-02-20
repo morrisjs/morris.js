@@ -38,6 +38,7 @@ class Morris.Bar extends Morris.Grid
     inBarValueTextColor: 'white'
     inBarValueMinTopMargin: 1
     inBarValueRightMargin: 4
+    rightAxisBar: false
 
   # Do any size-related calculations
   #
@@ -65,8 +66,9 @@ class Morris.Bar extends Morris.Grid
   draw: ->
     @drawXAxis() if @options.axes in [true, 'both', 'x']
     @drawSeries()
-    @drawBarLine()
-    @drawBarPoints()
+    if @options.rightAxisBar is not true
+      @drawBarLine()
+      @drawBarPoints()
 
   drawBarLine: ->
     nb = @options.ykeys.length - @options.nbYkeys2
@@ -223,7 +225,7 @@ class Morris.Bar extends Morris.Grid
         if @hasToShow(i)
           numBars += 1
 
-    if @options.stacked is not true
+    if @options.stacked is not true and @options.rightAxisBar is false
       numBars = numBars - @options.nbYkeys2
     barWidth = (groupWidth * @options.barSizeRatio - @options.barGap * (numBars - 1)) / numBars
     barWidth = Math.min(barWidth, @options.barSize) if @options.barSize
@@ -235,8 +237,16 @@ class Morris.Bar extends Morris.Grid
       @data[idx].label_y = []
       @seriesBars[idx] = []
       lastTop = 0
-      nb = row._y.length - @options.nbYkeys2
+      if @options.rightAxisBar is true
+        nb = row._y.length
+      else
+        nb = row._y.length - @options.nbYkeys2
       for ypos, sidx in row._y[0...nb]
+        if row._y[sidx]?
+          ypos = row._y[sidx]
+        else if row._y2[sidx]?
+          ypos = row._y2[sidx]
+
         if not @hasToShow(sidx)
           continue
         if ypos != null

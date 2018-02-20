@@ -2231,7 +2231,8 @@ Licensed under the BSD-2-Clause License.
       inBarValue: false,
       inBarValueTextColor: 'white',
       inBarValueMinTopMargin: 1,
-      inBarValueRightMargin: 4
+      inBarValueRightMargin: 4,
+      rightAxisBar: false
     };
 
     Bar.prototype.calc = function() {
@@ -2295,8 +2296,10 @@ Licensed under the BSD-2-Clause License.
         this.drawXAxis();
       }
       this.drawSeries();
-      this.drawBarLine();
-      return this.drawBarPoints();
+      if (this.options.rightAxisBar === !true) {
+        this.drawBarLine();
+        return this.drawBarPoints();
+      }
     };
 
     Bar.prototype.drawBarLine = function() {
@@ -2509,7 +2512,7 @@ Licensed under the BSD-2-Clause License.
           }
         }
       }
-      if (this.options.stacked === !true) {
+      if (this.options.stacked === !true && this.options.rightAxisBar === false) {
         numBars = numBars - this.options.nbYkeys2;
       }
       barWidth = (groupWidth * this.options.barSizeRatio - this.options.barGap * (numBars - 1)) / numBars;
@@ -2529,13 +2532,22 @@ Licensed under the BSD-2-Clause License.
           this.data[idx].label_y = [];
           this.seriesBars[idx] = [];
           lastTop = 0;
-          nb = row._y.length - this.options.nbYkeys2;
+          if (this.options.rightAxisBar === true) {
+            nb = row._y.length;
+          } else {
+            nb = row._y.length - this.options.nbYkeys2;
+          }
           _results.push((function() {
             var _k, _len1, _ref2, _results1;
             _ref2 = row._y.slice(0, nb);
             _results1 = [];
             for (sidx = _k = 0, _len1 = _ref2.length; _k < _len1; sidx = ++_k) {
               ypos = _ref2[sidx];
+              if (row._y[sidx] != null) {
+                ypos = row._y[sidx];
+              } else if (row._y2[sidx] != null) {
+                ypos = row._y2[sidx];
+              }
               if (!this.hasToShow(sidx)) {
                 continue;
               }
