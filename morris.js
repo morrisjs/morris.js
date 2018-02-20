@@ -2673,8 +2673,12 @@ Licensed under the BSD-2-Clause License.
       } else {
         pos = y;
       }
-      pos = Math.max(Math.min(pos, this.xEnd), this.xStart);
-      return Math.min(this.data.length - 1, Math.floor((pos - this.xStart) / (this.xSize / this.data.length)));
+      if (!this.options.horizontal) {
+        pos = Math.max(Math.min(pos, this.xEnd), this.xStart);
+        return Math.min(this.data.length - 1, Math.floor((pos - this.xStart) / (this.xSize / this.data.length)));
+      } else {
+        return Math.min(this.data.length - 1, Math.max(Math.floor((pos - this.xEnd) / (this.xSize / this.data.length)) - 1, 0));
+      }
     };
 
     Bar.prototype.onGridClick = function(x, y) {
