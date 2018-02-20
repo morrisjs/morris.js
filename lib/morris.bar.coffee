@@ -340,16 +340,12 @@ class Morris.Bar extends Morris.Grid
     if not @options.horizontal
       pos = x
     else
-      pos = y
+      bodyRect = document.body.getBoundingClientRect()
+      pos = y + bodyRect.top
     
-    if not @options.horizontal
-      pos = Math.max(Math.min(pos, @xEnd), @xStart)
-      Math.min(@data.length - 1,
-        Math.floor((pos - @xStart) / (@xSize / @data.length)))
-    else
-      Math.min(@data.length - 1,
-        Math.max(Math.floor((pos - @xEnd) / (@xSize / @data.length)) - 1, 0)
-      )
+    pos = Math.max(Math.min(pos, @xEnd), @xStart)
+    Math.min(@data.length - 1,
+      Math.floor((pos - @xStart) / (@xSize / @data.length)))
 
   #/
   # click on grid event handler

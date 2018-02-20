@@ -2664,21 +2664,18 @@ Licensed under the BSD-2-Clause License.
     };
 
     Bar.prototype.hitTest = function(x, y) {
-      var pos;
+      var bodyRect, pos;
       if (this.data.length === 0) {
         return null;
       }
       if (!this.options.horizontal) {
         pos = x;
       } else {
-        pos = y;
+        bodyRect = document.body.getBoundingClientRect();
+        pos = y + bodyRect.top;
       }
-      if (!this.options.horizontal) {
-        pos = Math.max(Math.min(pos, this.xEnd), this.xStart);
-        return Math.min(this.data.length - 1, Math.floor((pos - this.xStart) / (this.xSize / this.data.length)));
-      } else {
-        return Math.min(this.data.length - 1, Math.max(Math.floor((pos - this.xEnd) / (this.xSize / this.data.length)) - 1, 0));
-      }
+      pos = Math.max(Math.min(pos, this.xEnd), this.xStart);
+      return Math.min(this.data.length - 1, Math.floor((pos - this.xStart) / (this.xSize / this.data.length)));
     };
 
     Bar.prototype.onGridClick = function(x, y) {
