@@ -120,6 +120,8 @@ class Morris.Grid extends Morris.EventEmitter
     ymin: 'auto 0'
     y2max: 'auto'
     y2min: 'auto 0'
+    areas: []
+    areasColors: ['#fde4e4']
     goals: []
     goals2: []
     goalStrokeWidth: 1.0
@@ -432,6 +434,7 @@ class Morris.Grid extends Morris.EventEmitter
     @raphael.clear()
     @_calc()
     @drawGrid()
+    @drawAreas()
     @drawEvents()
     @draw() if @draw
     @drawGoals()
@@ -520,6 +523,13 @@ class Morris.Grid extends Morris.EventEmitter
           else
             @drawXAxisLabel(pos, basePos2, @yAxisFormat2(lineY))
 
+  # draw horizontal areas
+  #
+  drawAreas: ->
+    for area, i in @options.areas
+      color = @options.areasColors[i % @options.areasColors.length]
+      @drawArea(area, color)
+
   # draw goals horizontal lines
   #
   drawGoals: ->
@@ -559,6 +569,37 @@ class Morris.Grid extends Morris.EventEmitter
     @raphael.path(path)
       .attr('stroke', color)
       .attr('stroke-width', @options.goalStrokeWidth2)
+
+  drawArea: (area, color) ->
+    if area instanceof Array
+      from = Math.max area...
+      to = Math.min area...
+      if not @options.horizontal
+        from = Math.floor(@transY(from))
+        to = Math.floor(@transY(to)) - from
+        @raphael.rect(@xStart, from, @xEnd-@xStart, to)
+          .attr({ fill: color, stroke: false })
+          .toBack()
+      else
+        to = Math.floor(@transY(to))
+        from = Math.floor(@transY(from)) - to
+        @raphael.rect(to, @xStart, from, @xEnd - @xStart)
+          .attr({ fill: color, stroke: false })
+          .toBack()
+
+    else
+      if not @options.horizontal
+        y = Math.floor(@transY(area)) + 1
+        path = "M#{@xStart},#{y}H#{@xEnd}"
+        @raphael.path(path)
+          .attr('stroke', color)
+          .attr('stroke-width', 2)
+      else
+        y = Math.floor(@transY(area)) + 1
+        path = "M#{y},#{@xStart}V#{@xEnd}"
+        @raphael.path(path)
+          .attr('stroke', color)
+          .attr('stroke-width', 2)
 
   drawEvent: (event, color) ->
     if event instanceof Array

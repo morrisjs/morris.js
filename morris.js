@@ -262,6 +262,8 @@ Licensed under the BSD-2-Clause License.
       ymin: 'auto 0',
       y2max: 'auto',
       y2min: 'auto 0',
+      areas: [],
+      areasColors: ['#fde4e4'],
       goals: [],
       goals2: [],
       goalStrokeWidth: 1.0,
@@ -270,7 +272,7 @@ Licensed under the BSD-2-Clause License.
       goalLineColors2: ['red'],
       events: [],
       eventStrokeWidth: 1.0,
-      eventLineColors: ['#005a04', '#ccffbb', '#3a5f0b', '#005502'],
+      eventLineColors: ['#005a04'],
       rangeSelect: null,
       rangeSelectColor: '#eef',
       resize: true,
@@ -673,6 +675,7 @@ Licensed under the BSD-2-Clause License.
       this.raphael.clear();
       this._calc();
       this.drawGrid();
+      this.drawAreas();
       this.drawEvents();
       if (this.draw) {
         this.draw();
@@ -785,6 +788,18 @@ Licensed under the BSD-2-Clause License.
       }
     };
 
+    Grid.prototype.drawAreas = function() {
+      var area, color, i, _i, _len, _ref, _results;
+      _ref = this.options.areas;
+      _results = [];
+      for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
+        area = _ref[i];
+        color = this.options.areasColors[i % this.options.areasColors.length];
+        _results.push(this.drawArea(area, color));
+      }
+      return _results;
+    };
+
     Grid.prototype.drawGoals = function() {
       var color, goal, i, _i, _j, _len, _len1, _ref, _ref1, _results;
       _ref = this.options.goals;
@@ -837,6 +852,39 @@ Licensed under the BSD-2-Clause License.
         path = "M" + y + "," + this.xStart + "V" + this.xEnd;
       }
       return this.raphael.path(path).attr('stroke', color).attr('stroke-width', this.options.goalStrokeWidth2);
+    };
+
+    Grid.prototype.drawArea = function(area, color) {
+      var from, path, to, y;
+      if (area instanceof Array) {
+        from = Math.max.apply(Math, area);
+        to = Math.min.apply(Math, area);
+        if (!this.options.horizontal) {
+          from = Math.floor(this.transY(from));
+          to = Math.floor(this.transY(to)) - from;
+          return this.raphael.rect(this.xStart, from, this.xEnd - this.xStart, to).attr({
+            fill: color,
+            stroke: false
+          }).toBack();
+        } else {
+          to = Math.floor(this.transY(to));
+          from = Math.floor(this.transY(from)) - to;
+          return this.raphael.rect(to, this.xStart, from, this.xEnd - this.xStart).attr({
+            fill: color,
+            stroke: false
+          }).toBack();
+        }
+      } else {
+        if (!this.options.horizontal) {
+          y = Math.floor(this.transY(area)) + 1;
+          path = "M" + this.xStart + "," + y + "H" + this.xEnd;
+          return this.raphael.path(path).attr('stroke', color).attr('stroke-width', 2);
+        } else {
+          y = Math.floor(this.transY(area)) + 1;
+          path = "M" + y + "," + this.xStart + "V" + this.xEnd;
+          return this.raphael.path(path).attr('stroke', color).attr('stroke-width', 2);
+        }
+      }
     };
 
     Grid.prototype.drawEvent = function(event, color) {
@@ -1241,7 +1289,6 @@ Licensed under the BSD-2-Clause License.
         for (index = _k = _ref2 = this.options.ykeys.length - 1; _ref2 <= 0 ? _k <= 0 : _k >= 0; index = _ref2 <= 0 ? ++_k : --_k) {
           if (row._y[index] != null) {
             this.data[idx].label_x[index] = row._x;
-            console.log(row.x + ' ' + row._y[index] - 10);
             this.data[idx].label_y[index] = row._y[index] - 10;
           }
           if (row._y2 != null) {
