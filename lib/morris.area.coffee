@@ -4,6 +4,8 @@ class Morris.Area extends Morris.Line
   areaDefaults = 
     fillOpacity: 'auto'
     behaveLikeLine: false
+    belowArea: true
+    areaColors: []
 
   constructor: (options) ->
     return new Morris.Area(options) unless (@ instanceof Morris.Area)
@@ -62,11 +64,20 @@ class Morris.Area extends Morris.Line
   _drawFillFor: (index) ->
     path = @paths[index]
     if path isnt null
-      path = path + "L#{@transX(@xmax)},#{@bottom}L#{@transX(@xmin)},#{@bottom}Z"
-      @drawFilledPath path, @fillForSeries(index), index
+      if @options.belowArea is true
+          path = path + "L#{@transX(@xmax)},#{@bottom}L#{@transX(@xmin)},#{@bottom}Z"
+          @drawFilledPath path, @fillForSeries(index), index
+        
+      else
+        coords = ({x: r._x, y: r._y[0]} for r in @data by - 1 when r._y[0] isnt undefined)
+        pathBelow = Morris.Line.createPath coords, 'smooth', @bottom
+        pathBelow = "L" + pathBelow.slice(1)
+        path = path + "L" + pathBelow.slice(1)
+        @drawFilledPath path, @fillForSeries(index), index
 
   fillForSeries: (i) ->
-    color = Raphael.rgb2hsl @colorFor(@data[i], i, 'line')
+    if @options.areaColors.length == 0 then @options.areaColors = @options.lineColors
+    color = Raphael.rgb2hsl @options.areaColors[i % @options.areaColors.length]
     Raphael.hsl(
       color.h,
       if @options.behaveLikeLine then color.s * 0.9 else color.s * 0.75,

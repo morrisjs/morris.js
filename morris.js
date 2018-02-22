@@ -2071,7 +2071,9 @@ Licensed under the BSD-2-Clause License.
 
     areaDefaults = {
       fillOpacity: 'auto',
-      behaveLikeLine: false
+      behaveLikeLine: false,
+      belowArea: true,
+      areaColors: []
     };
 
     function Area(options) {
@@ -2088,29 +2090,56 @@ Licensed under the BSD-2-Clause License.
     }
 
     Area.prototype.calcPoints = function() {
-      var row, total, y, _i, _len, _ref, _results;
+      var idx, index, row, total, y, _i, _j, _len, _len1, _ref, _ref1, _results;
       _ref = this.data;
-      _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         row = _ref[_i];
         row._x = this.transX(row.x);
         total = 0;
         row._y = (function() {
-          var _j, _len1, _ref1, _results1;
+          var _j, _len1, _ref1, _results;
           _ref1 = row.y;
-          _results1 = [];
+          _results = [];
           for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
             y = _ref1[_j];
             if (this.options.behaveLikeLine) {
-              _results1.push(this.transY(y));
+              _results.push(this.transY(y));
             } else {
               total += y || 0;
-              _results1.push(this.transY(total));
+              _results.push(this.transY(total));
+            }
+          }
+          return _results;
+        }).call(this);
+        row._ymax = Math.max.apply(Math, row._y);
+      }
+      _ref1 = this.data;
+      _results = [];
+      for (idx = _j = 0, _len1 = _ref1.length; _j < _len1; idx = ++_j) {
+        row = _ref1[idx];
+        this.data[idx].label_x = [];
+        this.data[idx].label_y = [];
+        _results.push((function() {
+          var _k, _ref2, _results1;
+          _results1 = [];
+          for (index = _k = _ref2 = this.options.ykeys.length - 1; _ref2 <= 0 ? _k <= 0 : _k >= 0; index = _ref2 <= 0 ? ++_k : --_k) {
+            if (row._y[index] != null) {
+              this.data[idx].label_x[index] = row._x;
+              this.data[idx].label_y[index] = row._y[index] - 10;
+            }
+            if (row._y2 != null) {
+              if (row._y2[index] != null) {
+                this.data[idx].label_x[index] = row._x;
+                _results1.push(this.data[idx].label_y[index] = row._y2[index] - 10);
+              } else {
+                _results1.push(void 0);
+              }
+            } else {
+              _results1.push(void 0);
             }
           }
           return _results1;
-        }).call(this);
-        _results.push(row._ymax = Math.max.apply(Math, row._y));
+        }).call(this));
       }
       return _results;
     };
@@ -2142,17 +2171,42 @@ Licensed under the BSD-2-Clause License.
     };
 
     Area.prototype._drawFillFor = function(index) {
-      var path;
+      var coords, path, pathBelow, r;
       path = this.paths[index];
       if (path !== null) {
-        path = path + ("L" + (this.transX(this.xmax)) + "," + this.bottom + "L" + (this.transX(this.xmin)) + "," + this.bottom + "Z");
-        return this.drawFilledPath(path, this.fillForSeries(index), index);
+        if (this.options.belowArea === true) {
+          path = path + ("L" + (this.transX(this.xmax)) + "," + this.bottom + "L" + (this.transX(this.xmin)) + "," + this.bottom + "Z");
+          return this.drawFilledPath(path, this.fillForSeries(index), index);
+        } else {
+          coords = (function() {
+            var _i, _ref, _results;
+            _ref = this.data;
+            _results = [];
+            for (_i = _ref.length - 1; _i >= 0; _i += -1) {
+              r = _ref[_i];
+              if (r._y[0] !== void 0) {
+                _results.push({
+                  x: r._x,
+                  y: r._y[0]
+                });
+              }
+            }
+            return _results;
+          }).call(this);
+          pathBelow = Morris.Line.createPath(coords, 'smooth', this.bottom);
+          pathBelow = "L" + pathBelow.slice(1);
+          path = path + "L" + pathBelow.slice(1);
+          return this.drawFilledPath(path, this.fillForSeries(index), index);
+        }
       }
     };
 
     Area.prototype.fillForSeries = function(i) {
       var color;
-      color = Raphael.rgb2hsl(this.colorFor(this.data[i], i, 'line'));
+      if (this.options.areaColors.length === 0) {
+        this.options.areaColors = this.options.lineColors;
+      }
+      color = Raphael.rgb2hsl(this.options.areaColors[i % this.options.areaColors.length]);
       return Raphael.hsl(color.h, this.options.behaveLikeLine ? color.s * 0.9 : color.s * 0.75, Math.min(0.98, this.options.behaveLikeLine ? color.l * 1.2 : color.l * 1.25));
     };
 
