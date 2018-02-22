@@ -2194,7 +2194,6 @@ Licensed under the BSD-2-Clause License.
             return _results;
           }).call(this);
           pathBelow = Morris.Line.createPath(coords, 'smooth', this.bottom);
-          pathBelow = "L" + pathBelow.slice(1);
           path = path + "L" + pathBelow.slice(1);
           return this.drawFilledPath(path, this.fillForSeries(index), index);
         }
@@ -2211,20 +2210,45 @@ Licensed under the BSD-2-Clause License.
     };
 
     Area.prototype.drawFilledPath = function(path, fill, areaIndex) {
-      var ii, rPath, row, straightPath, _i, _ref,
+      var coords, pathBelow, r, rPath, straightPath,
         _this = this;
       if (this.options.animate) {
-        straightPath = '';
-        straightPath = 'M' + this.data[0]._x + ',' + this.transY(this.ymin);
-        straightPath += ',' + this.data[this.data.length - 1]._x + ',' + this.transY(this.ymin);
-        _ref = this.data;
-        for (ii = _i = _ref.length - 1; _i >= 0; ii = _i += -1) {
-          row = _ref[ii];
-          if (straightPath === '') {
-            straightPath = 'M' + row._x + ',' + this.transY(this.ymin);
-          } else {
-            straightPath += ',' + row._x + ',' + this.transY(this.ymin);
+        coords = (function() {
+          var _i, _len, _ref, _results;
+          _ref = this.data;
+          _results = [];
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            r = _ref[_i];
+            if (r._y[areaIndex] !== void 0) {
+              _results.push({
+                x: r._x,
+                y: this.transY(0)
+              });
+            }
           }
+          return _results;
+        }).call(this);
+        straightPath = Morris.Line.createPath(coords, 'smooth', this.bottom);
+        if (this.options.belowArea === true) {
+          straightPath = straightPath + ("L" + (this.transX(this.xmax)) + "," + this.bottom + "L" + (this.transX(this.xmin)) + "," + this.bottom + "Z");
+        } else {
+          coords = (function() {
+            var _i, _ref, _results;
+            _ref = this.data;
+            _results = [];
+            for (_i = _ref.length - 1; _i >= 0; _i += -1) {
+              r = _ref[_i];
+              if (r._y[areaIndex] !== void 0) {
+                _results.push({
+                  x: r._x,
+                  y: this.transY(0)
+                });
+              }
+            }
+            return _results;
+          }).call(this);
+          pathBelow = Morris.Line.createPath(coords, 'smooth', this.bottom);
+          straightPath = straightPath + "L" + pathBelow.slice(1);
         }
         straightPath += 'Z';
         rPath = this.raphael.path(straightPath).attr('fill', fill).attr('fill-opacity', this.options.fillOpacity).attr('stroke', 'none');

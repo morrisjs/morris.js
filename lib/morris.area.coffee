@@ -71,7 +71,6 @@ class Morris.Area extends Morris.Line
       else
         coords = ({x: r._x, y: r._y[0]} for r in @data by - 1 when r._y[0] isnt undefined)
         pathBelow = Morris.Line.createPath coords, 'smooth', @bottom
-        pathBelow = "L" + pathBelow.slice(1)
         path = path + "L" + pathBelow.slice(1)
         @drawFilledPath path, @fillForSeries(index), index
 
@@ -85,15 +84,14 @@ class Morris.Area extends Morris.Line
 
   drawFilledPath: (path, fill, areaIndex) ->
     if @options.animate
-      straightPath = ''
-      straightPath = 'M'+@data[0]._x+','+@transY(@ymin)
-      straightPath += ','+@data[@data.length-1]._x+','+@transY(@ymin)
-
-      for row, ii in @data by -1
-        if straightPath == ''
-          straightPath = 'M'+row._x+','+@transY(@ymin)
-        else
-          straightPath += ','+row._x+','+@transY(@ymin)
+      coords = ({x: r._x, y: @transY(0)} for r in @data when r._y[areaIndex] isnt undefined)
+      straightPath = Morris.Line.createPath coords, 'smooth', @bottom
+      if @options.belowArea is true
+        straightPath = straightPath + "L#{@transX(@xmax)},#{@bottom}L#{@transX(@xmin)},#{@bottom}Z"
+      else 
+        coords = ({x: r._x, y: @transY(0)} for r in @data by - 1 when r._y[areaIndex] isnt undefined)
+        pathBelow = Morris.Line.createPath coords, 'smooth', @bottom
+        straightPath = straightPath + "L" + pathBelow.slice(1)
 
       straightPath += 'Z';
       rPath = @raphael.path(straightPath)
