@@ -2145,7 +2145,7 @@ Licensed under the BSD-2-Clause License.
     };
 
     Area.prototype.drawSeries = function() {
-      var i, range, _i, _j, _k, _len, _ref, _ref1, _results, _results1, _results2;
+      var i, range, _i, _j, _k, _l, _len, _len1, _ref, _ref1, _results, _results1, _results2;
       this.seriesPoints = [];
       if (this.options.behaveLikeLine) {
         range = (function() {
@@ -2160,10 +2160,13 @@ Licensed under the BSD-2-Clause License.
           return _results1;
         }).apply(this);
       }
-      _results2 = [];
       for (_k = 0, _len = range.length; _k < _len; _k++) {
         i = range[_k];
         this._drawFillFor(i);
+      }
+      _results2 = [];
+      for (_l = 0, _len1 = range.length; _l < _len1; _l++) {
+        i = range[_l];
         this._drawLineFor(i);
         _results2.push(this._drawPointFor(i));
       }

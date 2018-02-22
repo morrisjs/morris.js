@@ -58,6 +58,8 @@ class Morris.Area extends Morris.Line
 
     for i in range
       @_drawFillFor i
+
+    for i in range
       @_drawLineFor i
       @_drawPointFor i
 
