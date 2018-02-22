@@ -31,6 +31,19 @@ class Morris.Area extends Morris.Line
           @transY(total)
       row._ymax = Math.max row._y...
 
+    for row, idx in @data
+      @data[idx].label_x = []
+      @data[idx].label_y = []
+      for index in [@options.ykeys.length-1..0]
+        if row._y[index]?
+          @data[idx].label_x[index] = row._x
+          @data[idx].label_y[index] = row._y[index] - 10
+        
+        if row._y2?
+          if row._y2[index]?
+            @data[idx].label_x[index] = row._x
+            @data[idx].label_y[index] = row._y2[index] - 10
+
   # draw the data series
   #
   # @private
