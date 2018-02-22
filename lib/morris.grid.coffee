@@ -120,8 +120,8 @@ class Morris.Grid extends Morris.EventEmitter
     ymin: 'auto 0'
     y2max: 'auto'
     y2min: 'auto 0'
-    areas: []
-    areasColors: ['#fde4e4']
+    regions: []
+    regionsColors: ['#fde4e4']
     goals: []
     goals2: []
     goalStrokeWidth: 1.0
@@ -136,9 +136,6 @@ class Morris.Grid extends Morris.EventEmitter
     eventStrokeWidth: 1.0
     eventLineColors: [
       '#005a04'
-      '#ccffbb'
-      '#3a5f0b'
-      '#005502'
     ]
     rangeSelect: null
     rangeSelectColor: '#eef'
@@ -434,7 +431,7 @@ class Morris.Grid extends Morris.EventEmitter
     @raphael.clear()
     @_calc()
     @drawGrid()
-    @drawAreas()
+    @drawRegions()
     @drawEvents()
     @draw() if @draw
     @drawGoals()
@@ -523,12 +520,12 @@ class Morris.Grid extends Morris.EventEmitter
           else
             @drawXAxisLabel(pos, basePos2, @yAxisFormat2(lineY))
 
-  # draw horizontal areas
+  # draw horizontal regions
   #
-  drawAreas: ->
-    for area, i in @options.areas
-      color = @options.areasColors[i % @options.areasColors.length]
-      @drawArea(area, color)
+  drawRegions: ->
+    for region, i in @options.regions
+      color = @options.regionsColors[i % @options.regionsColors.length]
+      @drawRegion(region, color)
 
   # draw goals horizontal lines
   #
@@ -570,10 +567,10 @@ class Morris.Grid extends Morris.EventEmitter
       .attr('stroke', color)
       .attr('stroke-width', @options.goalStrokeWidth2)
 
-  drawArea: (area, color) ->
-    if area instanceof Array
-      from = Math.max area...
-      to = Math.min area...
+  drawRegion: (region, color) ->
+    if region instanceof Array
+      from = Math.min(Math.max(region...), @ymax)
+      to = Math.max(Math.min(region...), @ymin)
       if not @options.horizontal
         from = Math.floor(@transY(from))
         to = Math.floor(@transY(to)) - from

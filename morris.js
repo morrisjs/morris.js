@@ -262,8 +262,8 @@ Licensed under the BSD-2-Clause License.
       ymin: 'auto 0',
       y2max: 'auto',
       y2min: 'auto 0',
-      areas: [],
-      areasColors: ['#fde4e4'],
+      regions: [],
+      regionsColors: ['#fde4e4'],
       goals: [],
       goals2: [],
       goalStrokeWidth: 1.0,
@@ -675,7 +675,7 @@ Licensed under the BSD-2-Clause License.
       this.raphael.clear();
       this._calc();
       this.drawGrid();
-      this.drawAreas();
+      this.drawRegions();
       this.drawEvents();
       if (this.draw) {
         this.draw();
@@ -788,14 +788,14 @@ Licensed under the BSD-2-Clause License.
       }
     };
 
-    Grid.prototype.drawAreas = function() {
-      var area, color, i, _i, _len, _ref, _results;
-      _ref = this.options.areas;
+    Grid.prototype.drawRegions = function() {
+      var color, i, region, _i, _len, _ref, _results;
+      _ref = this.options.regions;
       _results = [];
       for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
-        area = _ref[i];
-        color = this.options.areasColors[i % this.options.areasColors.length];
-        _results.push(this.drawArea(area, color));
+        region = _ref[i];
+        color = this.options.regionsColors[i % this.options.regionsColors.length];
+        _results.push(this.drawRegion(region, color));
       }
       return _results;
     };
@@ -854,11 +854,11 @@ Licensed under the BSD-2-Clause License.
       return this.raphael.path(path).attr('stroke', color).attr('stroke-width', this.options.goalStrokeWidth2);
     };
 
-    Grid.prototype.drawArea = function(area, color) {
+    Grid.prototype.drawRegion = function(region, color) {
       var from, path, to, y;
-      if (area instanceof Array) {
-        from = Math.max.apply(Math, area);
-        to = Math.min.apply(Math, area);
+      if (region instanceof Array) {
+        from = Math.min(Math.max.apply(Math, region), this.ymax);
+        to = Math.max(Math.min.apply(Math, region), this.ymin);
         if (!this.options.horizontal) {
           from = Math.floor(this.transY(from));
           to = Math.floor(this.transY(to)) - from;
