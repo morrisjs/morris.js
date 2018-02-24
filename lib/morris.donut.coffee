@@ -326,9 +326,10 @@ class Morris.DonutSegment extends Morris.EventEmitter
 
   select: =>
     unless @selected
-      @seg.animate(path: @selectedPath, 150, '<>')
-      @arc.animate(opacity: 1, 150, '<>')
-      @selected = true
+      if @seg?
+        @seg.animate(path: @selectedPath, 150, '<>')
+        @arc.animate(opacity: 1, 150, '<>')
+        @selected = true
 
   deselect: =>
     if @selected

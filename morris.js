@@ -3254,13 +3254,15 @@ Licensed under the BSD-2-Clause License.
 
     DonutSegment.prototype.select = function() {
       if (!this.selected) {
-        this.seg.animate({
-          path: this.selectedPath
-        }, 150, '<>');
-        this.arc.animate({
-          opacity: 1
-        }, 150, '<>');
-        return this.selected = true;
+        if (this.seg != null) {
+          this.seg.animate({
+            path: this.selectedPath
+          }, 150, '<>');
+          this.arc.animate({
+            opacity: 1
+          }, 150, '<>');
+          return this.selected = true;
+        }
       }
     };
 
