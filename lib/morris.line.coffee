@@ -80,7 +80,6 @@ class Morris.Line extends Morris.Grid
       for index in [@options.ykeys.length-1..0]
         if row._y[index]?
           @data[idx].label_x[index] = row._x
-          console.log(row.x+' '+row._y[index] - 10)
           @data[idx].label_y[index] = row._y[index] - 10
         
         if row._y2?
