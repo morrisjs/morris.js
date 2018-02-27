@@ -2105,8 +2105,12 @@ Licensed under the BSD-2-Clause License.
             if (this.options.behaveLikeLine) {
               _results.push(this.transY(y));
             } else {
-              total += y || 0;
-              _results.push(this.transY(total));
+              if (y != null) {
+                total += y || 0;
+                _results.push(this.transY(total));
+              } else {
+                _results.push(void 0);
+              }
             }
           }
           return _results;

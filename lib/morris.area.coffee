@@ -29,8 +29,9 @@ class Morris.Area extends Morris.Line
         if @options.behaveLikeLine
           @transY(y)
         else
-          total += (y || 0)
-          @transY(total)
+          if y? 
+            total += (y || 0)
+            @transY(total)
       row._ymax = Math.max row._y...
 
     for row, idx in @data
