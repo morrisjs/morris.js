@@ -27,7 +27,7 @@ class Morris.Area extends Morris.Line
       total = 0
       row._y = for y in row.y
         if @options.behaveLikeLine
-          @transY(y)
+          if y? then @transY(y) else y
         else
           if y? 
             total += (y || 0)
