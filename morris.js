@@ -281,7 +281,7 @@ Licensed under the BSD-2-Clause License.
       dataLabelsFamily: 'sans-serif',
       dataLabelsSize: 12,
       dataLabelsWeight: 'normal',
-      dataLabelsColor: '#000',
+      dataLabelsColor: 'auto',
       animate: true,
       nbYkeys2: 0,
       smooth: true
@@ -976,18 +976,33 @@ Licensed under the BSD-2-Clause License.
       return this.options.shown === true || this.options.shown[i] === true;
     };
 
-    Grid.prototype.drawDataLabel = function(xPos, yPos, text) {
-      var label;
-      return label = this.raphael.text(xPos, yPos, text).attr('text-anchor', 'middle').attr('font-size', this.options.dataLabelsSize).attr('font-family', this.options.dataLabelsFamily).attr('font-weight', this.options.dataLabelsWeight).attr('fill', this.options.dataLabelsColor);
+    Grid.prototype.isColorDark = function(hex) {
+      var b, g, luma, r, rgb;
+      hex = hex.substring(1);
+      rgb = parseInt(hex, 16);
+      r = (rgb >> 16) & 0xff;
+      g = (rgb >> 8) & 0xff;
+      b = (rgb >> 0) & 0xff;
+      luma = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+      if (luma >= 100) {
+        return false;
+      } else {
+        return true;
+      }
     };
 
-    Grid.prototype.drawDataLabelExt = function(xPos, yPos, text, anchor) {
+    Grid.prototype.drawDataLabel = function(xPos, yPos, text, color) {
       var label;
-      return label = this.raphael.text(xPos, yPos, text).attr('text-anchor', anchor).attr('font-size', this.options.dataLabelsSize).attr('font-family', this.options.dataLabelsFamily).attr('font-weight', this.options.dataLabelsWeight).attr('fill', this.options.dataLabelsColor);
+      return label = this.raphael.text(xPos, yPos, text).attr('text-anchor', 'middle').attr('font-size', this.options.dataLabelsSize).attr('font-family', this.options.dataLabelsFamily).attr('font-weight', this.options.dataLabelsWeight).attr('fill', color);
+    };
+
+    Grid.prototype.drawDataLabelExt = function(xPos, yPos, text, anchor, color) {
+      var label;
+      return label = this.raphael.text(xPos, yPos, text).attr('text-anchor', anchor).attr('font-size', this.options.dataLabelsSize).attr('font-family', this.options.dataLabelsFamily).attr('font-weight', this.options.dataLabelsWeight).attr('fill', color);
     };
 
     Grid.prototype.setLabels = function() {
-      var index, row, ykey, _i, _len, _ref, _results;
+      var color, index, row, ykey, _i, _len, _ref, _results;
       if (this.options.dataLabels) {
         _ref = this.data;
         _results = [];
@@ -999,13 +1014,20 @@ Licensed under the BSD-2-Clause License.
             _results1 = [];
             for (index = _j = 0, _len1 = _ref1.length; _j < _len1; index = ++_j) {
               ykey = _ref1[index];
+              if (this.options.dataLabelsColor !== 'auto') {
+                color = this.options.dataLabelsColor;
+              } else if (this.options.dataLabelsPosition === 'inside' && this.isColorDark(this.options.barColors[index]) === true) {
+                color = '#fff';
+              } else {
+                color = '#000';
+              }
               if (this.options.lineColors != null) {
                 if (row.label_y[index] != null) {
-                  this.drawDataLabel(row._x, row.label_y[index], this.yLabelFormat_noUnit(row.y[index], 0));
+                  this.drawDataLabel(row._x, row.label_y[index], this.yLabelFormat_noUnit(row.y[index], 0), color);
                 }
                 if (row._y2 != null) {
                   if (row._y2[index] != null) {
-                    _results1.push(this.drawDataLabel(row._x, row._y2[index] - 10, this.yLabelFormat_noUnit(row.y[index], 1000)));
+                    _results1.push(this.drawDataLabel(row._x, row._y2[index] - 10, this.yLabelFormat_noUnit(row.y[index], 1000), color));
                   } else {
                     _results1.push(void 0);
                   }
@@ -1015,15 +1037,15 @@ Licensed under the BSD-2-Clause License.
               } else {
                 if (row.label_y[index] != null) {
                   if (this.options.horizontal === !true) {
-                    _results1.push(this.drawDataLabel(row.label_x[index], row.label_y[index], this.yLabelFormat_noUnit(row.y[index], index)));
+                    _results1.push(this.drawDataLabel(row.label_x[index], row.label_y[index], this.yLabelFormat_noUnit(row.y[index], index), color));
                   } else {
-                    _results1.push(this.drawDataLabelExt(row.label_x[index], row.label_y[index], this.yLabelFormat_noUnit(row.y[index]), 'start'));
+                    _results1.push(this.drawDataLabelExt(row.label_x[index], row.label_y[index], this.yLabelFormat_noUnit(row.y[index]), 'start', color));
                   }
                 } else if (row._y2[index] != null) {
                   if (this.options.horizontal === !true) {
-                    _results1.push(this.drawDataLabel(row._x, row._y2[index] - 10, this.yLabelFormat_noUnit(row.y[index], index)));
+                    _results1.push(this.drawDataLabel(row._x, row._y2[index] - 10, this.yLabelFormat_noUnit(row.y[index], index), color));
                   } else {
-                    _results1.push(this.drawDataLabelExt(row._y2[index], row._x - 10, this.yLabelFormat_noUnit(row.y[index]), 'middle'));
+                    _results1.push(this.drawDataLabelExt(row._y2[index], row._x - 10, this.yLabelFormat_noUnit(row.y[index]), 'middle', color));
                   }
                 } else {
                   _results1.push(void 0);
@@ -2103,7 +2125,11 @@ Licensed under the BSD-2-Clause License.
           for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
             y = _ref1[_j];
             if (this.options.behaveLikeLine) {
-              _results.push(this.transY(y));
+              if (y != null) {
+                _results.push(this.transY(y));
+              } else {
+                _results.push(y);
+              }
             } else {
               if (y != null) {
                 total += y || 0;
@@ -2894,7 +2920,7 @@ Licensed under the BSD-2-Clause License.
       dataLabelsFamily: 'sans-serif',
       dataLabelsSize: 12,
       dataLabelsWeight: 'normal',
-      dataLabelsColor: '#000',
+      dataLabelsColor: 'auto',
       donutType: 'donut',
       animate: true,
       showPercentage: false
@@ -2939,7 +2965,7 @@ Licensed under the BSD-2-Clause License.
     }
 
     Donut.prototype.redraw = function() {
-      var C, cx, cy, dist, finalValue, height, i, idx, label_x, label_y, last, max_value, min, next, p_cos_p0, p_sin_p0, seg, total, value, w, width, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _ref3, _results;
+      var C, color, cx, cy, dist, finalValue, height, i, idx, label_x, label_y, last, max_value, min, next, p_cos_p0, p_sin_p0, seg, total, value, w, width, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _ref3, _results;
       this.raphael.clear();
       _ref = Morris.dimensions(this.el), width = _ref.width, height = _ref.height;
       cx = width / 2;
@@ -2986,11 +3012,18 @@ Licensed under the BSD-2-Clause License.
             label_x = parseFloat(cx) + parseFloat((dist - 9) * 0.5 * p_sin_p0);
             label_y = parseFloat(cy) + parseFloat((dist - 9) * 0.5 * p_cos_p0);
           }
+          if (this.options.dataLabelsColor !== 'auto') {
+            color = this.options.dataLabelsColor;
+          } else if (this.options.dataLabelsPosition === 'inside' && this.isColorDark(this.options.colors[i]) === true) {
+            color = '#fff';
+          } else {
+            color = '#000';
+          }
           if (this.options.showPercentage) {
             finalValue = Math.round(parseFloat(value) / parseFloat(total) * 100) + '%';
-            this.drawDataLabelExt(label_x, label_y, finalValue);
+            this.drawDataLabelExt(label_x, label_y, finalValue, color);
           } else {
-            this.drawDataLabelExt(label_x, label_y, value);
+            this.drawDataLabelExt(label_x, label_y, value, color);
           }
         }
         last = next;
@@ -3031,12 +3064,12 @@ Licensed under the BSD-2-Clause License.
       return this.redraw();
     };
 
-    Donut.prototype.drawDataLabel = function(xPos, yPos, text) {
+    Donut.prototype.drawDataLabel = function(xPos, yPos, text, color) {
       var label;
       return label = this.raphael.text(xPos, yPos, text).attr('text-anchor', 'middle').attr('font-size', this.options.dataLabelsSize).attr('font-family', this.options.dataLabelsFamily).attr('font-weight', this.options.dataLabelsWeight).attr('fill', this.options.dataLabelsColor);
     };
 
-    Donut.prototype.drawDataLabelExt = function(xPos, yPos, text) {
+    Donut.prototype.drawDataLabelExt = function(xPos, yPos, text, color) {
       var label, labelAnchor;
       if (this.options.dataLabelsPosition === 'inside') {
         labelAnchor = 'middle';
@@ -3047,7 +3080,7 @@ Licensed under the BSD-2-Clause License.
       } else {
         labelAnchor = 'end';
       }
-      return label = this.raphael.text(xPos, yPos, text).attr('text-anchor', labelAnchor).attr('font-size', this.options.dataLabelsSize).attr('font-family', this.options.dataLabelsFamily).attr('font-weight', this.options.dataLabelsWeight).attr('fill', this.options.dataLabelsColor);
+      return label = this.raphael.text(xPos, yPos, text, color).attr('text-anchor', labelAnchor).attr('font-size', this.options.dataLabelsSize).attr('font-family', this.options.dataLabelsFamily).attr('font-weight', this.options.dataLabelsWeight).attr('fill', color);
     };
 
     Donut.prototype.click = function(idx) {
@@ -3078,6 +3111,21 @@ Licensed under the BSD-2-Clause License.
         _results.push(s.deselect());
       }
       return _results;
+    };
+
+    Donut.prototype.isColorDark = function(hex) {
+      var b, g, luma, r, rgb;
+      hex = hex.substring(1);
+      rgb = parseInt(hex, 16);
+      r = (rgb >> 16) & 0xff;
+      g = (rgb >> 8) & 0xff;
+      b = (rgb >> 0) & 0xff;
+      luma = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+      if (luma >= 128) {
+        return false;
+      } else {
+        return true;
+      }
     };
 
     Donut.prototype.setLabels = function(label1, label2) {

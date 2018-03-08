@@ -145,7 +145,7 @@ class Morris.Grid extends Morris.EventEmitter
     dataLabelsFamily: 'sans-serif',
     dataLabelsSize: 12,
     dataLabelsWeight: 'normal',
-    dataLabelsColor: '#000',
+    dataLabelsColor: 'auto',
     animate: true
     nbYkeys2: 0
     smooth: true
@@ -679,45 +679,66 @@ class Morris.Grid extends Morris.EventEmitter
   hasToShow: (i) =>
     @options.shown is true or @options.shown[i] is true
 
-  drawDataLabel: (xPos, yPos, text) ->
+  isColorDark: (hex) ->
+    hex = hex.substring(1)
+    rgb = parseInt(hex, 16)
+    r = (rgb >> 16) & 0xff
+    g = (rgb >>  8) & 0xff
+    b = (rgb >>  0) & 0xff
+    luma = 0.2126 * r + 0.7152 * g + 0.0722 * b
+    if luma >= 128
+      return false
+    else 
+      return true
+
+  drawDataLabel: (xPos, yPos, text, color) ->
     label = @raphael.text(xPos, yPos, text)
                     .attr('text-anchor', 'middle')
                     .attr('font-size', @options.dataLabelsSize)
                     .attr('font-family', @options.dataLabelsFamily)
                     .attr('font-weight', @options.dataLabelsWeight)
-                    .attr('fill', @options.dataLabelsColor)
+                    .attr('fill', color)
 
-  drawDataLabelExt: (xPos, yPos, text, anchor) ->
+  drawDataLabelExt: (xPos, yPos, text, anchor, color) ->
     label = @raphael.text(xPos, yPos, text)
                     .attr('text-anchor', anchor)
                     .attr('font-size', @options.dataLabelsSize)
                     .attr('font-family', @options.dataLabelsFamily)
                     .attr('font-weight', @options.dataLabelsWeight)
-                    .attr('fill', @options.dataLabelsColor)
+                    .attr('fill', color)
 
   setLabels: =>
+
     if @options.dataLabels
       for row in @data
         for ykey, index in @options.ykeys
+
+          if @options.dataLabelsColor != 'auto'
+            color = @options.dataLabelsColor
+          else if @options.dataLabelsPosition == 'inside' && @isColorDark(@options.barColors[index]) == true
+            color = '#fff'
+          else
+            color = '#000'
+
           if @options.lineColors?
             if row.label_y[index]?
-              @drawDataLabel(row._x, row.label_y[index], this.yLabelFormat_noUnit(row.y[index], 0))
+              @drawDataLabel(row._x, row.label_y[index], this.yLabelFormat_noUnit(row.y[index], 0), color)
 
             if row._y2?
               if row._y2[index]?
-                @drawDataLabel(row._x, row._y2[index] - 10, this.yLabelFormat_noUnit(row.y[index], 1000))
+                @drawDataLabel(row._x, row._y2[index] - 10, this.yLabelFormat_noUnit(row.y[index], 1000), color)
 
           else
             if row.label_y[index]?
               if @options.horizontal is not true
-                @drawDataLabel(row.label_x[index], row.label_y[index],@yLabelFormat_noUnit(row.y[index], index))
+                @drawDataLabel(row.label_x[index], row.label_y[index],@yLabelFormat_noUnit(row.y[index], index), color)
               else
-                @drawDataLabelExt(row.label_x[index], row.label_y[index], @yLabelFormat_noUnit(row.y[index]), 'start')
+                @drawDataLabelExt(row.label_x[index], row.label_y[index], @yLabelFormat_noUnit(row.y[index]), 'start', color)
             else if row._y2[index]?
               if @options.horizontal is not true
-                @drawDataLabel(row._x, row._y2[index] - 10,@yLabelFormat_noUnit(row.y[index], index))
+                @drawDataLabel(row._x, row._y2[index] - 10,@yLabelFormat_noUnit(row.y[index], index), color)
               else
-                @drawDataLabelExt(row._y2[index], row._x - 10, @yLabelFormat_noUnit(row.y[index]), 'middle')
+                @drawDataLabelExt(row._y2[index], row._x - 10, @yLabelFormat_noUnit(row.y[index]), 'middle', color)
 
 # Parse a date into a javascript timestamp
 #

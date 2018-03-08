@@ -33,7 +33,7 @@ class Morris.Donut extends Morris.EventEmitter
     dataLabelsFamily: 'sans-serif',
     dataLabelsSize: 12,
     dataLabelsWeight: 'normal',
-    dataLabelsColor: '#000',
+    dataLabelsColor: 'auto',
     donutType: 'donut',
     animate: true,
     showPercentage: false
@@ -123,11 +123,18 @@ class Morris.Donut extends Morris.EventEmitter
           label_x = parseFloat(cx) + parseFloat((dist - 9) * 0.5 * p_sin_p0);
           label_y = parseFloat(cy) + parseFloat((dist - 9) * 0.5 * p_cos_p0);
         
+        if @options.dataLabelsColor != 'auto'
+          color = @options.dataLabelsColor
+        else if @options.dataLabelsPosition == 'inside' && @isColorDark(@options.colors[i]) == true
+          color = '#fff'
+        else
+          color = '#000'
+
         if @options.showPercentage
           finalValue = Math.round(parseFloat(value) / parseFloat(total) * 100) + '%'
-          @drawDataLabelExt(label_x,label_y, finalValue)
+          @drawDataLabelExt(label_x,label_y, finalValue, color)
         else
-          @drawDataLabelExt(label_x,label_y,value)
+          @drawDataLabelExt(label_x,label_y,value, color)
 
       last = next
       idx += 1
@@ -150,7 +157,7 @@ class Morris.Donut extends Morris.EventEmitter
     @values = (parseFloat(row.value) for row in @data)
     @redraw()
 
-  drawDataLabel: (xPos, yPos, text) ->
+  drawDataLabel: (xPos, yPos, text, color) ->
     label = @raphael.text(xPos, yPos, text)
                     .attr('text-anchor', 'middle')
                     .attr('font-size', @options.dataLabelsSize)
@@ -158,7 +165,7 @@ class Morris.Donut extends Morris.EventEmitter
                     .attr('font-weight', @options.dataLabelsWeight)
                     .attr('fill', @options.dataLabelsColor)
 
-  drawDataLabelExt: (xPos, yPos, text) ->
+  drawDataLabelExt: (xPos, yPos, text, color) ->
     if @options.dataLabelsPosition == 'inside'
       labelAnchor = 'middle'
     else if xPos > this.raphael.width / 2
@@ -167,12 +174,12 @@ class Morris.Donut extends Morris.EventEmitter
       labelAnchor = 'middle'
     else
       labelAnchor = 'end'
-    label = @raphael.text(xPos, yPos, text)
+    label = @raphael.text(xPos, yPos, text, color)
                     .attr('text-anchor', labelAnchor)
                     .attr('font-size', @options.dataLabelsSize)
                     .attr('font-family', @options.dataLabelsFamily)
                     .attr('font-weight', @options.dataLabelsWeight)
-                    .attr('fill', @options.dataLabelsColor)
+                    .attr('fill', color)
 
   # @private
   click: (idx) =>
@@ -189,6 +196,18 @@ class Morris.Donut extends Morris.EventEmitter
 
   deselect: (idx) =>
     s.deselect() for s in @segments
+
+  isColorDark: (hex) ->
+    hex = hex.substring(1)
+    rgb = parseInt(hex, 16)
+    r = (rgb >> 16) & 0xff
+    g = (rgb >>  8) & 0xff
+    b = (rgb >>  0) & 0xff
+    luma = 0.2126 * r + 0.7152 * g + 0.0722 * b
+    if luma >= 128
+      return false
+    else 
+      return true
 
   # @private
   setLabels: (label1, label2) ->
