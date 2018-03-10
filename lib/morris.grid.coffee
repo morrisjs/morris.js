@@ -680,16 +680,19 @@ class Morris.Grid extends Morris.EventEmitter
     @options.shown is true or @options.shown[i] is true
 
   isColorDark: (hex) ->
-    hex = hex.substring(1)
-    rgb = parseInt(hex, 16)
-    r = (rgb >> 16) & 0xff
-    g = (rgb >>  8) & 0xff
-    b = (rgb >>  0) & 0xff
-    luma = 0.2126 * r + 0.7152 * g + 0.0722 * b
-    if luma >= 128
+    if hex?
+      hex = hex.substring(1)
+      rgb = parseInt(hex, 16)
+      r = (rgb >> 16) & 0xff
+      g = (rgb >>  8) & 0xff
+      b = (rgb >>  0) & 0xff
+      luma = 0.2126 * r + 0.7152 * g + 0.0722 * b
+      if luma >= 128
+        return false
+      else 
+        return true
+    else
       return false
-    else 
-      return true
 
   drawDataLabel: (xPos, yPos, text, color) ->
     label = @raphael.text(xPos, yPos, text)
@@ -715,7 +718,7 @@ class Morris.Grid extends Morris.EventEmitter
 
           if @options.dataLabelsColor != 'auto'
             color = @options.dataLabelsColor
-          else if @options.dataLabelsPosition == 'inside' && @isColorDark(@options.barColors[index]) == true
+          else if @options.stacked == true && @isColorDark(@options.barColors[index]) == true
             color = '#fff'
           else
             color = '#000'

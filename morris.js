@@ -978,16 +978,20 @@ Licensed under the BSD-2-Clause License.
 
     Grid.prototype.isColorDark = function(hex) {
       var b, g, luma, r, rgb;
-      hex = hex.substring(1);
-      rgb = parseInt(hex, 16);
-      r = (rgb >> 16) & 0xff;
-      g = (rgb >> 8) & 0xff;
-      b = (rgb >> 0) & 0xff;
-      luma = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-      if (luma >= 100) {
-        return false;
+      if (hex != null) {
+        hex = hex.substring(1);
+        rgb = parseInt(hex, 16);
+        r = (rgb >> 16) & 0xff;
+        g = (rgb >> 8) & 0xff;
+        b = (rgb >> 0) & 0xff;
+        luma = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+        if (luma >= 128) {
+          return false;
+        } else {
+          return true;
+        }
       } else {
-        return true;
+        return false;
       }
     };
 
@@ -1016,7 +1020,7 @@ Licensed under the BSD-2-Clause License.
               ykey = _ref1[index];
               if (this.options.dataLabelsColor !== 'auto') {
                 color = this.options.dataLabelsColor;
-              } else if (this.options.dataLabelsPosition === 'inside' && this.isColorDark(this.options.barColors[index]) === true) {
+              } else if (this.options.stacked === true && this.isColorDark(this.options.barColors[index]) === true) {
                 color = '#fff';
               } else {
                 color = '#000';
@@ -3115,16 +3119,20 @@ Licensed under the BSD-2-Clause License.
 
     Donut.prototype.isColorDark = function(hex) {
       var b, g, luma, r, rgb;
-      hex = hex.substring(1);
-      rgb = parseInt(hex, 16);
-      r = (rgb >> 16) & 0xff;
-      g = (rgb >> 8) & 0xff;
-      b = (rgb >> 0) & 0xff;
-      luma = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-      if (luma >= 128) {
-        return false;
+      if (hex != null) {
+        hex = hex.substring(1);
+        rgb = parseInt(hex, 16);
+        r = (rgb >> 16) & 0xff;
+        g = (rgb >> 8) & 0xff;
+        b = (rgb >> 0) & 0xff;
+        luma = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+        if (luma >= 128) {
+          return false;
+        } else {
+          return true;
+        }
       } else {
-        return true;
+        return false;
       }
     };
 
