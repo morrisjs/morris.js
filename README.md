@@ -5,6 +5,14 @@ This is an improved work of the great plugin [morris.js](https://github.com/morr
 ![examples](examples/image.png)
 
 ## Changelog
+### 0.6.2 (13th March 2018)
+- Color data labels is defined automatically (black or white) according to color of element
+- Can display colored regions [Issue #723](https://github.com/morrisjs/morris.js/issues/723)
+- Add option pointSuperimposed [Issue #3](https://github.com/pierresh/morris.js/issues/3)
+- Vertical grid can be dashed / dotted / …
+- Animation of area chart improved
+- Many other minor improvements
+
 ### 0.6.1 (13th February 2018)
 - Step line added, based on [PR #331](https://github.com/morrisjs/morris.js/pull/331)
 - Trend line can be non-linear (polynomial, logarithmic, exponential)
