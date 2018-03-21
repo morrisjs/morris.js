@@ -268,7 +268,7 @@ class Morris.Grid extends Morris.EventEmitter
 
     # round steps for the Y axes
     if this.options.roundYSteps
-      step = Math.round(step)
+      step = Math.ceil(step)
 
     if unit == 1 and step > 1 and Math.ceil(step) != step
       step = Math.ceil(step)
