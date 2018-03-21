@@ -386,7 +386,7 @@ Licensed under the BSD-2-Clause License.
       gmax = Math.ceil(ymax / unit) * unit;
       step = (gmax - gmin) / (nlines - 1);
       if (this.options.roundYSteps) {
-        step = Math.round(step);
+        step = Math.ceil(step);
       }
       if (unit === 1 && step > 1 && Math.ceil(step) !== step) {
         step = Math.ceil(step);
