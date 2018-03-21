@@ -97,7 +97,8 @@ class Morris.Grid extends Morris.EventEmitter
     dateFormat: null
     axes: true
     freePosition: false
-    grid: true
+    grid: true,
+    roundYSteps: false,
     gridLineColor: '#aaa'
     gridStrokeWidth: 0.5
     gridTextColor: '#888'
@@ -264,6 +265,11 @@ class Morris.Grid extends Morris.EventEmitter
     gmin = Math.floor(ymin / unit) * unit
     gmax = Math.ceil(ymax / unit) * unit
     step = (gmax - gmin) / (nlines - 1)
+
+    # round steps for the Y axes
+    if this.options.roundYSteps
+      step = Math.ceil(step)
+
     if unit == 1 and step > 1 and Math.ceil(step) != step
       step = Math.ceil(step)
       gmax = gmin + step * (nlines - 1)
