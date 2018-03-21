@@ -1,6 +1,6 @@
 /* @license
 morris.js v0.5.1
-Copyright 2014 Olly Smith All rights reserved.
+Copyright 2018 Olly Smith All rights reserved.
 Licensed under the BSD-2-Clause License.
 */
 
@@ -169,7 +169,9 @@ Licensed under the BSD-2-Clause License.
     Grid.prototype.gridDefaults = {
       dateFormat: null,
       axes: true,
+      freePosition: false,
       grid: true,
+      roundYSteps: false,
       gridLineColor: '#aaa',
       gridStrokeWidth: 0.5,
       gridTextColor: '#888',
@@ -178,6 +180,7 @@ Licensed under the BSD-2-Clause License.
       gridTextWeight: 'normal',
       hideHover: false,
       yLabelFormat: null,
+      yLabelAlign: 'right',
       xLabelAngle: 0,
       numLines: 5,
       padding: 25,
@@ -235,6 +238,11 @@ Licensed under the BSD-2-Clause License.
             } else if (typeof ret.label === 'number') {
               ret.label = new Date(ret.label).toString();
             }
+          } else if (this.options.freePosition) {
+            ret.x = parseFloat(row[this.options.xkey]);
+            if (this.options.xLabelFormat) {
+              ret.label = this.options.xLabelFormat(ret);
+            }
           } else {
             ret.x = index;
             if (this.options.xLabelFormat) {
@@ -279,7 +287,7 @@ Licensed under the BSD-2-Clause License.
         }
         return _results;
       }).call(this);
-      if (this.options.parseTime) {
+      if (this.options.parseTime || this.options.freePosition) {
         this.data = this.data.sort(function(a, b) {
           return (a.x > b.x) - (b.x > a.x);
         });
@@ -377,6 +385,9 @@ Licensed under the BSD-2-Clause License.
       gmin = Math.floor(ymin / unit) * unit;
       gmax = Math.ceil(ymax / unit) * unit;
       step = (gmax - gmin) / (nlines - 1);
+      if (this.options.roundYSteps) {
+        step = Math.round(step);
+      }
       if (unit === 1 && step > 1 && Math.ceil(step) !== step) {
         step = Math.ceil(step);
         gmax = gmin + step * (nlines - 1);
@@ -535,7 +546,11 @@ Licensed under the BSD-2-Clause License.
     };
 
     Grid.prototype.getYAxisLabelX = function() {
-      return this.left - this.options.padding / 2;
+      if (this.options.yLabelAlign === 'right') {
+        return this.left - this.options.padding / 2;
+      } else {
+        return this.options.padding / 2;
+      }
     };
 
     Grid.prototype.drawGrid = function() {
@@ -638,7 +653,17 @@ Licensed under the BSD-2-Clause License.
     };
 
     Grid.prototype.drawYAxisLabel = function(xPos, yPos, text) {
-      return this.raphael.text(xPos, yPos, text).attr('font-size', this.options.gridTextSize).attr('font-family', this.options.gridTextFamily).attr('font-weight', this.options.gridTextWeight).attr('fill', this.options.gridTextColor).attr('text-anchor', 'end');
+      var label;
+      label = this.raphael.text(xPos, yPos, text).attr('font-size', this.options.gridTextSize).attr('font-family', this.options.gridTextFamily).attr('font-weight', this.options.gridTextWeight).attr('fill', this.options.gridTextColor);
+      if (this.options.yLabelAlign === 'right') {
+        return label.attr('text-anchor', 'end');
+      } else {
+        return label.attr('text-anchor', 'start');
+      }
+    };
+
+    Grid.prototype.drawXAxisLabel = function(xPos, yPos, text) {
+      return this.raphael.text(xPos, yPos, text).attr('font-size', this.options.gridTextSize).attr('font-family', this.options.gridTextFamily).attr('font-weight', this.options.gridTextWeight).attr('fill', this.options.gridTextColor);
     };
 
     Grid.prototype.drawGridLine = function(path) {
@@ -847,9 +872,13 @@ Licensed under the BSD-2-Clause License.
       xLabels: 'auto',
       xLabelFormat: null,
       xLabelMargin: 24,
+      verticalGrid: false,
+      verticalGridHeight: 'full',
+      verticalGridStartOffset: 0,
       hideHover: false,
       trendLine: false,
       trendLineWidth: 2,
+      trendLineWeight: false,
       trendLineColors: ['#689bc3', '#a2b3bf', '#64b764']
     };
 
@@ -859,7 +888,7 @@ Licensed under the BSD-2-Clause License.
     };
 
     Line.prototype.calcPoints = function() {
-      var row, y, _i, _len, _ref, _results;
+      var i, row, y, _i, _len, _ref, _results;
       _ref = this.data;
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -883,14 +912,14 @@ Licensed under the BSD-2-Clause License.
           var _j, _len1, _ref1, _results1;
           _ref1 = row._y;
           _results1 = [];
-          for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-            y = _ref1[_j];
-            if (y != null) {
+          for (i = _j = 0, _len1 = _ref1.length; _j < _len1; i = ++_j) {
+            y = _ref1[i];
+            if ((y != null) && this.hasToShow(i)) {
               _results1.push(y);
             }
           }
           return _results1;
-        })())));
+        }).call(this))));
       }
       return _results;
     };
@@ -1002,7 +1031,7 @@ Licensed under the BSD-2-Clause License.
     };
 
     Line.prototype.drawXAxis = function() {
-      var drawLabel, l, labels, prevAngleMargin, prevLabelMargin, row, ypos, _i, _len, _results,
+      var drawLabel, l, labels, lines, prevAngleMargin, prevLabelMargin, row, ypos, _i, _j, _len, _len1, _results,
         _this = this;
       ypos = this.bottom + this.options.padding / 2;
       prevLabelMargin = null;
@@ -1024,7 +1053,10 @@ Licensed under the BSD-2-Clause License.
             margin = 1.25 * _this.options.gridTextSize / Math.sin(_this.options.xLabelAngle * Math.PI / 180.0);
             prevAngleMargin = labelBox.x - margin;
           }
-          return prevLabelMargin = labelBox.x - _this.options.xLabelMargin;
+          prevLabelMargin = labelBox.x - _this.options.xLabelMargin;
+          if (_this.options.verticalGrid === true) {
+            return _this.drawVerticalGridLine(xpos);
+          }
         } else {
           return label.remove();
         }
@@ -1035,6 +1067,17 @@ Licensed under the BSD-2-Clause License.
         } else {
           labels = Morris.labelSeries(this.xmin, this.xmax, this.width, this.options.xLabels, this.options.xLabelFormat);
         }
+      } else if (this.options.customLabels) {
+        labels = (function() {
+          var _i, _len, _ref, _results;
+          _ref = this.options.customLabels;
+          _results = [];
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            row = _ref[_i];
+            _results.push([row.label, row.x]);
+          }
+          return _results;
+        }).call(this);
       } else {
         labels = (function() {
           var _i, _len, _ref, _results;
@@ -1048,12 +1091,31 @@ Licensed under the BSD-2-Clause License.
         }).call(this);
       }
       labels.reverse();
-      _results = [];
       for (_i = 0, _len = labels.length; _i < _len; _i++) {
         l = labels[_i];
-        _results.push(drawLabel(l[0], l[1]));
+        drawLabel(l[0], l[1]);
       }
-      return _results;
+      if (typeof this.options.verticalGrid === 'string') {
+        lines = Morris.labelSeries(this.xmin, this.xmax, this.width, this.options.verticalGrid);
+        _results = [];
+        for (_j = 0, _len1 = lines.length; _j < _len1; _j++) {
+          l = lines[_j];
+          _results.push(this.drawVerticalGridLine(l[1]));
+        }
+        return _results;
+      }
+    };
+
+    Line.prototype.drawVerticalGridLine = function(xpos) {
+      var yEnd, yStart;
+      xpos = Math.floor(this.transX(xpos)) + 0.5;
+      yStart = this.yStart + this.options.verticalGridStartOffset;
+      if (this.options.verticalGridHeight === 'full') {
+        yEnd = this.yEnd;
+      } else {
+        yEnd = this.yStart - this.options.verticalGridHeight;
+      }
+      return this.drawGridLine("M" + xpos + "," + yStart + "V" + yEnd);
     };
 
     Line.prototype.drawSeries = function() {
@@ -1103,25 +1165,30 @@ Licensed under the BSD-2-Clause License.
     };
 
     Line.prototype._drawTrendLine = function(index) {
-      var a, b, data, datapoints, path, sum_x, sum_xx, sum_xy, sum_y, val, x, y, _i, _len, _ref;
+      var a, b, data, datapoints, i, path, sum_x, sum_xx, sum_xy, sum_y, val, weight, x, y, _i, _len, _ref;
       sum_x = 0;
       sum_y = 0;
       sum_xx = 0;
       sum_xy = 0;
       datapoints = 0;
       _ref = this.data;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        val = _ref[_i];
+      for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
+        val = _ref[i];
         x = val.x;
         y = val.y[index];
         if (y === void 0) {
           continue;
         }
-        datapoints += 1;
-        sum_x += x;
-        sum_y += y;
-        sum_xx += x * x;
-        sum_xy += x * y;
+        if (this.options.trendLineWeight === false) {
+          weight = 1;
+        } else {
+          weight = this.options.data[i][this.options.trendLineWeight];
+        }
+        datapoints += weight;
+        sum_x += x * weight;
+        sum_y += y * weight;
+        sum_xx += x * x * weight;
+        sum_xy += x * y * weight;
       }
       a = (datapoints * sum_xy - sum_x * sum_y) / (datapoints * sum_xx - sum_x * sum_x);
       b = (sum_y / datapoints) - ((a * sum_x) / datapoints);
@@ -1205,14 +1272,14 @@ Licensed under the BSD-2-Clause License.
       var i, _i, _j, _ref, _ref1;
       if (this.prevHilight !== null && this.prevHilight !== index) {
         for (i = _i = 0, _ref = this.seriesPoints.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
-          if (this.seriesPoints[i][this.prevHilight]) {
+          if (this.hasToShow(i) && this.seriesPoints[i][this.prevHilight]) {
             this.seriesPoints[i][this.prevHilight].animate(this.pointShrinkSeries(i));
           }
         }
       }
       if (index !== null && this.prevHilight !== index) {
         for (i = _j = 0, _ref1 = this.seriesPoints.length - 1; 0 <= _ref1 ? _j <= _ref1 : _j >= _ref1; i = 0 <= _ref1 ? ++_j : --_j) {
-          if (this.seriesPoints[i][index]) {
+          if (this.hasToShow(i) && this.seriesPoints[i][index]) {
             this.seriesPoints[i][index].animate(this.pointGrowSeries(i));
           }
         }
@@ -1225,15 +1292,11 @@ Licensed under the BSD-2-Clause License.
         return this.options.lineColors.call(this, row, sidx, type);
       } else if (type === 'point') {
         return this.options.pointFillColors[sidx % this.options.pointFillColors.length] || this.options.lineColors[sidx % this.options.lineColors.length];
-      } else if (type === 'line') {
-        return this.options.lineColors[sidx % this.options.lineColors.length];
-      } else {
+      } else if (type === 'trendLine') {
         return this.options.trendLineColors[sidx % this.options.trendLineColors.length];
+      } else {
+        return this.options.lineColors[sidx % this.options.lineColors.length];
       }
-    };
-
-    Line.prototype.drawXAxisLabel = function(xPos, yPos, text) {
-      return this.raphael.text(xPos, yPos, text).attr('font-size', this.options.gridTextSize).attr('font-family', this.options.gridTextFamily).attr('font-weight', this.options.gridTextWeight).attr('fill', this.options.gridTextColor);
     };
 
     Line.prototype.drawLinePath = function(path, lineColor, lineIndex) {
@@ -1560,10 +1623,16 @@ Licensed under the BSD-2-Clause License.
       barGap: 3,
       barColors: ['#0b62a4', '#7a92a3', '#4da74d', '#afd8f8', '#edc240', '#cb4b4b', '#9440ed'],
       barOpacity: 1.0,
+      barHighlightOpacity: 1.0,
+      highlightSpeed: 150,
       barRadius: [0, 0, 0, 0],
       xLabelMargin: 50,
       horizontal: false,
-      shown: true
+      shown: true,
+      inBarValue: false,
+      inBarValueTextColor: 'white',
+      inBarValueMinTopMargin: 1,
+      inBarValueRightMargin: 4
     };
 
     Bar.prototype.calc = function() {
@@ -1668,7 +1737,8 @@ Licensed under the BSD-2-Clause License.
     };
 
     Bar.prototype.drawSeries = function() {
-      var barWidth, bottom, groupWidth, i, idx, lastTop, left, leftPadding, numBars, row, sidx, size, spaceLeft, top, ypos, zeroPos, _i, _ref;
+      var barMiddle, barWidth, bottom, groupWidth, i, idx, lastTop, left, leftPadding, numBars, row, sidx, size, spaceLeft, top, ypos, zeroPos, _i, _ref;
+      this.seriesBars = [];
       groupWidth = this.xSize / this.options.data.length;
       if (this.options.stacked) {
         numBars = 1;
@@ -1687,12 +1757,13 @@ Licensed under the BSD-2-Clause License.
       spaceLeft = groupWidth - barWidth * numBars - this.options.barGap * (numBars - 1);
       leftPadding = spaceLeft / 2;
       zeroPos = this.ymin <= 0 && this.ymax >= 0 ? this.transY(0) : null;
-      return this.bars = (function() {
+      this.bars = (function() {
         var _j, _len, _ref1, _results;
         _ref1 = this.data;
         _results = [];
         for (idx = _j = 0, _len = _ref1.length; _j < _len; idx = ++_j) {
           row = _ref1[idx];
+          this.seriesBars[idx] = [];
           lastTop = 0;
           _results.push((function() {
             var _k, _len1, _ref2, _results1;
@@ -1727,11 +1798,17 @@ Licensed under the BSD-2-Clause License.
                   top -= lastTop;
                 }
                 if (!this.options.horizontal) {
-                  this.drawBar(left, top, barWidth, size, this.colorFor(row, sidx, 'bar'), this.options.barOpacity, this.options.barRadius);
-                  _results1.push(lastTop += size);
+                  lastTop += size;
+                  _results1.push(this.seriesBars[idx][sidx] = this.drawBar(left, top, barWidth, size, this.colorFor(row, sidx, 'bar'), this.options.barOpacity, this.options.barRadius));
                 } else {
-                  this.drawBar(top, left, size, barWidth, this.colorFor(row, sidx, 'bar'), this.options.barOpacity, this.options.barRadius);
-                  _results1.push(lastTop -= size);
+                  lastTop -= size;
+                  this.seriesBars[idx][sidx] = this.drawBar(top, left, size, barWidth, this.colorFor(row, sidx, 'bar'), this.options.barOpacity, this.options.barRadius);
+                  if (this.options.inBarValue && barWidth > this.options.gridTextSize + 2 * this.options.inBarValueMinTopMargin) {
+                    barMiddle = left + 0.5 * barWidth;
+                    _results1.push(this.raphael.text(bottom - this.options.inBarValueRightMargin, barMiddle, this.yLabelFormat(row.y[sidx], sidx)).attr('font-size', this.options.gridTextSize).attr('font-family', this.options.gridTextFamily).attr('font-weight', this.options.gridTextWeight).attr('fill', this.options.inBarValueTextColor).attr('text-anchor', 'end'));
+                  } else {
+                    _results1.push(void 0);
+                  }
                 }
               } else {
                 _results1.push(null);
@@ -1742,6 +1819,42 @@ Licensed under the BSD-2-Clause License.
         }
         return _results;
       }).call(this);
+      this.flat_bars = $.map(this.bars, function(n) {
+        return n;
+      });
+      this.flat_bars = $.grep(this.flat_bars, function(n) {
+        return n != null;
+      });
+      return this.bar_els = $($.map(this.flat_bars, function(n) {
+        return n[0];
+      }));
+    };
+
+    Bar.prototype.hilight = function(index) {
+      var i, y, _i, _j, _len, _len1, _ref, _ref1;
+      if (this.seriesBars && this.seriesBars[this.prevHilight] && this.prevHilight !== null && this.prevHilight !== index) {
+        _ref = this.seriesBars[this.prevHilight];
+        for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
+          y = _ref[i];
+          if (y) {
+            y.animate({
+              'fill-opacity': this.options.barOpacity
+            }, this.options.highlightSpeed);
+          }
+        }
+      }
+      if (this.seriesBars && this.seriesBars[index] && index !== null && this.prevHilight !== index) {
+        _ref1 = this.seriesBars[index];
+        for (i = _j = 0, _len1 = _ref1.length; _j < _len1; i = ++_j) {
+          y = _ref1[i];
+          if (y) {
+            y.animate({
+              'fill-opacity': this.options.barHighlightOpacity
+            }, this.options.highlightSpeed);
+          }
+        }
+      }
+      return this.prevHilight = index;
     };
 
     Bar.prototype.colorFor = function(row, sidx, type) {
@@ -1750,7 +1863,8 @@ Licensed under the BSD-2-Clause License.
         r = {
           x: row.x,
           y: row.y[sidx],
-          label: row.label
+          label: row.label,
+          src: row.src
         };
         s = {
           index: sidx,
@@ -1778,18 +1892,27 @@ Licensed under the BSD-2-Clause License.
     };
 
     Bar.prototype.onGridClick = function(x, y) {
-      var index;
+      var bar_hit, index;
       index = this.hitTest(x, y);
-      return this.fire('click', index, this.data[index].src, x, y);
+      bar_hit = !!this.bar_els.filter(function() {
+        return $(this).is(':hover');
+      }).length;
+      return this.fire('click', index, this.data[index].src, x, y, bar_hit);
     };
 
     Bar.prototype.onHoverMove = function(x, y) {
       var index, _ref;
       index = this.hitTest(x, y);
-      return (_ref = this.hover).update.apply(_ref, this.hoverContentForRow(index));
+      this.hilight(index);
+      if (index != null) {
+        return (_ref = this.hover).update.apply(_ref, this.hoverContentForRow(index));
+      } else {
+        return this.hover.hide();
+      }
     };
 
     Bar.prototype.onHoverOut = function() {
+      this.hilight(-1);
       if (this.options.hideHover !== false) {
         return this.hover.hide();
       }
@@ -1819,11 +1942,6 @@ Licensed under the BSD-2-Clause License.
         y = this.top + (index + 0.5) * this.height / this.data.length;
         return [content, x, y, true];
       }
-    };
-
-    Bar.prototype.drawXAxisLabel = function(xPos, yPos, text) {
-      var label;
-      return label = this.raphael.text(xPos, yPos, text).attr('font-size', this.options.gridTextSize).attr('font-family', this.options.gridTextFamily).attr('font-weight', this.options.gridTextWeight).attr('fill', this.options.gridTextColor);
     };
 
     Bar.prototype.drawBar = function(xPos, yPos, width, height, barColor, opacity, radiusArray) {
