@@ -260,8 +260,8 @@ Licensed under the BSD-2-Clause License.
       preUnits2: '',
       ymax: 'auto',
       ymin: 'auto 0',
-      y2max: 'auto',
-      y2min: 'auto 0',
+      ymax2: 'auto',
+      ymin2: 'auto 0',
       regions: [],
       regionsColors: ['#fde4e4'],
       goals: [],
@@ -439,8 +439,8 @@ Licensed under the BSD-2-Clause License.
       }
       this.ymin = this.yboundary('min', ymin);
       this.ymax = this.yboundary('max', ymax);
-      this.ymin2 = this.yboundary('min', ymin2);
-      this.ymax2 = this.yboundary('max', ymax2);
+      this.ymin2 = this.yboundary('min2', ymin2);
+      this.ymax2 = this.yboundary('max2', ymax2);
       if (this.ymin === this.ymax) {
         if (ymin) {
           this.ymin -= 1;
@@ -456,9 +456,6 @@ Licensed under the BSD-2-Clause License.
       if (((_ref1 = this.options.axes) === true || _ref1 === 'both' || _ref1 === 'y') || this.options.grid === true) {
         if (this.options.ymax === this.gridDefaults.ymax && this.options.ymin === this.gridDefaults.ymin) {
           this.grid = this.autoGridLines(this.ymin, this.ymax, this.options.numLines);
-          if (this.options.nbYkeys2 > 0) {
-            this.grid2 = this.autoGridLines(this.ymin2, this.ymax2, this.options.numLines);
-          }
           this.ymin = Math.min(this.ymin, this.grid[0]);
           this.ymax = Math.max(this.ymax, this.grid[this.grid.length - 1]);
         } else {
@@ -471,6 +468,12 @@ Licensed under the BSD-2-Clause License.
             }
             return _results;
           }).call(this);
+        }
+        if (this.options.ymax2 === this.gridDefaults.ymax2 && this.options.ymin2 === this.gridDefaults.ymin2 && this.options.nbYkeys2 > 0) {
+          this.grid2 = this.autoGridLines(this.ymin2, this.ymax2, this.options.numLines);
+          this.ymin2 = Math.min(this.ymin2, this.grid2[0]);
+          this.ymax2 = Math.max(this.ymax2, this.grid2[this.grid2.length - 1]);
+        } else {
           step2 = (this.ymax2 - this.ymin2) / (this.options.numLines - 1);
           this.grid2 = (function() {
             var _j, _ref2, _ref3, _results;
@@ -498,7 +501,7 @@ Licensed under the BSD-2-Clause License.
             if (currentValue == null) {
               return suggestedValue;
             }
-            return Math[boundaryType](currentValue, suggestedValue);
+            return Math[boundaryType.substring(0, 3)](currentValue, suggestedValue);
           } else {
             if (currentValue != null) {
               return currentValue;

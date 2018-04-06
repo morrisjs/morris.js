@@ -118,8 +118,8 @@ class Morris.Grid extends Morris.EventEmitter
     preUnits2: ''
     ymax: 'auto'
     ymin: 'auto 0'
-    y2max: 'auto'
-    y2min: 'auto 0'
+    ymax2: 'auto'
+    ymin2: 'auto 0'
     regions: []
     regionsColors: ['#fde4e4']
     goals: []
@@ -261,8 +261,8 @@ class Morris.Grid extends Morris.EventEmitter
 
     @ymin = @yboundary('min', ymin)
     @ymax = @yboundary('max', ymax)
-    @ymin2 = @yboundary('min', ymin2)
-    @ymax2 = @yboundary('max', ymax2)
+    @ymin2 = @yboundary('min2', ymin2)
+    @ymax2 = @yboundary('max2', ymax2)
 
     if @ymin is @ymax
       @ymin -= 1 if ymin
@@ -277,13 +277,20 @@ class Morris.Grid extends Morris.EventEmitter
           @options.ymin == @gridDefaults.ymin)
         # calculate 'magic' grid placement
         @grid = @autoGridLines(@ymin, @ymax, @options.numLines)
-        if @options.nbYkeys2 > 0
-          @grid2 = @autoGridLines(@ymin2, @ymax2, @options.numLines)
         @ymin = Math.min(@ymin, @grid[0])
         @ymax = Math.max(@ymax, @grid[@grid.length - 1])
       else
         step = (@ymax - @ymin) / (@options.numLines - 1)
         @grid = (y for y in [@ymin..@ymax] by step)
+
+      if (@options.ymax2 == @gridDefaults.ymax2 and
+          @options.ymin2 == @gridDefaults.ymin2 and 
+          @options.nbYkeys2 > 0)
+        # calculate 'magic' grid placement
+        @grid2 = @autoGridLines(@ymin2, @ymax2, @options.numLines)
+        @ymin2 = Math.min(@ymin2, @grid2[0])
+        @ymax2 = Math.max(@ymax2, @grid2[@grid2.length - 1])
+      else
         step2 = (@ymax2 - @ymin2) / (@options.numLines - 1)
         @grid2 = (y for y in [@ymin2..@ymax2] by step2)
 
@@ -297,7 +304,7 @@ class Morris.Grid extends Morris.EventEmitter
         if boundaryOption.length > 5
           suggestedValue = parseInt(boundaryOption[5..], 10)
           return suggestedValue unless currentValue?
-          Math[boundaryType](currentValue, suggestedValue)
+          Math[boundaryType.substring(0,3)](currentValue, suggestedValue)
         else
           if currentValue? then currentValue else 0
       else
