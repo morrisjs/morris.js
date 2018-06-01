@@ -725,7 +725,7 @@ class Morris.Grid extends Morris.EventEmitter
 
           if @options.dataLabelsColor != 'auto'
             color = @options.dataLabelsColor
-          else if @options.stacked == true && @isColorDark(@options.barColors[index]) == true
+          else if @options.stacked == true && @isColorDark(@options.barColors[index%@options.barColors.length]) == true
             color = '#fff'
           else
             color = '#000'

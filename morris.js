@@ -1023,7 +1023,7 @@ Licensed under the BSD-2-Clause License.
               ykey = _ref1[index];
               if (this.options.dataLabelsColor !== 'auto') {
                 color = this.options.dataLabelsColor;
-              } else if (this.options.stacked === true && this.isColorDark(this.options.barColors[index]) === true) {
+              } else if (this.options.stacked === true && this.isColorDark(this.options.barColors[index % this.options.barColors.length]) === true) {
                 color = '#fff';
               } else {
                 color = '#000';
