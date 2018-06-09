@@ -33,6 +33,10 @@ This is an improved work of the great plugin [morris.js](https://github.com/morr
 - Color scheme changed to Bootstrap 4's default theme
 - Option to display percentage in Donut and Pie charts
 
+### :heart: Like it? :heart:
+
+:star: Star it! :star:
+
 ## Installation
 You can download the latest version of Morris.js06 from the [GitHub releases](https://github.com/pierresh/morris.js/releases/latest).
 
