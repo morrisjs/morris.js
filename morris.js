@@ -236,7 +236,7 @@ Licensed under the BSD-2-Clause License.
               ret.label = new Date(ret.label).toString();
             }
           } else {
-            ret.x = index;
+        	 ret.x = index;
             if (this.options.xLabelFormat) {
               ret.label = this.options.xLabelFormat(ret);
             }
@@ -950,7 +950,7 @@ Licensed under the BSD-2-Clause License.
         if (this.options.labels[j] === false) {
           continue;
         }
-        content += "<div class='morris-hover-point' style='color: " + (this.colorFor(row, j, 'label')) + "'>\n  " + this.options.labels[j] + ":\n  " + (this.yLabelFormat(y, j)) + "\n</div>";
+        content += "<div class='morris-hover-point' style='color: " + (this.colorFor(row, j, 'label')) + "'>\n  " + this.options.labels[j] + ":\n  " + ( this.options.valueFormatter?this.options.valueFormatter (y): this.yLabelFormat(y, j)) + "\n</div>";
       }
       if (typeof this.options.hoverCallback === 'function') {
         content = this.options.hoverCallback(index, this.options, content, row.src);
@@ -1237,11 +1237,11 @@ Licensed under the BSD-2-Clause License.
     };
 
     Line.prototype.drawLinePath = function(path, lineColor, lineIndex) {
-      return this.raphael.path(path).attr('stroke', lineColor).attr('stroke-width', this.lineWidthForSeries(lineIndex));
+      return this.raphael.path(path).attr('stroke', lineColor).attr('stroke-width', this.lineWidthForSeries(lineIndex)).attr('class','morris-line');
     };
 
     Line.prototype.drawLinePoint = function(xPos, yPos, pointColor, lineIndex) {
-      return this.raphael.circle(xPos, yPos, this.pointSizeForSeries(lineIndex)).attr('fill', pointColor).attr('stroke-width', this.pointStrokeWidthForSeries(lineIndex)).attr('stroke', this.pointStrokeColorForSeries(lineIndex));
+      return this.raphael.circle(xPos, yPos, this.pointSizeForSeries(lineIndex)).attr('fill', pointColor).attr('stroke-width', this.pointStrokeWidthForSeries(lineIndex)).attr('stroke', this.pointStrokeColorForSeries(lineIndex)).attr('class','morris-line-point');
     };
 
     Line.prototype.pointStrokeWidthForSeries = function(index) {
@@ -1806,7 +1806,7 @@ Licensed under the BSD-2-Clause License.
         if (this.options.labels[j] === false) {
           continue;
         }
-        content += "<div class='morris-hover-point' style='color: " + (this.colorFor(row, j, 'label')) + "'>\n  " + this.options.labels[j] + ":\n  " + (this.yLabelFormat(y, j)) + "\n</div>";
+        content += "<div class='morris-hover-point' style='color: " + (this.colorFor(row, j, 'label')) + "'>\n  " + this.options.labels[j] + ":\n  " + (this.options.valueFormatter?this.options.valueFormatter (y):this.yLabelFormat(y, j)) + "\n</div>";
       }
       if (typeof this.options.hoverCallback === 'function') {
         content = this.options.hoverCallback(index, this.options, content, row.src);
@@ -1831,6 +1831,7 @@ Licensed under the BSD-2-Clause License.
       maxRadius = Math.max.apply(Math, radiusArray);
       if (maxRadius === 0 || maxRadius > height) {
         path = this.raphael.rect(xPos, yPos, width, height);
+ 
       } else {
         path = this.raphael.path(this.roundedRect(xPos, yPos, width, height, radiusArray));
       }
