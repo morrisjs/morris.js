@@ -1246,11 +1246,11 @@ Licensed under the BSD-2-Clause License.
     };
 
     Line.prototype.drawLinePath = function(path, lineColor, lineIndex) {
-      return this.raphael.path(path).attr('stroke', lineColor).attr('stroke-width', this.lineWidthForSeries(lineIndex));
+      return this.raphael.path(path).attr('stroke', lineColor).attr('stroke-width', this.lineWidthForSeries(lineIndex)).attr('class','morris-line');
     };
 
     Line.prototype.drawLinePoint = function(xPos, yPos, pointColor, lineIndex) {
-      return this.raphael.circle(xPos, yPos, this.pointSizeForSeries(lineIndex)).attr('fill', pointColor).attr('stroke-width', this.pointStrokeWidthForSeries(lineIndex)).attr('stroke', this.pointStrokeColorForSeries(lineIndex));
+      return this.raphael.circle(xPos, yPos, this.pointSizeForSeries(lineIndex)).attr('fill', pointColor).attr('stroke-width', this.pointStrokeWidthForSeries(lineIndex)).attr('stroke', this.pointStrokeColorForSeries(lineIndex)).attr('class','morris-line-point');
     };
 
     Line.prototype.pointStrokeWidthForSeries = function(index) {
