@@ -236,16 +236,7 @@ Licensed under the BSD-2-Clause License.
               ret.label = new Date(ret.label).toString();
             }
           } else {
-        	  if(this.options.valueFormatter) {
-        		  ret.src.formated = []
-        		  for(var ykey in this.options.ykeys) {
-        			  var value = ret.src[this.options.ykeys[ykey]];
-        			  ret.src.formated[this.options.ykeys[ykey]] =  this.options.valueFormatter(value);
-        	  } 
-        	  }
-        		  ret.x = index;
-        	  
-           
+        	 ret.x = index;
             if (this.options.xLabelFormat) {
               ret.label = this.options.xLabelFormat(ret);
             }
@@ -1840,6 +1831,7 @@ Licensed under the BSD-2-Clause License.
       maxRadius = Math.max.apply(Math, radiusArray);
       if (maxRadius === 0 || maxRadius > height) {
         path = this.raphael.rect(xPos, yPos, width, height);
+ 
       } else {
         path = this.raphael.path(this.roundedRect(xPos, yPos, width, height, radiusArray));
       }
