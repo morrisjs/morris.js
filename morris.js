@@ -120,6 +120,14 @@ Licensed under the BSD-2-Clause License.
     }
   };
 
+  Morris.off = function(el, eventName, fn) {
+    if (el.removeEventListener) {
+      return el.removeEventListener(eventName, fn);
+    } else {
+      return el.detachEvent('on' + eventName, fn);
+    }
+  };
+
   Morris.dimensions = function(el) {
     var style;
     style = compStyle(el);
@@ -144,8 +152,14 @@ Licensed under the BSD-2-Clause License.
     function Grid(options) {
       this.setLabels = __bind(this.setLabels, this);
       this.hasToShow = __bind(this.hasToShow, this);
+      this.debouncedResizeHandler = __bind(this.debouncedResizeHandler, this);
       this.resizeHandler = __bind(this.resizeHandler, this);
-      var _this = this;
+      this.mouseupHandler = __bind(this.mouseupHandler, this);
+      this.mousedownHandler = __bind(this.mousedownHandler, this);
+      this.clickHandler = __bind(this.clickHandler, this);
+      this.touchHandler = __bind(this.touchHandler, this);
+      this.mouseleaveHandler = __bind(this.mouseleaveHandler, this);
+      this.mousemoveHandler = __bind(this.mousemoveHandler, this);
       if (typeof options.element === 'string') {
         this.el = document.getElementById(options.element);
       } else {
@@ -170,64 +184,20 @@ Licensed under the BSD-2-Clause License.
         this.init();
       }
       this.setData(this.options.data);
-      Morris.on(this.el, 'mousemove', function(evt) {
-        var left, offset, right, width, x;
-        offset = Morris.offset(_this.el);
-        x = evt.pageX - offset.left;
-        if (_this.selectFrom) {
-          left = _this.data[_this.hitTest(Math.min(x, _this.selectFrom))]._x;
-          right = _this.data[_this.hitTest(Math.max(x, _this.selectFrom))]._x;
-          width = right - left;
-          return _this.selectionRect.attr({
-            x: left,
-            width: width
-          });
-        } else {
-          return _this.fire('hovermove', x, evt.pageY - offset.top);
-        }
-      });
-      Morris.on(this.el, 'mouseleave', function(evt) {
-        if (_this.selectFrom) {
-          _this.selectionRect.hide();
-          _this.selectFrom = null;
-        }
-        return _this.fire('hoverout');
-      });
-      Morris.on(this.el, 'touchstart touchmove touchend', function(evt) {
-        var offset, touch;
-        touch = evt.originalEvent.touches[0] || evt.originalEvent.changedTouches[0];
-        offset = Morris.offset(_this.el);
-        return _this.fire('hovermove', touch.pageX - offset.left, touch.pageY - offset.top);
-      });
-      Morris.on(this.el, 'click', function(evt) {
-        var offset;
-        offset = Morris.offset(_this.el);
-        return _this.fire('gridclick', evt.pageX - offset.left, evt.pageY - offset.top);
-      });
+      Morris.on(this.el, 'mousemove', this.mousemoveHandler);
+      Morris.on(this.el, 'mouseleave', this.mouseleaveHandler);
+      Morris.on(this.el, 'touchstart touchmove touchend', this.touchHandler);
+      Morris.on(this.el, 'click', this.clickHandler);
       if (this.options.rangeSelect) {
         this.selectionRect = this.raphael.rect(0, 0, 0, Morris.innerDimensions(this.el).height).attr({
           fill: this.options.rangeSelectColor,
           stroke: false
         }).toBack().hide();
-        Morris.on(this.el, 'mousedown', function(evt) {
-          var offset;
-          offset = Morris.offset(_this.el);
-          return _this.startRange(evt.pageX - offset.left);
-        });
-        Morris.on(this.el, 'mouseup', function(evt) {
-          var offset;
-          offset = Morris.offset(_this.el);
-          _this.endRange(evt.pageX - offset.left);
-          return _this.fire('hovermove', evt.pageX - offset.left, evt.pageY - offset.top);
-        });
+        Morris.on(this.el, 'mousedown', this.mousedownHandler);
+        Morris.on(this.el, 'mouseup', this.mouseupHandler);
       }
       if (this.options.resize) {
-        Morris.on(window, 'resize', function(evt) {
-          if (_this.timeoutId != null) {
-            window.clearTimeout(_this.timeoutId);
-          }
-          return _this.timeoutId = window.setTimeout(_this.resizeHandler, 100);
-        });
+        Morris.on(window, 'resize', this.resizeHandler);
       }
       this.el.style.webkitTapHighlightColor = 'rgba(0,0,0,0)';
       if (this.postInit) {
@@ -285,6 +255,21 @@ Licensed under the BSD-2-Clause License.
       animate: true,
       nbYkeys2: 0,
       smooth: true
+    };
+
+    Grid.prototype.destroy = function() {
+      Morris.off(this.el, 'mousemove', this.mousemoveHandler);
+      Morris.off(this.el, 'mouseleave', this.mouseleaveHandler);
+      Morris.off(this.el, 'touchstart touchmove touchend', this.touchHandler);
+      Morris.off(this.el, 'click', this.clickHandler);
+      if (this.options.rangeSelect) {
+        Morris.off(this.el, 'mousedown', this.mousedownHandler);
+        Morris.off(this.el, 'mouseup', this.mouseupHandler);
+      }
+      if (this.options.resize) {
+        window.clearTimeout(this.timeoutId);
+        return Morris.off(window, 'resize', this.resizeHandler);
+      }
     };
 
     Grid.prototype.setData = function(data, redraw) {
@@ -966,7 +951,65 @@ Licensed under the BSD-2-Clause License.
       }
     };
 
+    Grid.prototype.mousemoveHandler = function(evt) {
+      var left, offset, right, width, x;
+      offset = Morris.offset(this.el);
+      x = evt.pageX - offset.left;
+      if (this.selectFrom) {
+        left = this.data[this.hitTest(Math.min(x, this.selectFrom))]._x;
+        right = this.data[this.hitTest(Math.max(x, this.selectFrom))]._x;
+        width = right - left;
+        return this.selectionRect.attr({
+          x: left,
+          width: width
+        });
+      } else {
+        return this.fire('hovermove', x, evt.pageY - offset.top);
+      }
+    };
+
+    Grid.prototype.mouseleaveHandler = function(evt) {
+      if (this.selectFrom) {
+        this.selectionRect.hide();
+        this.selectFrom = null;
+      }
+      return this.fire('hoverout');
+    };
+
+    Grid.prototype.touchHandler = function(evt) {
+      var offset, touch;
+      touch = evt.originalEvent.touches[0] || evt.originalEvent.changedTouches[0];
+      offset = Morris.offset(this.el);
+      return this.fire('hovermove', touch.pageX - offset.left, touch.pageY - offset.top);
+    };
+
+    Grid.prototype.clickHandler = function(evt) {
+      var offset;
+      offset = Morris.offset(this.el);
+      return this.fire('gridclick', evt.pageX - offset.left, evt.pageY - offset.top);
+    };
+
+    Grid.prototype.mousedownHandler = function(evt) {
+      var offset;
+      offset = Morris.offset(this.el);
+      return this.startRange(evt.pageX - offset.left);
+    };
+
+    Grid.prototype.mouseupHandler = function(evt) {
+      var offset;
+      offset = Morris.offset(this.el);
+      this.endRange(evt.pageX - offset.left);
+      return this.fire('hovermove', evt.pageX - offset.left, evt.pageY - offset.top);
+    };
+
     Grid.prototype.resizeHandler = function() {
+      if (this.timeoutId != null) {
+        window.clearTimeout(this.timeoutId);
+      }
+      return this.timeoutId = window.setTimeout(this.debouncedResizeHandler, 100);
+    };
+
+    Grid.prototype.debouncedResizeHandler = function() {
       var height, width, _ref;
       this.timeoutId = null;
       _ref = Morris.dimensions(this.el), width = _ref.width, height = _ref.height;
@@ -2934,12 +2977,12 @@ Licensed under the BSD-2-Clause License.
     };
 
     function Donut(options) {
+      this.debouncedResizeHandler = __bind(this.debouncedResizeHandler, this);
       this.resizeHandler = __bind(this.resizeHandler, this);
       this.deselect = __bind(this.deselect, this);
       this.select = __bind(this.select, this);
       this.click = __bind(this.click, this);
-      var cx, cy, height, width, _ref,
-        _this = this;
+      var cx, cy, height, width, _ref;
       if (!(this instanceof Morris.Donut)) {
         return new Morris.Donut(options);
       }
@@ -2961,15 +3004,17 @@ Licensed under the BSD-2-Clause License.
         return;
       }
       if (this.options.resize) {
-        Morris.on(window, 'resize', function(evt) {
-          if (_this.timeoutId != null) {
-            window.clearTimeout(_this.timeoutId);
-          }
-          return _this.timeoutId = window.setTimeout(_this.resizeHandler, 100);
-        });
+        Morris.on(window, 'resize', this.resizeHandler);
       }
       this.setData(options.data);
     }
+
+    Donut.prototype.destroy = function() {
+      if (this.options.resize) {
+        window.clearTimeout(this.timeoutId);
+        return Morris.off(window, 'resize', this.resizeHandler);
+      }
+    };
 
     Donut.prototype.redraw = function() {
       var C, color, cx, cy, dist, finalValue, height, i, idx, label_x, label_y, last, max_value, min, next, p_cos_p0, p_sin_p0, seg, total, value, w, width, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _ref3, _results;
@@ -3176,6 +3221,13 @@ Licensed under the BSD-2-Clause License.
     };
 
     Donut.prototype.resizeHandler = function() {
+      if (this.timeoutId != null) {
+        window.clearTimeout(this.timeoutId);
+      }
+      return this.timeoutId = window.setTimeout(this.debouncedResizeHandler, 100);
+    };
+
+    Donut.prototype.debouncedResizeHandler = function() {
       var height, width, _ref;
       this.timeoutId = null;
       _ref = Morris.dimensions(this.el), width = _ref.width, height = _ref.height;

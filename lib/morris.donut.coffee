@@ -68,12 +68,16 @@ class Morris.Donut extends Morris.EventEmitter
       return
 
     if @options.resize
-      Morris.on window, 'resize', (evt) =>
-        if @timeoutId?
-          window.clearTimeout @timeoutId
-        @timeoutId = window.setTimeout @resizeHandler, 100
+      Morris.on window, 'resize', @resizeHandler
 
     @setData options.data
+  
+  # Destroy
+  #
+  destroy: () ->
+    if @options.resize
+      window.clearTimeout @timeoutId
+      Morris.off window, 'resize', @resizeHandler
 
   # Clear and redraw the chart.
   redraw: ->
@@ -236,12 +240,16 @@ class Morris.Donut extends Morris.EventEmitter
     return text
 
   resizeHandler: =>
+    if @timeoutId?
+      window.clearTimeout @timeoutId
+    @timeoutId = window.setTimeout @debouncedResizeHandler, 100
+  
+  debouncedResizeHandler: =>
     @timeoutId = null
     {width, height} =  Morris.dimensions @el
     @raphael.setSize width, height
     @options.animate = false
     @redraw()
-
 
 # A segment within a donut chart.
 #

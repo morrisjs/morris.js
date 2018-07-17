@@ -39,31 +39,10 @@ class Morris.Grid extends Morris.EventEmitter
     @setData @options.data
 
     # hover
-    Morris.on @el, 'mousemove', (evt) =>
-      offset = Morris.offset(@el)
-      x = evt.pageX - offset.left
-      if @selectFrom
-        left = @data[@hitTest(Math.min(x, @selectFrom))]._x
-        right = @data[@hitTest(Math.max(x, @selectFrom))]._x
-        width = right - left
-        @selectionRect.attr({ x: left, width: width })
-      else
-        @fire 'hovermove', x, evt.pageY - offset.top
-
-    Morris.on @el, 'mouseleave', (evt) =>
-      if @selectFrom
-        @selectionRect.hide()
-        @selectFrom = null
-      @fire 'hoverout'
-
-    Morris.on @el, 'touchstart touchmove touchend', (evt) =>
-      touch = evt.originalEvent.touches[0] or evt.originalEvent.changedTouches[0]
-      offset = Morris.offset(@el)
-      @fire 'hovermove', touch.pageX - offset.left, touch.pageY - offset.top
-
-    Morris.on @el, 'click', (evt) =>
-      offset = Morris.offset(@el)
-      @fire 'gridclick', evt.pageX - offset.left, evt.pageY - offset.top
+    Morris.on @el, 'mousemove', @mousemoveHandler
+    Morris.on @el, 'mouseleave', @mouseleaveHandler
+    Morris.on @el, 'touchstart touchmove touchend', @touchHandler
+    Morris.on @el, 'click', @clickHandler
 
     if @options.rangeSelect
       @selectionRect = @raphael.rect(0, 0, 0, Morris.innerDimensions(@el).height)
@@ -71,20 +50,12 @@ class Morris.Grid extends Morris.EventEmitter
         .toBack()
         .hide()
 
-      Morris.on @el, 'mousedown', (evt) =>
-        offset = Morris.offset(@el)
-        @startRange evt.pageX - offset.left
+      Morris.on @el, 'mousedown', @mousedownHandler
 
-      Morris.on @el, 'mouseup', (evt) =>
-        offset = Morris.offset(@el)
-        @endRange evt.pageX - offset.left
-        @fire 'hovermove', evt.pageX - offset.left, evt.pageY - offset.top
+      Morris.on @el, 'mouseup', @mouseupHandler
 
     if @options.resize
-      Morris.on window, 'resize', (evt) =>
-        if @timeoutId?
-          window.clearTimeout @timeoutId
-        @timeoutId = window.setTimeout @resizeHandler, 100
+      Morris.on window, 'resize', @resizeHandler
 
     # Disable tap highlight on iOS.
     @el.style.webkitTapHighlightColor = 'rgba(0,0,0,0)'
@@ -149,6 +120,21 @@ class Morris.Grid extends Morris.EventEmitter
     animate: true
     nbYkeys2: 0
     smooth: true
+
+  # Destroy
+  #
+  destroy: () ->
+    Morris.off @el, 'mousemove', @mousemoveHandler
+    Morris.off @el, 'mouseleave', @mouseleaveHandler
+    Morris.off @el, 'touchstart touchmove touchend', @touchHandler
+    Morris.off @el, 'click', @clickHandler
+    if @options.rangeSelect
+      Morris.off @el, 'mousedown', @mousedownHandler
+      Morris.off @el, 'mouseup', @mouseupHandler
+
+    if @options.resize
+      window.clearTimeout @timeoutId
+      Morris.off window, 'resize', @resizeHandler
 
   # Update the data series and redraw the chart.
   #
@@ -676,7 +662,47 @@ class Morris.Grid extends Morris.EventEmitter
         end: @data[@hitTest(end)].x
       @selectFrom = null
 
+  mousemoveHandler: (evt) =>
+    offset = Morris.offset(@el)
+    x = evt.pageX - offset.left
+    if @selectFrom
+      left = @data[@hitTest(Math.min(x, @selectFrom))]._x
+      right = @data[@hitTest(Math.max(x, @selectFrom))]._x
+      width = right - left
+      @selectionRect.attr({ x: left, width: width })
+    else
+      @fire 'hovermove', x, evt.pageY - offset.top
+
+  mouseleaveHandler: (evt) =>
+    if @selectFrom
+      @selectionRect.hide()
+      @selectFrom = null
+    @fire 'hoverout'
+
+  touchHandler: (evt) =>
+    touch = evt.originalEvent.touches[0] or evt.originalEvent.changedTouches[0]
+    offset = Morris.offset(@el)
+    @fire 'hovermove', touch.pageX - offset.left, touch.pageY - offset.top
+
+  clickHandler: (evt) =>
+    offset = Morris.offset(@el)
+    @fire 'gridclick', evt.pageX - offset.left, evt.pageY - offset.top
+
+  mousedownHandler: (evt) =>
+    offset = Morris.offset(@el)
+    @startRange evt.pageX - offset.left
+
+  mouseupHandler: (evt) =>
+    offset = Morris.offset(@el)
+    @endRange evt.pageX - offset.left
+    @fire 'hovermove', evt.pageX - offset.left, evt.pageY - offset.top
+
   resizeHandler: =>
+    if @timeoutId?
+      window.clearTimeout @timeoutId
+    @timeoutId = window.setTimeout @debouncedResizeHandler, 100
+
+  debouncedResizeHandler: =>
     @timeoutId = null
     {width, height} = Morris.dimensions @el
     @raphael.setSize width, height

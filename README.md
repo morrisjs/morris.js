@@ -5,6 +5,9 @@ This is an improved work of the great plugin [morris.js](https://github.com/morr
 ![examples](examples/image.png)
 
 ## Changelog
+### unreleased
+- Method to destroy [Issue #569](https://github.com/morrisjs/morris.js/issues/569)
+
 ### 0.6.2 (13th March 2018)
 - Color data labels is defined automatically (black or white) according to color of element
 - Can display colored regions [Issue #723](https://github.com/morrisjs/morris.js/issues/723)
@@ -51,9 +54,6 @@ npm install morris.js06
 - [Raphael.js](http://raphaeljs.com/) (>= 2.0)
 - [Regression.js](https://github.com/Tom-Alexander/regression-js/releases/tag/1.4.0) (1.4.0) for trendline type polynomial, logarithmic, exponential
 
-## Usage
-
-See [the website](http://pierresh.github.com/morris.js/).
 
 ## Development
 
