@@ -77,6 +77,13 @@ Morris.on = (el, eventName, fn) ->
   else
     el.attachEvent('on'+eventName, fn)
 
+# Emulate jQuery's $el.off()
+Morris.off = (el, eventName, fn) ->
+  if el.removeEventListener
+    el.removeEventListener(eventName, fn)
+  else
+    el.detachEvent('on'+eventName, fn)
+
 # Emulate jQuery's $el.width() and $el.height()
 Morris.dimensions = (el) ->
   style = compStyle el
