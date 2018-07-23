@@ -2973,7 +2973,9 @@ Licensed under the BSD-2-Clause License.
       dataLabelsColor: 'auto',
       donutType: 'donut',
       animate: true,
-      showPercentage: false
+      showPercentage: false,
+      postUnits: '',
+      preUnits: ''
     };
 
     function Donut(options) {
@@ -3075,7 +3077,7 @@ Licensed under the BSD-2-Clause License.
             finalValue = Math.round(parseFloat(value) / parseFloat(total) * 100) + '%';
             this.drawDataLabelExt(label_x, label_y, finalValue, color);
           } else {
-            this.drawDataLabelExt(label_x, label_y, value, color);
+            this.drawDataLabelExt(label_x, label_y, this.options.preUnits + value + this.options.postUnits, color);
           }
         }
         last = next;

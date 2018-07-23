@@ -36,7 +36,9 @@ class Morris.Donut extends Morris.EventEmitter
     dataLabelsColor: 'auto',
     donutType: 'donut',
     animate: true,
-    showPercentage: false
+    showPercentage: false,
+    postUnits: '',
+    preUnits: ''
 
   # Create and render a donut chart.
   #
@@ -138,7 +140,7 @@ class Morris.Donut extends Morris.EventEmitter
           finalValue = Math.round(parseFloat(value) / parseFloat(total) * 100) + '%'
           @drawDataLabelExt(label_x,label_y, finalValue, color)
         else
-          @drawDataLabelExt(label_x,label_y,value, color)
+          @drawDataLabelExt(label_x,label_y, @options.preUnits+value+@options.postUnits, color)
 
       last = next
       idx += 1
