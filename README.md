@@ -3,10 +3,13 @@
 This is an improved work of the great plugin [morris.js](https://github.com/morrisjs/morris.js), the simplest chart library for javascript!
 
 ![examples](examples/image.png)
+(Source code of examples is available [here](https://github.com/pierresh/morris.js/blob/master/examples/index.html)
 
 ## Changelog
-### unreleased
+### 0.6.3 (16th September 2018)
+- PostUnits and preUnits for pie chart added
 - Method to destroy [Issue #569](https://github.com/morrisjs/morris.js/issues/569)
+- Ymin2 and Ymax2 are now considered [Issue #569](https://github.com/pierresh/morris.js/issues/5)
 
 ### 0.6.2 (13th March 2018)
 - Color data labels is defined automatically (black or white) according to color of element
