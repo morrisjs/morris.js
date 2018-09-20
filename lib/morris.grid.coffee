@@ -39,7 +39,7 @@ class Morris.Grid extends Morris.EventEmitter
     @setData @options.data
 
     # hover
-    @el.bind 'mousemove', (evt) =>
+    @el.on 'mousemove', (evt) =>
       offset = @el.offset()
       x = evt.pageX - offset.left
       if @selectFrom
@@ -50,18 +50,18 @@ class Morris.Grid extends Morris.EventEmitter
       else
         @fire 'hovermove', x, evt.pageY - offset.top
 
-    @el.bind 'mouseleave', (evt) =>
+    @el.on 'mouseleave', (evt) =>
       if @selectFrom
         @selectionRect.hide()
         @selectFrom = null
       @fire 'hoverout'
 
-    @el.bind 'touchstart touchmove touchend', (evt) =>
+    @el.on 'touchstart touchmove touchend', (evt) =>
       touch = evt.originalEvent.touches[0] or evt.originalEvent.changedTouches[0]
       offset = @el.offset()
       @fire 'hovermove', touch.pageX - offset.left, touch.pageY - offset.top
 
-    @el.bind 'click', (evt) =>
+    @el.on 'click', (evt) =>
       offset = @el.offset()
       @fire 'gridclick', evt.pageX - offset.left, evt.pageY - offset.top
 
@@ -71,17 +71,17 @@ class Morris.Grid extends Morris.EventEmitter
         .toBack()
         .hide()
 
-      @el.bind 'mousedown', (evt) =>
+      @el.on 'mousedown', (evt) =>
         offset = @el.offset()
         @startRange evt.pageX - offset.left
 
-      @el.bind 'mouseup', (evt) =>
+      @el.on 'mouseup', (evt) =>
         offset = @el.offset()
         @endRange evt.pageX - offset.left
         @fire 'hovermove', evt.pageX - offset.left, evt.pageY - offset.top
 
     if @options.resize
-      $(window).bind 'resize', (evt) =>
+      $(window).on 'resize', (evt) =>
         if @timeoutId?
           window.clearTimeout @timeoutId
         @timeoutId = window.setTimeout @resizeHandler, 100
