@@ -58,6 +58,10 @@ tests currently *only* pass on OS X.
 
 ## Changelog
 
+### 0.5.2 - 20th September 2018
+
+- Replace calls to the jQuery.bind method with jQuery.on to give jQuery 3.0.0 support.
+
 ### 0.5.1 - 15th June 2014
 
 - Fix touch event handling.
