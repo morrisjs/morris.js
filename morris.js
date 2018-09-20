@@ -101,7 +101,7 @@ Licensed under the BSD-2-Clause License.
         this.init();
       }
       this.setData(this.options.data);
-      this.el.bind('mousemove', function(evt) {
+      this.el.on('mousemove', function(evt) {
         var left, offset, right, width, x;
         offset = _this.el.offset();
         x = evt.pageX - offset.left;
@@ -117,20 +117,20 @@ Licensed under the BSD-2-Clause License.
           return _this.fire('hovermove', x, evt.pageY - offset.top);
         }
       });
-      this.el.bind('mouseleave', function(evt) {
+      this.el.on('mouseleave', function(evt) {
         if (_this.selectFrom) {
           _this.selectionRect.hide();
           _this.selectFrom = null;
         }
         return _this.fire('hoverout');
       });
-      this.el.bind('touchstart touchmove touchend', function(evt) {
+      this.el.on('touchstart touchmove touchend', function(evt) {
         var offset, touch;
         touch = evt.originalEvent.touches[0] || evt.originalEvent.changedTouches[0];
         offset = _this.el.offset();
         return _this.fire('hovermove', touch.pageX - offset.left, touch.pageY - offset.top);
       });
-      this.el.bind('click', function(evt) {
+      this.el.on('click', function(evt) {
         var offset;
         offset = _this.el.offset();
         return _this.fire('gridclick', evt.pageX - offset.left, evt.pageY - offset.top);
@@ -140,12 +140,12 @@ Licensed under the BSD-2-Clause License.
           fill: this.options.rangeSelectColor,
           stroke: false
         }).toBack().hide();
-        this.el.bind('mousedown', function(evt) {
+        this.el.on('mousedown', function(evt) {
           var offset;
           offset = _this.el.offset();
           return _this.startRange(evt.pageX - offset.left);
         });
-        this.el.bind('mouseup', function(evt) {
+        this.el.on('mouseup', function(evt) {
           var offset;
           offset = _this.el.offset();
           _this.endRange(evt.pageX - offset.left);
@@ -153,7 +153,7 @@ Licensed under the BSD-2-Clause License.
         });
       }
       if (this.options.resize) {
-        $(window).bind('resize', function(evt) {
+        $(window).on('resize', function(evt) {
           if (_this.timeoutId != null) {
             window.clearTimeout(_this.timeoutId);
           }
@@ -1881,7 +1881,7 @@ Licensed under the BSD-2-Clause License.
       }
       this.raphael = new Raphael(this.el[0]);
       if (this.options.resize) {
-        $(window).bind('resize', function(evt) {
+        $(window).on('resize', function(evt) {
           if (_this.timeoutId != null) {
             window.clearTimeout(_this.timeoutId);
           }
