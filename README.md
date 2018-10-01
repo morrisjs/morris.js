@@ -3,7 +3,7 @@
 This is an improved work of the great plugin [morris.js](https://github.com/morrisjs/morris.js), the simplest chart library for javascript!
 
 ![examples](examples/image.png)
-(Source code of examples is available [here](https://github.com/pierresh/morris.js/blob/master/examples/index.html)
+Source code of examples is available [here](https://github.com/pierresh/morris.js/blob/master/examples/image.html)
 
 ## Changelog
 ### 0.6.3 (16th September 2018)
