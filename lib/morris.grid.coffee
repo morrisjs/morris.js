@@ -267,7 +267,8 @@ class Morris.Grid extends Morris.EventEmitter
         @ymax = Math.max(@ymax, @grid[@grid.length - 1])
       else
         step = (@ymax - @ymin) / (@options.numLines - 1)
-        @grid = (y for y in [@ymin..@ymax] by step)
+        @grid = for y in [@ymin..@ymax] by step
+          parseFloat(y.toFixed(2))
 
       if (@options.ymax2 == @gridDefaults.ymax2 and
           @options.ymin2 == @gridDefaults.ymin2 and 
@@ -278,7 +279,8 @@ class Morris.Grid extends Morris.EventEmitter
         @ymax2 = Math.max(@ymax2, @grid2[@grid2.length - 1])
       else
         step2 = (@ymax2 - @ymin2) / (@options.numLines - 1)
-        @grid2 = (y for y in [@ymin2..@ymax2] by step2)
+        @grid2 = for y in [@ymin2..@ymax2] by step2
+          parseFloat(y.toFixed(2))
 
     @dirty = true
     @redraw() if redraw

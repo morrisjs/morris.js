@@ -1,5 +1,5 @@
 /* @license
-morris.js06 v0.6.2 
+morris.js06 v0.6.3 
 https://pierresh.github.io/morris.js/
 Copyright 2018 Olly Smith All rights reserved.
 Licensed under the BSD-2-Clause License.
@@ -449,7 +449,7 @@ Licensed under the BSD-2-Clause License.
             var _j, _ref2, _ref3, _results;
             _results = [];
             for (y = _j = _ref2 = this.ymin, _ref3 = this.ymax; step > 0 ? _j <= _ref3 : _j >= _ref3; y = _j += step) {
-              _results.push(y);
+              _results.push(parseFloat(y.toFixed(2)));
             }
             return _results;
           }).call(this);
@@ -464,7 +464,7 @@ Licensed under the BSD-2-Clause License.
             var _j, _ref2, _ref3, _results;
             _results = [];
             for (y = _j = _ref2 = this.ymin2, _ref3 = this.ymax2; step2 > 0 ? _j <= _ref3 : _j >= _ref3; y = _j += step2) {
-              _results.push(y);
+              _results.push(parseFloat(y.toFixed(2)));
             }
             return _results;
           }).call(this);
