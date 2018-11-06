@@ -27,6 +27,8 @@ class Morris.Line extends Morris.Grid
       '#4aa0b5'
       '#222529'
     ]
+    extraClassLine: ''
+    extraClassCircle: ''
     pointStrokeWidths: [1]
     pointStrokeColors: ['#ffffff']
     pointFillColors: []
@@ -494,6 +496,7 @@ class Morris.Line extends Morris.Grid
       rPath = @raphael.path(straightPath)
                       .attr('stroke', lineColor)
                       .attr('stroke-width', this.lineWidthForSeries(lineIndex))
+                      .attr('class', @options.extraClassLine)
       if @options.cumulative
         do (rPath, path) =>
           rPath.animate {path}, 600, '<>'
@@ -504,12 +507,14 @@ class Morris.Line extends Morris.Grid
       @raphael.path(path)
         .attr('stroke', lineColor)
         .attr('stroke-width', @lineWidthForSeries(lineIndex))
+        .attr('class', @options.extraClassLine)
 
   drawLinePoint: (xPos, yPos, pointColor, lineIndex) ->
     @raphael.circle(xPos, yPos, @pointSizeForSeries(lineIndex))
       .attr('fill', pointColor)
       .attr('stroke-width', @pointStrokeWidthForSeries(lineIndex))
       .attr('stroke', @pointStrokeColorForSeries(lineIndex))
+      .attr('class', @options.extraClassCircle)
 
   # @private
   pointStrokeWidthForSeries: (index) ->

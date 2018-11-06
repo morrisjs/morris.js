@@ -1270,6 +1270,8 @@ Licensed under the BSD-2-Clause License.
       pointSize: 4,
       pointSizeGrow: 3,
       lineColors: ['#2f7df6', '#53a351', '#f6c244', '#cb444a', '#4aa0b5', '#222529'],
+      extraClassLine: '',
+      extraClassCircle: '',
       pointStrokeWidths: [1],
       pointStrokeColors: ['#ffffff'],
       pointFillColors: [],
@@ -1929,7 +1931,7 @@ Licensed under the BSD-2-Clause License.
             }
           }
         }
-        rPath = this.raphael.path(straightPath).attr('stroke', lineColor).attr('stroke-width', this.lineWidthForSeries(lineIndex));
+        rPath = this.raphael.path(straightPath).attr('stroke', lineColor).attr('stroke-width', this.lineWidthForSeries(lineIndex)).attr('class', this.options.extraClassLine);
         if (this.options.cumulative) {
           return (function(rPath, path) {
             return rPath.animate({
@@ -1944,12 +1946,12 @@ Licensed under the BSD-2-Clause License.
           })(rPath, path);
         }
       } else {
-        return this.raphael.path(path).attr('stroke', lineColor).attr('stroke-width', this.lineWidthForSeries(lineIndex));
+        return this.raphael.path(path).attr('stroke', lineColor).attr('stroke-width', this.lineWidthForSeries(lineIndex)).attr('class', this.options.extraClassLine);
       }
     };
 
     Line.prototype.drawLinePoint = function(xPos, yPos, pointColor, lineIndex) {
-      return this.raphael.circle(xPos, yPos, this.pointSizeForSeries(lineIndex)).attr('fill', pointColor).attr('stroke-width', this.pointStrokeWidthForSeries(lineIndex)).attr('stroke', this.pointStrokeColorForSeries(lineIndex));
+      return this.raphael.circle(xPos, yPos, this.pointSizeForSeries(lineIndex)).attr('fill', pointColor).attr('stroke-width', this.pointStrokeWidthForSeries(lineIndex)).attr('stroke', this.pointStrokeColorForSeries(lineIndex)).attr('class', this.options.extraClassCircle);
     };
 
     Line.prototype.pointStrokeWidthForSeries = function(index) {
