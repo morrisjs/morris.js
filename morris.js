@@ -2971,6 +2971,9 @@ Licensed under the BSD-2-Clause License.
       dataLabelsSize: 12,
       dataLabelsWeight: 'normal',
       dataLabelsColor: 'auto',
+      noDataLabel: 'No data for this chart',
+      noDataLabelSize: 21,
+      noDataLabelWeight: 'bold',
       donutType: 'donut',
       animate: true,
       showPercentage: false,
@@ -3002,7 +3005,7 @@ Licensed under the BSD-2-Clause License.
         _ref = Morris.dimensions(this.el), width = _ref.width, height = _ref.height;
         cx = width / 2;
         cy = height / 2;
-        this.raphael.text(cx, cy, 'NaN').attr('text-anchor', 'middle').attr('font-size', 30).attr('font-family', this.options.dataLabelsFamily).attr('font-weight', 'bold').attr('fill', this.options.dataLabelsColor);
+        this.raphael.text(cx, cy, this.options.noDataLabel).attr('text-anchor', 'middle').attr('font-size', this.options.noDataLabelSize).attr('font-family', this.options.dataLabelsFamily).attr('font-weight', this.options.noDataLabelWeight).attr('fill', this.options.dataLabelsColor);
         return;
       }
       if (this.options.resize) {

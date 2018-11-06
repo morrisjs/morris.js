@@ -34,6 +34,9 @@ class Morris.Donut extends Morris.EventEmitter
     dataLabelsSize: 12,
     dataLabelsWeight: 'normal',
     dataLabelsColor: 'auto',
+    noDataLabel: 'No data for this chart',
+    noDataLabelSize: 21,
+    noDataLabelWeight: 'bold',
     donutType: 'donut',
     animate: true,
     showPercentage: false,
@@ -61,11 +64,11 @@ class Morris.Donut extends Morris.EventEmitter
       {width, height} = Morris.dimensions @el
       cx = width / 2
       cy = height / 2
-      @raphael.text(cx, cy, 'NaN')
+      @raphael.text(cx, cy, @options.noDataLabel)
               .attr('text-anchor', 'middle')
-              .attr('font-size', 30)
+              .attr('font-size', @options.noDataLabelSize)
               .attr('font-family', @options.dataLabelsFamily)
-              .attr('font-weight', 'bold')
+              .attr('font-weight', @options.noDataLabelWeight)
               .attr('fill', @options.dataLabelsColor)
       return
 
