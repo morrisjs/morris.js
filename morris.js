@@ -1071,7 +1071,7 @@ Licensed under the BSD-2-Clause License.
               } else {
                 color = '#000';
               }
-              if (this.options.lineColors != null) {
+              if ((this.options.lineColors != null) && (this.options.lineType != null)) {
                 if (row.label_y[index] != null) {
                   this.drawDataLabel(row._x, row.label_y[index], this.yLabelFormat_noUnit(row.y[index], 0), color);
                 }

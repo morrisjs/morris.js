@@ -758,7 +758,7 @@ class Morris.Grid extends Morris.EventEmitter
           else
             color = '#000'
 
-          if @options.lineColors?
+          if @options.lineColors? and @options.lineType?
             if row.label_y[index]?
               @drawDataLabel(row._x, row.label_y[index], this.yLabelFormat_noUnit(row.y[index], 0), color)
 
