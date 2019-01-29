@@ -1,7 +1,7 @@
 /* @license
 morris.js06 v0.6.3 
 https://pierresh.github.io/morris.js/
-Copyright 2018 Olly Smith All rights reserved.
+Copyright 2019 Olly Smith All rights reserved.
 Licensed under the BSD-2-Clause License.
 */
 
@@ -2164,7 +2164,7 @@ Licensed under the BSD-2-Clause License.
     }
 
     Area.prototype.calcPoints = function() {
-      var idx, index, row, total, y, _i, _j, _len, _len1, _ref, _ref1, _results;
+      var i, idx, index, row, total, y, _i, _j, _len, _len1, _ref, _ref1, _results;
       _ref = this.data;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         row = _ref[_i];
@@ -2193,7 +2193,18 @@ Licensed under the BSD-2-Clause License.
           }
           return _results;
         }).call(this);
-        row._ymax = Math.max.apply(Math, row._y);
+        row._ymax = Math.max.apply(Math, [].concat((function() {
+          var _j, _len1, _ref1, _results;
+          _ref1 = row._y;
+          _results = [];
+          for (i = _j = 0, _len1 = _ref1.length; _j < _len1; i = ++_j) {
+            y = _ref1[i];
+            if (y != null) {
+              _results.push(y);
+            }
+          }
+          return _results;
+        })()));
       }
       _ref1 = this.data;
       _results = [];

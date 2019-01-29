@@ -32,7 +32,7 @@ class Morris.Area extends Morris.Line
           if y? 
             total += (y || 0)
             @transY(total)
-      row._ymax = Math.max row._y...
+      row._ymax = Math.max [].concat(y for y, i in row._y when y?)...
 
     for row, idx in @data
       @data[idx].label_x = []
