@@ -26,6 +26,7 @@ class Morris.Donut extends Morris.EventEmitter
     ],
     backgroundColor: '#FFFFFF', 
     labelColor: '#000000',
+    padding: 0
     formatter: Morris.commas
     resize: true,
     dataLabels: false,
@@ -91,7 +92,7 @@ class Morris.Donut extends Morris.EventEmitter
     {width, height} = Morris.dimensions @el
     cx = width / 2
     cy = height / 2
-    w = (Math.min(cx, cy) - 10) / 3
+    w = (Math.min(cx, cy) - 10) / 3 - @options.padding
 
     total = 0
     total += value for value in @values
@@ -114,9 +115,9 @@ class Morris.Donut extends Morris.EventEmitter
       seg.on 'click', @click
       seg.on 'mouseout', @deselect
       if parseFloat(seg.raphael.height) > parseFloat(height)
-        dist = height
+        dist = height  * 2 - @options.padding * 7
       else
-        dist = seg.raphael.height
+        dist = seg.raphael.height - @options.padding * 7
 
       if @options.dataLabels && @values.length > 1
         p_sin_p0 = Math.sin((last + next)/2);

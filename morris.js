@@ -2976,6 +2976,7 @@ Licensed under the BSD-2-Clause License.
       colors: ['#2f7df6', '#53a351', '#f6c244', '#cb444a', '#4aa0b5', '#222529', '#44a1f8', '#81d453', '#f0bb40', '#eb3f25', '#b45184', '#5f5f5f'],
       backgroundColor: '#FFFFFF',
       labelColor: '#000000',
+      padding: 0,
       formatter: Morris.commas,
       resize: true,
       dataLabels: false,
@@ -3040,7 +3041,7 @@ Licensed under the BSD-2-Clause License.
       _ref = Morris.dimensions(this.el), width = _ref.width, height = _ref.height;
       cx = width / 2;
       cy = height / 2;
-      w = (Math.min(cx, cy) - 10) / 3;
+      w = (Math.min(cx, cy) - 10) / 3 - this.options.padding;
       total = 0;
       _ref1 = this.values;
       for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
@@ -3063,9 +3064,9 @@ Licensed under the BSD-2-Clause License.
         seg.on('click', this.click);
         seg.on('mouseout', this.deselect);
         if (parseFloat(seg.raphael.height) > parseFloat(height)) {
-          dist = height;
+          dist = height * 2 - this.options.padding * 7;
         } else {
-          dist = seg.raphael.height;
+          dist = seg.raphael.height - this.options.padding * 7;
         }
         if (this.options.dataLabels && this.values.length > 1) {
           p_sin_p0 = Math.sin((last + next) / 2);
