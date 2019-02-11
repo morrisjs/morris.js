@@ -75,6 +75,7 @@ class Morris.Line extends Morris.Grid
         if ii >= @options.ykeys.length - @options.nbYkeys2
           if y? then @transY2(y) else y
       row._ymax = Math.min [@bottom].concat(y for y, i in row._y when y? and @hasToShow(i))...
+      row._ymax2 = Math.min [@bottom].concat(y for y, i in row._y2 when y? and @hasToShow(i))...
 
     for row, idx in @data
       @data[idx].label_x = []
@@ -164,9 +165,12 @@ class Morris.Line extends Morris.Grid
 
     if @options.hoverReversed is true then order = order.reverse()
 
+    axis = -1;
     for j in order by -1
       if @options.labels[j] is false
         continue
+
+      if row.y[j] != undefined and axis == -1 then axis = j
 
       content = """
         <div class='morris-hover-point' style='color: #{@colorFor(row, j, 'label')}'>
@@ -179,8 +183,9 @@ class Morris.Line extends Morris.Grid
     
     if typeof @options.hoverCallback is 'function'
       content = @options.hoverCallback(index, @options, content, row.src)
-    [content, row._x, row._ymax]
-
+    
+    if axis == 1 then [content, row._x, row._ymax2]
+    else [content, row._x, row._ymax]
 
   # generate paths for series lines
   #
@@ -202,7 +207,7 @@ class Morris.Line extends Morris.Grid
       if i < nb
         coords = ({x: r._x, y: r._y[i]} for r in @data when r._y[i] isnt undefined)
       else
-        coords = ({x: r._x, y: r._y2[i]} for r in @data when r._y2 isnt undefined)
+        coords = ({x: r._x, y: r._y2[i]} for r in @data when r._y2[i] isnt undefined)
 
       if coords.length > 1
         Morris.Line.createPath coords, lineType, @bottom

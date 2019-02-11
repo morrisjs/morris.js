@@ -1354,6 +1354,18 @@ Licensed under the BSD-2-Clause License.
           }
           return _results;
         }).call(this)));
+        row._ymax2 = Math.min.apply(Math, [this.bottom].concat((function() {
+          var _j, _len1, _ref1, _results;
+          _ref1 = row._y2;
+          _results = [];
+          for (i = _j = 0, _len1 = _ref1.length; _j < _len1; i = ++_j) {
+            y = _ref1[i];
+            if ((y != null) && this.hasToShow(i)) {
+              _results.push(y);
+            }
+          }
+          return _results;
+        }).call(this)));
       }
       _ref1 = this.data;
       for (idx = _j = 0, _len1 = _ref1.length; _j < _len1; idx = ++_j) {
@@ -1455,7 +1467,7 @@ Licensed under the BSD-2-Clause License.
     };
 
     Line.prototype.hoverContentForRow = function(index) {
-      var content, j, jj, max, max_pos, order, row, y, yy, _i, _j, _k, _l, _len, _len1, _ref, _ref1, _ref2;
+      var axis, content, j, jj, max, max_pos, order, row, y, yy, _i, _j, _k, _l, _len, _len1, _ref, _ref1, _ref2;
       row = this.data[index];
       content = "";
       order = [];
@@ -1487,10 +1499,14 @@ Licensed under the BSD-2-Clause License.
       if (this.options.hoverReversed === true) {
         order = order.reverse();
       }
+      axis = -1;
       for (_l = order.length - 1; _l >= 0; _l += -1) {
         j = order[_l];
         if (this.options.labels[j] === false) {
           continue;
+        }
+        if (row.y[j] !== void 0 && axis === -1) {
+          axis = j;
         }
         content = ("<div class='morris-hover-point' style='color: " + (this.colorFor(row, j, 'label')) + "'>\n  " + this.options.labels[j] + ":\n  " + (this.yLabelFormat(row.y[j], j)) + "\n</div>") + content;
       }
@@ -1498,7 +1514,11 @@ Licensed under the BSD-2-Clause License.
       if (typeof this.options.hoverCallback === 'function') {
         content = this.options.hoverCallback(index, this.options, content, row.src);
       }
-      return [content, row._x, row._ymax];
+      if (axis === 1) {
+        return [content, row._x, row._ymax2];
+      } else {
+        return [content, row._x, row._ymax];
+      }
     };
 
     Line.prototype.generatePaths = function() {
@@ -1541,7 +1561,7 @@ Licensed under the BSD-2-Clause License.
               _results1 = [];
               for (_j = 0, _len = _ref2.length; _j < _len; _j++) {
                 r = _ref2[_j];
-                if (r._y2 !== void 0) {
+                if (r._y2[i] !== void 0) {
                   _results1.push({
                     x: r._x,
                     y: r._y2[i]
