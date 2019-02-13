@@ -170,7 +170,8 @@ class Morris.Line extends Morris.Grid
       if @options.labels[j] is false
         continue
 
-      if row.y[j] != undefined and axis == -1 then axis = j
+      if row.y[j] != undefined and axis == -1
+        axis = j
 
       content = """
         <div class='morris-hover-point' style='color: #{@colorFor(row, j, 'label')}'>
@@ -184,7 +185,7 @@ class Morris.Line extends Morris.Grid
     if typeof @options.hoverCallback is 'function'
       content = @options.hoverCallback(index, @options, content, row.src)
     
-    if axis == 1 then [content, row._x, row._ymax2]
+    if axis > @options.nbYkeys2 then [content, row._x, row._ymax2]
     else [content, row._x, row._ymax]
 
   # generate paths for series lines

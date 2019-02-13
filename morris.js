@@ -1514,7 +1514,7 @@ Licensed under the BSD-2-Clause License.
       if (typeof this.options.hoverCallback === 'function') {
         content = this.options.hoverCallback(index, this.options, content, row.src);
       }
-      if (axis === 1) {
+      if (axis > this.options.nbYkeys2) {
         return [content, row._x, row._ymax2];
       } else {
         return [content, row._x, row._ymax];
