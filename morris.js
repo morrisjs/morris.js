@@ -3073,6 +3073,9 @@ Licensed under the BSD-2-Clause License.
       last = 0;
       idx = 0;
       this.segments = [];
+      if (total === 0) {
+        total = 1;
+      }
       _ref2 = this.values;
       for (i = _j = 0, _len1 = _ref2.length; _j < _len1; i = ++_j) {
         value = _ref2[i];
