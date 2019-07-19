@@ -6,10 +6,16 @@ This is an improved work of the great plugin [morris.js](https://github.com/morr
 Source code of examples is available [here](https://github.com/pierresh/morris.js/blob/master/examples/image.html)
 
 ## Changelog
+### 0.6.4 (19th July 2018) 
+- display segments in pie charts even if total = 0 [Issue #13](https://github.com/pierresh/morris.js/issues/13)
+- can add padding to pie charts [Issue #9](https://github.com/pierresh/morris.js/issues/9)
+- options extraClassLine and extraClassCircle for line charts [Issue #7](https://github.com/pierresh/morris.js/pull/7)
+- option to display customized text when pie chart has no data [Issue #705](https://github.com/morrisjs/morris.js/issues/705)
+
 ### 0.6.3 (16th September 2018)
 - PostUnits and preUnits for pie chart added
 - Method to destroy [Issue #569](https://github.com/morrisjs/morris.js/issues/569)
-- Ymin2 and Ymax2 are now considered [Issue #569](https://github.com/pierresh/morris.js/issues/5)
+- Ymin2 and Ymax2 are now considered [Issue #5](https://github.com/pierresh/morris.js/issues/5)
 
 ### 0.6.2 (13th March 2018)
 - Color data labels is defined automatically (black or white) according to color of element
