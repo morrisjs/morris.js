@@ -6,7 +6,7 @@ This is an improved work of the great plugin [morris.js](https://github.com/morr
 Source code of examples is available [here](https://github.com/pierresh/morris.js/blob/master/examples/image.html)
 
 ## Changelog
-### 0.6.4 (19th July 2018) 
+### 0.6.4 (19th July 2019) 
 - display segments in pie charts even if total = 0 [Issue #13](https://github.com/pierresh/morris.js/issues/13)
 - can add padding to pie charts [Issue #9](https://github.com/pierresh/morris.js/issues/9)
 - options extraClassLine and extraClassCircle for line charts [Issue #7](https://github.com/pierresh/morris.js/pull/7)
