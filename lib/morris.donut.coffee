@@ -96,6 +96,7 @@ class Morris.Donut extends Morris.EventEmitter
 
     total = 0
     total += value for value in @values
+    @options.total = total
 
     min = 5 / (2 * w)
     C = 1.9999 * Math.PI - min * @data.length
@@ -205,7 +206,12 @@ class Morris.Donut extends Morris.EventEmitter
     segment.select()
     row = @data[idx]
     if @options.donutType == 'donut' 
-      @setLabels(row.label, @options.formatter(row.value, row))
+
+      if @options.showPercentage && !@options.dataLabels
+        finalValue = Math.round(parseFloat(row.value) / parseFloat(@options.total) * 100) + '%'
+        @setLabels(row.label, finalValue)
+      else
+        @setLabels(row.label, @options.formatter(row.value, row))
 
   deselect: (idx) =>
     s.deselect() for s in @segments

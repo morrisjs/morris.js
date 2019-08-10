@@ -3068,6 +3068,7 @@ Licensed under the BSD-2-Clause License.
         value = _ref1[_i];
         total += value;
       }
+      this.options.total = total;
       min = 5 / (2 * w);
       C = 1.9999 * Math.PI - min * this.data.length;
       last = 0;
@@ -3182,7 +3183,7 @@ Licensed under the BSD-2-Clause License.
     };
 
     Donut.prototype.select = function(idx) {
-      var row, s, segment, _i, _len, _ref;
+      var finalValue, row, s, segment, _i, _len, _ref;
       _ref = this.segments;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         s = _ref[_i];
@@ -3192,7 +3193,12 @@ Licensed under the BSD-2-Clause License.
       segment.select();
       row = this.data[idx];
       if (this.options.donutType === 'donut') {
-        return this.setLabels(row.label, this.options.formatter(row.value, row));
+        if (this.options.showPercentage && !this.options.dataLabels) {
+          finalValue = Math.round(parseFloat(row.value) / parseFloat(this.options.total) * 100) + '%';
+          return this.setLabels(row.label, finalValue);
+        } else {
+          return this.setLabels(row.label, this.options.formatter(row.value, row));
+        }
       }
     };
 
