@@ -16,6 +16,8 @@ class Morris.Bar extends Morris.Grid
   #
   defaults:
     barSizeRatio: 0.75
+    pointSize: 4,
+    lineWidth: 3,
     barGap: 3
     barColors: [
       '#2f7df6'
@@ -112,13 +114,13 @@ class Morris.Bar extends Morris.Grid
         if @options.animate
           rPath = @raphael.path(straightPath)
                           .attr('stroke', @options.barColors[nb+ii])
-                          .attr('stroke-width', 3)
+                          .attr('stroke-width', @lineWidthForSeries(ii))
           do (rPath, path) =>
             rPath.animate {path}, 500, '<>'
         else
           rPath = @raphael.path(path)
                           .attr('stroke', @options.barColors[nb+ii])
-                          .attr('stroke-width', 3)
+                          .attr('stroke-width', @lineWidthForSeries(ii))
 
   drawBarPoints: ->
     nb = @options.ykeys.length - @options.nbYkeys2
@@ -129,18 +131,32 @@ class Morris.Bar extends Morris.Grid
         circle = null
         if row._y2[nb+ii]?
           if @options.horizontal is not true
-            circle = @raphael.circle(row._x, row._y2[nb+ii], 4)
+            circle = @raphael.circle(row._x, row._y2[nb+ii], @pointSizeForSeries(ii))
               .attr('fill', @options.barColors[nb+ii])
               .attr('stroke-width', 1)
               .attr('stroke', '#ffffff')
             @seriesPoints[ii].push(circle)
           else
-            circle = @raphael.circle(row._y2[nb+ii], row._x, 4)
+            circle = @raphael.circle(row._y2[nb+ii], row._x, @pointSizeForSeries(ii))
               .attr('fill', @options.barColors[nb+ii])
               .attr('stroke-width', 1)
               .attr('stroke', '#ffffff')
             @seriesPoints[ii].push(circle)
-              
+
+  # @private
+  lineWidthForSeries: (index) ->
+    if (@options.lineWidth instanceof Array)
+      @options.lineWidth[index % @options.lineWidth.length]
+    else
+      @options.lineWidth
+
+  # @private
+  pointSizeForSeries: (index) ->
+    if (@options.pointSize instanceof Array)
+      @options.pointSize[index % @options.pointSize.length]
+    else
+      @options.pointSize
+
   # draw the x-axis labels
   #
   # @private
