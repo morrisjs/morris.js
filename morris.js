@@ -1,7 +1,7 @@
 /* @license
 morris.js06 v0.6.4 
 https://pierresh.github.io/morris.js/
-Copyright 2019 Olly Smith All rights reserved.
+Copyright 2020 Olly Smith All rights reserved.
 Licensed under the BSD-2-Clause License.
 */
 
@@ -1690,7 +1690,9 @@ Licensed under the BSD-2-Clause License.
       for (i = _i = _ref = this.options.ykeys.length - 1; _ref <= 0 ? _i <= 0 : _i >= 0; i = _ref <= 0 ? ++_i : --_i) {
         if (this.hasToShow(i)) {
           if (this.options.trendLine !== false && this.options.trendLine === true || this.options.trendLine[i] === true) {
-            this._drawTrendLine(i);
+            if (this.data.length > 0) {
+              this._drawTrendLine(i);
+            }
           }
           this._drawLineFor(i);
         }
@@ -2411,6 +2413,8 @@ Licensed under the BSD-2-Clause License.
 
     Bar.prototype.defaults = {
       barSizeRatio: 0.75,
+      pointSize: 4,
+      lineWidth: 3,
       barGap: 3,
       barColors: ['#2f7df6', '#53a351', '#f6c244', '#cb444a', '#4aa0b5', '#222529'],
       barOpacity: 1.0,
@@ -2581,14 +2585,14 @@ Licensed under the BSD-2-Clause License.
         }
         if (path !== "") {
           if (this.options.animate) {
-            rPath = this.raphael.path(straightPath).attr('stroke', this.options.barColors[nb + ii]).attr('stroke-width', 3);
+            rPath = this.raphael.path(straightPath).attr('stroke', this.options.barColors[nb + ii]).attr('stroke-width', this.lineWidthForSeries(ii));
             _results.push((function(rPath, path) {
               return rPath.animate({
                 path: path
               }, 500, '<>');
             })(rPath, path));
           } else {
-            _results.push(rPath = this.raphael.path(path).attr('stroke', this.options.barColors[nb + ii]).attr('stroke-width', 3));
+            _results.push(rPath = this.raphael.path(path).attr('stroke', this.options.barColors[nb + ii]).attr('stroke-width', this.lineWidthForSeries(ii)));
           }
         } else {
           _results.push(void 0);
@@ -2615,10 +2619,10 @@ Licensed under the BSD-2-Clause License.
             circle = null;
             if (row._y2[nb + ii] != null) {
               if (this.options.horizontal === !true) {
-                circle = this.raphael.circle(row._x, row._y2[nb + ii], 4).attr('fill', this.options.barColors[nb + ii]).attr('stroke-width', 1).attr('stroke', '#ffffff');
+                circle = this.raphael.circle(row._x, row._y2[nb + ii], this.pointSizeForSeries(ii)).attr('fill', this.options.barColors[nb + ii]).attr('stroke-width', 1).attr('stroke', '#ffffff');
                 _results1.push(this.seriesPoints[ii].push(circle));
               } else {
-                circle = this.raphael.circle(row._y2[nb + ii], row._x, 4).attr('fill', this.options.barColors[nb + ii]).attr('stroke-width', 1).attr('stroke', '#ffffff');
+                circle = this.raphael.circle(row._y2[nb + ii], row._x, this.pointSizeForSeries(ii)).attr('fill', this.options.barColors[nb + ii]).attr('stroke-width', 1).attr('stroke', '#ffffff');
                 _results1.push(this.seriesPoints[ii].push(circle));
               }
             } else {
@@ -2629,6 +2633,22 @@ Licensed under the BSD-2-Clause License.
         }).call(this));
       }
       return _results;
+    };
+
+    Bar.prototype.lineWidthForSeries = function(index) {
+      if (this.options.lineWidth instanceof Array) {
+        return this.options.lineWidth[index % this.options.lineWidth.length];
+      } else {
+        return this.options.lineWidth;
+      }
+    };
+
+    Bar.prototype.pointSizeForSeries = function(index) {
+      if (this.options.pointSize instanceof Array) {
+        return this.options.pointSize[index % this.options.pointSize.length];
+      } else {
+        return this.options.pointSize;
+      }
     };
 
     Bar.prototype.drawXAxis = function() {
@@ -3092,7 +3112,7 @@ Licensed under the BSD-2-Clause License.
         } else {
           dist = seg.raphael.height - this.options.padding * 7;
         }
-        if (this.options.dataLabels && this.values.length > 1) {
+        if (this.options.dataLabels && this.values.length >= 1) {
           p_sin_p0 = Math.sin((last + next) / 2);
           p_cos_p0 = Math.cos((last + next) / 2);
           if (this.options.dataLabelsPosition === 'inside') {
@@ -3166,7 +3186,9 @@ Licensed under the BSD-2-Clause License.
 
     Donut.prototype.drawDataLabelExt = function(xPos, yPos, text, color) {
       var label, labelAnchor;
-      if (this.options.dataLabelsPosition === 'inside') {
+      if (this.values.length >= 1) {
+        labelAnchor = 'middle';
+      } else if (this.options.dataLabelsPosition === 'inside') {
         labelAnchor = 'middle';
       } else if (xPos > this.raphael.width / 2) {
         labelAnchor = 'start';

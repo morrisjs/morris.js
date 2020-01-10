@@ -307,7 +307,8 @@ class Morris.Line extends Morris.Grid
       if @hasToShow(i)
         if @options.trendLine isnt false and
             @options.trendLine is true or @options.trendLine[i] is true
-          @_drawTrendLine i
+          if @data.length > 0 
+            @_drawTrendLine i
 
         @_drawLineFor i
 
