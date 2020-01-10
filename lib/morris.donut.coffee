@@ -123,7 +123,7 @@ class Morris.Donut extends Morris.EventEmitter
       else
         dist = seg.raphael.height - @options.padding * 7
 
-      if @options.dataLabels && @values.length > 1
+      if @options.dataLabels && @values.length >= 1
         p_sin_p0 = Math.sin((last + next)/2);
         p_cos_p0 = Math.cos((last + next)/2);
         if @options.dataLabelsPosition == 'inside'
@@ -180,7 +180,9 @@ class Morris.Donut extends Morris.EventEmitter
                     .attr('fill', @options.dataLabelsColor)
 
   drawDataLabelExt: (xPos, yPos, text, color) ->
-    if @options.dataLabelsPosition == 'inside'
+    if @values.length >= 1
+      labelAnchor = 'middle'
+    else if @options.dataLabelsPosition == 'inside'
       labelAnchor = 'middle'
     else if xPos > this.raphael.width / 2
       labelAnchor = 'start'
