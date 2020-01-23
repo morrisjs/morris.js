@@ -1467,7 +1467,7 @@ Licensed under the BSD-2-Clause License.
     };
 
     Line.prototype.hoverContentForRow = function(index) {
-      var axis, content, j, jj, max, max_pos, order, row, y, yy, _i, _j, _k, _l, _len, _len1, _ref, _ref1, _ref2;
+      var axis, content, content_hover, j, jj, max, max_pos, order, row, y, yy, _i, _j, _k, _l, _len, _len1, _ref, _ref1, _ref2;
       row = this.data[index];
       content = "";
       order = [];
@@ -1510,7 +1510,8 @@ Licensed under the BSD-2-Clause License.
         }
         content = ("<div class='morris-hover-point' style='color: " + (this.colorFor(row, j, 'label')) + "'>\n  " + this.options.labels[j] + ":\n  " + (this.yLabelFormat(row.y[j], j)) + "\n</div>") + content;
       }
-      content = ("<div class='morris-hover-row-label'>" + row.label + "</div>") + content;
+      content_hover = $("<div class='morris-hover-row-label'>").text(row.label);
+      content = content_hover.prop('outerHTML') + content;
       if (typeof this.options.hoverCallback === 'function') {
         content = this.options.hoverCallback(index, this.options, content, row.src);
       }
@@ -2931,7 +2932,8 @@ Licensed under the BSD-2-Clause License.
     Bar.prototype.hoverContentForRow = function(index) {
       var content, inv, j, jj, row, x, y, _i, _j, _len, _len1, _ref;
       row = this.data[index];
-      content = "<div class='morris-hover-row-label'>" + row.label + "</div>";
+      content = $("<div class='morris-hover-row-label'>").text(row.label);
+      content = content.prop('outerHTML');
       inv = [];
       _ref = row.y;
       for (jj = _i = 0, _len = _ref.length; _i < _len; jj = ++_i) {

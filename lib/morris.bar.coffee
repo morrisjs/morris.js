@@ -406,7 +406,8 @@ class Morris.Bar extends Morris.Grid
   # @private
   hoverContentForRow: (index) ->
     row = @data[index]
-    content = "<div class='morris-hover-row-label'>#{row.label}</div>"
+    content = $("<div class='morris-hover-row-label'>").text(row.label)
+    content = content.prop('outerHTML')
 
     inv = []
     for y, jj in row.y
