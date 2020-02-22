@@ -3,7 +3,7 @@
 This is an improved work of the great plugin [morris.js](https://github.com/morrisjs/morris.js), the simplest chart library for javascript!
 
 ![examples](examples/image.png)
-Source code of examples is available [here](https://github.com/pierresh/morris.js/blob/master/examples/image.html)
+Examples can be seen in [action](https://pierresh.github.io/morris.js/image.html) and their source codes are available [here](https://github.com/pierresh/morris.js/blob/master/examples/image.html)
 
 ## Changelog
 ### 0.6.4 (19th July 2019) 
@@ -114,3 +114,9 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
 ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+## My other projects :)
+- [flightphp-skeleton](https://github.com/pierresh/flightphp-skeleton): a simple starter kit to build scalable REST APIs with FlightPHP
+- [multiple-emails.js](https://github.com/pierresh/multiple-emails.js): Enter multiple emails in a single input field with jQuery
+
