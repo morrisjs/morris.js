@@ -69,6 +69,7 @@ class Morris.Grid extends Morris.EventEmitter
     axes: true
     freePosition: false
     grid: true
+    gridIntegers: false
     gridLineColor: '#aaa'
     gridStrokeWidth: 0.5
     gridTextColor: '#888'
@@ -267,6 +268,10 @@ class Morris.Grid extends Morris.EventEmitter
         @ymax = Math.max(@ymax, @grid[@grid.length - 1])
       else
         step = (@ymax - @ymin) / (@options.numLines - 1)
+
+        if @options.gridIntegers
+          step = Math.max(1, Math.round(step));
+
         @grid = for y in [@ymin..@ymax] by step
           parseFloat(y.toFixed(2))
 

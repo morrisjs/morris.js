@@ -210,6 +210,7 @@ Licensed under the BSD-2-Clause License.
       axes: true,
       freePosition: false,
       grid: true,
+      gridIntegers: false,
       gridLineColor: '#aaa',
       gridStrokeWidth: 0.5,
       gridTextColor: '#888',
@@ -445,6 +446,9 @@ Licensed under the BSD-2-Clause License.
           this.ymax = Math.max(this.ymax, this.grid[this.grid.length - 1]);
         } else {
           step = (this.ymax - this.ymin) / (this.options.numLines - 1);
+          if (this.options.gridIntegers) {
+            step = Math.max(1, Math.round(step));
+          }
           this.grid = (function() {
             var _j, _ref2, _ref3, _results;
             _results = [];
