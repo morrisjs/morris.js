@@ -212,7 +212,7 @@ class Morris.Line extends Morris.Grid
         coords = ({x: r._x, y: r._y2[i]} for r in @data when r._y2[i] isnt undefined)
 
       if coords.length > 1
-        Morris.Line.createPath coords, lineType, @bottom
+        Morris.Line.createPath coords, lineType, @bottom, i, @options.ykeys.length, @options.lineWidth
       else
         null
 
@@ -409,7 +409,9 @@ class Morris.Line extends Morris.Grid
   # create a path for a data series
   #
   # @private
-  @createPath: (coords, lineType, bottom) ->
+  @createPath: (coords, lineType, bottom, index, nb, lineWidth) ->
+    # index, nb and lineWidth are only used for lineType == 'vertical'
+
     path = ""
     grads = Morris.Line.gradients(coords) if lineType == 'smooth'
 
@@ -434,6 +436,14 @@ class Morris.Line extends Morris.Grid
           else if  lineType == 'stepNoRiser'
             path += "L#{coord.x},#{prevCoord.y}"
             path += "M#{coord.x},#{coord.y}"
+          else if  lineType == 'vertical'
+            path += "L#{prevCoord.x-(nb-1)*(lineWidth/nb)+index*lineWidth},#{prevCoord.y}"
+            path += "L#{prevCoord.x-(nb-1)*(lineWidth/nb)+index*lineWidth},#{bottom}"
+            path += "M#{coord.x-(nb-1)*(lineWidth/nb)+index*lineWidth},#{bottom}"
+            if (coords.length == (i+1))
+              # Display the last vertical line
+              path += "L#{coord.x-(nb-1)*(lineWidth/nb)+index*lineWidth},#{coord.y}"
+              path += "L#{coord.x-(nb-1)*(lineWidth/nb)+index*lineWidth},#{bottom}"
         else
           if lineType != 'smooth' or grads[i]?
             path += "M#{coord.x},#{coord.y}"
@@ -491,14 +501,21 @@ class Morris.Line extends Morris.Grid
             if row._y2[lineIndex]?
               straightPath = 'M'+row._x+','+@transY2(@ymin2)
           else if row._y[lineIndex]?
-            straightPath = 'M'+row._x+','+@transY(@ymin)
+            if @options.lineType != 'vertical'
+              straightPath = 'M'+row._x+','+@transY(@ymin)
+            else
+              straightPath = 'M'+row._x+','+@transY(0)+'L'+row._x+','+@transY(0)+'L'+row._x+','+@transY(0)
         else
           if lineIndex >= @options.ykeys.length - @options.nbYkeys2
             if row._y2[lineIndex]?
               straightPath += ','+row._x+','+@transY2(@ymin2)
               if @options.lineType == 'step' then straightPath += ','+row._x+','+@transY2(@ymin2)
           else if row._y[lineIndex]?
-            straightPath += ','+row._x+','+@transY(@ymin)
+            if @options.lineType != 'vertical'
+              straightPath += ','+row._x+','+@transY(@ymin)
+            else
+              row_x = row._x-(this.options.ykeys.length-1)*(this.options.lineWidth / this.options.ykeys.length)+lineIndex*this.options.lineWidth;
+              straightPath += 'M'+row_x+','+@transY(0)+'L'+row_x+','+@transY(0)+'L'+row_x+','+@transY(0)
             if @options.lineType == 'step' then straightPath += ','+row._x+','+@transY(@ymin)
 
       rPath = @raphael.path(straightPath)

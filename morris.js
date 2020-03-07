@@ -1577,7 +1577,7 @@ Licensed under the BSD-2-Clause License.
             }).call(this);
           }
           if (coords.length > 1) {
-            _results.push(Morris.Line.createPath(coords, lineType, this.bottom));
+            _results.push(Morris.Line.createPath(coords, lineType, this.bottom, i, this.options.ykeys.length, this.options.lineWidth));
           } else {
             _results.push(null);
           }
@@ -1822,7 +1822,7 @@ Licensed under the BSD-2-Clause License.
       }
     };
 
-    Line.createPath = function(coords, lineType, bottom) {
+    Line.createPath = function(coords, lineType, bottom, index, nb, lineWidth) {
       var coord, g, grads, i, ix, lg, path, prevCoord, x1, x2, y1, y2, _i, _len;
       path = "";
       if (lineType === 'smooth') {
@@ -1852,6 +1852,14 @@ Licensed under the BSD-2-Clause License.
             } else if (lineType === 'stepNoRiser') {
               path += "L" + coord.x + "," + prevCoord.y;
               path += "M" + coord.x + "," + coord.y;
+            } else if (lineType === 'vertical') {
+              path += "L" + (prevCoord.x - (nb - 1) * (lineWidth / nb) + index * lineWidth) + "," + prevCoord.y;
+              path += "L" + (prevCoord.x - (nb - 1) * (lineWidth / nb) + index * lineWidth) + "," + bottom;
+              path += "M" + (coord.x - (nb - 1) * (lineWidth / nb) + index * lineWidth) + "," + bottom;
+              if (coords.length === (i + 1)) {
+                path += "L" + (coord.x - (nb - 1) * (lineWidth / nb) + index * lineWidth) + "," + coord.y;
+                path += "L" + (coord.x - (nb - 1) * (lineWidth / nb) + index * lineWidth) + "," + bottom;
+              }
             }
           } else {
             if (lineType !== 'smooth' || (grads[i] != null)) {
@@ -1927,7 +1935,7 @@ Licensed under the BSD-2-Clause License.
     };
 
     Line.prototype.drawLinePath = function(path, lineColor, lineIndex) {
-      var ii, rPath, row, straightPath, _i, _len, _ref,
+      var ii, rPath, row, row_x, straightPath, _i, _len, _ref,
         _this = this;
       if (this.options.animate) {
         straightPath = '';
@@ -1940,7 +1948,11 @@ Licensed under the BSD-2-Clause License.
                 straightPath = 'M' + row._x + ',' + this.transY2(this.ymin2);
               }
             } else if (row._y[lineIndex] != null) {
-              straightPath = 'M' + row._x + ',' + this.transY(this.ymin);
+              if (this.options.lineType !== 'vertical') {
+                straightPath = 'M' + row._x + ',' + this.transY(this.ymin);
+              } else {
+                straightPath = 'M' + row._x + ',' + this.transY(0) + 'L' + row._x + ',' + this.transY(0) + 'L' + row._x + ',' + this.transY(0);
+              }
             }
           } else {
             if (lineIndex >= this.options.ykeys.length - this.options.nbYkeys2) {
@@ -1951,7 +1963,12 @@ Licensed under the BSD-2-Clause License.
                 }
               }
             } else if (row._y[lineIndex] != null) {
-              straightPath += ',' + row._x + ',' + this.transY(this.ymin);
+              if (this.options.lineType !== 'vertical') {
+                straightPath += ',' + row._x + ',' + this.transY(this.ymin);
+              } else {
+                row_x = row._x - (this.options.ykeys.length - 1) * (this.options.lineWidth / this.options.ykeys.length) + lineIndex * this.options.lineWidth;
+                straightPath += 'M' + row_x + ',' + this.transY(0) + 'L' + row_x + ',' + this.transY(0) + 'L' + row_x + ',' + this.transY(0);
+              }
               if (this.options.lineType === 'step') {
                 straightPath += ',' + row._x + ',' + this.transY(this.ymin);
               }
