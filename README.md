@@ -116,7 +116,7 @@ tests currently *only* pass on OS X.
 - More flexible formatters [#107](https://github.com/morrisjs/morris.js/issues/107).
 - Color callbacks.
 - Decade intervals for time-axis labels.
-- Non-continous line tweaks [#116](https://github.com/morrisjs/morris.js/issues/116).
+- Non-continuous line tweaks [#116](https://github.com/morrisjs/morris.js/issues/116).
 - Stacked bars [#120](https://github.com/morrisjs/morris.js/issues/120).
 - HTML hover [#134](https://github.com/morrisjs/morris.js/issues/134).
 - yLabelFormat [#139](https://github.com/morrisjs/morris.js/issues/139).
