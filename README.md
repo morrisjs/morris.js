@@ -6,7 +6,16 @@ This is an improved work of the great plugin [morris.js](https://github.com/morr
 Examples can be seen in [action](https://pierresh.github.io/morris.js/image.html) and their source codes are available [here](https://github.com/pierresh/morris.js/blob/master/examples/image.html)
 
 ## Changelog
-### 0.6.4 (19th July 2019) 
+### 0.6.5 (4th May 2020)
+- option to display percentage in donut [Issue #12](https://github.com/pierresh/morris.js/issues/12)
+- options pointSize and lineWidth for line curves in combo charts
+- Display Pie\Donut value when there is only 1 value
+- Escape labels in hover [Pull #464](https://github.com/morrisjs/morris.js/pull/464)
+- option gridIntegers [Issue #344](https://github.com/morrisjs/morris.js/pull/344)
+- Add lineType vertical for line charts [Issue #634](https://github.com/morrisjs/morris.js/issues/634)
+
+
+### 0.6.4 (19th July 2019)
 - display segments in pie charts even if total = 0 [Issue #13](https://github.com/pierresh/morris.js/issues/13)
 - can add padding to pie charts [Issue #9](https://github.com/pierresh/morris.js/issues/9)
 - options extraClassLine and extraClassCircle for line charts [Issue #7](https://github.com/pierresh/morris.js/pull/7)
@@ -84,7 +93,7 @@ With node installed, install [grunt](https://github.com/cowboy/grunt) using
 `npm install -g grunt-cli`, and then the rest of the test/build dependencies
 with `npm install` in the morris.js project folder.
 
-Additionally, [bower](http://bower.io/) is required for for retrieving additional test dependencies.  
+Additionally, [bower](http://bower.io/) is required for for retrieving additional test dependencies.
 Install it with `npm install -g bower` and then `bower install` in the morris project folder.
 
 Once you're all set up, you can compile, minify and run the tests using `grunt`.
