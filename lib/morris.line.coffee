@@ -141,6 +141,18 @@ class Morris.Line extends Morris.Grid
       @hover.hide()
       @hilight()
 
+  escapeHTML:(string) =>
+    map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#x27;',
+        "/": '&#x2F;',
+    };
+    reg = /[&<>"'/]/ig;
+    return string.replace(reg, (match)=>(map[match]));
+
   # hover content for a point
   #
   # @private
@@ -180,7 +192,7 @@ class Morris.Line extends Morris.Grid
         </div>
       """ + content
     
-    content = "<div class='morris-hover-row-label'>#{row.label}</div>" + content
+    content = "<div class='morris-hover-row-label'>"+@escapeHTML(row.label)+"</div>" + content
 
     if typeof @options.hoverCallback is 'function'
       content = @options.hoverCallback(index, @options, content, row.src)

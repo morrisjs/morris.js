@@ -401,13 +401,24 @@ class Morris.Bar extends Morris.Grid
     if @options.hideHover isnt false
       @hover.hide()
 
+  escapeHTML:(string) =>
+    map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#x27;',
+        "/": '&#x2F;',
+    };
+    reg = /[&<>"'/]/ig;
+    return string.replace(reg, (match)=>(map[match]));
+
   # hover content for a point
   #
   # @private
   hoverContentForRow: (index) ->
     row = @data[index]
-    content = "<div class='morris-hover-row-label'>#{row.label}</div>"
-    content = content.prop('outerHTML')
+    content = "<div class='morris-hover-row-label'>"+@escapeHTML(row.label)+"</div>"
 
     inv = []
     for y, jj in row.y

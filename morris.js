@@ -1249,6 +1249,7 @@ Licensed under the BSD-2-Clause License.
 
     function Line(options) {
       this.hilight = __bind(this.hilight, this);
+      this.escapeHTML = __bind(this.escapeHTML, this);
       this.onHoverOut = __bind(this.onHoverOut, this);
       this.onHoverMove = __bind(this.onHoverMove, this);
       this.onGridClick = __bind(this.onGridClick, this);
@@ -1470,6 +1471,23 @@ Licensed under the BSD-2-Clause License.
       }
     };
 
+    Line.prototype.escapeHTML = function(string) {
+      var map, reg,
+        _this = this;
+      map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#x27;',
+        "/": '&#x2F;'
+      };
+      reg = /[&<>"'/]/ig;
+      return string.replace(reg, function(match) {
+        return map[match];
+      });
+    };
+
     Line.prototype.hoverContentForRow = function(index) {
       var axis, content, j, jj, max, max_pos, order, row, y, yy, _i, _j, _k, _l, _len, _len1, _ref, _ref1, _ref2;
       row = this.data[index];
@@ -1514,7 +1532,7 @@ Licensed under the BSD-2-Clause License.
         }
         content = ("<div class='morris-hover-point' style='color: " + (this.colorFor(row, j, 'label')) + "'>\n  " + this.options.labels[j] + ":\n  " + (this.yLabelFormat(row.y[j], j)) + "\n</div>") + content;
       }
-      content = ("<div class='morris-hover-row-label'>" + row.label + "</div>") + content;
+      content = "<div class='morris-hover-row-label'>" + this.escapeHTML(row.label) + "</div>" + content;
       if (typeof this.options.hoverCallback === 'function') {
         content = this.options.hoverCallback(index, this.options, content, row.src);
       }
@@ -2409,6 +2427,7 @@ Licensed under the BSD-2-Clause License.
     __extends(Bar, _super);
 
     function Bar(options) {
+      this.escapeHTML = __bind(this.escapeHTML, this);
       this.onHoverOut = __bind(this.onHoverOut, this);
       this.onHoverMove = __bind(this.onHoverMove, this);
       this.onGridClick = __bind(this.onGridClick, this);
@@ -2949,11 +2968,27 @@ Licensed under the BSD-2-Clause License.
       }
     };
 
+    Bar.prototype.escapeHTML = function(string) {
+      var map, reg,
+        _this = this;
+      map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#x27;',
+        "/": '&#x2F;'
+      };
+      reg = /[&<>"'/]/ig;
+      return string.replace(reg, function(match) {
+        return map[match];
+      });
+    };
+
     Bar.prototype.hoverContentForRow = function(index) {
       var content, inv, j, jj, row, x, y, _i, _j, _len, _len1, _ref;
       row = this.data[index];
-      content = "<div class='morris-hover-row-label'>" + row.label + "</div>";
-      content = content.prop('outerHTML');
+      content = "<div class='morris-hover-row-label'>" + this.escapeHTML(row.label) + "</div>";
       inv = [];
       _ref = row.y;
       for (jj = _i = 0, _len = _ref.length; _i < _len; jj = ++_i) {
