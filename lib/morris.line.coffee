@@ -180,8 +180,7 @@ class Morris.Line extends Morris.Grid
         </div>
       """ + content
     
-    content_hover = $("<div class='morris-hover-row-label'>").text(row.label)
-    content = content_hover.prop('outerHTML') + content
+    content = "<div class='morris-hover-row-label'>#{row.label}</div>" + content
 
     if typeof @options.hoverCallback is 'function'
       content = @options.hoverCallback(index, @options, content, row.src)

@@ -368,7 +368,7 @@ class Morris.Bar extends Morris.Grid
     else
       bodyRect = document.body.getBoundingClientRect()
       pos = y + bodyRect.top
-    
+
     pos = Math.max(Math.min(pos, @xEnd), @xStart)
     Math.min(@data.length - 1,
       Math.floor((pos - @xStart) / (@xSize / @data.length)))
@@ -406,7 +406,7 @@ class Morris.Bar extends Morris.Grid
   # @private
   hoverContentForRow: (index) ->
     row = @data[index]
-    content = $("<div class='morris-hover-row-label'>").text(row.label)
+    content = "<div class='morris-hover-row-label'>#{row.label}</div>"
     content = content.prop('outerHTML')
 
     inv = []
