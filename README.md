@@ -6,6 +6,10 @@ This is an improved work of the great plugin [morris.js](https://github.com/morr
 Examples can be seen in [action](https://pierresh.github.io/morris.js/image.html) and their source codes are available [here](https://github.com/pierresh/morris.js/blob/master/examples/image.html)
 
 ## Changelog
+### 0.6.6 (12th May 2020)
+- Escaping of labels refactored [Issue #15](https://github.com/pierresh/morris.js/issues/15)
+
+
 ### 0.6.5 (4th May 2020)
 - option to display percentage in donut [Issue #12](https://github.com/pierresh/morris.js/issues/12)
 - options pointSize and lineWidth for line curves in combo charts
