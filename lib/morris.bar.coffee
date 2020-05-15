@@ -252,7 +252,8 @@ class Morris.Bar extends Morris.Grid
       @data[idx].label_x = []
       @data[idx].label_y = []
       @seriesBars[idx] = []
-      lastTop = 0
+      lastTop = null
+      lastBottom = null
       if @options.rightAxisBar is true
         nb = row._y.length
       else
@@ -284,9 +285,10 @@ class Morris.Bar extends Morris.Grid
               @drawBar(@yStart, @xStart + idx * groupWidth, @ySize, groupWidth, @options.verticalGridColor, @options.verticalGridOpacity, @options.barRadius)
 
 
-          top -= lastTop if @options.stacked
+
           if not @options.horizontal
-            lastTop += size
+            top += lastTop-bottom if @options.stacked and lastTop?
+            lastTop = top
             if size == 0 && @options.showZero then size = 1
             @seriesBars[idx][sidx] = @drawBar(left, top, barWidth, size, @colorFor(row, sidx, 'bar'),
                 @options.barOpacity, @options.barRadius)
@@ -300,7 +302,7 @@ class Morris.Bar extends Morris.Grid
                 @data[idx].label_y[sidx] = top+depth;
 
           else
-            lastTop -= size
+            lastBottom = bottom
             if size == 0 then size = 1
             @seriesBars[idx][sidx] = @drawBar(top, left, size, barWidth, @colorFor(row, sidx, 'bar'),
                 @options.barOpacity, @options.barRadius)

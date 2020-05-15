@@ -350,7 +350,11 @@ Licensed under the BSD-2-Clause License.
               if (idx < this.options.ykeys.length - this.options.nbYkeys2) {
                 if ((yval != null) && this.hasToShow(idx)) {
                   if (this.cumulative) {
-                    total += yval;
+                    if (total < 0 && yval > 0) {
+                      total = yval;
+                    } else {
+                      total += yval;
+                    }
                   } else {
                     if (ymax != null) {
                       ymax = Math.max(yval, ymax);
@@ -2753,7 +2757,7 @@ Licensed under the BSD-2-Clause License.
     };
 
     Bar.prototype.drawSeries = function() {
-      var barMiddle, barWidth, bottom, depth, groupWidth, i, idx, lastTop, left, leftPadding, nb, numBars, row, sidx, size, spaceLeft, top, ypos, zeroPos, _i, _ref;
+      var barMiddle, barWidth, bottom, depth, groupWidth, i, idx, lastBottom, lastTop, left, leftPadding, nb, numBars, row, sidx, size, spaceLeft, top, ypos, zeroPos, _i, _ref;
       this.seriesBars = [];
       groupWidth = this.xSize / this.options.data.length;
       if (this.options.stacked) {
@@ -2785,7 +2789,8 @@ Licensed under the BSD-2-Clause License.
           this.data[idx].label_x = [];
           this.data[idx].label_y = [];
           this.seriesBars[idx] = [];
-          lastTop = 0;
+          lastTop = null;
+          lastBottom = null;
           if (this.options.rightAxisBar === true) {
             nb = row._y.length;
           } else {
@@ -2825,11 +2830,11 @@ Licensed under the BSD-2-Clause License.
                     this.drawBar(this.yStart, this.xStart + idx * groupWidth, this.ySize, groupWidth, this.options.verticalGridColor, this.options.verticalGridOpacity, this.options.barRadius);
                   }
                 }
-                if (this.options.stacked) {
-                  top -= lastTop;
-                }
                 if (!this.options.horizontal) {
-                  lastTop += size;
+                  if (this.options.stacked && (lastTop != null)) {
+                    top += lastTop - bottom;
+                  }
+                  lastTop = top;
                   if (size === 0 && this.options.showZero) {
                     size = 1;
                   }
@@ -2850,7 +2855,7 @@ Licensed under the BSD-2-Clause License.
                     _results1.push(void 0);
                   }
                 } else {
-                  lastTop -= size;
+                  lastBottom = bottom;
                   if (size === 0) {
                     size = 1;
                   }
