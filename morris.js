@@ -2629,14 +2629,14 @@ Licensed under the BSD-2-Clause License.
         }
         if (path !== "") {
           if (this.options.animate) {
-            rPath = this.raphael.path(straightPath).attr('stroke', this.options.barColors[nb + ii]).attr('stroke-width', this.lineWidthForSeries(ii));
+            rPath = this.raphael.path(straightPath).attr('stroke', this.colorFor(coord, nb + ii, 'bar')).attr('stroke-width', this.lineWidthForSeries(ii));
             _results.push((function(rPath, path) {
               return rPath.animate({
                 path: path
               }, 500, '<>');
             })(rPath, path));
           } else {
-            _results.push(rPath = this.raphael.path(path).attr('stroke', this.options.barColors[nb + ii]).attr('stroke-width', this.lineWidthForSeries(ii)));
+            _results.push(rPath = this.raphael.path(path).attr('stroke', this.colorFor(coord, nb + ii, 'bar')).attr('stroke-width', this.lineWidthForSeries(ii)));
           }
         } else {
           _results.push(void 0);
@@ -2663,10 +2663,10 @@ Licensed under the BSD-2-Clause License.
             circle = null;
             if (row._y2[nb + ii] != null) {
               if (this.options.horizontal === !true) {
-                circle = this.raphael.circle(row._x, row._y2[nb + ii], this.pointSizeForSeries(ii)).attr('fill', this.options.barColors[nb + ii]).attr('stroke-width', 1).attr('stroke', '#ffffff');
+                circle = this.raphael.circle(row._x, row._y2[nb + ii], this.pointSizeForSeries(ii)).attr('fill', this.colorFor(row, nb + ii, 'bar')).attr('stroke-width', 1).attr('stroke', '#ffffff');
                 _results1.push(this.seriesPoints[ii].push(circle));
               } else {
-                circle = this.raphael.circle(row._y2[nb + ii], row._x, this.pointSizeForSeries(ii)).attr('fill', this.options.barColors[nb + ii]).attr('stroke-width', 1).attr('stroke', '#ffffff');
+                circle = this.raphael.circle(row._y2[nb + ii], row._x, this.pointSizeForSeries(ii)).attr('fill', this.colorFor(row, nb + ii, 'bar')).attr('stroke-width', 1).attr('stroke', '#ffffff');
                 _results1.push(this.seriesPoints[ii].push(circle));
               }
             } else {

@@ -113,13 +113,13 @@ class Morris.Bar extends Morris.Grid
       if path != ""
         if @options.animate
           rPath = @raphael.path(straightPath)
-                          .attr('stroke', @options.barColors[nb+ii])
+                          .attr('stroke', @colorFor(coord, nb+ii, 'bar'))
                           .attr('stroke-width', @lineWidthForSeries(ii))
           do (rPath, path) =>
             rPath.animate {path}, 500, '<>'
         else
           rPath = @raphael.path(path)
-                          .attr('stroke', @options.barColors[nb+ii])
+                          .attr('stroke', @colorFor(coord, nb+ii, 'bar'))
                           .attr('stroke-width', @lineWidthForSeries(ii))
 
   drawBarPoints: ->
@@ -132,13 +132,13 @@ class Morris.Bar extends Morris.Grid
         if row._y2[nb+ii]?
           if @options.horizontal is not true
             circle = @raphael.circle(row._x, row._y2[nb+ii], @pointSizeForSeries(ii))
-              .attr('fill', @options.barColors[nb+ii])
+              .attr('fill', @colorFor(row, nb+ii, 'bar'))
               .attr('stroke-width', 1)
               .attr('stroke', '#ffffff')
             @seriesPoints[ii].push(circle)
           else
             circle = @raphael.circle(row._y2[nb+ii], row._x, @pointSizeForSeries(ii))
-              .attr('fill', @options.barColors[nb+ii])
+              .attr('fill', @colorFor(row, nb+ii, 'bar'))
               .attr('stroke-width', 1)
               .attr('stroke', '#ffffff')
             @seriesPoints[ii].push(circle)
