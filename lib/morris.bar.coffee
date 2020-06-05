@@ -303,6 +303,8 @@ class Morris.Bar extends Morris.Grid
 
           else
             lastBottom = bottom
+            top = lastTop if @options.stacked and lastTop?
+            lastTop = top + size
             if size == 0 then size = 1
             @seriesBars[idx][sidx] = @drawBar(top, left, size, barWidth, @colorFor(row, sidx, 'bar'),
                 @options.barOpacity, @options.barRadius)

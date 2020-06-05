@@ -2856,6 +2856,10 @@ Licensed under the BSD-2-Clause License.
                   }
                 } else {
                   lastBottom = bottom;
+                  if (this.options.stacked && (lastTop != null)) {
+                    top = lastTop;
+                  }
+                  lastTop = top + size;
                   if (size === 0) {
                     size = 1;
                   }
