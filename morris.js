@@ -1,5 +1,5 @@
 /* @license
-morris.js06 v0.6.5 
+morris.js06 v0.6.6 
 https://pierresh.github.io/morris.js/
 Copyright 2020 Olly Smith All rights reserved.
 Licensed under the BSD-2-Clause License.
@@ -350,7 +350,11 @@ Licensed under the BSD-2-Clause License.
               if (idx < this.options.ykeys.length - this.options.nbYkeys2) {
                 if ((yval != null) && this.hasToShow(idx)) {
                   if (this.cumulative) {
-                    total += yval;
+                    if (total < 0 && yval > 0) {
+                      total = yval;
+                    } else {
+                      total += yval;
+                    }
                   } else {
                     if (ymax != null) {
                       ymax = Math.max(yval, ymax);
@@ -1249,6 +1253,7 @@ Licensed under the BSD-2-Clause License.
 
     function Line(options) {
       this.hilight = __bind(this.hilight, this);
+      this.escapeHTML = __bind(this.escapeHTML, this);
       this.onHoverOut = __bind(this.onHoverOut, this);
       this.onHoverMove = __bind(this.onHoverMove, this);
       this.onGridClick = __bind(this.onGridClick, this);
@@ -1470,8 +1475,25 @@ Licensed under the BSD-2-Clause License.
       }
     };
 
+    Line.prototype.escapeHTML = function(string) {
+      var map, reg,
+        _this = this;
+      map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#x27;',
+        "/": '&#x2F;'
+      };
+      reg = /[&<>"'/]/ig;
+      return string.replace(reg, function(match) {
+        return map[match];
+      });
+    };
+
     Line.prototype.hoverContentForRow = function(index) {
-      var axis, content, content_hover, j, jj, max, max_pos, order, row, y, yy, _i, _j, _k, _l, _len, _len1, _ref, _ref1, _ref2;
+      var axis, content, j, jj, max, max_pos, order, row, y, yy, _i, _j, _k, _l, _len, _len1, _ref, _ref1, _ref2;
       row = this.data[index];
       content = "";
       order = [];
@@ -1514,8 +1536,7 @@ Licensed under the BSD-2-Clause License.
         }
         content = ("<div class='morris-hover-point' style='color: " + (this.colorFor(row, j, 'label')) + "'>\n  " + this.options.labels[j] + ":\n  " + (this.yLabelFormat(row.y[j], j)) + "\n</div>") + content;
       }
-      content_hover = $("<div class='morris-hover-row-label'>").text(row.label);
-      content = content_hover.prop('outerHTML') + content;
+      content = "<div class='morris-hover-row-label'>" + this.escapeHTML(row.label) + "</div>" + content;
       if (typeof this.options.hoverCallback === 'function') {
         content = this.options.hoverCallback(index, this.options, content, row.src);
       }
@@ -2410,6 +2431,7 @@ Licensed under the BSD-2-Clause License.
     __extends(Bar, _super);
 
     function Bar(options) {
+      this.escapeHTML = __bind(this.escapeHTML, this);
       this.onHoverOut = __bind(this.onHoverOut, this);
       this.onHoverMove = __bind(this.onHoverMove, this);
       this.onGridClick = __bind(this.onGridClick, this);
@@ -2607,14 +2629,14 @@ Licensed under the BSD-2-Clause License.
         }
         if (path !== "") {
           if (this.options.animate) {
-            rPath = this.raphael.path(straightPath).attr('stroke', this.options.barColors[nb + ii]).attr('stroke-width', this.lineWidthForSeries(ii));
+            rPath = this.raphael.path(straightPath).attr('stroke', this.colorFor(coord, nb + ii, 'bar')).attr('stroke-width', this.lineWidthForSeries(ii));
             _results.push((function(rPath, path) {
               return rPath.animate({
                 path: path
               }, 500, '<>');
             })(rPath, path));
           } else {
-            _results.push(rPath = this.raphael.path(path).attr('stroke', this.options.barColors[nb + ii]).attr('stroke-width', this.lineWidthForSeries(ii)));
+            _results.push(rPath = this.raphael.path(path).attr('stroke', this.colorFor(coord, nb + ii, 'bar')).attr('stroke-width', this.lineWidthForSeries(ii)));
           }
         } else {
           _results.push(void 0);
@@ -2641,10 +2663,10 @@ Licensed under the BSD-2-Clause License.
             circle = null;
             if (row._y2[nb + ii] != null) {
               if (this.options.horizontal === !true) {
-                circle = this.raphael.circle(row._x, row._y2[nb + ii], this.pointSizeForSeries(ii)).attr('fill', this.options.barColors[nb + ii]).attr('stroke-width', 1).attr('stroke', '#ffffff');
+                circle = this.raphael.circle(row._x, row._y2[nb + ii], this.pointSizeForSeries(ii)).attr('fill', this.colorFor(row, nb + ii, 'bar')).attr('stroke-width', 1).attr('stroke', '#ffffff');
                 _results1.push(this.seriesPoints[ii].push(circle));
               } else {
-                circle = this.raphael.circle(row._y2[nb + ii], row._x, this.pointSizeForSeries(ii)).attr('fill', this.options.barColors[nb + ii]).attr('stroke-width', 1).attr('stroke', '#ffffff');
+                circle = this.raphael.circle(row._y2[nb + ii], row._x, this.pointSizeForSeries(ii)).attr('fill', this.colorFor(row, nb + ii, 'bar')).attr('stroke-width', 1).attr('stroke', '#ffffff');
                 _results1.push(this.seriesPoints[ii].push(circle));
               }
             } else {
@@ -2735,7 +2757,7 @@ Licensed under the BSD-2-Clause License.
     };
 
     Bar.prototype.drawSeries = function() {
-      var barMiddle, barWidth, bottom, depth, groupWidth, i, idx, lastTop, left, leftPadding, nb, numBars, row, sidx, size, spaceLeft, top, ypos, zeroPos, _i, _ref;
+      var barMiddle, barWidth, bottom, depth, groupWidth, i, idx, lastBottom, lastTop, left, leftPadding, nb, numBars, row, sidx, size, spaceLeft, top, ypos, zeroPos, _i, _ref;
       this.seriesBars = [];
       groupWidth = this.xSize / this.options.data.length;
       if (this.options.stacked) {
@@ -2767,7 +2789,8 @@ Licensed under the BSD-2-Clause License.
           this.data[idx].label_x = [];
           this.data[idx].label_y = [];
           this.seriesBars[idx] = [];
-          lastTop = 0;
+          lastTop = null;
+          lastBottom = null;
           if (this.options.rightAxisBar === true) {
             nb = row._y.length;
           } else {
@@ -2807,11 +2830,11 @@ Licensed under the BSD-2-Clause License.
                     this.drawBar(this.yStart, this.xStart + idx * groupWidth, this.ySize, groupWidth, this.options.verticalGridColor, this.options.verticalGridOpacity, this.options.barRadius);
                   }
                 }
-                if (this.options.stacked) {
-                  top -= lastTop;
-                }
                 if (!this.options.horizontal) {
-                  lastTop += size;
+                  if (this.options.stacked && (lastTop != null)) {
+                    top += lastTop - bottom;
+                  }
+                  lastTop = top;
                   if (size === 0 && this.options.showZero) {
                     size = 1;
                   }
@@ -2832,7 +2855,11 @@ Licensed under the BSD-2-Clause License.
                     _results1.push(void 0);
                   }
                 } else {
-                  lastTop -= size;
+                  lastBottom = bottom;
+                  if (this.options.stacked && (lastTop != null)) {
+                    top = lastTop;
+                  }
+                  lastTop = top + size;
                   if (size === 0) {
                     size = 1;
                   }
@@ -2950,11 +2977,27 @@ Licensed under the BSD-2-Clause License.
       }
     };
 
+    Bar.prototype.escapeHTML = function(string) {
+      var map, reg,
+        _this = this;
+      map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#x27;',
+        "/": '&#x2F;'
+      };
+      reg = /[&<>"'/]/ig;
+      return string.replace(reg, function(match) {
+        return map[match];
+      });
+    };
+
     Bar.prototype.hoverContentForRow = function(index) {
       var content, inv, j, jj, row, x, y, _i, _j, _len, _len1, _ref;
       row = this.data[index];
-      content = $("<div class='morris-hover-row-label'>").text(row.label);
-      content = content.prop('outerHTML');
+      content = "<div class='morris-hover-row-label'>" + this.escapeHTML(row.label) + "</div>";
       inv = [];
       _ref = row.y;
       for (jj = _i = 0, _len = _ref.length; _i < _len; jj = ++_i) {
