@@ -12,7 +12,9 @@
     "javascript",
     "morris.js"
   ],
-  "main": "morris.min.js",
+  "main": "dist/morris.min.js",
+  "module": "dist/morris.esm.js",
+  "types": "dist/types.d.ts",
   "homepage": "http://pierresh.github.com/morris.js",
   "license": "BSD-2-Clause",
   "repository": {
