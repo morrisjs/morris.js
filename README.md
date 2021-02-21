@@ -6,6 +6,11 @@ This is an improved work of the great plugin [morris.js](https://github.com/morr
 Examples can be seen in [action](https://pierresh.github.io/morris.js/image.html) and their source codes are available [here](https://github.com/pierresh/morris.js/blob/master/examples/image.html)
 
 ## Changelog
+### 0.6.7 & 0.6.8 (21st February 2021)
+- npm import (ES6 Module) [Issue #4](https://github.com/pierresh/morris.js/issues/4)
+- TypeScript type definitions
+
+
 ### 0.6.6 (12th May 2020)
 - Escaping of labels refactored [Issue #15](https://github.com/pierresh/morris.js/issues/15)
 

@@ -5,15 +5,13 @@ export interface ChartDonutData {
 	value: number;
 }
 
-export interface ChartBarData {
+export interface ChartData {
 	[key: string]: unknown;
 }
 
-export type ChartLineData = ChartBarData;
-
-export type ChartAreaData = ChartBarData;
-
 export interface ChartDonutOptions {
+	element: string;
+	data: ChartDonutData[];
 	colors?: string[];
 	formatter?: (y: number, data: ChartDonutData) => string;
 	resize?: boolean;
@@ -27,6 +25,8 @@ export interface ChartDonutOptions {
 }
 
 interface GridOptions {
+	element: string;
+	data: ChartData[];
 	ykeys: string[];
 	labels: string[];
 	hideHover?: boolean | 'auto' | 'always';
@@ -52,7 +52,7 @@ export interface ChartBarOptions extends GridOptions {
 		index: number,
 		options: GridOptions,
 		content: string,
-		row: ChartBarData
+		row: ChartData
 	) => void;
 }
 
