@@ -7,7 +7,7 @@ module.exports = function (grunt) {
       lib: {
         options: { bare: false },
         files: {
-          'morris.js': ['build/morris.coffee']
+          'dist/morris.js': ['build/morris.coffee']
         }
       },
       spec: {
@@ -42,7 +42,7 @@ module.exports = function (grunt) {
     less: {
       all: {
         src: 'less/*.less',
-        dest: 'morris.css',
+        dest: 'dist/morris.css',
         options: {
           compress: true
         }
@@ -54,7 +54,7 @@ module.exports = function (grunt) {
           preserveComments: 'some'
         },
         files: {
-          'morris.min.js': 'morris.js'
+          'dist/morris.min.js': 'dist/morris.js'
         }
       }
     }

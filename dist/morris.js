@@ -1,7 +1,7 @@
 /* @license
-morris.js06 v0.6.6 
+morris.js06 v0.6.7
 https://pierresh.github.io/morris.js/
-Copyright 2020 Olly Smith All rights reserved.
+Copyright 2021 Olly Smith All rights reserved.
 Licensed under the BSD-2-Clause License.
 */
 
