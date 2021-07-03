@@ -3,6 +3,7 @@ export { Morris } from './morris.esm';
 export interface ChartDonutData {
 	label: string;
 	value: number;
+	ratio?: number;
 }
 
 export interface ChartData {

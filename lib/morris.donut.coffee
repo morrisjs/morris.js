@@ -123,6 +123,11 @@ class Morris.Donut extends Morris.EventEmitter
       else
         dist = seg.raphael.height - @options.padding * 7
 
+      if @options.data[i].ratio is undefined
+        @options.data[i].ratio = 1
+
+      dist = dist * @options.data[i].ratio
+
       if @options.dataLabels && @values.length >= 1
         p_sin_p0 = Math.sin((last + next)/2);
         p_cos_p0 = Math.cos((last + next)/2);
@@ -278,9 +283,13 @@ class Morris.DonutSegment extends Morris.EventEmitter
     @sin_p1 = Math.sin(p1)
     @cos_p1 = Math.cos(p1)
     @is_long = if (p1 - p0) > Math.PI then 1 else 0
-    @path = @calcSegment(@inner + 3, @inner + @outer - 5)
-    @selectedPath = @calcSegment(@inner + 3, @inner + @outer)
-    @hilight = @calcArc(@inner)
+
+    if @options.data[@index].ratio is undefined
+        @options.data[@index].ratio = 1
+    inner = @inner  * @options.data[@index].ratio
+    @path = @calcSegment(inner + 3, inner + @outer - 5)
+    @selectedPath = @calcSegment(inner + 3, inner + @outer)
+    @hilight = @calcArc(inner)
 
   calcArcPoints: (r) ->
     return [
