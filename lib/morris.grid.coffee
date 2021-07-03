@@ -207,7 +207,7 @@ class Morris.Grid extends Morris.EventEmitter
           if @cumulative and total?
             ymax = Math.max(total, ymax)
             ymin = Math.min(total, ymin)
-        else 
+        else
           if yval? and @hasToShow(idx)
             if @cumulative
               total = yval
@@ -279,7 +279,7 @@ class Morris.Grid extends Morris.EventEmitter
           parseFloat(y.toFixed(2))
 
       if (@options.ymax2 == @gridDefaults.ymax2 and
-          @options.ymin2 == @gridDefaults.ymin2 and 
+          @options.ymin2 == @gridDefaults.ymin2 and
           @options.nbYkeys2 > 0)
         # calculate 'magic' grid placement
         @grid2 = @autoGridLines(@ymin2, @ymax2, @options.numLines)
@@ -348,7 +348,7 @@ class Morris.Grid extends Morris.EventEmitter
       @top = @options.padding
       @bottom = @elementHeight - @options.padding
       if @options.axes in [true, 'both', 'y']
-        if @grid? 
+        if @grid?
           yLabelWidths = for gridLine in @grid
             @measureText(@yAxisFormat(gridLine)).width
 
@@ -465,7 +465,7 @@ class Morris.Grid extends Morris.EventEmitter
     else
       if @options.nbYkeys2 == 0 || (i <= @options.ykeys.length - @options.nbYkeys2 - 1)
         "#{@options.preUnits}#{Morris.commas(label)}#{@options.postUnits}"
-      else 
+      else
         "#{@options.preUnits2}#{Morris.commas(label)}#{@options.postUnits2}"
 
   yLabelFormat_noUnit: (label, i) ->
@@ -732,7 +732,7 @@ class Morris.Grid extends Morris.EventEmitter
       luma = 0.2126 * r + 0.7152 * g + 0.0722 * b
       if luma >= 128
         return false
-      else 
+      else
         return true
     else
       return false

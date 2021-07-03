@@ -36,6 +36,7 @@ interface GridOptions {
 	gridTextSize?: number;
 	gridTextFamily?: string;
 	gridTextWeight?: string;
+	resize?: boolean;
 	fillOpacity?: number;
 	dataLabels?: boolean;
 	dataLabelsPosition?: 'inside' | 'outside' | 'force_outside';
@@ -62,7 +63,7 @@ export interface ChartLineOptions extends GridOptions {
 	lineWidth?: number;
 	pointSize?: number;
 	pointFillColors?: string;
-	pointStrokeColors?: string;
+	pointStrokeColors?: string[];
 	ymax?: string | number;
 	ymin?: string | number;
 	verticalGrid?: boolean;

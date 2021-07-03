@@ -99,5 +99,5 @@ Morris.innerDimensions = (el) ->
   height: parseInt(style.height) +
     parseInt(style.paddingTop) +
     parseInt(style.paddingBottom)
-     
+
 
