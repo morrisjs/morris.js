@@ -84,7 +84,7 @@ class Morris.Line extends Morris.Grid
         if row._y[index]?
           @data[idx].label_x[index] = row._x
           @data[idx].label_y[index] = row._y[index] - 10
-        
+
         if row._y2?
           if row._y2[index]?
             @data[idx].label_x[index] = row._x
@@ -191,12 +191,12 @@ class Morris.Line extends Morris.Grid
           #{@yLabelFormat(row.y[j], j)}
         </div>
       """ + content
-    
+
     content = "<div class='morris-hover-row-label'>"+@escapeHTML(row.label)+"</div>" + content
 
     if typeof @options.hoverCallback is 'function'
       content = @options.hoverCallback(index, @options, content, row.src)
-    
+
     if axis > @options.nbYkeys2 then [content, row._x, row._ymax2]
     else [content, row._x, row._ymax]
 
@@ -215,7 +215,7 @@ class Morris.Line extends Morris.Grid
         # Expect something like lineType: {"key1":"jagged","key2":"smooth","key3":"step","key4":"stepNoRiser",}
       if @options.lineType[@options.ykeys[i]] isnt undefined
         lineType = @options.lineType[@options.ykeys[i]]
-      
+
       nb = @options.ykeys.length - @options.nbYkeys2
       if i < nb
         coords = ({x: r._x, y: r._y[i]} for r in @data when r._y[i] isnt undefined)
@@ -319,7 +319,7 @@ class Morris.Line extends Morris.Grid
       if @hasToShow(i)
         if @options.trendLine isnt false and
             @options.trendLine is true or @options.trendLine[i] is true
-          if @data.length > 0 
+          if @data.length > 0
             @_drawTrendLine i
 
         @_drawLineFor i
@@ -334,7 +334,7 @@ class Morris.Line extends Morris.Grid
       circle = null
       if row._y[index]?
         circle = @drawLinePoint(row._x, row._y[index], @colorFor(row, index, 'point'), index)
-      
+
       if row._y2?
         if row._y2[index]?
           circle = @drawLinePoint(row._x, row._y2[index], @colorFor(row, index, 'point'), index)
@@ -380,8 +380,8 @@ class Morris.Line extends Morris.Grid
     data[0].y = @transY(@data[0].x * a + b)
     data[1].x = @transX(@data[@data.length - 1].x)
     data[1].y = @transY(@data[@data.length - 1].x * a + b)
-    
-    if @options.trendLineType != 'linear' 
+
+    if @options.trendLineType != 'linear'
       if typeof regression is 'function'
         t_off_x = (@xmax - @xmin)/30
         data = []
@@ -407,7 +407,7 @@ class Morris.Line extends Morris.Grid
             data.push({x: @transX(t_x), y: @transY(t_y)})
 
         console.log('Regression formula is: '+reg.string+', r2:'+reg.r2)
-      else 
+      else
         console.log('Warning: regression() is undefined, please ensure that regression.js is loaded')
 
     if !isNaN(a)

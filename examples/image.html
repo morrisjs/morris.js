@@ -43,7 +43,7 @@
             <div id='chart_hist_2' class='chart_morris'></div>
           </div>
           <div class='col-md-3 col-sm-12 text-center'>
-            <h3>Pie chart</h3>
+            <h3>Polar pie chart</h3>
             <div id='chart_pie_3' class='chart_morris'></div>
             <div id='chart_pie_3_legend'></div>
           </div>
@@ -74,7 +74,7 @@
 
   <script src='./lib/raphael.min.js' crossorigin='anonymous'></script>
   <script src='./lib/regression.js' crossorigin='anonymous'></script>
-  <script src='../morris.js' crossorigin='anonymous'></script>
+  <script src='../dist/morris.js' crossorigin='anonymous'></script>
 
   <script>
     Morris.Line({
@@ -174,19 +174,19 @@
     });
 
     pie_data = [
-        {label: 'Africa', value: 5 },
-        {label: 'Asia', value: 5 },
-        {label: 'Europe', value: 14 },
-        {label: 'North America', value: 3 },
-        {label: 'South America', value: 5 }
+        {label: 'Africa', value: 5, ratio: 0.1 },
+        {label: 'Asia', value: 5, ratio: 0.3 },
+        {label: 'Europe', value: 14, ratio: 1 },
+        {label: 'North America', value: 3, ratio: 0.75 },
+        {label: 'South America', value: 5, ratio: 0.6 }
       ];
 
     Morris.Donut({
       element: 'chart_pie_3',
       data: pie_data,
       donutType: 'pie',
-      dataLabels: true,
-      dataLabelsPosition: 'outside'
+      dataLabels: false,
+      dataLabelsPosition: 'inside'
     });
 
     Morris.Area({

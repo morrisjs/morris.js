@@ -1,5 +1,5 @@
 /* @license
-morris.js06 v0.6.8
+morris.js06 v0.6.9 
 https://pierresh.github.io/morris.js/
 Copyright 2021 Olly Smith All rights reserved.
 Licensed under the BSD-2-Clause License.
@@ -3178,6 +3178,10 @@ Licensed under the BSD-2-Clause License.
         } else {
           dist = seg.raphael.height - this.options.padding * 7;
         }
+        if (this.options.data[i].ratio === void 0) {
+          this.options.data[i].ratio = 1;
+        }
+        dist = dist * this.options.data[i].ratio;
         if (this.options.dataLabels && this.values.length >= 1) {
           p_sin_p0 = Math.sin((last + next) / 2);
           p_cos_p0 = Math.cos((last + next) / 2);
@@ -3396,9 +3400,13 @@ Licensed under the BSD-2-Clause License.
       this.sin_p1 = Math.sin(p1);
       this.cos_p1 = Math.cos(p1);
       this.is_long = (p1 - p0) > Math.PI ? 1 : 0;
-      this.path = this.calcSegment(this.inner + 3, this.inner + this.outer - 5);
-      this.selectedPath = this.calcSegment(this.inner + 3, this.inner + this.outer);
-      this.hilight = this.calcArc(this.inner);
+      if (this.options.data[this.index].ratio === void 0) {
+        this.options.data[this.index].ratio = 1;
+      }
+      inner = this.inner * this.options.data[this.index].ratio;
+      this.path = this.calcSegment(inner + 3, inner + this.outer - 5);
+      this.selectedPath = this.calcSegment(inner + 3, inner + this.outer);
+      this.hilight = this.calcArc(inner);
     }
 
     DonutSegment.prototype.calcArcPoints = function(r) {

@@ -24,7 +24,7 @@ class Morris.Donut extends Morris.EventEmitter
       '#b45184'
       '#5f5f5f'
     ],
-    backgroundColor: '#FFFFFF', 
+    backgroundColor: '#FFFFFF',
     labelColor: '#000000',
     padding: 0
     formatter: Morris.commas
@@ -77,7 +77,7 @@ class Morris.Donut extends Morris.EventEmitter
       Morris.on window, 'resize', @resizeHandler
 
     @setData options.data
-  
+
   # Destroy
   #
   destroy: () ->
@@ -123,6 +123,11 @@ class Morris.Donut extends Morris.EventEmitter
       else
         dist = seg.raphael.height - @options.padding * 7
 
+      if @options.data[i].ratio is undefined
+        @options.data[i].ratio = 1
+
+      dist = dist * @options.data[i].ratio
+
       if @options.dataLabels && @values.length >= 1
         p_sin_p0 = Math.sin((last + next)/2);
         p_cos_p0 = Math.cos((last + next)/2);
@@ -136,7 +141,7 @@ class Morris.Donut extends Morris.EventEmitter
         else
           label_x = parseFloat(cx) + parseFloat((dist - 9) * 0.5 * p_sin_p0);
           label_y = parseFloat(cy) + parseFloat((dist - 9) * 0.5 * p_cos_p0);
-        
+
         if @options.dataLabelsColor != 'auto'
           color = @options.dataLabelsColor
         else if @options.dataLabelsPosition == 'inside' && @isColorDark(@options.colors[i]) == true
@@ -158,7 +163,7 @@ class Morris.Donut extends Morris.EventEmitter
 
     max_value = Math.max @values...
     idx = 0
-  
+
     if @options.donutType == 'donut'
       for value in @values
         if value == max_value
@@ -207,7 +212,7 @@ class Morris.Donut extends Morris.EventEmitter
     segment = @segments[idx]
     segment.select()
     row = @data[idx]
-    if @options.donutType == 'donut' 
+    if @options.donutType == 'donut'
 
       if @options.showPercentage && !@options.dataLabels
         finalValue = Math.round(parseFloat(row.value) / parseFloat(@options.total) * 100) + '%'
@@ -228,11 +233,11 @@ class Morris.Donut extends Morris.EventEmitter
       luma = 0.2126 * r + 0.7152 * g + 0.0722 * b
       if luma >= 128
         return false
-      else 
+      else
         return true
     else
       return false
-      
+
   # @private
   setLabels: (label1, label2) ->
     {width, height} = Morris.dimensions(@el)
@@ -260,7 +265,7 @@ class Morris.Donut extends Morris.EventEmitter
     if @timeoutId?
       window.clearTimeout @timeoutId
     @timeoutId = window.setTimeout @debouncedResizeHandler, 100
-  
+
   debouncedResizeHandler: =>
     @timeoutId = null
     {width, height} =  Morris.dimensions @el
@@ -278,9 +283,13 @@ class Morris.DonutSegment extends Morris.EventEmitter
     @sin_p1 = Math.sin(p1)
     @cos_p1 = Math.cos(p1)
     @is_long = if (p1 - p0) > Math.PI then 1 else 0
-    @path = @calcSegment(@inner + 3, @inner + @outer - 5)
-    @selectedPath = @calcSegment(@inner + 3, @inner + @outer)
-    @hilight = @calcArc(@inner)
+
+    if @options.data[@index].ratio is undefined
+        @options.data[@index].ratio = 1
+    inner = @inner  * @options.data[@index].ratio
+    @path = @calcSegment(inner + 3, inner + @outer - 5)
+    @selectedPath = @calcSegment(inner + 3, inner + @outer)
+    @hilight = @calcArc(inner)
 
   calcArcPoints: (r) ->
     return [
@@ -315,12 +324,12 @@ class Morris.DonutSegment extends Morris.EventEmitter
   render: ->
     if !/NaN/.test @hilight
       @arc = @drawDonutArc(@hilight, @color)
-    
+
     if !/NaN/.test @path
       @seg = @drawDonutSegment(
-        @path, 
-        @color, 
-        @backgroundColor, 
+        @path,
+        @color,
+        @backgroundColor,
         => @fire('hover', @index),
         => @fire('click', @index),
         => @fire('mouseout', @index)
@@ -349,13 +358,13 @@ class Morris.DonutSegment extends Morris.EventEmitter
         straightPath = 'M'+straightDots[0]+','+straightDots[1]+','+straightDots[straightDots.length-2]+','+straightDots[straightDots.length-1]+','+straightDots[straightDots.length-2]+','+straightDots[straightDots.length-1]+'Z'
       else
         straightPath = 'M'+straightDots[0]+','+straightDots[1]+','+straightDots[straightDots.length-2]+','+straightDots[straightDots.length-1]+'Z'
-    
+
       rPath = @raphael.path(straightPath)
         .attr(fill: fillColor, stroke: strokeColor, 'stroke-width': 3)
         .hover(hoverFunction)
         .click(clickFunction)
         .mouseout(leaveFunction)
-      
+
       do (rPath, path) =>
         rPath.animate {path}, 500, '<>'
     else
