@@ -1,6 +1,6 @@
 # Morris.js06 - pretty time-series line graphs
 
-This is an improved work of the great plugin [morris.js](https://github.com/morrisjs/morris.js), the simplest chart library for javascript!
+This is an improved work of the great plugin [morris.js](https://github.com/morrisjs/morris.js), the simplest chart library for Javascript and Typescript!
 
 ![examples](examples/image.png)
 Examples can be seen in [action](https://pierresh.github.io/morris.js/image.html) and their source codes are available [here](https://github.com/pierresh/morris.js/blob/master/examples/image.html)
