@@ -6,23 +6,23 @@ class Morris.Grid extends Morris.EventEmitter
   constructor: (options) ->
     # find the container to draw the graph in
     if typeof options.element is 'string'
-      @el = $ document.getElementById(options.element)
+      @el = document.getElementById(options.element)
     else
-      @el = $ options.element
-    if not @el? or @el.length == 0
+      @el = options.element[0] or options.element
+    if not @el?
       throw new Error("Graph container element not found")
 
-    if @el.css('position') == 'static'
-      @el.css('position', 'relative')
+    if Morris.css(@el, 'position') == 'static'
+      @el.style.position = 'relative'
 
-    @options = $.extend {}, @gridDefaults, (@defaults || {}), options
+    @options = Morris.extend {}, @gridDefaults, (@defaults || {}), options
 
     # backwards compatibility for units -> postUnits
     if typeof @options.units is 'string'
       @options.postUnits = options.units
 
     # the raphael drawing instance
-    @raphael = new Raphael(@el[0])
+    @raphael = new Raphael(@el)
 
     # some redraw stuff
     @elementWidth = null
@@ -39,55 +39,26 @@ class Morris.Grid extends Morris.EventEmitter
     @setData @options.data
 
     # hover
-    @el.bind 'mousemove', (evt) =>
-      offset = @el.offset()
-      x = evt.pageX - offset.left
-      if @selectFrom
-        left = @data[@hitTest(Math.min(x, @selectFrom))]._x
-        right = @data[@hitTest(Math.max(x, @selectFrom))]._x
-        width = right - left
-        @selectionRect.attr({ x: left, width: width })
-      else
-        @fire 'hovermove', x, evt.pageY - offset.top
-
-    @el.bind 'mouseleave', (evt) =>
-      if @selectFrom
-        @selectionRect.hide()
-        @selectFrom = null
-      @fire 'hoverout'
-
-    @el.bind 'touchstart touchmove touchend', (evt) =>
-      touch = evt.originalEvent.touches[0] or evt.originalEvent.changedTouches[0]
-      offset = @el.offset()
-      @fire 'hovermove', touch.pageX - offset.left, touch.pageY - offset.top
-
-    @el.bind 'click', (evt) =>
-      offset = @el.offset()
-      @fire 'gridclick', evt.pageX - offset.left, evt.pageY - offset.top
+    Morris.on @el, 'mousemove', @mousemoveHandler
+    Morris.on @el, 'mouseleave', @mouseleaveHandler
+    Morris.on @el, 'touchstart touchmove touchend', @touchHandler
+    Morris.on @el, 'click', @clickHandler
 
     if @options.rangeSelect
-      @selectionRect = @raphael.rect(0, 0, 0, @el.innerHeight())
+      @selectionRect = @raphael.rect(0, 0, 0, Morris.innerDimensions(@el).height)
         .attr({ fill: @options.rangeSelectColor, stroke: false })
         .toBack()
         .hide()
 
-      @el.bind 'mousedown', (evt) =>
-        offset = @el.offset()
-        @startRange evt.pageX - offset.left
+      Morris.on @el, 'mousedown', @mousedownHandler
 
-      @el.bind 'mouseup', (evt) =>
-        offset = @el.offset()
-        @endRange evt.pageX - offset.left
-        @fire 'hovermove', evt.pageX - offset.left, evt.pageY - offset.top
+      Morris.on @el, 'mouseup', @mouseupHandler
 
     if @options.resize
-      $(window).bind 'resize', (evt) =>
-        if @timeoutId?
-          window.clearTimeout @timeoutId
-        @timeoutId = window.setTimeout @resizeHandler, 100
+      Morris.on window, 'resize', @resizeHandler
 
     # Disable tap highlight on iOS.
-    @el.css('-webkit-tap-highlight-color', 'rgba(0,0,0,0)')
+    @el.style.webkitTapHighlightColor = 'rgba(0,0,0,0)'
 
     @postInit() if @postInit
 
@@ -98,46 +69,78 @@ class Morris.Grid extends Morris.EventEmitter
     axes: true
     freePosition: false
     grid: true
+    gridIntegers: false
     gridLineColor: '#aaa'
     gridStrokeWidth: 0.5
     gridTextColor: '#888'
     gridTextSize: 12
     gridTextFamily: 'sans-serif'
     gridTextWeight: 'normal'
-    hideHover: false
+    hideHover: 'auto'
     yLabelFormat: null
     yLabelAlign: 'right'
+    yLabelAlign2: 'left'
     xLabelAngle: 0
     numLines: 5
     padding: 25
     parseTime: true
     postUnits: ''
+    postUnits2: ''
     preUnits: ''
+    preUnits2: ''
     ymax: 'auto'
     ymin: 'auto 0'
+    ymax2: 'auto'
+    ymin2: 'auto 0'
+    regions: []
+    regionsColors: ['#fde4e4']
     goals: []
+    goals2: []
     goalStrokeWidth: 1.0
+    goalStrokeWidth2: 1.0
     goalLineColors: [
-      '#666633'
-      '#999966'
-      '#cc6666'
-      '#663333'
+      'red'
+    ]
+    goalLineColors2: [
+      'red'
     ]
     events: []
     eventStrokeWidth: 1.0
     eventLineColors: [
       '#005a04'
-      '#ccffbb'
-      '#3a5f0b'
-      '#005502'
     ]
     rangeSelect: null
     rangeSelectColor: '#eef'
-    resize: false
+    resize: true,
+    dataLabels: true,
+    dataLabelsPosition: 'outside',
+    dataLabelsFamily: 'sans-serif',
+    dataLabelsSize: 12,
+    dataLabelsWeight: 'normal',
+    dataLabelsColor: 'auto',
+    animate: true
+    nbYkeys2: 0
+    smooth: true
+
+  # Destroy
+  #
+  destroy: () ->
+    Morris.off @el, 'mousemove', @mousemoveHandler
+    Morris.off @el, 'mouseleave', @mouseleaveHandler
+    Morris.off @el, 'touchstart touchmove touchend', @touchHandler
+    Morris.off @el, 'click', @clickHandler
+    if @options.rangeSelect
+      Morris.off @el, 'mousedown', @mousedownHandler
+      Morris.off @el, 'mouseup', @mouseupHandler
+
+    if @options.resize
+      window.clearTimeout @timeoutId
+      Morris.off window, 'resize', @resizeHandler
 
   # Update the data series and redraw the chart.
   #
   setData: (data, redraw = true) ->
+
     @options.data = data
 
     if !data? or data.length == 0
@@ -148,12 +151,22 @@ class Morris.Grid extends Morris.EventEmitter
 
     ymax = if @cumulative then 0 else null
     ymin = if @cumulative then 0 else null
+    ymax2 = if @cumulative then 0 else null
+    ymin2 = if @cumulative then 0 else null
 
     if @options.goals.length > 0
       minGoal = Math.min @options.goals...
       maxGoal = Math.max @options.goals...
       ymin = if ymin? then Math.min(ymin, minGoal) else minGoal
       ymax = if ymax? then Math.max(ymax, maxGoal) else maxGoal
+
+    if @options.goals2.length > 0
+      minGoal = Math.min @options.goals2...
+      maxGoal = Math.max @options.goals2...
+      ymin2 = if ymin2? then Math.min(ymin2, minGoal) else minGoal
+      ymax2 = if ymax2? then Math.max(ymax2, maxGoal) else maxGoal
+
+    if @options.nbYkeys2 > @options.ykeys.length then @options.nbYkeys2 = @options.ykeys.length
 
     @data = for row, index in data
       ret = {src: row}
@@ -178,18 +191,35 @@ class Morris.Grid extends Morris.EventEmitter
         yval = row[ykey]
         yval = parseFloat(yval) if typeof yval is 'string'
         yval = null if yval? and typeof yval isnt 'number'
-        if yval? and @hasToShow(idx)
-          if @cumulative
-            total += yval
-          else
-            if ymax?
-              ymax = Math.max(yval, ymax)
-              ymin = Math.min(yval, ymin)
+        if idx < @options.ykeys.length - @options.nbYkeys2
+          if yval? and @hasToShow(idx)
+            if @cumulative
+              if total < 0 and yval > 0
+                total = yval
+              else
+                total += yval
             else
-              ymax = ymin = yval
-        if @cumulative and total?
-          ymax = Math.max(total, ymax)
-          ymin = Math.min(total, ymin)
+              if ymax?
+                ymax = Math.max(yval, ymax)
+                ymin = Math.min(yval, ymin)
+              else
+                ymax = ymin = yval
+          if @cumulative and total?
+            ymax = Math.max(total, ymax)
+            ymin = Math.min(total, ymin)
+        else
+          if yval? and @hasToShow(idx)
+            if @cumulative
+              total = yval
+            else
+              if ymax2?
+                ymax2 = Math.max(yval, ymax2)
+                ymin2 = Math.min(yval, ymin2)
+              else
+                ymax2 = ymin2 = yval
+          if @cumulative and total?
+            ymax2 = Math.max(total, ymax2)
+            ymin2 = Math.min(total, ymin2)
         yval
       ret
 
@@ -211,7 +241,7 @@ class Morris.Grid extends Morris.EventEmitter
             @events.push(Morris.parseDate(e))
       else
         @events = @options.events
-      flatEvents = $.map @events, (e) -> e
+      flatEvents = @events.map (e) -> e
       @xmax = Math.max(@xmax, Math.max(flatEvents...))
       @xmin = Math.min(@xmin, Math.min(flatEvents...))
 
@@ -221,10 +251,16 @@ class Morris.Grid extends Morris.EventEmitter
 
     @ymin = @yboundary('min', ymin)
     @ymax = @yboundary('max', ymax)
+    @ymin2 = @yboundary('min2', ymin2)
+    @ymax2 = @yboundary('max2', ymax2)
 
     if @ymin is @ymax
       @ymin -= 1 if ymin
       @ymax += 1
+
+    if @ymin2 is @ymax2
+      @ymin2 -= 1 if ymin2
+      @ymax2 += 1
 
     if @options.axes in [true, 'both', 'y'] or @options.grid is true
       if (@options.ymax == @gridDefaults.ymax and
@@ -235,7 +271,24 @@ class Morris.Grid extends Morris.EventEmitter
         @ymax = Math.max(@ymax, @grid[@grid.length - 1])
       else
         step = (@ymax - @ymin) / (@options.numLines - 1)
-        @grid = (y for y in [@ymin..@ymax] by step)
+
+        if @options.gridIntegers
+          step = Math.max(1, Math.round(step));
+
+        @grid = for y in [@ymin..@ymax] by step
+          parseFloat(y.toFixed(2))
+
+      if (@options.ymax2 == @gridDefaults.ymax2 and
+          @options.ymin2 == @gridDefaults.ymin2 and
+          @options.nbYkeys2 > 0)
+        # calculate 'magic' grid placement
+        @grid2 = @autoGridLines(@ymin2, @ymax2, @options.numLines)
+        @ymin2 = Math.min(@ymin2, @grid2[0])
+        @ymax2 = Math.max(@ymax2, @grid2[@grid2.length - 1])
+      else
+        step2 = (@ymax2 - @ymin2) / (@options.numLines - 1)
+        @grid2 = for y in [@ymin2..@ymax2] by step2
+          parseFloat(y.toFixed(2))
 
     @dirty = true
     @redraw() if redraw
@@ -247,7 +300,7 @@ class Morris.Grid extends Morris.EventEmitter
         if boundaryOption.length > 5
           suggestedValue = parseInt(boundaryOption[5..], 10)
           return suggestedValue unless currentValue?
-          Math[boundaryType](currentValue, suggestedValue)
+          Math[boundaryType.substring(0,3)](currentValue, suggestedValue)
         else
           if currentValue? then currentValue else 0
       else
@@ -283,8 +336,7 @@ class Morris.Grid extends Morris.EventEmitter
     grid
 
   _calc: ->
-    w = @el.width()
-    h = @el.height()
+    {width:w, height:h} = Morris.dimensions @el
 
     if @elementWidth != w or @elementHeight != h or @dirty
       @elementWidth = w
@@ -296,13 +348,20 @@ class Morris.Grid extends Morris.EventEmitter
       @top = @options.padding
       @bottom = @elementHeight - @options.padding
       if @options.axes in [true, 'both', 'y']
-        yLabelWidths = for gridLine in @grid
-          @measureText(@yAxisFormat(gridLine)).width
+        if @grid?
+          yLabelWidths = for gridLine in @grid
+            @measureText(@yAxisFormat(gridLine)).width
+
+        if @options.nbYkeys2 > 0
+          yLabelWidths2 = for gridLine in @grid2
+            @measureText(@yAxisFormat2(gridLine)).width
 
         if not @options.horizontal
           @left += Math.max(yLabelWidths...)
+          if @options.nbYkeys2 > 0
+            @right -= Math.max(yLabelWidths2...)
         else
-          @bottom -= Math.max(yLabelWidths...)
+          @bottom -= @options.padding / 2
 
       if @options.axes in [true, 'both', 'x']
         if not @options.horizontal
@@ -324,6 +383,7 @@ class Morris.Grid extends Morris.EventEmitter
       if not @options.horizontal
         @dx = @width / (@xmax - @xmin)
         @dy = @height / (@ymax - @ymin)
+        @dy2 = @height / (@ymax2 - @ymin2)
 
         @yStart = @bottom
         @yEnd = @top
@@ -335,6 +395,7 @@ class Morris.Grid extends Morris.EventEmitter
       else
         @dx = @height / (@xmax - @xmin)
         @dy = @width / (@ymax - @ymin)
+        @dy2 = @width / (@ymax2 - @ymin2)
 
         @yStart = @left
         @yEnd = @right
@@ -353,6 +414,11 @@ class Morris.Grid extends Morris.EventEmitter
       @bottom - (y - @ymin) * @dy
     else
       @left + (y - @ymin) * @dy
+  transY2: (y) ->
+    if not @options.horizontal
+      @bottom - (y - @ymin2) * @dy2
+    else
+      @left + (y - @ymin2) * @dy2
   transX: (x) ->
     if @data.length == 1
       (@xStart + @xEnd) / 2
@@ -368,9 +434,11 @@ class Morris.Grid extends Morris.EventEmitter
     @raphael.clear()
     @_calc()
     @drawGrid()
-    @drawGoals()
+    @drawRegions()
     @drawEvents()
     @draw() if @draw
+    @drawGoals()
+    @setLabels()
 
   # @private
   #
@@ -387,6 +455,7 @@ class Morris.Grid extends Morris.EventEmitter
   # @private
   #
   yAxisFormat: (label) -> @yLabelFormat(label, 0)
+  yAxisFormat2: (label) -> @yLabelFormat(label, 1000)
 
   # @private
   #
@@ -394,7 +463,16 @@ class Morris.Grid extends Morris.EventEmitter
     if typeof @options.yLabelFormat is 'function'
       @options.yLabelFormat(label, i)
     else
-      "#{@options.preUnits}#{Morris.commas(label)}#{@options.postUnits}"
+      if @options.nbYkeys2 == 0 || (i <= @options.ykeys.length - @options.nbYkeys2 - 1)
+        "#{@options.preUnits}#{Morris.commas(label)}#{@options.postUnits}"
+      else
+        "#{@options.preUnits2}#{Morris.commas(label)}#{@options.postUnits2}"
+
+  yLabelFormat_noUnit: (label, i) ->
+    if typeof @options.yLabelFormat is 'function'
+      @options.yLabelFormat(label, i)
+    else
+      "#{Morris.commas(label)}"
 
   # get the X position of a label on the Y axis
   #
@@ -413,23 +491,44 @@ class Morris.Grid extends Morris.EventEmitter
 
     if not @options.horizontal
       basePos = @getYAxisLabelX()
+      basePos2 = @right + @options.padding / 2
     else
       basePos = @getXAxisLabelY()
+      basePos2 = @top - (@options.xAxisLabelTopPadding || @options.padding / 2)
 
-    for lineY in @grid
-      pos = @transY(lineY)
-      if @options.axes in [true, 'both', 'y']
-        if not @options.horizontal
-          @drawYAxisLabel(basePos, pos, @yAxisFormat(lineY))
-        else
-          @drawXAxisLabel(pos, basePos, @yAxisFormat(lineY))
+    if @grid?
+      for lineY in @grid
+        pos = @transY(lineY)
+        if @options.axes in [true, 'both', 'y']
+          if not @options.horizontal
+            @drawYAxisLabel(basePos, pos, @yAxisFormat(lineY), 1)
+          else
+            @drawXAxisLabel(pos, basePos, @yAxisFormat(lineY))
 
-      if @options.grid
-        pos = Math.floor(pos) + 0.5
-        if not @options.horizontal
-          @drawGridLine("M#{@xStart},#{pos}H#{@xEnd}")
-        else
-          @drawGridLine("M#{pos},#{@xStart}V#{@xEnd}")
+        if @options.grid
+          pos = Math.floor(pos) + 0.5
+          if not @options.horizontal
+            if isNaN(@xEnd)
+              @xEnd = 20
+            @drawGridLine("M#{@xStart},#{pos}H#{@xEnd}")
+          else
+            @drawGridLine("M#{pos},#{@xStart}V#{@xEnd}")
+
+    if @options.nbYkeys2 > 0
+      for lineY in @grid2
+        pos = @transY2(lineY)
+        if @options.axes in [true, 'both', 'y']
+          if not @options.horizontal
+            @drawYAxisLabel(basePos2, pos, @yAxisFormat2(lineY), 2)
+          else
+            @drawXAxisLabel(pos, basePos2, @yAxisFormat2(lineY))
+
+  # draw horizontal regions
+  #
+  drawRegions: ->
+    for region, i in @options.regions
+      color = @options.regionsColors[i % @options.regionsColors.length]
+      @drawRegion(region, color)
 
   # draw goals horizontal lines
   #
@@ -438,11 +537,16 @@ class Morris.Grid extends Morris.EventEmitter
       color = @options.goalLineColors[i % @options.goalLineColors.length]
       @drawGoal(goal, color)
 
+    for goal, i in @options.goals2
+      color = @options.goalLineColors2[i % @options.goalLineColors2.length]
+      @drawGoal2(goal, color)
+
   # draw events vertical lines
   drawEvents: ->
-    for event, i in @events
-      color = @options.eventLineColors[i % @options.eventLineColors.length]
-      @drawEvent(event, color)
+    if @events?
+      for event, i in @events
+        color = @options.eventLineColors[i % @options.eventLineColors.length]
+        @drawEvent(event, color)
 
   drawGoal: (goal, color) ->
     y = Math.floor(@transY(goal)) + 0.5
@@ -454,6 +558,48 @@ class Morris.Grid extends Morris.EventEmitter
     @raphael.path(path)
       .attr('stroke', color)
       .attr('stroke-width', @options.goalStrokeWidth)
+
+  drawGoal2: (goal, color) ->
+    y = Math.floor(@transY2(goal)) + 0.5
+    if not @options.horizontal
+      path = "M#{@xStart},#{y}H#{@xEnd}"
+    else
+      path = "M#{y},#{@xStart}V#{@xEnd}"
+
+    @raphael.path(path)
+      .attr('stroke', color)
+      .attr('stroke-width', @options.goalStrokeWidth2)
+
+  drawRegion: (region, color) ->
+    if region instanceof Array
+      from = Math.min(Math.max(region...), @ymax)
+      to = Math.max(Math.min(region...), @ymin)
+      if not @options.horizontal
+        from = Math.floor(@transY(from))
+        to = Math.floor(@transY(to)) - from
+        @raphael.rect(@xStart, from, @xEnd-@xStart, to)
+          .attr({ fill: color, stroke: false })
+          .toBack()
+      else
+        to = Math.floor(@transY(to))
+        from = Math.floor(@transY(from)) - to
+        @raphael.rect(to, @xStart, from, @xEnd - @xStart)
+          .attr({ fill: color, stroke: false })
+          .toBack()
+
+    else
+      if not @options.horizontal
+        y = Math.floor(@transY(area)) + 1
+        path = "M#{@xStart},#{y}H#{@xEnd}"
+        @raphael.path(path)
+          .attr('stroke', color)
+          .attr('stroke-width', 2)
+      else
+        y = Math.floor(@transY(area)) + 1
+        path = "M#{y},#{@xStart}V#{@xEnd}"
+        @raphael.path(path)
+          .attr('stroke', color)
+          .attr('stroke-width', 2)
 
   drawEvent: (event, color) ->
     if event instanceof Array
@@ -481,16 +627,22 @@ class Morris.Grid extends Morris.EventEmitter
         .attr('stroke', color)
         .attr('stroke-width', @options.eventStrokeWidth)
 
-  drawYAxisLabel: (xPos, yPos, text) ->
+  drawYAxisLabel: (xPos, yPos, text, yaxis) ->
     label = @raphael.text(xPos, yPos, text)
       .attr('font-size', @options.gridTextSize)
       .attr('font-family', @options.gridTextFamily)
       .attr('font-weight', @options.gridTextWeight)
       .attr('fill', @options.gridTextColor)
-    if @options.yLabelAlign == 'right'
-      label.attr('text-anchor', 'end')
+    if yaxis == 1
+      if @options.yLabelAlign == 'right'
+        label.attr('text-anchor', 'end')
+      else
+        label.attr('text-anchor', 'start')
     else
-      label.attr('text-anchor', 'start')
+      if @options.yLabelAlign2 == 'left'
+        label.attr('text-anchor', 'start')
+      else
+        label.attr('text-anchor', 'end')
 
   drawXAxisLabel: (xPos, yPos, text) ->
     @raphael.text(xPos, yPos, text)
@@ -520,14 +672,119 @@ class Morris.Grid extends Morris.EventEmitter
         end: @data[@hitTest(end)].x
       @selectFrom = null
 
+  mousemoveHandler: (evt) =>
+    offset = Morris.offset(@el)
+    x = evt.pageX - offset.left
+    if @selectFrom
+      left = @data[@hitTest(Math.min(x, @selectFrom))]._x
+      right = @data[@hitTest(Math.max(x, @selectFrom))]._x
+      width = right - left
+      @selectionRect.attr({ x: left, width: width })
+    else
+      @fire 'hovermove', x, evt.pageY - offset.top
+
+  mouseleaveHandler: (evt) =>
+    if @selectFrom
+      @selectionRect.hide()
+      @selectFrom = null
+    @fire 'hoverout'
+
+  touchHandler: (evt) =>
+    touch = evt.originalEvent.touches[0] or evt.originalEvent.changedTouches[0]
+    offset = Morris.offset(@el)
+    @fire 'hovermove', touch.pageX - offset.left, touch.pageY - offset.top
+
+  clickHandler: (evt) =>
+    offset = Morris.offset(@el)
+    @fire 'gridclick', evt.pageX - offset.left, evt.pageY - offset.top
+
+  mousedownHandler: (evt) =>
+    offset = Morris.offset(@el)
+    @startRange evt.pageX - offset.left
+
+  mouseupHandler: (evt) =>
+    offset = Morris.offset(@el)
+    @endRange evt.pageX - offset.left
+    @fire 'hovermove', evt.pageX - offset.left, evt.pageY - offset.top
+
   resizeHandler: =>
+    if @timeoutId?
+      window.clearTimeout @timeoutId
+    @timeoutId = window.setTimeout @debouncedResizeHandler, 100
+
+  debouncedResizeHandler: =>
     @timeoutId = null
-    @raphael.setSize @el.width(), @el.height()
+    {width, height} = Morris.dimensions @el
+    @raphael.setSize width, height
+    @options.animate = false
     @redraw()
 
   hasToShow: (i) =>
     @options.shown is true or @options.shown[i] is true
 
+  isColorDark: (hex) ->
+    if hex?
+      hex = hex.substring(1)
+      rgb = parseInt(hex, 16)
+      r = (rgb >> 16) & 0xff
+      g = (rgb >>  8) & 0xff
+      b = (rgb >>  0) & 0xff
+      luma = 0.2126 * r + 0.7152 * g + 0.0722 * b
+      if luma >= 128
+        return false
+      else
+        return true
+    else
+      return false
+
+  drawDataLabel: (xPos, yPos, text, color) ->
+    label = @raphael.text(xPos, yPos, text)
+                    .attr('text-anchor', 'middle')
+                    .attr('font-size', @options.dataLabelsSize)
+                    .attr('font-family', @options.dataLabelsFamily)
+                    .attr('font-weight', @options.dataLabelsWeight)
+                    .attr('fill', color)
+
+  drawDataLabelExt: (xPos, yPos, text, anchor, color) ->
+    label = @raphael.text(xPos, yPos, text)
+                    .attr('text-anchor', anchor)
+                    .attr('font-size', @options.dataLabelsSize)
+                    .attr('font-family', @options.dataLabelsFamily)
+                    .attr('font-weight', @options.dataLabelsWeight)
+                    .attr('fill', color)
+
+  setLabels: =>
+
+    if @options.dataLabels
+      for row in @data
+        for ykey, index in @options.ykeys
+
+          if @options.dataLabelsColor != 'auto'
+            color = @options.dataLabelsColor
+          else if @options.stacked == true && @isColorDark(@options.barColors[index%@options.barColors.length]) == true
+            color = '#fff'
+          else
+            color = '#000'
+
+          if @options.lineColors? and @options.lineType?
+            if row.label_y[index]?
+              @drawDataLabel(row._x, row.label_y[index], this.yLabelFormat_noUnit(row.y[index], 0), color)
+
+            if row._y2?
+              if row._y2[index]?
+                @drawDataLabel(row._x, row._y2[index] - 10, this.yLabelFormat_noUnit(row.y[index], 1000), color)
+
+          else
+            if row.label_y[index]?
+              if @options.horizontal is not true
+                @drawDataLabel(row.label_x[index], row.label_y[index],@yLabelFormat_noUnit(row.y[index], index), color)
+              else
+                @drawDataLabelExt(row.label_x[index], row.label_y[index], @yLabelFormat_noUnit(row.y[index]), 'start', color)
+            else if row._y2[index]?
+              if @options.horizontal is not true
+                @drawDataLabel(row._x, row._y2[index] - 10,@yLabelFormat_noUnit(row.y[index], index), color)
+              else
+                @drawDataLabelExt(row._y2[index], row._x - 10, @yLabelFormat_noUnit(row.y[index]), 'middle', color)
 
 # Parse a date into a javascript timestamp
 #

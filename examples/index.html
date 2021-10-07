@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang='en'>
+  <head>
+    <!-- Required meta tags -->
+    <meta charset='utf-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1, shrink-to-fit=no'>
+
+    <!-- Bootstrap CSS -->
+    <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css' integrity='sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm' crossorigin='anonymous'>
+    <link rel='stylesheet' href='https://pierresh.github.io/morris.js/css/morris.css' crossorigin='anonymous'>
+    <script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
+
+    <title>Morris.js 0.6</title>
+    <style>
+      h1, h2 {
+        font-weight: 300;
+        margin-top: 20px;
+        margin-bottom: 20px;
+      }
+      h3 { font-weight: 300; }
+      .chart_morris {
+        height: 250px;
+        background-color: #fff;
+      }
+      canvas { max-height: 250px; }
+    </style>
+  </head>
+<body>
+  <div class='container-fluid' style='padding-left: 0; padding-right: 0;'>
+    <div style='background-color: #fff; color: #4E4852;'>
+      <div class='container'>
+        <div class='row'>
+          <div class='col-md-4 col-sm-12 text-center'>
+            <h3>Standard line chart 
+              <span class='float-right'>
+                <a id='std_line' tabindex='0' class='btn btn-lg btn-link btn-sm' role='button' data-toggle='popover' data-trigger='click' data-html='true' >
+                  <i class='fas fa-info-circle'></i>
+                </a>
+              </span>
+            </h3>
+            <div id='chart_line_1' class='chart_morris'></div>
+          </div>
+          <div class='col-md-4 col-sm-12 text-center'>
+            <h3>
+              Non-linear trend line
+              <span class='float-right'>
+                <a tabindex='0' class='btn btn-lg btn-link btn-sm' role='button' data-toggle='popover' data-trigger='click' data-html='true' data-content="<pre><code>...<br>lineWidth: 0,<br>trendLine: true,<br>trendLineType: 'polynomial',<br>...</code></pre>">
+                  <i class='fas fa-info-circle'></i>
+                </a>
+              </span>
+            </h3>
+            <div id='chart_line_2' class='chart_morris'></div>
+          </div>
+          <div class='col-md-4 col-sm-12 text-center'>
+            <h3>
+              Step chart 
+              <span class='float-right'>
+                <a tabindex='0' class='btn btn-lg btn-link btn-sm' role='button' data-toggle='popover' data-trigger='click' data-html='true' data-content="<pre><code>...<br>lineType: 'step',<br>...</code></pre>">
+                  <i class='fas fa-info-circle'></i>
+                </a>
+              </span>
+            </h3>
+            <div id='chart_line_3' class='chart_morris'></div>
+          </div>
+        </div>
+      </div>
+      <hr>
+      <div class='container'>
+        <div class='row'>
+          <div class='col-md-4 col-sm-12 text-center'>
+            <h3>
+              Standard bar chart
+              <span class='float-right'>
+                <a id='std_bar' tabindex='0' class='btn btn-lg btn-link btn-sm' role='button' data-toggle='popover' data-trigger='click' data-html='true'>
+                  <i class='fas fa-info-circle'></i>
+                </a>
+              </span>
+            </h3>
+            <div id='chart_hist_1' class='chart_morris'></div>
+          </div>
+          <div class='col-md-4 col-sm-12 text-center'>
+            <h3>
+              Horizontal bar chart
+              <span class='float-right'>
+                <a tabindex='0' class='btn btn-lg btn-link btn-sm' role='button' data-toggle='popover' data-trigger='click' data-html='true' data-content="<pre><code>...<br>horizontal: true<br>...</code></pre>">
+                  <i class='fas fa-info-circle'></i>
+                </a>
+              </span>
+            </h3>
+            <div id='chart_hist_2' class='chart_morris'></div>
+          </div>
+          <div class='col-md-4 col-sm-12 text-center'>
+            <h3>
+              Combo chart
+              <span class='float-right'>
+                <a id='combo_bar' tabindex='0' class='btn btn-lg btn-link btn-sm' role='button' data-toggle='popover' data-trigger='click' data-html='true'>
+                  <i class='fas fa-info-circle'></i>
+                </a>
+              </span>
+            </h3>
+            <div id='chart_hist_3' class='chart_morris'></div>
+          </div>
+        </div>
+      </div>
+      <hr>
+      <div class='container'>
+        <div class='row' style='margin-bottom: 20px;'>
+          <div class='col-md-4 col-sm-12 text-center'>
+            <h3>
+              Standard donut chart
+              <span class='float-right'>
+                <a id='std_donut' tabindex='0' class='btn btn-lg btn-link btn-sm' role='button' data-toggle='popover' data-trigger='click' data-html='true'>
+                  <i class='fas fa-info-circle'></i>
+                </a>
+              </span>
+            </h3>
+            <div id='chart_pie_1' class='chart_morris'></div>
+            <div id='chart_pie_1_legend' class='text-center'></div>
+          </div>
+          <div class='col-md-4 col-sm-12 text-center'>
+            <h3>
+              Datalabels
+              <span class='float-right'>
+                <a tabindex='0' class='btn btn-lg btn-link btn-sm' role='button' data-toggle='popover' data-trigger='click' data-html='true' data-content="<pre><code>...<br>dataLabels: true,<br>dataLabelsPosition: 'outside',<br>showPercentage: true,<br>...</code></pre>">
+                  <i class='fas fa-info-circle'></i>
+                </a>
+              </span>
+            </h3>
+            <div id='chart_pie_2' class='chart_morris'></div>
+            <div id='chart_pie_2_legend' class='text-center'></div>
+          </div>
+          <div class='col-md-4 col-sm-12 text-center'>
+            <h3>
+              Pie chart
+              <span class='float-right'>
+                <a tabindex='0' class='btn btn-lg btn-link btn-sm' role='button' data-toggle='popover' data-trigger='click' data-html='true' data-content="<pre><code class='text-left'>...<br>dataLabels: true,<br>donutType: 'pie',<br>...</code></pre>">
+                  <i class='fas fa-info-circle'></i>
+                </a>
+              </span>
+            </h3>
+            <div id='chart_pie_3' class='chart_morris'></div>
+            <div id='chart_pie_3_legend'></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src='https://code.jquery.com/jquery-3.2.1.slim.min.js' integrity='sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN' crossorigin='anonymous'></script>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js' integrity='sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q' crossorigin='anonymous'></script>
+  <script src='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js' integrity='sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl' crossorigin='anonymous'></script>
+
+  <script src='./lib/raphael.min.js' crossorigin='anonymous'></script>
+  <script src='./lib/regression.js' crossorigin='anonymous'></script>
+  <script src='../dist/morris.js' crossorigin='anonymous'></script>
+
+  <script>
+    Morris.Line({
+      element: 'chart_line_1',
+      data: [
+        {year: '1958', nb: 1},
+        {year: '1962', nb: 2},
+        {year: '1970', nb: 3},
+        {year: '1994', nb: 4},
+        {year: '2002', nb: 5},
+      ],
+      xkey: 'year',
+      ykeys: ['nb'],
+      labels: ['Editions Wins']
+    });
+
+    Morris.Line({
+      element: 'chart_line_2',
+      data: [
+        {year: '1958', nb: 1},
+        {year: '1962', nb: 2},
+        {year: '1970', nb: 3},
+        {year: '1994', nb: 4},
+        {year: '2002', nb: 5},
+      ],
+      lineWidth: 0,
+      trendLine: true,
+      trendLineType: 'polynomial',
+      xkey: 'year',
+      ykeys: ['nb'],
+      labels: ['Editions Wins']
+    });
+
+    Morris.Line({
+      element: 'chart_line_3',
+      data: [
+        {year: '1958', nb: 1},
+        {year: '1962', nb: 2},
+        {year: '1970', nb: 3},
+        {year: '1994', nb: 4},
+        {year: '2002', nb: 5},
+      ],
+      xkey: 'year',
+      ykeys: ['nb'],
+      labels: ['Editions Wins'],
+      lineType: 'step'
+    });
+
+    Morris.Bar({
+      element: 'chart_hist_1',
+      data: [
+        {team: 'Brazil', nb: 5},
+        {team: 'Italy', nb: 4},
+        {team: 'Germany', nb: 4},
+        {team: 'Uruguay', nb: 2},
+        {team: 'Argentina', nb: 2},
+      ],
+      xkey: 'team',
+      ykeys: ['nb'],
+      labels: ['Editions Wins'],
+    });
+
+    Morris.Bar({
+      element: 'chart_hist_2',
+      data: [
+        {team: 'Brazil', nb: 5},
+        {team: 'Italy', nb: 4},
+        {team: 'Germany', nb: 4},
+        {team: 'Uruguay', nb: 2},
+        {team: 'Argentina', nb: 2},
+      ],
+      horizontal: true,
+      xkey: 'team',
+      ykeys: ['nb'],
+      labels: ['Editions Wins'],
+    });
+
+    Morris.Bar({
+      element: 'chart_hist_3',
+      data: [
+        {team: 'Brazil', nb: 5, avg: 2.2},
+        {team: 'Italy', nb: 4, avg: 1.9},
+        {team: 'Germany', nb: 4, avg: 2.1},
+        {team: 'Uruguay', nb: 2, avg: 1.4},
+        {team: 'Argentina', nb: 2, avg: 1.8},
+      ],
+      xkey: 'team',
+      ykeys: ['nb', 'avg'],
+      labels: ['Editions Wins', 'Average Points'],
+      nbYkeys2: 1,
+    });
+
+    pie_data = [
+        {label: 'Africa', value: 5 },
+        {label: 'Asia', value: 5 },
+        {label: 'Europe', value: 14 },
+        {label: 'North America', value: 3 },
+        {label: 'South America', value: 5 }
+      ];
+
+    Morris.Donut({
+      element: 'chart_pie_1',
+      data: pie_data
+    }).options.colors.forEach(function(color, a){ 
+      if (pie_data[a] != undefined) {
+        var node = document.createElement('span');
+        node.innerHTML += '<span style="color:'+color+'"><i style="margin-left: 15px;" class="fas fa-square"></i> '+pie_data[a].label+'</span>';
+        document.getElementById("chart_pie_1_legend").appendChild(node);
+      }
+    });
+
+    Morris.Donut({
+      element: 'chart_pie_2',
+      data: pie_data,
+      dataLabels: true,
+      showPercentage: true,
+      dataLabelsPosition: 'outside'
+    }).options.colors.forEach(function(color, a){ 
+      if (pie_data[a] != undefined) {
+        var node = document.createElement('span');
+        node.innerHTML += '<span style="color:'+color+'"><i style="margin-left: 15px;" class="fas fa-square"></i> '+pie_data[a].label+'</span>';
+        document.getElementById("chart_pie_2_legend").appendChild(node);
+      }
+    });
+
+    Morris.Donut({
+      element: 'chart_pie_3',
+      data: pie_data,
+      donutType: 'pie',
+      dataLabels: true
+    }).options.colors.forEach(function(color, a){ 
+      if (pie_data[a] != undefined) {
+        var node = document.createElement('span');
+        node.innerHTML += '<span style="color:'+color+'"><i style="margin-left: 15px;" class="fas fa-square"></i> '+pie_data[a].label+'</span>';
+        document.getElementById("chart_pie_3_legend").appendChild(node);
+      }
+    });
+
+    $(function () {
+      var tmp_content = "Morris.Line({<br>&emsp;element: 'chart_line_1',<br>&emsp;data: [<br>&emsp;&emsp;{year: '1958', nb: 1},<br>&emsp;&emsp;{year: '1962', nb: 2},<br>&emsp;&emsp;{year: '1970', nb: 3},<br>&emsp;&emsp;{year: '1994', nb: 4},<br>&emsp;&emsp;{year: '2002', nb: 5},<br>&emsp;],<br>&emsp;xkey: 'year',<br>&emsp;ykeys: ['nb'],<br>&emsp;labels: ['Editions Wins'],<br>});";
+      $('#std_line').popover({content: tmp_content, html: true});
+  
+      tmp_content = "Morris.Bar({<br>&emsp;element: 'chart_hist_1',<br>&emsp;data: [<br>&emsp;&emsp;{team: 'Brazil', nb: 5},<br>&emsp;&emsp;{team: 'Italy', nb: 4},<br>&emsp;&emsp;{team: 'Germany', nb: 4},<br>&emsp;&emsp;{team: 'Uruguay', nb: 2},<br>&emsp;&emsp;{team: 'Argentina', nb: 2},<br>&emsp;],<br>&emsp;xkey: 'team',<br>&emsp;ykeys: ['nb'],<br>&emsp;labels: ['Editions Wins'],<br>});";
+      $('#std_bar').popover({content: tmp_content, html: true});
+
+      tmp_content = "Morris.Bar({<br>&emsp;element: 'chart_hist_3',<br>&emsp;data: [<br>&emsp;&emsp;{team: 'Brazil', nb: 5, avg: 2.2},<br>&emsp;&emsp;{team: 'Italy', nb: 4, avg: 1.9},<br>&emsp;&emsp;{team: 'Germany', nb: 4, avg: 2.1},<br>&emsp;&emsp;{team: 'Uruguay', nb: 2, avg: 1.4},<br>&emsp;&emsp;{team: 'Argentina', nb: 2, avg: 1.8},<br>],<br>&emsp;xkey: 'team',<br>&emsp;ykeys: ['nb', 'avg'],<br>&emsp;labels: ['Editions Wins', 'Average Points'],<br>&emsp;<strong>nbYkeys2: 1</strong><br>});";
+      $('#combo_bar').popover({content: tmp_content, html: true});
+
+      tmp_content = "Morris.Donut({<br>&emsp;element: 'chart_pie_1',<br>&emsp;data: [<br>&emsp;&emsp;{label: 'Africa', value: 5 },<br>&emsp;&emsp;{label: 'Asia', value: 5 },<br>&emsp;&emsp;{label: 'Europe', value: 14 },<br>&emsp;&emsp;{label: 'North America', value: 3 },<br>&emsp;&emsp;{label: 'South America', value: 5 }<br>&emsp;]<br>});";
+      $('#std_donut').popover({content: tmp_content, html: true});
+
+      $('[data-toggle="popover"]').popover();
+    });
+  </script>
+</body>
+</html>

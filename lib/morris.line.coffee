@@ -18,28 +18,35 @@ class Morris.Line extends Morris.Grid
   defaults:
     lineWidth: 3
     pointSize: 4
+    pointSizeGrow: 3
     lineColors: [
-      '#0b62a4'
-      '#7A92A3'
-      '#4da74d'
-      '#afd8f8'
-      '#edc240'
-      '#cb4b4b'
-      '#9440ed'
+      '#2f7df6'
+      '#53a351'
+      '#f6c244'
+      '#cb444a'
+      '#4aa0b5'
+      '#222529'
     ]
+    extraClassLine: ''
+    extraClassCircle: ''
     pointStrokeWidths: [1]
     pointStrokeColors: ['#ffffff']
     pointFillColors: []
+    pointSuperimposed: true
+    hoverOrdered: false
+    hoverReversed: false
     smooth: true
+    lineType: {}
     shown: true
     xLabels: 'auto'
     xLabelFormat: null
-    xLabelMargin: 24
+    xLabelMargin: 0
     verticalGrid: false
     verticalGridHeight: 'full'
     verticalGridStartOffset: 0
-    hideHover: false
+    verticalGridType: ''
     trendLine: false
+    trendLineType: 'linear'
     trendLineWidth: 2
     trendLineWeight: false
     trendLineColors: [
@@ -61,9 +68,37 @@ class Morris.Line extends Morris.Grid
   calcPoints: ->
     for row in @data
       row._x = @transX(row.x)
-      row._y = for y in row.y
-        if y? then @transY(y) else y
+      row._y = for y, ii in row.y
+        if ii < @options.ykeys.length - @options.nbYkeys2
+          if y? then @transY(y) else y
+      row._y2 = for y, ii in row.y
+        if ii >= @options.ykeys.length - @options.nbYkeys2
+          if y? then @transY2(y) else y
       row._ymax = Math.min [@bottom].concat(y for y, i in row._y when y? and @hasToShow(i))...
+      row._ymax2 = Math.min [@bottom].concat(y for y, i in row._y2 when y? and @hasToShow(i))...
+
+    for row, idx in @data
+      @data[idx].label_x = []
+      @data[idx].label_y = []
+      for index in [@options.ykeys.length-1..0]
+        if row._y[index]?
+          @data[idx].label_x[index] = row._x
+          @data[idx].label_y[index] = row._y[index] - 10
+
+        if row._y2?
+          if row._y2[index]?
+            @data[idx].label_x[index] = row._x
+            @data[idx].label_y[index] = row._y2[index] - 10
+
+    if @options.pointSuperimposed is not true
+      for row in @data
+        for point,idx in row._y
+          count = 0
+          for v, i in row._y
+            if point == v and typeof point is 'number' then count++
+          if count > 1
+            row._y[idx] = row._y[idx] + count * (this.lineWidthForSeries(idx))
+            if this.lineWidthForSeries(idx) > 1 then row._y[idx] = row._y[idx] - 1
 
   # hit test - returns the index of the row at the given x-coordinate
   #
@@ -106,38 +141,89 @@ class Morris.Line extends Morris.Grid
       @hover.hide()
       @hilight()
 
+  escapeHTML:(string) =>
+    map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#x27;',
+        "/": '&#x2F;',
+    };
+    reg = /[&<>"'/]/ig;
+    return string.replace(reg, (match)=>(map[match]));
+
   # hover content for a point
   #
   # @private
   hoverContentForRow: (index) ->
     row = @data[index]
-    content = $("<div class='morris-hover-row-label'>").text(row.label)
-    content = content.prop('outerHTML')
-    for y, j in row.y
+    content = ""
+
+    order = []
+    if @options.hoverOrdered is true
+      for yy, jj in row.y
+        max = null
+        max_pos = -1
+        for y, j in row.y
+          if j not in order
+            if max <= y || max is null
+              max = y
+              max_pos = j
+        order.push(max_pos)
+    else
+      for yy, jj in row.y by -1
+        order.push(jj)
+
+    if @options.hoverReversed is true then order = order.reverse()
+
+    axis = -1;
+    for j in order by -1
       if @options.labels[j] is false
         continue
 
-      content += """
+      if row.y[j] != undefined and axis == -1
+        axis = j
+
+      content = """
         <div class='morris-hover-point' style='color: #{@colorFor(row, j, 'label')}'>
           #{@options.labels[j]}:
-          #{@yLabelFormat(y, j)}
+          #{@yLabelFormat(row.y[j], j)}
         </div>
-      """
+      """ + content
+
+    content = "<div class='morris-hover-row-label'>"+@escapeHTML(row.label)+"</div>" + content
+
     if typeof @options.hoverCallback is 'function'
       content = @options.hoverCallback(index, @options, content, row.src)
-    [content, row._x, row._ymax]
 
+    if axis > @options.nbYkeys2 then [content, row._x, row._ymax2]
+    else [content, row._x, row._ymax]
 
   # generate paths for series lines
   #
   # @private
   generatePaths: ->
     @paths = for i in [0...@options.ykeys.length]
+      # Keep 'smooth' option handling for compatibility
       smooth = if typeof @options.smooth is "boolean" then @options.smooth else @options.ykeys[i] in @options.smooth
-      coords = ({x: r._x, y: r._y[i]} for r in @data when r._y[i] isnt undefined)
+      lineType = if smooth then 'smooth' else 'jagged'
+      # Handle 'lineType' option
+      if typeof @options.lineType is "string"
+        lineType = @options.lineType
+      else
+        # Expect something like lineType: {"key1":"jagged","key2":"smooth","key3":"step","key4":"stepNoRiser",}
+      if @options.lineType[@options.ykeys[i]] isnt undefined
+        lineType = @options.lineType[@options.ykeys[i]]
+
+      nb = @options.ykeys.length - @options.nbYkeys2
+      if i < nb
+        coords = ({x: r._x, y: r._y[i]} for r in @data when r._y[i] isnt undefined)
+      else
+        coords = ({x: r._x, y: r._y2[i]} for r in @data when r._y2[i] isnt undefined)
 
       if coords.length > 1
-        Morris.Line.createPath coords, smooth, @bottom
+        Morris.Line.createPath coords, lineType, @bottom, i, @options.ykeys.length, @options.lineWidth
       else
         null
 
@@ -173,7 +259,7 @@ class Morris.Line extends Morris.Grid
       if (not prevLabelMargin? or
           prevLabelMargin >= labelBox.x + labelBox.width or
           prevAngleMargin? and prevAngleMargin >= labelBox.x) and
-         labelBox.x >= 0 and (labelBox.x + labelBox.width) < @el.width()
+          labelBox.x >= 0 and (labelBox.x + labelBox.width) < Morris.dimensions(@el).width
         if @options.xLabelAngle != 0
           margin = 1.25 * @options.gridTextSize /
             Math.sin(@options.xLabelAngle * Math.PI / 180.0)
@@ -216,7 +302,13 @@ class Morris.Line extends Morris.Grid
       yEnd = @yEnd
     else
       yEnd = @yStart - @options.verticalGridHeight
-    @drawGridLine("M#{xpos},#{yStart}V#{yEnd}")
+    @drawGridLineVert("M#{xpos},#{yStart}V#{yEnd}")
+
+  drawGridLineVert: (path) ->
+    @raphael.path(path)
+      .attr('stroke', @options.gridLineColor)
+      .attr('stroke-width', @options.gridStrokeWidth)
+      .attr('stroke-dasharray', @options.verticalGridType)
 
   # draw the data series
   #
@@ -227,7 +319,8 @@ class Morris.Line extends Morris.Grid
       if @hasToShow(i)
         if @options.trendLine isnt false and
             @options.trendLine is true or @options.trendLine[i] is true
-          @_drawTrendLine i
+          if @data.length > 0
+            @_drawTrendLine i
 
         @_drawLineFor i
 
@@ -237,10 +330,15 @@ class Morris.Line extends Morris.Grid
 
   _drawPointFor: (index) ->
     @seriesPoints[index] = []
-    for row in @data
+    for row, idx in @data
       circle = null
       if row._y[index]?
         circle = @drawLinePoint(row._x, row._y[index], @colorFor(row, index, 'point'), index)
+
+      if row._y2?
+        if row._y2[index]?
+          circle = @drawLinePoint(row._x, row._y2[index], @colorFor(row, index, 'point'), index)
+
       @seriesPoints[index].push(circle)
 
   _drawLineFor: (index) ->
@@ -255,22 +353,24 @@ class Morris.Line extends Morris.Grid
     sum_xx = 0
     sum_xy = 0
     datapoints = 0
+    plots = []
 
     for val, i in @data
       x = val.x
       y = val.y[index]
-      if y is undefined
-        continue
-      if @options.trendLineWeight is false
-        weight = 1
-      else
-        weight = @options.data[i][@options.trendLineWeight]
-      datapoints += weight
 
-      sum_x += x * weight
-      sum_y += y * weight
-      sum_xx += x * x * weight
-      sum_xy += x * y * weight
+      if y?
+        plots.push([x,y])
+        if @options.trendLineWeight is false
+          weight = 1
+        else
+          weight = @options.data[i][@options.trendLineWeight]
+        datapoints += weight
+
+        sum_x += x * weight
+        sum_y += y * weight
+        sum_xx += x * x * weight
+        sum_xy += x * y * weight
 
     a = (datapoints*sum_xy - sum_x*sum_y) / (datapoints*sum_xx - sum_x*sum_x)
     b = (sum_y / datapoints) - ((a * sum_x) / datapoints)
@@ -281,24 +381,56 @@ class Morris.Line extends Morris.Grid
     data[1].x = @transX(@data[@data.length - 1].x)
     data[1].y = @transY(@data[@data.length - 1].x * a + b)
 
-    path = Morris.Line.createPath data, false, @bottom
-    path = @raphael.path(path)
-      .attr('stroke', @colorFor(null, index, 'trendLine'))
-      .attr('stroke-width', @options.trendLineWidth)
+    if @options.trendLineType != 'linear'
+      if typeof regression is 'function'
+        t_off_x = (@xmax - @xmin)/30
+        data = []
+        if @options.trendLineType == 'polynomial'
+          reg = regression('polynomial', plots, 2);
+          for i in [0..30]
+            t_x = @xmin + i * t_off_x
+            t_y = reg.equation[2] * t_x * t_x + reg.equation[1] * t_x + reg.equation[0]
+            data.push({x: @transX(t_x), y: @transY(t_y)})
+
+        else if @options.trendLineType == 'logarithmic'
+          reg = regression('logarithmic', plots);
+          for i in [0..30]
+            t_x = @xmin + i * t_off_x
+            t_y = reg.equation[0] + reg.equation[1] * Math.log(t_x)
+            data.push({x: @transX(t_x), y: @transY(t_y)})
+
+        else if @options.trendLineType == 'exponential'
+          reg = regression('exponential', plots);
+          for i in [0..30]
+            t_x = @xmin + i * t_off_x
+            t_y = reg.equation[0] + Math.exp(reg.equation[1] * t_x)
+            data.push({x: @transX(t_x), y: @transY(t_y)})
+
+        console.log('Regression formula is: '+reg.string+', r2:'+reg.r2)
+      else
+        console.log('Warning: regression() is undefined, please ensure that regression.js is loaded')
+
+    if !isNaN(a)
+      path = Morris.Line.createPath data, 'jagged', @bottom
+      path = @raphael.path(path)
+        .attr('stroke', @colorFor(null, index, 'trendLine'))
+        .attr('stroke-width', @options.trendLineWidth)
 
 
   # create a path for a data series
   #
   # @private
-  @createPath: (coords, smooth, bottom) ->
+  @createPath: (coords, lineType, bottom, index, nb, lineWidth) ->
+    # index, nb and lineWidth are only used for lineType == 'vertical'
+
     path = ""
-    grads = Morris.Line.gradients(coords) if smooth
+    grads = Morris.Line.gradients(coords) if lineType == 'smooth'
 
     prevCoord = {y: null}
     for coord, i in coords
       if coord.y?
         if prevCoord.y?
-          if smooth
+          if lineType == 'smooth'
             g = grads[i]
             lg = grads[i - 1]
             ix = (coord.x - prevCoord.x) / 4
@@ -307,10 +439,24 @@ class Morris.Line extends Morris.Grid
             x2 = coord.x - ix
             y2 = Math.min(bottom, coord.y - ix * g)
             path += "C#{x1},#{y1},#{x2},#{y2},#{coord.x},#{coord.y}"
-          else
+          else if lineType == 'jagged'
             path += "L#{coord.x},#{coord.y}"
+          else if  lineType == 'step'
+            path += "L#{coord.x},#{prevCoord.y}"
+            path += "L#{coord.x},#{coord.y}"
+          else if  lineType == 'stepNoRiser'
+            path += "L#{coord.x},#{prevCoord.y}"
+            path += "M#{coord.x},#{coord.y}"
+          else if  lineType == 'vertical'
+            path += "L#{prevCoord.x-(nb-1)*(lineWidth/nb)+index*lineWidth},#{prevCoord.y}"
+            path += "L#{prevCoord.x-(nb-1)*(lineWidth/nb)+index*lineWidth},#{bottom}"
+            path += "M#{coord.x-(nb-1)*(lineWidth/nb)+index*lineWidth},#{bottom}"
+            if (coords.length == (i+1))
+              # Display the last vertical line
+              path += "L#{coord.x-(nb-1)*(lineWidth/nb)+index*lineWidth},#{coord.y}"
+              path += "L#{coord.x-(nb-1)*(lineWidth/nb)+index*lineWidth},#{bottom}"
         else
-          if not smooth or grads[i]?
+          if lineType != 'smooth' or grads[i]?
             path += "M#{coord.x},#{coord.y}"
       prevCoord = coord
     return path
@@ -358,15 +504,56 @@ class Morris.Line extends Morris.Grid
       @options.lineColors[sidx % @options.lineColors.length]
 
   drawLinePath: (path, lineColor, lineIndex) ->
-    @raphael.path(path)
-      .attr('stroke', lineColor)
-      .attr('stroke-width', @lineWidthForSeries(lineIndex))
+    if @options.animate
+      straightPath = ''
+      for row, ii in @data
+        if straightPath == ''
+          if lineIndex >= @options.ykeys.length - @options.nbYkeys2
+            if row._y2[lineIndex]?
+              straightPath = 'M'+row._x+','+@transY2(@ymin2)
+          else if row._y[lineIndex]?
+            if @options.lineType != 'vertical'
+              straightPath = 'M'+row._x+','+@transY(@ymin)
+            else
+              straightPath = 'M'+row._x+','+@transY(0)+'L'+row._x+','+@transY(0)+'L'+row._x+','+@transY(0)
+        else
+          if lineIndex >= @options.ykeys.length - @options.nbYkeys2
+            if row._y2[lineIndex]?
+              straightPath += ','+row._x+','+@transY2(@ymin2)
+              if @options.lineType == 'step' then straightPath += ','+row._x+','+@transY2(@ymin2)
+          else if row._y[lineIndex]?
+            if @options.lineType != 'vertical'
+              straightPath += ','+row._x+','+@transY(@ymin)
+            else
+              row_x = row._x-(this.options.ykeys.length-1)*(this.options.lineWidth / this.options.ykeys.length)+lineIndex*this.options.lineWidth;
+              straightPath += 'M'+row_x+','+@transY(0)+'L'+row_x+','+@transY(0)+'L'+row_x+','+@transY(0)
+            if @options.lineType == 'step' then straightPath += ','+row._x+','+@transY(@ymin)
+
+      rPath = @raphael.path(straightPath)
+                      .attr('stroke', lineColor)
+                      .attr('stroke-width', this.lineWidthForSeries(lineIndex))
+                      .attr('class', @options.extraClassLine)
+                      .attr('class', 'line_'+lineIndex)
+      if @options.cumulative
+        do (rPath, path) =>
+          rPath.animate {path}, 600, '<>'
+      else
+        do (rPath, path) =>
+          rPath.animate {path}, 500, '<>'
+    else
+      @raphael.path(path)
+        .attr('stroke', lineColor)
+        .attr('stroke-width', @lineWidthForSeries(lineIndex))
+        .attr('class', @options.extraClassLine)
+        .attr('class', 'line_'+lineIndex)
 
   drawLinePoint: (xPos, yPos, pointColor, lineIndex) ->
     @raphael.circle(xPos, yPos, @pointSizeForSeries(lineIndex))
       .attr('fill', pointColor)
       .attr('stroke-width', @pointStrokeWidthForSeries(lineIndex))
       .attr('stroke', @pointStrokeColorForSeries(lineIndex))
+      .attr('class', @options.extraClassCircle)
+      .attr('class', 'circle_line_'+lineIndex)
 
   # @private
   pointStrokeWidthForSeries: (index) ->
@@ -394,7 +581,7 @@ class Morris.Line extends Morris.Grid
   pointGrowSeries: (index) ->
     if @pointSizeForSeries(index) is 0
       return
-    Raphael.animation r: @pointSizeForSeries(index) + 3, 25, 'linear'
+    Raphael.animation r: @pointSizeForSeries(index) + @options.pointSizeGrow, 25, 'linear'
 
   # @private
   pointShrinkSeries: (index) ->
@@ -419,7 +606,7 @@ Morris.labelSeries = (dmin, dmax, pxwidth, specName, xLabelFormat) ->
     spec = Morris.LABEL_SPECS["second"]
   # check if there's a user-defined formatting function
   if xLabelFormat
-    spec = $.extend({}, spec, {fmt: xLabelFormat})
+    spec = Morris.extend({}, spec, {fmt: xLabelFormat})
   # calculate labels
   d = spec.start(d0)
   ret = []

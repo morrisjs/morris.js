@@ -1,7 +1,7 @@
 class Morris.Bar extends Morris.Grid
   constructor: (options) ->
     return new Morris.Bar(options) unless (@ instanceof Morris.Bar)
-    super($.extend {}, options, parseTime: false)
+    super(Morris.extend {}, options, parseTime: false)
 
   init: ->
     @cumulative = @options.stacked
@@ -16,27 +16,31 @@ class Morris.Bar extends Morris.Grid
   #
   defaults:
     barSizeRatio: 0.75
+    pointSize: 4,
+    lineWidth: 3,
     barGap: 3
     barColors: [
-      '#0b62a4'
-      '#7a92a3'
-      '#4da74d'
-      '#afd8f8'
-      '#edc240'
-      '#cb4b4b'
-      '#9440ed'
+      '#2f7df6'
+      '#53a351'
+      '#f6c244'
+      '#cb444a'
+      '#4aa0b5'
+      '#222529'
     ],
     barOpacity: 1.0
     barHighlightOpacity: 1.0
     highlightSpeed: 150
     barRadius: [0, 0, 0, 0]
-    xLabelMargin: 50
+    xLabelMargin: 0
     horizontal: false
+    stacked: false
     shown: true
+    showZero: true
     inBarValue: false
     inBarValueTextColor: 'white'
     inBarValueMinTopMargin: 1
     inBarValueRightMargin: 4
+    rightAxisBar: false
 
   # Do any size-related calculations
   #
@@ -52,14 +56,106 @@ class Morris.Bar extends Morris.Grid
   calcBars: ->
     for row, idx in @data
       row._x = @xStart + @xSize * (idx + 0.5) / @data.length
-      row._y = for y in row.y
-        if y? then @transY(y) else null
+      row._y = for y, ii in row.y
+        if ii < @options.ykeys.length - @options.nbYkeys2
+          if y? then @transY(y) else null
+      row._y2 = for y, ii in row.y
+        if ii >= @options.ykeys.length - @options.nbYkeys2
+          if y? then @transY2(y) else null
 
   # Draws the bar chart.
   #
   draw: ->
     @drawXAxis() if @options.axes in [true, 'both', 'x']
     @drawSeries()
+    if @options.rightAxisBar is not true
+      @drawBarLine()
+      @drawBarPoints()
+
+  drawBarLine: ->
+    nb = @options.ykeys.length - @options.nbYkeys2
+    for dim, ii in @options.ykeys[nb...@options.ykeys.length] by 1
+      path = ""
+      straightPath = ""
+      if @options.horizontal is not true
+        coords = ({x: r._x, y: r._y2[nb+ii]} for r in @data when r._y2[nb+ii] isnt undefined)
+      else
+        coords = ({x: r._y2[nb+ii], y: r._x} for r in @data when r._y2[nb+ii] isnt undefined)
+      grads = Morris.Line.gradients(coords) if @options.smooth
+      prevCoord = {y: null}
+      for coord, i in coords
+        if coord.y?
+          if prevCoord.y?
+            if @options.smooth and @options.horizontal is not true
+              g = grads[i]
+              lg = grads[i - 1]
+              ix = (coord.x - prevCoord.x) / 4
+              x1 = prevCoord.x + ix
+              y1 = Math.min(@bottom, prevCoord.y + ix * lg)
+              x2 = coord.x - ix
+              y2 = Math.min(@bottom, coord.y - ix * g)
+              path += "C#{x1},#{y1},#{x2},#{y2},#{coord.x},#{coord.y}"
+            else
+              path += "L#{coord.x},#{coord.y}"
+            if @options.horizontal is true
+              straightPath += 'L'+@transY(0)+','+coord.y
+            else
+              straightPath += 'L'+coord.x+','+@transY(0)
+          else
+            if not @options.smooth or grads[i]?
+              path += "M#{coord.x},#{coord.y}"
+              if @options.horizontal is true
+                straightPath += 'M'+@transY(0)+','+coord.y
+              else
+                straightPath += 'M'+coord.x+','+@transY(0)
+        prevCoord = coord
+
+      if path != ""
+        if @options.animate
+          rPath = @raphael.path(straightPath)
+                          .attr('stroke', @colorFor(coord, nb+ii, 'bar'))
+                          .attr('stroke-width', @lineWidthForSeries(ii))
+          do (rPath, path) =>
+            rPath.animate {path}, 500, '<>'
+        else
+          rPath = @raphael.path(path)
+                          .attr('stroke', @colorFor(coord, nb+ii, 'bar'))
+                          .attr('stroke-width', @lineWidthForSeries(ii))
+
+  drawBarPoints: ->
+    nb = @options.ykeys.length - @options.nbYkeys2
+    @seriesPoints = []
+    for dim, ii in @options.ykeys[nb...@options.ykeys.length] by 1
+      @seriesPoints[ii] = []
+      for row, idx in @data
+        circle = null
+        if row._y2[nb+ii]?
+          if @options.horizontal is not true
+            circle = @raphael.circle(row._x, row._y2[nb+ii], @pointSizeForSeries(ii))
+              .attr('fill', @colorFor(row, nb+ii, 'bar'))
+              .attr('stroke-width', 1)
+              .attr('stroke', '#ffffff')
+            @seriesPoints[ii].push(circle)
+          else
+            circle = @raphael.circle(row._y2[nb+ii], row._x, @pointSizeForSeries(ii))
+              .attr('fill', @colorFor(row, nb+ii, 'bar'))
+              .attr('stroke-width', 1)
+              .attr('stroke', '#ffffff')
+            @seriesPoints[ii].push(circle)
+
+  # @private
+  lineWidthForSeries: (index) ->
+    if (@options.lineWidth instanceof Array)
+      @options.lineWidth[index % @options.lineWidth.length]
+    else
+      @options.lineWidth
+
+  # @private
+  pointSizeForSeries: (index) ->
+    if (@options.pointSize instanceof Array)
+      @options.pointSize[index % @options.pointSize.length]
+    else
+      @options.pointSize
 
   # draw the x-axis labels
   #
@@ -78,7 +174,7 @@ class Morris.Bar extends Morris.Grid
       if not @options.horizontal
         label = @drawXAxisLabel(row._x, basePos, row.label)
       else
-        label = @drawYAxisLabel(basePos, row._x - 0.5 * @options.gridTextSize, row.label)
+        label = @drawYAxisLabel(basePos, row._x - 0.5 * @options.gridTextSize, row.label, 1)
 
 
       if not @options.horizontal
@@ -97,15 +193,15 @@ class Morris.Bar extends Morris.Grid
           Math.cos(angle * Math.PI / 180.0)
         label.transform("t#{offset},0...")
 
-
+      {width, height} = Morris.dimensions @el
       if not @options.horizontal
         startPos = labelBox.x
         size = labelBox.width
-        maxSize = @el.width()
+        maxSize = width
       else
         startPos = labelBox.y
         size = labelBox.height
-        maxSize = @el.height()
+        maxSize = height
 
       # try to avoid overlaps
       if (not prevLabelMargin? or
@@ -145,15 +241,29 @@ class Morris.Bar extends Morris.Grid
         if @hasToShow(i)
           numBars += 1
 
+    if @options.stacked is not true and @options.rightAxisBar is false
+      numBars = numBars - @options.nbYkeys2
     barWidth = (groupWidth * @options.barSizeRatio - @options.barGap * (numBars - 1)) / numBars
     barWidth = Math.min(barWidth, @options.barSize) if @options.barSize
     spaceLeft = groupWidth - barWidth * numBars - @options.barGap * (numBars - 1)
     leftPadding = spaceLeft / 2
     zeroPos = if @ymin <= 0 and @ymax >= 0 then @transY(0) else null
     @bars = for row, idx in @data
+      @data[idx].label_x = []
+      @data[idx].label_y = []
       @seriesBars[idx] = []
-      lastTop = 0
-      for ypos, sidx in row._y
+      lastTop = null
+      lastBottom = null
+      if @options.rightAxisBar is true
+        nb = row._y.length
+      else
+        nb = row._y.length - @options.nbYkeys2
+      for ypos, sidx in row._y[0...nb]
+        if row._y[sidx]?
+          ypos = row._y[sidx]
+        else if row._y2[sidx]?
+          ypos = row._y2[sidx]
+
         if not @hasToShow(sidx)
           continue
         if ypos != null
@@ -175,15 +285,37 @@ class Morris.Bar extends Morris.Grid
               @drawBar(@yStart, @xStart + idx * groupWidth, @ySize, groupWidth, @options.verticalGridColor, @options.verticalGridOpacity, @options.barRadius)
 
 
-          top -= lastTop if @options.stacked
+
           if not @options.horizontal
-            lastTop += size
+            top += lastTop-bottom if @options.stacked and lastTop?
+            lastTop = top
+            if size == 0 && @options.showZero then size = 1
             @seriesBars[idx][sidx] = @drawBar(left, top, barWidth, size, @colorFor(row, sidx, 'bar'),
                 @options.barOpacity, @options.barRadius)
+            if @options.dataLabels
+              if @options.dataLabelsPosition=='inside' || (@options.stacked && @options.dataLabelsPosition!='force_outside')
+                depth = (size)/2
+              else
+                depth = -7
+              if size>@options.dataLabelsSize || !@options.stacked || @options.dataLabelsPosition=='force_outside'
+                @data[idx].label_x[sidx] = left+barWidth/2;
+                @data[idx].label_y[sidx] = top+depth;
+
           else
-            lastTop -= size
+            lastBottom = bottom
+            top = lastTop if @options.stacked and lastTop?
+            lastTop = top + size
+            if size == 0 then size = 1
             @seriesBars[idx][sidx] = @drawBar(top, left, size, barWidth, @colorFor(row, sidx, 'bar'),
                 @options.barOpacity, @options.barRadius)
+            if @options.dataLabels
+              if @options.stacked || @options.dataLabelsPosition=='inside'
+                  @data[idx].label_x[sidx] = top + size / 2;
+                  @data[idx].label_y[sidx] = left + barWidth / 2;
+
+                else
+                  @data[idx].label_x[sidx] = top + size + 5;
+                  @data[idx].label_y[sidx] = left + barWidth / 2;
 
             if @options.inBarValue and
                 barWidth > @options.gridTextSize + 2*@options.inBarValueMinTopMargin
@@ -198,9 +330,9 @@ class Morris.Bar extends Morris.Grid
         else
           null
 
-    @flat_bars = $.map @bars, (n) -> return n
-    @flat_bars = $.grep @flat_bars, (n) -> return n?
-    @bar_els = $($.map @flat_bars, (n) -> return n[0])
+    #@flat_bars = $.map @bars, (n) -> return n
+    #@flat_bars = $.grep @flat_bars, (n) -> return n?
+    #@bar_els = $($.map @flat_bars, (n) -> return n[0])
 
   # hightlight the bar on hover
   #
@@ -238,20 +370,21 @@ class Morris.Bar extends Morris.Grid
     if not @options.horizontal
       pos = x
     else
-      pos = y
+      bodyRect = document.body.getBoundingClientRect()
+      pos = y + bodyRect.top
 
     pos = Math.max(Math.min(pos, @xEnd), @xStart)
     Math.min(@data.length - 1,
       Math.floor((pos - @xStart) / (@xSize / @data.length)))
 
-
+  #/
   # click on grid event handler
   #
   # @private
   onGridClick: (x, y) =>
     index = @hitTest(x, y)
-    bar_hit = !!@bar_els.filter(() -> $(@).is(':hover')).length
-    @fire 'click', index, @data[index].src, x, y, bar_hit
+    #bar_hit = !!@bar_els.filter(() -> $(@).is(':hover')).length
+    @fire 'click', index, @data[index].src, x, y
 
   # hover movement event handler
   #
@@ -272,14 +405,32 @@ class Morris.Bar extends Morris.Grid
     if @options.hideHover isnt false
       @hover.hide()
 
+  escapeHTML:(string) =>
+    map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#x27;',
+        "/": '&#x2F;',
+    };
+    reg = /[&<>"'/]/ig;
+    return string.replace(reg, (match)=>(map[match]));
+
   # hover content for a point
   #
   # @private
   hoverContentForRow: (index) ->
     row = @data[index]
-    content = $("<div class='morris-hover-row-label'>").text(row.label)
-    content = content.prop('outerHTML')
-    for y, j in row.y
+    content = "<div class='morris-hover-row-label'>"+@escapeHTML(row.label)+"</div>"
+
+    inv = []
+    for y, jj in row.y
+      inv.unshift(y)
+
+    for y, jj in inv
+
+      j = row.y.length - 1 - jj
       if @options.labels[j] is false
         continue
 
@@ -302,10 +453,22 @@ class Morris.Bar extends Morris.Grid
 
   drawBar: (xPos, yPos, width, height, barColor, opacity, radiusArray) ->
     maxRadius = Math.max(radiusArray...)
-    if maxRadius == 0 or maxRadius > height
-      path = @raphael.rect(xPos, yPos, width, height)
+    if @options.animate
+      if @options.horizontal
+        if maxRadius == 0 or maxRadius > height
+          path = @raphael.rect(@transY(0), yPos, 0, height).animate({x:xPos,width:width}, 500)
+        else
+          path = @raphael.path @roundedRect(@transY(0), yPos+height, width, 0, radiusArray).animate({y: yPos, height: height}, 500)
+      else
+        if maxRadius == 0 or maxRadius > height
+          path = @raphael.rect(xPos, @transY(0), width, 0).animate({y:yPos, height:height}, 500)
+        else
+          path = @raphael.path @roundedRect(xPos, @transY(0), width, 0, radiusArray).animate({y: yPos, height: height}, 500)
     else
-      path = @raphael.path @roundedRect(xPos, yPos, width, height, radiusArray)
+      if maxRadius == 0 or maxRadius > height
+        path = @raphael.rect(xPos, yPos, width, height)
+      else
+        path = @raphael.path @roundedRect(xPos, yPos, width, height, radiusArray)
     path
       .attr('fill', barColor)
       .attr('fill-opacity', opacity)

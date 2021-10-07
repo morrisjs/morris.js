@@ -7,7 +7,7 @@ module.exports = function (grunt) {
       lib: {
         options: { bare: false },
         files: {
-          'morris.js': ['build/morris.coffee']
+          'dist/morris.js': ['build/morris.coffee']
         }
       },
       spec: {
@@ -21,10 +21,10 @@ module.exports = function (grunt) {
       'build/morris.coffee': {
         options: {
           banner: "### @license\n"+
-                  "<%= pkg.name %> v<%= pkg.version %>\n"+
+                  "<%= pkg.name %> v<%= pkg.version %> \n"+
+                  "https://pierresh.github.io/morris.js/\n"+
                   "Copyright <%= (new Date()).getFullYear() %> <%= pkg.author.name %> All rights reserved.\n" +
-                  "Licensed under the <%= pkg.license %> License.\n" +
-                  "###\n",
+                  "Licensed under the <%= pkg.license %> License. ###\n",
         },
         src: [
           'lib/morris.coffee',
@@ -42,7 +42,7 @@ module.exports = function (grunt) {
     less: {
       all: {
         src: 'less/*.less',
-        dest: 'morris.css',
+        dest: 'dist/morris.css',
         options: {
           compress: true
         }
@@ -54,37 +54,11 @@ module.exports = function (grunt) {
           preserveComments: 'some'
         },
         files: {
-          'morris.min.js': 'morris.js'
-        }
-      }
-    },
-    mocha: {
-      index: ['spec/specs.html'],
-      options: {run: true}
-    },
-    watch: {
-      all: {
-        files: ['lib/**/*.coffee', 'spec/lib/**/*.coffee', 'spec/support/**/*.coffee', 'less/**/*.less'],
-        tasks: 'default'
-      },
-      dev: {
-        files:  'lib/*.coffee' ,
-        tasks: ['concat:build/morris.coffee', 'coffee:lib']
-      }
-    },
-    shell: {
-      visual_spec: {
-        command: './run.sh',
-        options: {
-          stdout: true,
-          failOnError: true,
-          execOptions: {
-            cwd: 'spec/viz'
-          }
+          'dist/morris.min.js': 'dist/morris.js'
         }
       }
     }
   });
 
-  grunt.registerTask('default', ['concat', 'coffee', 'less', 'uglify', 'mocha', 'shell:visual_spec']);
+  grunt.registerTask('default', ['concat', 'coffee', 'less', 'uglify']);
 };

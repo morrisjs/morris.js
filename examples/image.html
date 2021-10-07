@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang='en'>
+  <head>
+    <!-- Required meta tags -->
+    <meta charset='utf-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1, shrink-to-fit=no'>
+
+    <!-- Bootstrap CSS -->
+    <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css' integrity='sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm' crossorigin='anonymous'>
+    <link rel='stylesheet' href='https://pierresh.github.io/morris.js/css/morris.css' crossorigin='anonymous'>
+    <script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
+
+    <title>Morris.js 0.6</title>
+    <style>
+      h1, h2 {
+        font-weight: 300;
+        margin-top: 20px;
+        margin-bottom: 20px;
+      }
+      h3 { font-weight: 300; }
+      .chart_morris {
+        height: 250px;
+        background-color: #fff;
+      }
+      canvas { max-height: 250px; }
+    </style>
+  </head>
+<body>
+  <div class='container-fluid' style='padding-left: 0; padding-right: 0;'>
+    <div style='background-color: #fff; color: #4E4852;'>
+      <div class='container-fluid'>
+        <div class='row'>
+          <div class='col-md-3 col-sm-12 text-center'>
+            <h3>Right Y-Axis</h3>
+            <div id='chart_line_0' class='chart_morris'></div>
+          </div>
+          <div class='col-md-3 col-sm-12 text-center'>
+            <h3>Combo chart</h3>
+            <div id='chart_hist_3' class='chart_morris'></div>
+          </div>
+          <div class='col-md-3 col-sm-12 text-center'>
+            <h3>Horizontal bar chart</h3>
+            <div id='chart_hist_2' class='chart_morris'></div>
+          </div>
+          <div class='col-md-3 col-sm-12 text-center'>
+            <h3>Polar pie chart</h3>
+            <div id='chart_pie_3' class='chart_morris'></div>
+            <div id='chart_pie_3_legend'></div>
+          </div>
+          <div class='col-md-3 col-sm-12 text-center'>
+            <h3>Non-linear trend line</h3>
+            <div id='chart_line_2' class='chart_morris'></div>
+          </div>
+          <div class='col-md-3 col-sm-12 text-center'>
+            <h3>Step chart</h3>
+            <div id='chart_line_3' class='chart_morris'></div>
+          </div>
+          <div class='col-md-3 col-sm-12 text-center'>
+            <h3>Regions + Events</h3>
+            <div id='chart_line_1' class='chart_morris'></div>
+          </div>
+          <div class='col-md-3 col-sm-12 text-center'>
+            <h3>Propagation + Vertical grid</h3>
+            <div id='chart_area_1' class='chart_morris'></div>
+          </div> 
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src='https://code.jquery.com/jquery-3.2.1.slim.min.js' integrity='sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN' crossorigin='anonymous'></script>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js' integrity='sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q' crossorigin='anonymous'></script>
+  <script src='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js' integrity='sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl' crossorigin='anonymous'></script>
+
+  <script src='./lib/raphael.min.js' crossorigin='anonymous'></script>
+  <script src='./lib/regression.js' crossorigin='anonymous'></script>
+  <script src='../dist/morris.js' crossorigin='anonymous'></script>
+
+  <script>
+    Morris.Line({
+      element: 'chart_line_0',
+      data: [
+        {team: '1958', nb: 5, avg: 2.2},
+        {team: '1962', nb: 4, avg: 1.9},
+        {team: '1970', nb: 4, avg: 2.1},
+        {team: '1994', nb: 2, avg: 1.4},
+        {team: '2002', nb: 2, avg: 1.8},
+      ],
+      xkey: 'team',
+      ykeys: ['nb', 'avg'],
+      labels: ['Editions Wins', 'Average Points'],
+      nbYkeys2: 1
+    });
+
+    Morris.Line({
+      element: 'chart_line_1',
+      data: [
+        {year: '2018-02-28 08:00', nb: 38},
+        {year: '2018-02-28 10:00', nb: 38.6},
+        {year: '2018-02-28 12:00', nb: 38.3},
+        {year: '2018-02-28 14:00', nb: 37.7},
+        {year: '2018-02-28 16:00', nb: 37.5},
+      ],
+      xkey: 'year',
+      ykeys: ['nb'],
+      ymin: 32,
+      ymax: 40,
+      labels: ['Editions Wins'],
+      events: ['2018-02-28 09:40', '2018-02-28 11:00', '2018-02-28 15:30'],
+      regions: [[37.5,38.5], [38.5,43]],
+      regionsColors: ['#ffab3e', '#ff3e3e']
+    });
+
+    Morris.Line({
+      element: 'chart_line_2',
+      data: [
+        {year: '1958', nb: 1},
+        {year: '1962', nb: 2},
+        {year: '1970', nb: 3},
+        {year: '1994', nb: 4},
+        {year: '2002', nb: 5},
+      ],
+      lineWidth: 0,
+      trendLine: true,
+      trendLineType: 'polynomial',
+      xkey: 'year',
+      ykeys: ['nb'],
+      labels: ['Editions Wins']
+    });
+
+    Morris.Line({
+      element: 'chart_line_3',
+      data: [
+        {year: '1958', nb: 1},
+        {year: '1962', nb: 2},
+        {year: '1970', nb: 3},
+        {year: '1994', nb: 4},
+        {year: '2002', nb: 5},
+      ],
+      xkey: 'year',
+      ykeys: ['nb'],
+      labels: ['Editions Wins'],
+      lineType: 'step'
+    });
+
+    Morris.Bar({
+      element: 'chart_hist_2',
+      data: [
+        {team: 'Brazil', nb: 5},
+        {team: 'Italy', nb: 4},
+        {team: 'Germany', nb: 4},
+        {team: 'Uruguay', nb: 2},
+        {team: 'Argentina', nb: 2},
+      ],
+      horizontal: true,
+      xkey: 'team',
+      ykeys: ['nb'],
+      labels: ['Editions Wins'],
+    });
+
+    Morris.Bar({
+      element: 'chart_hist_3',
+      data: [
+        {team: 'Brazil', nb: 5, avg: 2.2},
+        {team: 'Italy', nb: 4, avg: 1.9},
+        {team: 'Germany', nb: 4, avg: 2.1},
+        {team: 'Uruguay', nb: 2, avg: 1.4},
+        {team: 'Argentina', nb: 2, avg: 1.8},
+      ],
+      xkey: 'team',
+      ykeys: ['nb', 'avg'],
+      labels: ['Editions Wins', 'Average Points'],
+      nbYkeys2: 1
+    });
+
+    pie_data = [
+        {label: 'Africa', value: 5, ratio: 0.1 },
+        {label: 'Asia', value: 5, ratio: 0.3 },
+        {label: 'Europe', value: 14, ratio: 1 },
+        {label: 'North America', value: 3, ratio: 0.75 },
+        {label: 'South America', value: 5, ratio: 0.6 }
+      ];
+
+    Morris.Donut({
+      element: 'chart_pie_3',
+      data: pie_data,
+      donutType: 'pie',
+      dataLabels: false,
+      dataLabelsPosition: 'inside'
+    });
+
+    Morris.Area({
+      element: 'chart_area_1',
+      verticalGrid: true,
+      data: [
+        {year: '1958', nb: 1, b: 1, c: 1},
+        {year: '1962', nb: 2, b: 2.2, c: 2.4},
+        {year: '1970', nb: 3, b: 3.6, c: 4.2},
+        {year: '1994', nb: 4, b: 5.75, c: 7.5},
+        {year: '2002', nb: 5, b: 7, c: 10},
+      ],
+      xkey: 'year',
+      ykeys: ['nb', 'b', 'c'],
+      labels: ['nb', 'b', 'c'],
+      belowArea: false,
+      areaColors: ['#2b416d'],
+      lineColors: ['#2b416d', '#f2ffa8', '#2b416d'],
+      lineWidth: [0, 2, 0],
+      pointSize: 0,
+      dataLabels: false,
+      behaveLikeLine: true,
+      fillOpacity: 1
+    });
+  </script>
+</body>
+</html>

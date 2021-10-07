@@ -35,23 +35,23 @@ describe "Morris.Hover", ->
 
       it "should place the popup directly above the given point", ->
         @hover.moveTo(100, 150)
-        @element.should.have.css('left', '50px')
-        @element.should.have.css('top', '40px')
+        getComputedStyle(@element[0])['left'].should.be '50px'
+        getComputedStyle(@element[0])['top'].should.be '40px'
 
       it "should place the popup below the given point if it does not fit above", ->
         @hover.moveTo(100, 50)
-        @element.should.have.css('left', '50px')
-        @element.should.have.css('top', '60px')
+        getComputedStyle(@element[0])['left'].should.be '50px'
+        getComputedStyle(@element[0])['top'].should.be '60px'
 
       it "should center the popup vertically if it will not fit above or below", ->
         @hover.moveTo(100, 100)
-        @element.should.have.css('left', '50px')
-        @element.should.have.css('top', '40px')
+        getComputedStyle(@element[0])['left'].should.be '50px'
+        getComputedStyle(@element[0])['top'].should.be '40px'
 
       it "should center the popup vertically if no y value is supplied", ->
         @hover.moveTo(100)
-        @element.should.have.css('left', '50px')
-        @element.should.have.css('top', '40px')
+        getComputedStyle(@element[0])['left'].should.be '50px'
+        getComputedStyle(@element[0])['top'].should.be '40px'
 
   describe "#update", ->
     it "should update content, show and reposition the popup", ->
@@ -59,6 +59,6 @@ describe "Morris.Hover", ->
       html = "<div style='width:84px;height:84px'>Hello, Everyone!</div>"
       hover.update(html, 150, 200)
       el = $('#test .morris-hover')
-      el.should.have.css('left', '100px')
-      el.should.have.css('top', '90px')
+      getComputedStyle(@element[0])['left'].should.be '100px'
+      getComputedStyle(@element[0])['top'].should.be '90px'
       el.should.have.text('Hello, Everyone!')

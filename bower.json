@@ -5,7 +5,6 @@
     "./morris.css"
   ],
   "dependencies": {
-    "jquery": ">= 1.7.0",
     "raphael": ">= 2.0"
   },
   "devDependencies": {
